@@ -20,16 +20,3 @@ function loadelecdemands(filepath)
     end
     return elec_demands
 end
-
-function calcfft(demand::Vector{Float64}, ffttype::String="real")
-    # TODO: swap all the defaults to real and make the inverse ffts responsive
-    if !(ffttype in ["real", "complex"])
-        error("ffttype must be either real or complex")
-    end
-    if ffttype == "real"
-        fdemand = rfft(demand)
-    elseif ffttype == "complex"
-        fdemand = fft(demand)
-    end
-    return fdemand
-end
