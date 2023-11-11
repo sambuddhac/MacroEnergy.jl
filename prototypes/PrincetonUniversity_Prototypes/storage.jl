@@ -1,13 +1,12 @@
 Base.@kwdef mutable struct SymmetricStorage{T} <: AbstractStorage{T}
-    Node::Int64;
-    R_ID::Int64;
+    node::Int64;
+    r_id::Int64;
     min_capacity::Float64 = 0.0
     max_capacity::Float64 = 100.0
     min_capacity_storage::Float64 = 0.0
     max_capacity_storage::Float64 = 100.0
     existing_capacity::Float64 = 0.0
     existing_capacity_storage::Float64=0.0
-    policy_membership::Vector{String} = [""]
     can_expand::Bool = true
     can_retire::Bool = true
     investment_cost::Float64 = 0.0
@@ -25,14 +24,15 @@ Base.@kwdef mutable struct SymmetricStorage{T} <: AbstractStorage{T}
     _capacity_storage::Array{VariableRef}  = VariableRef[]
     _new_capacity_storage::Array{VariableRef}  = VariableRef[]
     _ret_capacity_storage::Array{VariableRef} = VariableRef[]
-    _injection::Array{VariableRef} = Array{VariableRef}(undef,time_resolution_map[T])
-    _withdrawal::Array{VariableRef} = Array{VariableRef}(undef,time_resolution_map[T])
-    _storage_level::Array{VariableRef} = Array{VariableRef}(undef,time_resolution_map[T])
+    _injection::JuMP.Containers.DenseAxisArray = Containers.@container([t in time_interval_map[T]], VariableRef[])
+    _withdrawal::JuMP.Containers.DenseAxisArray = Containers.@container([t in time_interval_map[T]], VariableRef[])
+    _storage_level::JuMP.Containers.DenseAxisArray = Containers.@container([t in time_interval_map[T]], VariableRef[])
+    constraints::Vector{AbstractConstraint} = AbstractConstraint[] 
 end
 
 Base.@kwdef mutable struct AsymmetricStorage{T} <: AbstractStorage{T}
-    Node::Int64;
-    R_ID::Int64;
+    node::Int64;
+    r_id::Int64;
     min_capacity::Float64 = 0.0
     max_capacity::Float64 = 100.0
     min_capacity_storage::Float64 = 0.0
@@ -41,8 +41,7 @@ Base.@kwdef mutable struct AsymmetricStorage{T} <: AbstractStorage{T}
     max_capacity_withdrawal::Float64 = 100.0
     existing_capacity::Float64 = 0.0
     existing_capacity_storage::Float64=0.0
-    existing_capacityy_withdrawal::Float64=0.0
-    policy_membership::Vector{String} = [""]
+    existing_capacity_withdrawal::Float64=0.0
     can_expand::Bool = true
     can_retire::Bool = true
     investment_cost::Float64 = 0.0
@@ -65,69 +64,102 @@ Base.@kwdef mutable struct AsymmetricStorage{T} <: AbstractStorage{T}
     _capacity_withdrawal::Array{VariableRef}  = VariableRef[]
     _new_capacity_withdrawal::Array{VariableRef}  = VariableRef[]
     _ret_capacity_withdrawal::Array{VariableRef} = VariableRef[]
-    _injection::Array{VariableRef} = Array{VariableRef}(undef,time_resolution_map[T])
-    _withdrawal::Array{VariableRef} = Array{VariableRef}(undef,time_resolution_map[T])
-    _storage_level::Array{VariableRef} = Array{VariableRef}(undef,time_resolution_map[T])
+    _injection::JuMP.Containers.DenseAxisArray = Containers.@container([t in time_interval_map[T]], VariableRef[])
+    _withdrawal::JuMP.Containers.DenseAxisArray = Containers.@container([t in time_interval_map[T]], VariableRef[])
+    _storage_level::JuMP.Containers.DenseAxisArray = Containers.@container([t in time_interval_map[T]], VariableRef[])
+    constraints::Vector{AbstractConstraint} = AbstractConstraint[] 
 end
 
-
+existing_capacity_storage(g::AbstractStorage) = g.existing_capacity_storage;
 new_capacity_storage(g::AbstractStorage) = g._new_capacity_storage[1];
 ret_capacity_storage(g::AbstractStorage) = g._ret_capacity_storage[1];
 capacity_storage(g::AbstractStorage) = g._capacity_storage[1];
-withdrawal(g::AbstractStorage) = g._withdrawal;
-existing_capacity_storage(g::AbstractStorage) = g.existing_capacity_withdrawal;
 
+withdrawal(g::AbstractStorage) = g._withdrawal;
+storage_level(g::AbstractStorage) = g._storage_level;
+
+existing_capacity_withdrawal(g::AsymmetricStorage) = g.existing_capacity_withdrawal;
 new_capacity_withdrawal(g::AsymmetricStorage) = g._new_capacity_withdrawal[1];
 ret_capacity_withdrawal(g::AsymmetricStorage) = g._ret_capacity_withdrawal[1];
 capacity_withdrawal(g::AsymmetricStorage) = g._capacity_withdrawal[1];
-existing_capacity_withdrawal(g::AsymmetricStorage) = g.existing_capacity_withdrawal;
 
 
-function add_capacity_variables!(g::SymmetricStorage,model::Model)
+function add_planning_variables!(g::SymmetricStorage,model::Model)
 
-    g._new_capacity = [@variable(model,lower_bound=0.0,base_name="vNEWCAP_$(resource_type(g))_$(g.R_ID)")]
+    g._new_capacity = [@variable(model,lower_bound=0.0,base_name="vNEWCAP_$(commodity_type(g))_$(g.r_id)")]
 
-    g._ret_capacity = [@variable(model,lower_bound=0.0,base_name="vRETCAP_$(resource_type(g))_$(g.R_ID)")]
+    g._ret_capacity = [@variable(model,lower_bound=0.0,base_name="vRETCAP_$(commodity_type(g))_$(g.r_id)")]
 
-    g._capacity = [@variable(model,lower_bound=0.0,base_name="vCAP_$(resource_type(g))_$(g.R_ID)")]
+    g._capacity = [@variable(model,lower_bound=0.0,base_name="vCAP_$(commodity_type(g))_$(g.r_id)")]
 
-    g._new_capacity_storage = [@variable(model,lower_bound=0.0,base_name="vNEWCAPSTOR_$(resource_type(g))_$(g.R_ID)")]
+    g._new_capacity_storage = [@variable(model,lower_bound=0.0,base_name="vNEWCAPSTOR_$(commodity_type(g))_$(g.r_id)")]
 
-    g._ret_capacity_storage = [@variable(model,lower_bound=0.0,base_name="vRETCAPSTOR_$(resource_type(g))_$(g.R_ID)")]
+    g._ret_capacity_storage = [@variable(model,lower_bound=0.0,base_name="vRETCAPSTOR_$(commodity_type(g))_$(g.r_id)")]
 
-    g._capacity_storage = [@variable(model,lower_bound=0.0,base_name="vCAPSTOR_$(resource_type(g))_$(g.R_ID)")]
+    g._capacity_storage = [@variable(model,lower_bound=0.0,base_name="vCAPSTOR_$(commodity_type(g))_$(g.r_id)")]
 
+    @constraint(model, capacity(g) == new_capacity(g) - ret_capacity(g) + existing_capacity(g))
+    
+    @constraint(model, capacity_storage(g) == new_capacity_storage(g) - ret_capacity_storage(g) + existing_capacity_storage(g))
+
+    if !g.can_expand
+        fix(new_capacity(g),0.0; force=true)
+        fix(new_capacity_storage(g),0.0; force=true)
+    end
+    
+    if !g.can_retire
+        fix(ret_capacity(g),0.0; force=true)
+        fix(ret_capacity_storage(g),0.0; force=true)
+    end
     
     return nothing
     
 end
 
-function add_capacity_variables!(g::AsymmetricStorage,model::Model)
+function add_planning_variables!(g::AsymmetricStorage,model::Model)
 
-    g._new_capacity = [@variable(model,lower_bound=0.0,base_name="vNEWCAP_$(resource_type(g))_$(g.R_ID)")]
+    g._new_capacity = [@variable(model,lower_bound=0.0,base_name="vNEWCAP_$(commodity_type(g))_$(g.r_id)")]
 
-    g._ret_capacity = [@variable(model,lower_bound=0.0,base_name="vRETCAP_$(resource_type(g))_$(g.R_ID)")]
+    g._ret_capacity = [@variable(model,lower_bound=0.0,base_name="vRETCAP_$(commodity_type(g))_$(g.r_id)")]
 
-    g._capacity = [@variable(model,lower_bound=0.0,base_name="vCAP_$(resource_type(g))_$(g.R_ID)")]
+    g._capacity = [@variable(model,lower_bound=0.0,base_name="vCAP_$(commodity_type(g))_$(g.r_id)")]
 
-    g._new_capacity_storage = [@variable(model,lower_bound=0.0,base_name="vNEWCAPSTOR_$(resource_type(g))_$(g.R_ID)")]
+    g._new_capacity_storage = [@variable(model,lower_bound=0.0,base_name="vNEWCAPSTOR_$(commodity_type(g))_$(g.r_id)")]
 
-    g._ret_capacity_storage = [@variable(model,lower_bound=0.0,base_name="vRETCAPSTOR_$(resource_type(g))_$(g.R_ID)")]
+    g._ret_capacity_storage = [@variable(model,lower_bound=0.0,base_name="vRETCAPSTOR_$(commodity_type(g))_$(g.r_id)")]
 
-    g._capacity_storage = [@variable(model,lower_bound=0.0,base_name="vCAPSTOR_$(resource_type(g))_$(g.R_ID)")]
+    g._capacity_storage = [@variable(model,lower_bound=0.0,base_name="vCAPSTOR_$(commodity_type(g))_$(g.r_id)")]
 
-    g._new_capacity_withdrawal = [@variable(model,lower_bound=0.0,base_name="vNEWCAPWDW_$(resource_type(g))_$(g.R_ID)")]
+    g._new_capacity_withdrawal = [@variable(model,lower_bound=0.0,base_name="vNEWCAPWDW_$(commodity_type(g))_$(g.r_id)")]
 
-    g._ret_capacity_withdrawal = [@variable(model,lower_bound=0.0,base_name="vRETCAPWDW_$(resource_type(g))_$(g.R_ID)")]
+    g._ret_capacity_withdrawal = [@variable(model,lower_bound=0.0,base_name="vRETCAPWDW_$(commodity_type(g))_$(g.r_id)")]
 
-    g._capacity_withdrawal = [@variable(model,lower_bound=0.0,base_name="vCAPWDW_$(resource_type(g))_$(g.R_ID)")]
+    g._capacity_withdrawal = [@variable(model,lower_bound=0.0,base_name="vCAPWDW_$(commodity_type(g))_$(g.r_id)")]
+
+    @constraint(model, capacity(g) == new_capacity(g) - ret_capacity(g) + existing_capacity(g))
+
+    @constraint(model, capacity_storage(g) == new_capacity_storage(g) - ret_capacity_storage(g) + existing_capacity_storage(g))
+
+    @constraint(model, capacity_withdrawal(g) == new_capacity_withdrawal(g) - ret_capacity_withdrawal(g) + existing_capacity_withdrawal(g))
+
+    if !g.can_expand
+        fix(new_capacity(g),0.0; force=true)
+        fix(new_capacity_storage(g),0.0; force=true)
+        fix(new_capacity_withdrawal(g),0.0; force=true)
+    end
+    
+    if !g.can_retire
+        fix(ret_capacity(g),0.0; force=true)
+        fix(ret_capacity_storage(g),0.0; force=true)
+        fix(ret_capacity_withdrawal(g),0.0; force=true)
+    end
 
     return nothing
     
 end
 
 
-function add_fixed_costs!(g::SymmetricStorage,model::Model)
+function add_fixed_cost!(g::SymmetricStorage,model::Model)
 
     model[:eFixedCost] += g.investment_cost*new_capacity(g) + g.fixed_om_cost*capacity(g);
 
@@ -136,7 +168,7 @@ function add_fixed_costs!(g::SymmetricStorage,model::Model)
 end
 
 
-function add_fixed_costs!(g::AsymmetricStorage,model::Model)
+function add_fixed_cost!(g::AsymmetricStorage,model::Model)
 
     model[:eFixedCost] += g.investment_cost*new_capacity(g) + g.fixed_om_cost*capacity(g);
 
@@ -145,3 +177,21 @@ function add_fixed_costs!(g::AsymmetricStorage,model::Model)
     model[:eFixedCost] += g.investment_cost_withdrawal*new_capacity_withdrawal(g) + g.fixed_om_cost_withdrawal*capacity_withdrawal(g);
     
 end
+
+function add_operation_variables!(g::AbstractStorage,model::Model)
+
+    g._injection = @variable(model,[t in time_interval(g)],lower_bound=0.0,base_name="vINJ_$(commodity_type(g))_$(g.r_id)")
+    g._withdrawal = @variable(model,[t in time_interval(g)],lower_bound=0.0,base_name="vWDW_$(commodity_type(g))_$(g.r_id)")
+    g._storage_level = @variable(model,[t in time_interval(g)],lower_bound=0.0,base_name="vSTOR_$(commodity_type(g))_$(g.r_id)")
+
+end
+
+function add_variable_cost!(g::AbstractStorage,model::Model)
+
+    model[:eVariableCost] += g.variable_om_cost_withdrawal*sum(withdrawal(g))
+
+end
+
+
+
+
