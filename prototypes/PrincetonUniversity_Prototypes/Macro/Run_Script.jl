@@ -1,9 +1,13 @@
+cd("prototypes/PrincetonUniversity_Prototypes/Macro")
+using Pkg
+Pkg.activate(".")
 
-include("MACRO.jl")
+using Macro
+using JuMP
 
 all_resources = [];
 
-push!(all_resources,Resource{Electricity}(node = 1,r_id=1,investment_cost=85300.0,fixed_om_cost =18760))
+push!(all_resources,VRE{Electricity}(node = 1,r_id=1,investment_cost=85300.0,fixed_om_cost = 18760.))
 push!(all_resources,SymmetricStorage{Electricity}(node=1,r_id=2))
 push!(all_resources,AsymmetricStorage{Electricity}(node=1,r_id=3))
 
