@@ -1,6 +1,8 @@
 module Macro
 
-import JuMP
+using JuMP
+using DataFrames
+using CSV
 
 # Type parameter for Macro data structures
 abstract type Commodity end
@@ -8,25 +10,31 @@ abstract type Commodity end
 abstract type Electricity <: Commodity end
 abstract type Hydrogen <: Commodity end
 
+abstract type AbstractTypeConstraint{T <: Commodity} end
+
 # type hierarchy
 
 # globals
-const TimeLength = 10;
-const Containers = JuMP.Containers
-const VariableRef = JuMP.VariableRef
-const DenseAxisArray = JuMP.Containers.DenseAxisArray
-const time_interval_map = Dict(Electricity=>1:TimeLength,Hydrogen=>5:5:TimeLength);
-# const Component = Union{AbstractResource,AbstractEdge} # move it to the file where it is used
+
+# const Containers = JuMP.Containers
+# const VariableRef = JuMP.VariableRef
+const JuMPConstraint = Union{Array,Containers.DenseAxisArray,Containers.SparseAxisArray}
+# const DataFrameRow = DataFrames.DataFrameRow;
+# const DataFrame = DataFrames.DataFrame;
 
 # include files
-include("constraints.jl")
 include("resource.jl")
 include("storage.jl")
 include("edge.jl")
+include("generate_model.jl")
+include("prepare_inputs.jl")
+include("constraints.jl")
+include("variables.jl")
+include("costs.jl")
 
 # exports
 export  Electricity, Hydrogen, 
-        VRE, Solar, BaseResource,
+        Resource, Thermal, BaseResource,
         SymmetricStorage, AsymmetricStorage, 
         Edge, 
         CapacityConstraint, 
@@ -34,6 +42,9 @@ export  Electricity, Hydrogen,
         add_operation_variables!, 
         add_fixed_cost!, add_variable_cost!, 
         add_model_constraint!,
-        add_all_model_constraints!
-    
+        add_all_model_constraints!,
+        generate_model,
+        prepare_inputs!,
+        loadresources,
+        makeresource
 end # module Macro

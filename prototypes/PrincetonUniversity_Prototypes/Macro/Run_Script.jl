@@ -1,35 +1,23 @@
-cd("prototypes/PrincetonUniversity_Prototypes/Macro")
+###############cd("prototypes/PrincetonUniversity_Prototypes/Macro")
 using Pkg
 Pkg.activate(".")
 
+using Revise
 using Macro
-using JuMP
 
-all_resources = [];
+setup = Dict()
+#setup["commodities"] = [Electricity, Hydrogen];
+setup["commodities"] = [Electricity];
+setup["PeriodLength"] = 12;
+setup["hours_per_subperiod"] = 4;
+setup[Electricity] = Dict{Any,Any}("hours_per_timestep"=>1);
+#setup[Hydrogen] = Dict("hours_per_timestep"=>2);
+setup[Electricity]["filepath"] = "ExampleSystems/Electricity/resources.csv"
 
-push!(all_resources,VRE{Electricity}(node = 1,r_id=1,investment_cost=85300.0,fixed_om_cost = 18760.))
-push!(all_resources,SymmetricStorage{Electricity}(node=1,r_id=2))
-push!(all_resources,AsymmetricStorage{Electricity}(node=1,r_id=3))
+resources = prepare_inputs!(setup);
 
-model = Model()
+model = generate_model(resources,setup);
 
-@variable(model,vREF==1);
-
-@expression(model,eFixedCost,0*model[:vREF]);
-
-@expression(model,eVariableCost,0*model[:vREF]);
-
-add_planning_variables!.(all_resources,model)
-
-add_operation_variables!.(all_resources,model)
-
-add_all_model_constraints!.(all_resources,model)
-
-add_fixed_cost!.(all_resources,model)
-
-add_variable_cost!.(all_resources,model)
-
-@objective(model,Min,model[:eFixedCost] + model[:eVariableCost])
 
 println()
 

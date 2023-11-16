@@ -9,25 +9,26 @@ Base.@kwdef mutable struct Edge{T} <: AbstractEdge{T}
     existing_capacity::Float64
     can_expand::Bool = true
     investment_cost::Float64 = 0.0
-    _capacity::Array{VariableRef} = VariableRef[]
-    _new_capacity::Array{VariableRef} = VariableRef[]
-    _flow::Array{VariableRef} = Array{VariableRef}(undef, time_interval_map[T])
+    planning_vars::Dict
+    operation_vars::Dict
 end
 
 time_interval(e::AbstractEdge) = time_interval_map[commodity_type(e)];
 commodity_type(e::AbstractEdge{T}) where {T} = T;
+subperiod_interval(e::AbstractEdge) = subperiod_map[commodity_type(e)];
+
 exsiting_capacity(e::AbstractEdge) = e.existing_capacity;
-new_capacity(e::AbstractEdge) = e._new_capacity[1];
-capacity(e::AbstractEdge) = e._capacity[1];
-flow(e::AbstractEdge) = e._flow;
+new_capacity(e::AbstractEdge) = e.planning_vars[:new_capacity];
+capacity(e::AbstractEdge) = e.planning_vars[:capacity];
+flow(e::AbstractEdge) = e.operation_vars[:flow];
 
-function add_planning_variables!(e::AbstractEdge, model::JuMP.Model)
+function add_planning_variables!(e::AbstractEdge, model::Model)
 
-    e._new_capacity = [JuMP.@variable(model, lower_bound = 0.0, base_name = "vNEWCAPEDGE_$(commodity_type(e))_$(e.r_ID)")]
+    e.planning_vars[:new_capacity] = @variable(model, lower_bound = 0.0, base_name = "vNEWCAPEDGE_$(commodity_type(e))_$(e.r_ID)")
 
-    e._capacity = [JuMP.@variable(model, lower_bound = 0.0, base_name = "vCAPEDGE_$(commodity_type(e))_$(e.r_id)")]
+    e.planning_vars[:capacity] = @variable(model, lower_bound = 0.0, base_name = "vCAPEDGE_$(commodity_type(e))_$(e.r_id)")
 
-    JuMP.@constraint(model, capacity(e) == new_capacity(e) + existing_capacity(e))
+    @constraint(model, capacity(e) == new_capacity(e) + existing_capacity(e))
 
     if !can_expand
         fix(new_capacity, 0.0; force=true)
@@ -37,13 +38,13 @@ function add_planning_variables!(e::AbstractEdge, model::JuMP.Model)
 
 end
 
-function add_operation_variables!(e::AbstractEdge, model::JuMP.Model)
+function add_operation_variables!(e::AbstractEdge, model::Model)
 
-    g._flow = JuMP.@variable(model, [t in time_interval(g)], lower_bound = 0.0, base_name = "vFLOW_$(commodity_type(g))_$(g.r_id)")
+    e.operation_vars[:flow] = @variable(model, [t in time_interval(g)], lower_bound = 0.0, base_name = "vFLOW_$(commodity_type(g))_$(g.r_id)")
 
 end
 
-function add_fixed_cost!(e::AbstractEdge, model::JuMP.Model)
+function add_fixed_cost!(e::AbstractEdge, model::Model)
 
     model[:eFixedCost] += e.investment_cost * new_capacity(e)
 
