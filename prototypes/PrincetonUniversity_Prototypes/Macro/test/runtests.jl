@@ -1,6 +1,6 @@
 import Macro
 import Test
 
-Test.@testset "Macro" begin
-    
+Test.@testset "Resource" begin
+    include("test_resource.jl")
 end
