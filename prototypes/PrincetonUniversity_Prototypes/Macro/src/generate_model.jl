@@ -5,11 +5,9 @@ function generate_model(resources::Vector{AbstractResource},edges::Vector{Abstra
 
     model = Model()
 
-    @variable(model,vREF==1);
+    @variable(model, vREF == 1)
 
-    @expression(model,eFixedCost,0*model[:vREF]);
-    
-    @expression(model,eVariableCost,0*model[:vREF]);
+    @expression(model, eFixedCost, 0 * model[:vREF])
 
     add_planning_variables!.(components,model)
 
@@ -23,9 +21,9 @@ function generate_model(resources::Vector{AbstractResource},edges::Vector{Abstra
 
     add_fixed_costs!.(components,model)
 
-    add_variable_costs!.(resources,model)
+    add_variable_costs!.(resources, model)
 
-    @objective(model,Min,model[:eFixedCost] + model[:eVariableCost])
+    @objective(model, Min, model[:eFixedCost] + model[:eVariableCost])
 
     return model
 

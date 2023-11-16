@@ -65,12 +65,16 @@ function add_all_model_constraints!(y::Union{AbstractResource,AbstractEdge,Abstr
     return nothing
 end
 
-function add_model_constraint!(ct::CapacityConstraint,g::AbstractResource,model::Model)
-    
-    cap_factor = Dict(collect(time_interval(g)).=>capacity_factor(g));
+function add_model_constraint!(ct::CapacityConstraint, g::AbstractResource, model::Model)
 
-    ct.constraint_ref = @constraint(model,[t in time_interval(g)],injection(g)[t] <= cap_factor[t]*capacity(g))
-    
+    cap_factor = Dict(collect(time_interval(g)) .=> capacity_factor(g))
+
+    ct.constraint_ref = @constraint(
+        model,
+        [t in time_interval(g)],
+        injection(g)[t] <= cap_factor[t] * capacity(g)
+    )
+
     return nothing
 
 end
@@ -89,15 +93,27 @@ end
 
 function add_model_constraint!(ct::StorageCapacityConstraint,g::AbstractStorage,model::Model)
 
-    ct.constraint_ref = @constraint(model,[t in time_interval(g)],storage_level(g)[t] <= capacity_storage(g))
+    ct.constraint_ref = @constraint(
+        model,
+        [t in time_interval(g)],
+        storage_level(g)[t] <= capacity_storage(g)
+    )
 
 end
 
 
-function add_model_constraint!(ct::WithdrawalCapacityConstraint,g::AsymmetricStorage,model::Model)
+function add_model_constraint!(
+    ct::WithdrawalCapacityConstraint,
+    g::AsymmetricStorage,
+    model::Model,
+)
 
-    ct.constraint_ref = @constraint(model,[t in time_interval(g)],withdrawal(g)[t] <= capacity_withdrawal(g))
-    
+    ct.constraint_ref = @constraint(
+        model,
+        [t in time_interval(g)],
+        withdrawal(g)[t] <= capacity_withdrawal(g)
+    )
+
 end
 
 function add_model_constraint!(ct::MinStorageDurationConstraint,g::AbstractStorage,model::Model)

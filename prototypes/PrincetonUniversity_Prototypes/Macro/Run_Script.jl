@@ -28,4 +28,3 @@ model = generate_model(resources,edges,nodes,setup);
 
 
 println()
-

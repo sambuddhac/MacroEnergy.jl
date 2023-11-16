@@ -11,7 +11,7 @@ abstract type Electricity <: Commodity end
 abstract type Hydrogen <: Commodity end
 abstract type NaturalGas <: Commodity end
 
-abstract type AbstractTypeConstraint{T <: Commodity} end
+abstract type AbstractTypeConstraint{T<:Commodity} end
 
 #abstract type AbstractTypeTransformationConstraint end
 
@@ -44,18 +44,23 @@ end
 
 
 # exports
-export  Electricity, Hydrogen, 
-        Resource, Thermal, BaseResource,
-        SymmetricStorage, AsymmetricStorage, 
-        Edge, 
-        CapacityConstraint, 
-        add_planning_variables!, 
-        add_operation_variables!, 
-        add_fixed_cost!, add_variable_cost!, 
-        add_model_constraint!,
-        add_all_model_constraints!,
-        generate_model,
-        prepare_inputs!,
-        loadresources,
-        makeresource
+export Electricity,
+    Hydrogen,
+    Resource,
+    Thermal,
+    BaseResource,
+    SymmetricStorage,
+    AsymmetricStorage,
+    Edge,
+    CapacityConstraint,
+    add_planning_variables!,
+    add_operation_variables!,
+    add_fixed_cost!,
+    add_variable_cost!,
+    add_model_constraint!,
+    add_all_model_constraints!,
+    generate_model,
+    prepare_inputs!,
+    loadresources,
+    makeresource
 end # module Macro

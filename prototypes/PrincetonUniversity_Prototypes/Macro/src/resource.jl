@@ -16,6 +16,8 @@ capacity_factor(g::AbstractResource) = g.capacity_factor;
 price(g::AbstractResource) = g.price;
 resource_id(g::AbstractResource) = g.r_id;
 node(g::AbstractResource) = g.node;
+investment_cost(g::AbstractResource) = g.investment_cost;
+fixed_om_cost(g::AbstractResource) = g.fixed_om_cost;
 min_capacity(g::AbstractResource) = g.min_capacity;
 max_capacity(g::AbstractResource) = g.max_capacity;
 can_expand(g::AbstractResource) = g.can_expand;
@@ -32,14 +34,14 @@ map_resource_to_node(g::AbstractResource, nodes::Vector{AbstractNode}) = nodes[n
 
 
 Base.@kwdef mutable struct Resource{T} <: AbstractResource{T}
-    ### Fields without defaults
+    ### Mandatory fields: (fields without defaults)
     node::Int64
     r_id::Int64
-    capacity_factor :: Vector{Float64}  # = ones(length(time_interval_map[T]))
+    capacity_factor::Vector{Float64}  # = ones(length(time_interval_map[T]))
     price::Vector{Float64} # = zeros(length(time_interval_map[T]))
-    time_interval::StepRange{Int64, Int64}
-    subperiods::Vector{StepRange{Int64, Int64}}
-    #### Fields with defaults
+    time_interval::StepRange{Int64,Int64}
+    subperiods::Vector{StepRange{Int64,Int64}}
+    #### Optional fields - (fields with defaults)
     min_capacity::Float64 = 0.0
     max_capacity::Float64 = Inf
     existing_capacity::Float64 = 0.0
@@ -50,17 +52,17 @@ Base.@kwdef mutable struct Resource{T} <: AbstractResource{T}
     variable_om_cost::Float64 = 0.0
     planning_vars::Dict = Dict()
     operation_vars::Dict = Dict()
-    constraints ::Vector{AbstractTypeConstraint}=[CapacityConstraint{T}()]
+    constraints::Vector{AbstractTypeConstraint} = [CapacityConstraint{T}()]
 end
 
 Base.@kwdef mutable struct Thermal{T} <: AbstractResource{T}
     ### Fields without defaults
     node::Int64
     r_id::Int64
-    capacity_factor :: Vector{Float64}  # = ones(length(time_interval_map[T]))
+    capacity_factor::Vector{Float64}  # = ones(length(time_interval_map[T]))
     price::Vector{Float64} # = zeros(length(time_interval_map[T]))
-    time_interval::StepRange{Int64, Int64}
-    subperiods::Vector{StepRange{Int64, Int64}}
+    time_interval::StepRange{Int64,Int64}
+    subperiods::Vector{StepRange{Int64,Int64}}
     #### Fields with defaults
     min_capacity::Float64 = 0.0
     max_capacity::Float64 = Inf

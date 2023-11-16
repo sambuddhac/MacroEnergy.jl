@@ -41,10 +41,10 @@ Base.@kwdef mutable struct SymmetricStorage{T} <: AbstractStorage{T}
     ### Fields without defaults
     node::Int64
     r_id::Int64
-    capacity_factor :: Vector{Float64}  # = ones(length(time_interval_map[T]))
+    capacity_factor::Vector{Float64}  # = ones(length(time_interval_map[T]))
     price::Vector{Float64} # = zeros(length(time_interval_map[T]))
-    time_interval::StepRange{Int64, Int64}
-    subperiods::Vector{StepRange{Int64, Int64}}
+    time_interval::StepRange{Int64,Int64}
+    subperiods::Vector{StepRange{Int64,Int64}}
     #### Fields with defaults
     min_capacity::Float64 = 0.0
     max_capacity::Float64 = Inf
@@ -68,17 +68,18 @@ Base.@kwdef mutable struct SymmetricStorage{T} <: AbstractStorage{T}
     min_duration::Float64=1.0
     max_duration::Float64=10.0
     self_discharge::Float64 = 0.0
-    constraints ::Vector{AbstractTypeConstraint}=[CapacityConstraint{T}(),StorageCapacityConstraint{T}()]
+    constraints::Vector{AbstractTypeConstraint} =
+        [CapacityConstraint{T}(), StorageCapacityConstraint{T}()]
 end
 
 Base.@kwdef mutable struct AsymmetricStorage{T} <: AbstractStorage{T}
     ### Fields without defaults
     node::Int64
     r_id::Int64
-    capacity_factor :: Vector{Float64}  # = ones(length(time_interval_map[T]))
+    capacity_factor::Vector{Float64}  # = ones(length(time_interval_map[T]))
     price::Vector{Float64} # = zeros(length(time_interval_map[T]))
-    time_interval::StepRange{Int64, Int64}
-    subperiods::Vector{StepRange{Int64, Int64}}
+    time_interval::StepRange{Int64,Int64}
+    subperiods::Vector{StepRange{Int64,Int64}}
     #### Fields with defaults
     min_capacity::Float64 = 0.0
     max_capacity::Float64 = Inf
@@ -106,7 +107,11 @@ Base.@kwdef mutable struct AsymmetricStorage{T} <: AbstractStorage{T}
     existing_capacity_withdrawal::Float64 = 0.0
     investment_cost_withdrawal::Float64 = 0.0
     fixed_om_cost_withdrawal::Float64 = 0.0
-    constraints ::Vector{AbstractTypeConstraint}=[CapacityConstraint{T}(),StorageCapacityConstraint{T}(),WithdrawalCapacityConstraint{T}()]
+    constraints::Vector{AbstractTypeConstraint} = [
+        CapacityConstraint{T}(),
+        StorageCapacityConstraint{T}(),
+        WithdrawalCapacityConstraint{T}(),
+    ]
 end
 
 # Asymmetric Storage interface

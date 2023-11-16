@@ -35,3 +35,4 @@ Manifest.toml
 .history/
 # Built Visual Studio Code Extensions
 *.vsix
+.pre-commit-config.yaml
