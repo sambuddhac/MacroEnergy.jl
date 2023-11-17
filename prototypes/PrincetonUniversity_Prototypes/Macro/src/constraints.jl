@@ -23,6 +23,17 @@ Base.@kwdef mutable struct WithdrawalCapacityConstraint{T} <: AbstractTypeConstr
     constraint_ref::Union{Missing,JuMPConstraint} = missing
 end
 
+Base.@kwdef mutable struct MinStorageDurationConstraint{T} <: AbstractTypeConstraint{T}
+    value::Union{Missing,Vector{Float64}} = missing
+    lagrangian_multiplier::Union{Missing,Vector{Float64}} = missing
+    constraint_ref::Union{Missing,JuMPConstraint} = missing
+end
+
+Base.@kwdef mutable struct MaxStorageDurationConstraint{T} <: AbstractTypeConstraint{T}
+    value::Union{Missing,Vector{Float64}} = missing
+    lagrangian_multiplier::Union{Missing,Vector{Float64}} = missing
+    constraint_ref::Union{Missing,JuMPConstraint} = missing
+end
 
 
 function add_all_model_constraints!(g::AbstractResource,model::Model)
@@ -55,5 +66,17 @@ end
 function add_model_constraint!(ct::WithdrawalCapacityConstraint,g::AsymmetricStorage,model::Model)
 
     ct.constraint_ref = @constraint(model,[t in time_interval(g)],withdrawal(g)[t] <= capacity_withdrawal(g))
+    
+end
+
+function add_model_constraint!(ct::MinStorageDurationConstraint,g::AbstractStorage,model::Model)
+
+    ct.constraint_ref = @constraint(model,capacity_storage(g) >= g.min_duration*capacity(g))
+    
+end
+
+function add_model_constraint!(ct::MaxStorageDurationConstraint,g::AbstractStorage,model::Model)
+
+    ct.constraint_ref = @constraint(model,capacity_storage(g) <= g.max_duration*capacity(g))
     
 end

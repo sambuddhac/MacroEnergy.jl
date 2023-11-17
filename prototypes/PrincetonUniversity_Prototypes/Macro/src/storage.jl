@@ -65,6 +65,8 @@ Base.@kwdef mutable struct SymmetricStorage{T} <: AbstractStorage{T}
     efficiency_charge::Float64 = 1.0
     efficiency_discharge::Float64 = 1.0
     min_storage_level::Float64 = 0.0
+    min_duration::Float64=1.0
+    max_duration::Float64=10.0
     self_discharge::Float64 = 0.0
     constraints ::Vector{AbstractTypeConstraint}=[CapacityConstraint{T}(),StorageCapacityConstraint{T}()]
 end
@@ -115,4 +117,115 @@ capacity_withdrawal(g::AsymmetricStorage) = g.planning_vars[:capacity_withdrawal
 
 
 
+function add_planning_variables!(g::SymmetricStorage, model::Model)
+   
+    g.planning_vars[:new_capacity] = @variable(model, lower_bound = 0.0, base_name = "vNEWCAP_$(commodity_type(g))_$(g.r_id)")
+
+    g.planning_vars[:ret_capacity] = @variable(model, lower_bound = 0.0, base_name = "vRETCAP_$(commodity_type(g))_$(g.r_id)")
+
+    g.planning_vars[:capacity] = @variable(model, lower_bound = 0.0, base_name = "vCAP_$(commodity_type(g))_$(g.r_id)")
+
+    g.planning_vars[:new_capacity_storage] = @variable(model, lower_bound = 0.0, base_name = "vNEWCAPSTOR_$(commodity_type(g))_$(g.r_id)")
+
+    g.planning_vars[:ret_capacity_storage] = @variable(model, lower_bound = 0.0, base_name = "vRETCAPSTOR_$(commodity_type(g))_$(g.r_id)")
+
+    g.planning_vars[:capacity_storage] = @variable(model, lower_bound = 0.0, base_name = "vCAPSTOR_$(commodity_type(g))_$(g.r_id)")
+
+    @constraint(model, capacity(g) == new_capacity(g) - ret_capacity(g) + existing_capacity(g))
+
+    @constraint(model, capacity_storage(g) == new_capacity_storage(g) - ret_capacity_storage(g) + existing_capacity_storage(g))
+
+    if !g.can_expand
+        fix(new_capacity_storage(g), 0.0; force=true)
+    end
+
+    if !g.can_retire
+        fix(ret_capacity_storage(g), 0.0; force=true)
+    end
+
+    @constraint(model,ret_capacity(g)<=existing_cap(g))
+
+    @constraint(model,ret_capacity_storage(g)<=existing_cap_storage(g))
+   
+
+    return nothing
+
+end
+
+function add_planning_variables!(g::AsymmetricStorage, model::Model)
+
+    g.planning_vars[:new_capacity] = @variable(model, lower_bound = 0.0, base_name = "vNEWCAP_$(commodity_type(g))_$(g.r_id)")
+
+    g.planning_vars[:ret_capacity] = @variable(model, lower_bound = 0.0, base_name = "vRETCAP_$(commodity_type(g))_$(g.r_id)")
+
+    g.planning_vars[:capacity] = @variable(model, lower_bound = 0.0, base_name = "vCAP_$(commodity_type(g))_$(g.r_id)")
+
+    g.planning_vars[:new_capacity_storage] = @variable(model, lower_bound = 0.0, base_name = "vNEWCAPSTOR_$(commodity_type(g))_$(g.r_id)")
+
+    g.planning_vars[:ret_capacity_storage] = @variable(model, lower_bound = 0.0, base_name = "vRETCAPSTOR_$(commodity_type(g))_$(g.r_id)")
+
+    g.planning_vars[:capacity_storage] = @variable(model, lower_bound = 0.0, base_name = "vCAPSTOR_$(commodity_type(g))_$(g.r_id)")
+
+    g.planning_vars[:new_capacity_withdrawal] = @variable(model, lower_bound = 0.0, base_name = "vNEWCAPWDW_$(commodity_type(g))_$(g.r_id)")
+
+    g.planning_vars[:ret_capacity_withdrawal] = @variable(model, lower_bound = 0.0, base_name = "vRETCAPWDW_$(commodity_type(g))_$(g.r_id)")
+
+    g.planning_vars[:capacity_withdrawal] = @variable(model, lower_bound = 0.0, base_name = "vCAPWDW_$(commodity_type(g))_$(g.r_id)")
+
+    @constraint(model, capacity(g) == new_capacity(g) - ret_capacity(g) + existing_capacity(g))
+
+    @constraint(model, capacity_storage(g) == new_capacity_storage(g) - ret_capacity_storage(g) + existing_capacity_storage(g))
+
+    @constraint(model, capacity_withdrawal(g) == new_capacity_withdrawal(g)- ret_capacity_withdrawal(g) + existing_capacity_withdrawal(g))
+
+    @constraint(model,ret_capacity(g)<=existing_cap(g))
+    
+    @constraint(model,ret_capacity_storage(g)<=existing_cap_storage(g))
+
+    @constraint(model,ret_capacity_withdrawal(g)<=existing_cap_withdrawal(g))
+
+    if !g.can_expand
+        fix(new_capacity(g), 0.0; force=true)
+        fix(new_capacity_storage(g), 0.0; force=true)
+        fix(new_capacity_withdrawal(g), 0.0; force=true)
+    end
+
+    if !g.can_retire
+        fix(ret_capacity(g), 0.0; force=true)
+        fix(ret_capacity_storage(g), 0.0; force=true)
+        fix(ret_capacity_withdrawal(g), 0.0; force=true)
+    end
+
+
+    return nothing
+
+end
+
+
+function add_operation_variables!(g::AbstractStorage, model::Model)
+    
+    g.operation_vars[:injection] = @variable(model, [t in time_interval(g)], lower_bound = 0.0, base_name = "vINJ_$(commodity_type(g))_$(g.r_id)")
+    g.operation_vars[:withdrawal] = @variable(model, [t in time_interval(g)], lower_bound = 0.0, base_name = "vWDW_$(commodity_type(g))_$(g.r_id)")
+    g.operation_vars[:storage_level] = @variable(model, [t in time_interval(g)], lower_bound = 0.0, base_name = "vSTOR_$(commodity_type(g))_$(g.r_id)")
+
+    time_subperiods = subperiods(g);
+    
+    aux_expr = @expression(model,[t in time_interval(g)],0*model[:vREF])
+    for p in time_subperiods
+        t_start = first(p);
+        t_end = last(p);
+        add_to_expression!(aux_expr[t_start], storage_level(g)[t_start] - (1-self_discharge(g))*storage_level(g)[t_end]);
+        for t in p[2:end]
+            add_to_expression!(aux_expr[t], storage_level(g)[t]  - (1-self_discharge(g))*storage_level(g)[t-1]);
+        end
+    end
+  
+    @constraint(model,[t in time_interval(g)], aux_expr[t] == efficiency_discharge(g)*injection(g)[t] - efficiency_charge(g)*withdrawal(g)[t]);
+
+    unregister(model,:aux_expr)
+
+    return nothing
+
+
+end
 

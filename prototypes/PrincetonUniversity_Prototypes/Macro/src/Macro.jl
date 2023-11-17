@@ -9,6 +9,7 @@ abstract type Commodity end
 
 abstract type Electricity <: Commodity end
 abstract type Hydrogen <: Commodity end
+abstract type NaturalGas <: Commodity end
 
 abstract type AbstractTypeConstraint{T <: Commodity} end
 
@@ -29,7 +30,6 @@ include("edge.jl")
 include("generate_model.jl")
 include("prepare_inputs.jl")
 include("constraints.jl")
-include("variables.jl")
 include("costs.jl")
 
 # exports

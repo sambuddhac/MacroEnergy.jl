@@ -5,6 +5,8 @@ An abstract type for a generic resource. This type is used to define the common 
 It must contain the following field:
 - base::BaseResource{T}: a field of type BaseResource{T} that contains the common fields of all resources.
 """
+abstract type AbstractTransformation{T1<:Commodity,T2<:Commodities} end
+
 abstract type AbstractResource{T<:Commodity} end
 
 # Resource interface
@@ -67,4 +69,37 @@ Base.@kwdef mutable struct Thermal{T} <: AbstractResource{T}
     variable_om_cost::Float64 = 0.0
     planning_vars::Dict = Dict()
     operation_vars::Dict = Dict()
+end
+
+
+# add_variable  functions
+function add_planning_variables!(g::AbstractResource, model::Model)
+
+    g.planning_vars[:new_capacity] = @variable(model, lower_bound = 0.0, base_name = "vNEWCAP_$(commodity_type(g))_$(resource_id(g))")
+
+    g.planning_vars[:ret_capacity] = @variable(model, lower_bound = 0.0, base_name = "vRETCAP_$(commodity_type(g))_$(resource_id(g))")
+
+    g.planning_vars[:capacity] = @variable(model, lower_bound = 0.0, base_name = "vCAP_$(commodity_type(g))_$(resource_id(g))")
+
+    ### This constraint is just to set the auxiliary capacity variable. Capacity variable could be an expression if we don't want to have this constraint.
+    @constraint(model, capacity(g) == new_capacity(g) - ret_capacity(g) + existing_capacity(g))
+
+    if !can_expand(g)
+        fix(new_capacity(g), 0.0; force=true)
+    end
+
+    if !can_retire(g)
+        fix(ret_capacity(g), 0.0; force=true)
+    end
+
+    return nothing
+
+end
+
+
+function add_operation_variables!(g::AbstractResource, model::Model)
+
+    g.operation_vars[:injection] = @variable(model, [t in time_interval(g)], lower_bound = 0.0, base_name = "vINJ_$(commodity_type(g))_$(resource_id(g))")
+
+    return nothing
 end

@@ -6,12 +6,13 @@ using Revise
 using Macro
 
 setup = Dict()
-#setup["commodities"] = [Electricity, Hydrogen];
+#setup["commodities"] = [Electricity, Hydrogen,NaturalGas];
 setup["commodities"] = [Electricity];
-setup["PeriodLength"] = 12;
-setup["hours_per_subperiod"] = 4;
+setup["PeriodLength"] = 24;
+setup["hours_per_subperiod"] = 24;
 setup[Electricity] = Dict{Any,Any}("hours_per_timestep"=>1);
-#setup[Hydrogen] = Dict("hours_per_timestep"=>2);
+#setup[Hydrogen] = Dict("hours_per_timestep"=>1);
+#setup[NaturalGas] = Dict("hours_per_timestep"=>24);
 setup[Electricity]["filepath"] = "ExampleSystems/Electricity/resources.csv"
 
 resources = prepare_inputs!(setup);
