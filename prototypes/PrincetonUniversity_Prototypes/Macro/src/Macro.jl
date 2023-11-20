@@ -13,6 +13,8 @@ abstract type NaturalGas <: Commodity end
 
 abstract type AbstractTypeConstraint{T <: Commodity} end
 
+#abstract type AbstractTypeTransformationConstraint end
+
 # type hierarchy
 
 # globals
@@ -24,13 +26,22 @@ const JuMPConstraint = Union{Array,Containers.DenseAxisArray,Containers.SparseAx
 # const DataFrame = DataFrames.DataFrame;
 
 # include files
+include("node.jl")
+include("edge.jl")
 include("resource.jl")
 include("storage.jl")
-include("edge.jl")
+#include("transformation.jl")
 include("generate_model.jl")
 include("prepare_inputs.jl")
 include("constraints.jl")
 include("costs.jl")
+
+function commodity_type(c::AbstractString)
+        T::DataType = eval(Symbol(c))
+        @assert (T <: Commodity)
+        return T
+end
+
 
 # exports
 export  Electricity, Hydrogen, 

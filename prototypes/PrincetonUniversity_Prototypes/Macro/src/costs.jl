@@ -33,3 +33,10 @@ function add_variable_costs!(g::AbstractStorage, model::Model)
     model[:eVariableCost] += g.variable_om_cost_withdrawal * sum(withdrawal(g))
 
 end
+
+function add_fixed_costs!(e::AbstractEdge, model::Model)
+
+    model[:eFixedCost] += e.investment_cost * new_capacity(e)
+
+end
+

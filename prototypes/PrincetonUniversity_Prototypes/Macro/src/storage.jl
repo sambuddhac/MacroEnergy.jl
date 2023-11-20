@@ -143,9 +143,9 @@ function add_planning_variables!(g::SymmetricStorage, model::Model)
         fix(ret_capacity_storage(g), 0.0; force=true)
     end
 
-    @constraint(model,ret_capacity(g)<=existing_cap(g))
+    @constraint(model,ret_capacity(g)<=existing_capacity(g))
 
-    @constraint(model,ret_capacity_storage(g)<=existing_cap_storage(g))
+    @constraint(model,ret_capacity_storage(g)<=existing_capacity_storage(g))
    
 
     return nothing
@@ -178,11 +178,11 @@ function add_planning_variables!(g::AsymmetricStorage, model::Model)
 
     @constraint(model, capacity_withdrawal(g) == new_capacity_withdrawal(g)- ret_capacity_withdrawal(g) + existing_capacity_withdrawal(g))
 
-    @constraint(model,ret_capacity(g)<=existing_cap(g))
+    @constraint(model,ret_capacity(g)<=existing_capacity(g))
     
-    @constraint(model,ret_capacity_storage(g)<=existing_cap_storage(g))
+    @constraint(model,ret_capacity_storage(g)<=existing_capacity_storage(g))
 
-    @constraint(model,ret_capacity_withdrawal(g)<=existing_cap_withdrawal(g))
+    @constraint(model,ret_capacity_withdrawal(g)<=existing_capacity_withdrawal(g))
 
     if !g.can_expand
         fix(new_capacity(g), 0.0; force=true)
@@ -202,7 +202,7 @@ function add_planning_variables!(g::AsymmetricStorage, model::Model)
 end
 
 
-function add_operation_variables!(g::AbstractStorage, model::Model)
+function add_operation_variables!(g::AbstractStorage, nodes::Vector{AbstractNode},  model::Model)
     
     g.operation_vars[:injection] = @variable(model, [t in time_interval(g)], lower_bound = 0.0, base_name = "vINJ_$(commodity_type(g))_$(g.r_id)")
     g.operation_vars[:withdrawal] = @variable(model, [t in time_interval(g)], lower_bound = 0.0, base_name = "vWDW_$(commodity_type(g))_$(g.r_id)")
@@ -223,6 +223,12 @@ function add_operation_variables!(g::AbstractStorage, model::Model)
     @constraint(model,[t in time_interval(g)], aux_expr[t] == efficiency_discharge(g)*injection(g)[t] - efficiency_charge(g)*withdrawal(g)[t]);
 
     unregister(model,:aux_expr)
+
+    n = map_resource_to_node(g,nodes);
+
+    for t in time_interval(g)
+        add_to_expression!(n.operation_expr[:net_energy_production][t], injection(g)[t]-withdrawal(g)[t])
+    end
 
     return nothing
 

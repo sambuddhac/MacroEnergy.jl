@@ -5,8 +5,6 @@ An abstract type for a generic resource. This type is used to define the common 
 It must contain the following field:
 - base::BaseResource{T}: a field of type BaseResource{T} that contains the common fields of all resources.
 """
-abstract type AbstractTransformation{T1<:Commodity,T2<:Commodities} end
-
 abstract type AbstractResource{T<:Commodity} end
 
 # Resource interface
@@ -27,6 +25,11 @@ ret_capacity(g::AbstractResource) = g.planning_vars[:ret_capacity];
 capacity(g::AbstractResource) = g.planning_vars[:capacity];
 injection(g::AbstractResource) = g.operation_vars[:injection];
 all_constraints(g::AbstractResource) = g.constraints;
+
+map_resource_to_node(g::AbstractResource, nodes::Vector{AbstractNode}) = nodes[node(g)];
+
+
+
 
 Base.@kwdef mutable struct Resource{T} <: AbstractResource{T}
     ### Fields without defaults
@@ -97,9 +100,15 @@ function add_planning_variables!(g::AbstractResource, model::Model)
 end
 
 
-function add_operation_variables!(g::AbstractResource, model::Model)
+function add_operation_variables!(g::AbstractResource,all_nodes::Vector{AbstractNode}, model::Model)
+
+    n = map_resource_to_node(g,all_nodes);
 
     g.operation_vars[:injection] = @variable(model, [t in time_interval(g)], lower_bound = 0.0, base_name = "vINJ_$(commodity_type(g))_$(resource_id(g))")
+
+    for t in time_interval(g)
+        add_to_expression!(n.operation_expr[:net_energy_production][t], injection(g)[t])
+    end
 
     return nothing
 end

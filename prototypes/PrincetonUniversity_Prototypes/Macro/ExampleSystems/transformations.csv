@@ -1,0 +1,4 @@
+﻿id,commodity_1,node_1,stochiometry_1,direction_1,commodity_2,node_2,direction_2,stochiometry_2
+1,Electricity,1,0.6,-1,Hydrogen,1,1,1
+2,Electricity,2,0.6,-1,Hydrogen,2,1,1
+3,Electricity,3,0.6,-1,Hydrogen,3,1,1
