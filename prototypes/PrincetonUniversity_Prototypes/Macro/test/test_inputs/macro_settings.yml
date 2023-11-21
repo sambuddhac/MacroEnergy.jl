@@ -1,0 +1,7 @@
+InputDataPath: "test_inputs"
+OutputDataPath: "test_outputs"
+PrintModel: 0
+NetworkExpansion: 0
+TimeDomainReduction: 0
+TimeDomainReductionFolder: "TDR_Results"
+MultiStage: 0

@@ -6,7 +6,7 @@ using Test
 
 const test_inputs = (
     node = 1,
-    r_id = 1,
+    r_id = "Solar1",
     capacity_factor = rand(100),
     investment_cost = 85300.0,
     fixed_om_cost = 18760.0,

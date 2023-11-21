@@ -1,8 +1,9 @@
 module Macro
 
-using JuMP
-using DataFrames
+using YAML
 using CSV
+using DataFrames
+using JuMP
 
 # Type parameter for Macro data structures
 abstract type Commodity end
@@ -27,10 +28,15 @@ const JuMPConstraint = Union{Array,Containers.DenseAxisArray,Containers.SparseAx
 
 # include files
 include("node.jl")
-include("edge.jl")
 include("resource.jl")
 include("storage.jl")
 #include("transformation.jl")
+include("config/configure_settings.jl")
+include("edge.jl")
+include("load_inputs/load_inputs.jl")
+include("load_inputs/load_dataframe.jl")
+include("load_inputs/load_resources.jl")
+include("load_inputs/load_variability.jl")
 include("generate_model.jl")
 include("prepare_inputs.jl")
 include("constraints.jl")
@@ -53,6 +59,7 @@ export Electricity,
     AsymmetricStorage,
     Edge,
     CapacityConstraint,
+    configure_settings,
     add_planning_variables!,
     add_operation_variables!,
     add_fixed_cost!,
@@ -62,5 +69,9 @@ export Electricity,
     generate_model,
     prepare_inputs!,
     loadresources,
-    makeresource
+    makeresource,
+    InputFilesNames,
+    load_dataframe,
+    load_resources,
+    load_variability!
 end # module Macro
