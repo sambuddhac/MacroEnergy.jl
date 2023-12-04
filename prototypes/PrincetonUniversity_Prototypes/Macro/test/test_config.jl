@@ -7,12 +7,26 @@ using Test
 function test_configure_settings()
     settings = configure_settings("test_inputs/macro_settings.yml")
 
-    @test settings[:InputDataPath] == "test_inputs"
-    @test settings[:OutputDataPath] == "test_outputs"
-    @test settings[:TimeDomainReductionFolder] == "TDR_Results"
-    @test settings[:PrintModel] == 0
+    # Electricity
+    commodity_settings = settings.Commodities["Electricity"]
+    @test commodity_settings["InputDataPath"] == "test_inputs/Electricity"
+    @test commodity_settings["HoursPerTimeStep"] == 1
+
+    # Hydrogen
+    commodity_settings = settings.Commodities["Hydrogen"]
+    @test commodity_settings["InputDataPath"] == "test_inputs/Hydrogen"
+    @test commodity_settings["HoursPerTimeStep"] == 1
+
+    # Natural Gas
+    commodity_settings = settings.Commodities["NaturalGas"]
+    @test commodity_settings["InputDataPath"] == "test_inputs/NaturalGas"
+    @test commodity_settings["HoursPerTimeStep"] == 1
+
+
+    # Across all commodities
+    @test settings[:PeriodLength] == 24
+    @test settings[:HoursPerSubperiod] == 24
     @test settings[:NetworkExpansion] == 0
-    @test settings[:TimeDomainReduction] == 0
     @test settings[:MultiStage] == 0
 
     return nothing

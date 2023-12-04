@@ -1,11 +1,9 @@
 function default_settings()
     (
-        InputDataPath = "",
-        OutputDataPath = "",
-        PrintModel = 0,
+        Commodities = "",
+        PeriodLength = 24,
+        HoursPerSubperiod = 24,
         NetworkExpansion = 0,
-        TimeDomainReduction = 0,
-        TimeDomainReductionFolder = "TDR_Results",
         MultiStage = 0,
     )
 end
@@ -24,14 +22,15 @@ function configure_settings(settings_path::String)
 end
 
 function validate_settings(settings::NamedTuple)
-    # Check that input/output paths are valid
-    @assert isa(settings[:InputDataPath], String) && isdir(settings[:InputDataPath])
-    @assert isa(settings[:OutputDataPath], String)
-    @assert settings[:PrintModel] ∈ (0, 1)
-    @assert settings[:NetworkExpansion] ∈ (0, 1)
-    @assert settings[:TimeDomainReduction] ∈ (0, 1)
-    @assert isa(settings[:TimeDomainReductionFolder], String)
-    @assert settings[:MultiStage] ∈ (0, 1)
+    nothing
+    # # Check that input/output paths are valid
+    # @assert isa(settings[:InputDataPath], String) && isdir(settings[:InputDataPath])
+    # @assert isa(settings[:OutputDataPath], String)
+    # @assert settings[:PrintModel] ∈ (0, 1)
+    # @assert settings[:NetworkExpansion] ∈ (0, 1)
+    # @assert settings[:TimeDomainReduction] ∈ (0, 1)
+    # @assert isa(settings[:TimeDomainReductionFolder], String)
+    # @assert settings[:MultiStage] ∈ (0, 1)
 end
 
 function validate_names(settings::NamedTuple)

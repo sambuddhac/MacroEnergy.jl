@@ -21,9 +21,9 @@ function prepare_inputs!(setup::Dict)
 
     setup["subperiod_map"] = subperiod_map
 
-    setup["time_interval_map"] = time_interval_map;
-     
-    return loadresources(setup),loadedges(setup),loadnodes(setup)#,loadtransformations(setup)
+    setup["time_interval_map"] = time_interval_map
+
+    return loadresources(setup), loadedges(setup), loadnodes(setup)#,loadtransformations(setup)
 end
 
 function makeresource(
@@ -72,7 +72,7 @@ end
 
 
 # function maketransformation(row::DataFrameRow,setup::Dict)
-    
+
 #     number_of_commodities = length(setup["commodities"]);
 
 #     return Transformation(id = row.id,
@@ -86,15 +86,25 @@ end
 # end
 
 
-function makeedge(c::DataType,row::DataFrameRow,time_interval::StepRange{Int64, Int64})
+function makeedge(c::DataType, row::DataFrameRow, time_interval::StepRange{Int64,Int64})
 
-    return Edge{c}(start_node = row.start_node, end_node = row.end_node,existing_capacity = row.existing_capacity,time_interval=time_interval)
+    return Edge{c}(
+        start_node = row.start_node,
+        end_node = row.end_node,
+        existing_capacity = row.existing_capacity,
+        time_interval = time_interval,
+    )
 
 end
 
-function makenode(c::DataType,row::DataFrameRow,time_interval::StepRange{Int64, Int64})
+function makenode(c::DataType, row::DataFrameRow, time_interval::StepRange{Int64,Int64})
 
-    return Node{c}(id = row.id, demand = collect(row[2+first(time_interval):2+last(time_interval)]),max_nse = row.max_nse,time_interval=time_interval)
+    return Node{c}(
+        id = row.id,
+        demand = collect(row[2+first(time_interval):2+last(time_interval)]),
+        max_nse = row.max_nse,
+        time_interval = time_interval,
+    )
 
 end
 
@@ -102,12 +112,20 @@ function loadresources(setup::Dict)
     resources = AbstractResource[]
 
     for c in setup["commodities"]
-        filepath = setup[c]["resource_filepath"];
+        filepath = setup[c]["resource_filepath"]
         if !ismissing(filepath)
             nt = length(setup["time_interval_map"][c])
             df = CSV.read(filepath, DataFrame)
             for row in eachrow(df)
-                push!(resources, makeresource(c,row,setup["time_interval_map"][c],setup["subperiod_map"][c]))
+                push!(
+                    resources,
+                    makeresource(
+                        c,
+                        row,
+                        setup["time_interval_map"][c],
+                        setup["subperiod_map"][c],
+                    ),
+                )
             end
         end
     end
@@ -119,11 +137,11 @@ function loadedges(setup::Dict)
     edges = AbstractEdge[]
 
     for c in setup["commodities"]
-        filepath = setup[c]["edge_filepath"];
+        filepath = setup[c]["edge_filepath"]
         if !ismissing(filepath)
             df = CSV.read(filepath, DataFrame)
             for row in eachrow(df)
-                push!(edges, makeedge(c,row,setup["time_interval_map"][c]))
+                push!(edges, makeedge(c, row, setup["time_interval_map"][c]))
             end
         end
     end
@@ -134,11 +152,11 @@ function loadnodes(setup::Dict)
     nodes = AbstractNode[]
 
     for c in setup["commodities"]
-        filepath = setup[c]["node_filepath"];
+        filepath = setup[c]["node_filepath"]
         if !ismissing(filepath)
             df = CSV.read(filepath, DataFrame)
             for row in eachrow(df)
-                push!(nodes, makenode(c,row,setup["time_interval_map"][c]))
+                push!(nodes, makenode(c, row, setup["time_interval_map"][c]))
             end
         end
     end

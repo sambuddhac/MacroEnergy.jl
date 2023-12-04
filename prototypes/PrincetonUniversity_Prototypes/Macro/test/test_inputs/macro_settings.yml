@@ -1,7 +1,13 @@
-InputDataPath: "test_inputs"
-OutputDataPath: "test_outputs"
-PrintModel: 0
-NetworkExpansion: 0
-TimeDomainReduction: 0
-TimeDomainReductionFolder: "TDR_Results"
-MultiStage: 0
+Commodities:
+    Electricity:
+        InputDataPath: "test_inputs/Electricity"
+        HoursPerTimeStep: 1
+    Hydrogen:
+        InputDataPath: "test_inputs/Hydrogen"
+        HoursPerTimeStep: 1
+    NaturalGas:
+        InputDataPath: "test_inputs/NaturalGas"
+        HoursPerTimeStep: 1
+PeriodLength: 24
+HoursPerSubperiod: 24
+

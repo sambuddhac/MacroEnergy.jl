@@ -14,7 +14,8 @@ abstract type NaturalGas <: Commodity end
 
 abstract type AbstractTypeConstraint{T<:Commodity} end
 
-#abstract type AbstractTypeTransformationConstraint end
+
+abstract type AbstractTypeTransformationConstraint end
 
 # type hierarchy
 
@@ -28,26 +29,23 @@ const JuMPConstraint = Union{Array,Containers.DenseAxisArray,Containers.SparseAx
 
 # include files
 include("node.jl")
+include("edge.jl")
 include("resource.jl")
 include("storage.jl")
-#include("transformation.jl")
+include("transformation.jl")
 include("config/configure_settings.jl")
-include("edge.jl")
-include("load_inputs/load_inputs.jl")
 include("load_inputs/load_dataframe.jl")
+include("load_inputs/load_timeseries.jl")
+include("load_inputs/load_inputs.jl")
+include("load_inputs/load_network.jl")
+include("load_inputs/load_transformations.jl")
 include("load_inputs/load_resources.jl")
+include("load_inputs/load_storage.jl")
 include("load_inputs/load_variability.jl")
 include("generate_model.jl")
 include("prepare_inputs.jl")
 include("constraints.jl")
 include("costs.jl")
-
-function commodity_type(c::AbstractString)
-        T::DataType = eval(Symbol(c))
-        @assert (T <: Commodity)
-        return T
-end
-
 
 # exports
 export Electricity,
@@ -55,9 +53,14 @@ export Electricity,
     Resource,
     Thermal,
     BaseResource,
+    AbstractStorage,
     SymmetricStorage,
     AsymmetricStorage,
+    Transformation,
+    InputFilesNames,
+    Node,
     Edge,
+    TEdge,
     CapacityConstraint,
     configure_settings,
     add_planning_variables!,
@@ -70,8 +73,12 @@ export Electricity,
     prepare_inputs!,
     loadresources,
     makeresource,
-    InputFilesNames,
-    load_dataframe,
-    load_resources,
-    load_variability!
+    load_inputs,
+    settings,
+    nodes,
+    networks,
+    resources,
+    storage,
+    transformations
+
 end # module Macro

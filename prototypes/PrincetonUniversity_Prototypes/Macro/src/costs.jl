@@ -49,4 +49,3 @@ function add_fixed_costs!(e::AbstractEdge, model::Model)
     model[:eFixedCost] += e.investment_cost * new_capacity(e)
 
 end
-
