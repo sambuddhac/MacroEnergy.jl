@@ -26,6 +26,9 @@ end
 start_node(e::AbstractEdge) = e.start_node;
 end_node(e::AbstractEdge) = e.end_node;
 
+start_node_id(e::AbstractEdge) = node_id(e.start_node);
+end_node_id(e::AbstractEdge) = node_id(e.end_node);
+
 time_interval(e::AbstractEdge) = e.time_interval;
 commodity_type(e::AbstractEdge{T}) where {T} = T;
 existing_capacity(e::AbstractEdge) = e.existing_capacity;
@@ -45,13 +48,13 @@ function add_planning_variables!(e::AbstractEdge, model::Model)
     e.planning_vars[:new_capacity] = @variable(
         model,
         lower_bound = 0.0,
-        base_name = "vNEWCAPEDGE_$(commodity_type(e))_$(e.start_node)_$(e.end_node)"
+        base_name = "vNEWCAPEDGE_$(commodity_type(e))_$(start_node_id(e))_$(end_node_id(e))"
     )
 
     e.planning_vars[:capacity] = @variable(
         model,
         lower_bound = 0.0,
-        base_name = "vCAPEDGE_$(commodity_type(e))_$(e.start_node)_$(e.end_node)"
+        base_name = "vCAPEDGE_$(commodity_type(e))_$(start_node_id(e))_$(end_node_id(e))"
     )
 
     @constraint(model, capacity(e) == new_capacity(e) + existing_capacity(e))
@@ -73,7 +76,7 @@ function add_operation_variables!(
         model,
         [t in time_interval(e)],
         lower_bound = 0.0,
-        base_name = "vFLOW_$(commodity_type(e))_$(e.start_node)_$(e.end_node)"
+        base_name = "vFLOW_$(commodity_type(e))_$(start_node_id(e))_$(end_node_id(e))"
     )
 
     for t in time_interval(e)

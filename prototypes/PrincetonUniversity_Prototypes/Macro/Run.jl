@@ -20,5 +20,4 @@ using BenchmarkTools
 
 bm = @benchmark model = generate_model(inputs);
 
-display(bm)
 

@@ -34,7 +34,7 @@ Base.@kwdef mutable struct Resource{T} <: AbstractResource{T}
     id::Symbol
     #### Optional fields - (fields with defaults)
     capacity_factor::Vector{Float64} = Float64[]
-    # price::Vector{Float64} = Float64[]    #TODO: talk with Filippo about this
+    ### price::Vector{Float64} = Float64[]    #TODO: talk with Filippo about this
     time_interval::StepRange{Int64,Int64} = 1:1
     subperiods::Vector{StepRange{Int64,Int64}} = StepRange{Int64,Int64}[]
     min_capacity::Float64 = 0.0

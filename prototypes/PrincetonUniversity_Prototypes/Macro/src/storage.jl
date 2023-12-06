@@ -151,37 +151,37 @@ function add_planning_variables!(g::SymmetricStorage, model::Model)
     g.planning_vars[:new_capacity] = @variable(
         model,
         lower_bound = 0.0,
-        base_name = "vNEWCAP_$(commodity_type(g))_$(g.r_id)"
+        base_name = "vNEWCAP_$(commodity_type(g))_$(g.id)"
     )
 
     g.planning_vars[:ret_capacity] = @variable(
         model,
         lower_bound = 0.0,
-        base_name = "vRETCAP_$(commodity_type(g))_$(g.r_id)"
+        base_name = "vRETCAP_$(commodity_type(g))_$(g.id)"
     )
 
     g.planning_vars[:capacity] = @variable(
         model,
         lower_bound = 0.0,
-        base_name = "vCAP_$(commodity_type(g))_$(g.r_id)"
+        base_name = "vCAP_$(commodity_type(g))_$(g.id)"
     )
 
     g.planning_vars[:new_capacity_storage] = @variable(
         model,
         lower_bound = 0.0,
-        base_name = "vNEWCAPSTOR_$(commodity_type(g))_$(g.r_id)"
+        base_name = "vNEWCAPSTOR_$(commodity_type(g))_$(g.id)"
     )
 
     g.planning_vars[:ret_capacity_storage] = @variable(
         model,
         lower_bound = 0.0,
-        base_name = "vRETCAPSTOR_$(commodity_type(g))_$(g.r_id)"
+        base_name = "vRETCAPSTOR_$(commodity_type(g))_$(g.id)"
     )
 
     g.planning_vars[:capacity_storage] = @variable(
         model,
         lower_bound = 0.0,
-        base_name = "vCAPSTOR_$(commodity_type(g))_$(g.r_id)"
+        base_name = "vCAPSTOR_$(commodity_type(g))_$(g.id)"
     )
 
     @constraint(
@@ -217,55 +217,55 @@ function add_planning_variables!(g::AsymmetricStorage, model::Model)
     g.planning_vars[:new_capacity] = @variable(
         model,
         lower_bound = 0.0,
-        base_name = "vNEWCAP_$(commodity_type(g))_$(g.r_id)"
+        base_name = "vNEWCAP_$(commodity_type(g))_$(g.id)"
     )
 
     g.planning_vars[:ret_capacity] = @variable(
         model,
         lower_bound = 0.0,
-        base_name = "vRETCAP_$(commodity_type(g))_$(g.r_id)"
+        base_name = "vRETCAP_$(commodity_type(g))_$(g.id)"
     )
 
     g.planning_vars[:capacity] = @variable(
         model,
         lower_bound = 0.0,
-        base_name = "vCAP_$(commodity_type(g))_$(g.r_id)"
+        base_name = "vCAP_$(commodity_type(g))_$(g.id)"
     )
 
     g.planning_vars[:new_capacity_storage] = @variable(
         model,
         lower_bound = 0.0,
-        base_name = "vNEWCAPSTOR_$(commodity_type(g))_$(g.r_id)"
+        base_name = "vNEWCAPSTOR_$(commodity_type(g))_$(g.id)"
     )
 
     g.planning_vars[:ret_capacity_storage] = @variable(
         model,
         lower_bound = 0.0,
-        base_name = "vRETCAPSTOR_$(commodity_type(g))_$(g.r_id)"
+        base_name = "vRETCAPSTOR_$(commodity_type(g))_$(g.id)"
     )
 
     g.planning_vars[:capacity_storage] = @variable(
         model,
         lower_bound = 0.0,
-        base_name = "vCAPSTOR_$(commodity_type(g))_$(g.r_id)"
+        base_name = "vCAPSTOR_$(commodity_type(g))_$(g.id)"
     )
 
     g.planning_vars[:new_capacity_withdrawal] = @variable(
         model,
         lower_bound = 0.0,
-        base_name = "vNEWCAPWDW_$(commodity_type(g))_$(g.r_id)"
+        base_name = "vNEWCAPWDW_$(commodity_type(g))_$(g.id)"
     )
 
     g.planning_vars[:ret_capacity_withdrawal] = @variable(
         model,
         lower_bound = 0.0,
-        base_name = "vRETCAPWDW_$(commodity_type(g))_$(g.r_id)"
+        base_name = "vRETCAPWDW_$(commodity_type(g))_$(g.id)"
     )
 
     g.planning_vars[:capacity_withdrawal] = @variable(
         model,
         lower_bound = 0.0,
-        base_name = "vCAPWDW_$(commodity_type(g))_$(g.r_id)"
+        base_name = "vCAPWDW_$(commodity_type(g))_$(g.id)"
     )
 
     @constraint(
@@ -319,19 +319,19 @@ function add_operation_variables!(
         model,
         [t in time_interval(g)],
         lower_bound = 0.0,
-        base_name = "vINJ_$(commodity_type(g))_$(g.r_id)"
+        base_name = "vINJ_$(commodity_type(g))_$(g.id)"
     )
     g.operation_vars[:withdrawal] = @variable(
         model,
         [t in time_interval(g)],
         lower_bound = 0.0,
-        base_name = "vWDW_$(commodity_type(g))_$(g.r_id)"
+        base_name = "vWDW_$(commodity_type(g))_$(g.id)"
     )
     g.operation_vars[:storage_level] = @variable(
         model,
         [t in time_interval(g)],
         lower_bound = 0.0,
-        base_name = "vSTOR_$(commodity_type(g))_$(g.r_id)"
+        base_name = "vSTOR_$(commodity_type(g))_$(g.id)"
     )
 
     time_subperiods = subperiods(g)

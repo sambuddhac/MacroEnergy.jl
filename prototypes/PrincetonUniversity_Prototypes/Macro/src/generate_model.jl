@@ -6,9 +6,11 @@ function generate_model(inputs::InputData)
 
     nodes = reduce(vcat,[inputs.nodes[c] for c in keys(inputs.nodes)]);
  
-    components = [resources; edges];
+    storage =  [reduce(vcat,[inputs.storage[c].s for c in keys(inputs.storage)]);reduce(vcat,[inputs.storage[c].a for c in keys(inputs.storage)])];
 
-    system = [nodes; resources; edges];
+    components = [resources; storage; edges];
+
+    system = [nodes; components];
 
     model = Model()
 
@@ -16,17 +18,19 @@ function generate_model(inputs::InputData)
 
     @expression(model, eFixedCost, 0 * model[:vREF])
 
+    @expression(model, eVariableCost, 0 * model[:vREF])
+
     add_planning_variables!.(components, model)
 
     add_operation_variables!.(system, model)
-    
-    # add_all_model_constraints!.(system, model)
+   
+    add_all_model_constraints!.(system, model)
 
-    # add_fixed_costs!.(components, model)
+    add_fixed_costs!.(components, model)
 
-    # add_variable_costs!.(resources, model)
+    add_variable_costs!.(resources, model)
 
-    # @objective(model, Min, model[:eFixedCost] + model[:eVariableCost])
+    @objective(model, Min, model[:eFixedCost] + model[:eVariableCost])
 
     return model
 
