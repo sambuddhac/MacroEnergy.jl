@@ -20,15 +20,15 @@ function generate_model(inputs::InputData)
 
     @expression(model, eVariableCost, 0 * model[:vREF])
 
-    add_planning_variables!.(components, model)
+    add_planning_variables!.(components, Ref(model))
 
-    add_operation_variables!.(system, model)
+    add_operation_variables!.(system, Ref(model))
    
-    add_all_model_constraints!.(system, model)
+    add_all_model_constraints!.(system, Ref(model))
 
-    add_fixed_costs!.(components, model)
+    add_fixed_costs!.(components, Ref(model))
 
-    add_variable_costs!.(resources, model)
+    add_variable_costs!.(resources, Ref(model))
 
     @objective(model, Min, model[:eFixedCost] + model[:eVariableCost])
 

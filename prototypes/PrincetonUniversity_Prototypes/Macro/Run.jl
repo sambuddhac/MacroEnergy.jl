@@ -16,8 +16,8 @@ settings = configure_settings(joinpath(example_path, "macro_settings.yml"))
 
 inputs = load_inputs(settings, example_path);
 
-using BenchmarkTools
+model = generate_model(inputs);
 
-bm = @benchmark model = generate_model(inputs);
+println()
 
 

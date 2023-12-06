@@ -34,8 +34,9 @@ end
 
 function add_variable_costs!(g::AbstractResource, model::Model)
 
-    model[:eVariableCost] +=
-        g.variable_om_cost * sum(injection(g)); #TODO: put this back when we have add price timeseries to resources ### + sum(price(g) .* injection(g))
+    for t in time_interval(g)
+        add_to_expression!(model[:eVariableCost], g.variable_om_cost * injection(g)[t]); #TODO: put this back when we have add price timeseries to resources ### + sum(price(g) .* injection(g))
+    end
 
 end
 function add_variable_costs!(g::AbstractStorage, model::Model)
