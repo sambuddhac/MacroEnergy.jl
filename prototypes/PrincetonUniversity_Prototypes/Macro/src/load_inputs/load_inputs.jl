@@ -42,7 +42,7 @@ function load_inputs(settings::NamedTuple, input_path::AbstractString)
     filenames = InputFilesNames()
     @info "Reading in CSV Files from $input_path"
 
-    hours_per_subperiod = settings.HoursPerSubperiod
+    #hours_per_subperiod = settings.HoursPerSubperiod
     period_length = settings.PeriodLength
 
     # Read in all the commodities
@@ -65,6 +65,7 @@ function load_inputs(settings::NamedTuple, input_path::AbstractString)
         commodity_settings = settings.Commodities[commodity_name]
 
         hours_per_timestep = commodity_settings["HoursPerTimeStep"]
+        hours_per_subperiod = commodity_settings["HoursPerSubperiod"]
         time_interval = 1:hours_per_timestep:period_length
         subperiods = collect(
             Iterators.partition(

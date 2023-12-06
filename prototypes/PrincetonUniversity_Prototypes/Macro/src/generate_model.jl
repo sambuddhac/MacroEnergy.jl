@@ -1,12 +1,14 @@
-function generate_model(
-    resources::Vector{AbstractResource},
-    edges::Vector{AbstractEdge},
-    nodes::Vector{AbstractNode},
-    setup::Dict,
-)
-    components = [resources; edges]
+function generate_model(inputs::InputData)
 
-    system = [resources; edges; nodes]
+    resources = reduce(vcat,[inputs.resources[c] for c in keys(inputs.resources)]);
+
+    edges = reduce(vcat,[inputs.networks[c] for c in keys(inputs.networks)]);
+
+    nodes = reduce(vcat,[inputs.nodes[c] for c in keys(inputs.nodes)]);
+ 
+    components = [resources; edges];
+
+    system = [nodes; resources; edges];
 
     model = Model()
 
@@ -16,19 +18,15 @@ function generate_model(
 
     add_planning_variables!.(components, model)
 
-    add_operation_variables!.(nodes, model)
+    add_operation_variables!.(system, model)
+    
+    # add_all_model_constraints!.(system, model)
 
-    for y in components
-        add_operation_variables!(y, nodes, model)
-    end
+    # add_fixed_costs!.(components, model)
 
-    add_all_model_constraints!.(system, model)
+    # add_variable_costs!.(resources, model)
 
-    add_fixed_costs!.(components, model)
-
-    add_variable_costs!.(resources, model)
-
-    @objective(model, Min, model[:eFixedCost] + model[:eVariableCost])
+    # @objective(model, Min, model[:eFixedCost] + model[:eVariableCost])
 
     return model
 

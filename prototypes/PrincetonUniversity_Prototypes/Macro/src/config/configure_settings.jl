@@ -2,7 +2,6 @@ function default_settings()
     (
         Commodities = "",
         PeriodLength = 24,
-        HoursPerSubperiod = 24,
         NetworkExpansion = 0,
         MultiStage = 0,
     )

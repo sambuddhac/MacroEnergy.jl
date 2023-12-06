@@ -1,4 +1,4 @@
-package_folder = "/Users/lb9239/Documents/ZERO_lab/Macro/Macro/prototypes/PrincetonUniversity_Prototypes/Macro"
+package_folder = pwd()
 repl_folder = pwd()
 
 if package_folder != repl_folder
@@ -15,3 +15,10 @@ example_path = "ExampleSystems/SmallNewEngland/"
 settings = configure_settings(joinpath(example_path, "macro_settings.yml"))
 
 inputs = load_inputs(settings, example_path);
+
+using BenchmarkTools
+
+bm = @benchmark model = generate_model(inputs);
+
+display(bm)
+

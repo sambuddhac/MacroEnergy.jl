@@ -312,7 +312,6 @@ end
 
 function add_operation_variables!(
     g::AbstractStorage,
-    nodes::Vector{AbstractNode},
     model::Model,
 )
 
@@ -362,7 +361,7 @@ function add_operation_variables!(
 
     unregister(model, :aux_expr)
 
-    n = map_resource_to_node(g, nodes)
+    n = node(g);
 
     for t in time_interval(g)
         add_to_expression!(

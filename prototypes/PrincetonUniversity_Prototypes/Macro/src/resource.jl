@@ -28,11 +28,6 @@ capacity(g::AbstractResource) = g.planning_vars[:capacity];
 injection(g::AbstractResource) = g.operation_vars[:injection];
 all_constraints(g::AbstractResource) = g.constraints;
 
-map_resource_to_node(g::AbstractResource, nodes::Vector{AbstractNode}) = nodes[node(g)];
-
-
-
-
 Base.@kwdef mutable struct Resource{T} <: AbstractResource{T}
     ### Mandatory fields: (fields without defaults)
     node::Node{T}
@@ -55,26 +50,26 @@ Base.@kwdef mutable struct Resource{T} <: AbstractResource{T}
     constraints::Vector{AbstractTypeConstraint} = [CapacityConstraint{T}()]
 end
 
-Base.@kwdef mutable struct Thermal{T} <: AbstractResource{T}
-    ### Fields without defaults
-    node::Int64
-    r_id::Int64
-    capacity_factor::Vector{Float64}  # = ones(length(time_interval_map[T]))
-    # price::Vector{Float64} # = zeros(length(time_interval_map[T]))    #TODO: talk with Filippo about this
-    time_interval::StepRange{Int64,Int64}
-    subperiods::Vector{StepRange{Int64,Int64}}
-    #### Fields with defaults
-    min_capacity::Float64 = 0.0
-    max_capacity::Float64 = Inf
-    existing_capacity::Float64 = 0.0
-    can_expand::Bool = true
-    can_retire::Bool = true
-    investment_cost::Float64 = 0.0
-    fixed_om_cost::Float64 = 0.0
-    variable_om_cost::Float64 = 0.0
-    planning_vars::Dict = Dict()
-    operation_vars::Dict = Dict()
-end
+# Base.@kwdef mutable struct Thermal{T} <: AbstractResource{T}
+#     ### Fields without defaults
+#     node::Int64
+#     r_id::Int64
+#     capacity_factor::Vector{Float64}  # = ones(length(time_interval_map[T]))
+#     # price::Vector{Float64} # = zeros(length(time_interval_map[T]))    #TODO: talk with Filippo about this
+#     time_interval::StepRange{Int64,Int64}
+#     subperiods::Vector{StepRange{Int64,Int64}}
+#     #### Fields with defaults
+#     min_capacity::Float64 = 0.0
+#     max_capacity::Float64 = Inf
+#     existing_capacity::Float64 = 0.0
+#     can_expand::Bool = true
+#     can_retire::Bool = true
+#     investment_cost::Float64 = 0.0
+#     fixed_om_cost::Float64 = 0.0
+#     variable_om_cost::Float64 = 0.0
+#     planning_vars::Dict = Dict()
+#     operation_vars::Dict = Dict()
+# end
 
 
 # add_variable  functions
@@ -119,11 +114,9 @@ end
 
 function add_operation_variables!(
     g::AbstractResource,
-    all_nodes::Vector{AbstractNode},
     model::Model,
 )
-
-    n = map_resource_to_node(g, all_nodes)
+    n = node(g);
 
     g.operation_vars[:injection] = @variable(
         model,

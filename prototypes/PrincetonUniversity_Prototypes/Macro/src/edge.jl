@@ -23,8 +23,8 @@ Base.@kwdef mutable struct Edge{T} <: AbstractEdge{T}
     constraints::Vector{AbstractTypeConstraint} = [CapacityConstraint{T}()]
 end
 
-start_node_id(e::AbstractEdge) = e.start_node;
-end_node_id(e::AbstractEdge) = e.end_node;
+start_node(e::AbstractEdge) = e.start_node;
+end_node(e::AbstractEdge) = e.end_node;
 
 time_interval(e::AbstractEdge) = e.time_interval;
 commodity_type(e::AbstractEdge{T}) where {T} = T;
@@ -36,8 +36,7 @@ flow(e::AbstractEdge) = e.operation_vars[:flow];
 
 all_constraints(e::AbstractEdge) = e.constraints;
 
-map_edge_to_nodes(e::AbstractEdge, nodes::Vector{AbstractNode}) =
-    (nodes[start_node_id(e)], nodes[end_node_id(e)])
+
 
 const Network = Union{Vector{Edge},Vector{Node}}
 
@@ -58,7 +57,7 @@ function add_planning_variables!(e::AbstractEdge, model::Model)
     @constraint(model, capacity(e) == new_capacity(e) + existing_capacity(e))
 
     if !can_expand(e)
-        fix(new_capacity, 0.0; force = true)
+        fix(new_capacity(e), 0.0; force = true)
     end
 
     return nothing
@@ -67,7 +66,6 @@ end
 
 function add_operation_variables!(
     e::AbstractEdge,
-    nodes::Vector{AbstractNode},
     model::Model,
 )
 
@@ -78,11 +76,9 @@ function add_operation_variables!(
         base_name = "vFLOW_$(commodity_type(e))_$(e.start_node)_$(e.end_node)"
     )
 
-    start_node, end_node = map_edge_to_nodes(e, nodes)
-
     for t in time_interval(e)
-        add_to_expression!(net_energy_production(start_node)[t], -flow(e)[t])
-        add_to_expression!(net_energy_production(end_node)[t], flow(e)[t])
+        add_to_expression!(net_energy_production(start_node(e))[t], -flow(e)[t])
+        add_to_expression!(net_energy_production(end_node(e))[t], flow(e)[t])
     end
 
 end
