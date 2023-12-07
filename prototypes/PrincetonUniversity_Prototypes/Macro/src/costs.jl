@@ -41,7 +41,9 @@ function add_variable_costs!(g::AbstractResource, model::Model)
 end
 function add_variable_costs!(g::AbstractStorage, model::Model)
 
-    model[:eVariableCost] += g.variable_om_cost_withdrawal * sum(withdrawal(g))
+    for t in time_interval(g)
+        add_to_expression!(model[:eVariableCost], g.variable_om_cost_withdrawal * withdrawal(g)[t])
+    end
 
 end
 
