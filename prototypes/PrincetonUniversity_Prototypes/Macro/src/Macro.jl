@@ -15,7 +15,7 @@ abstract type NaturalGas <: Commodity end
 abstract type AbstractTypeConstraint{T<:Commodity} end
 
 
-abstract type AbstractTypeTransformationConstraint end
+abstract type AbstractTypeStochiometryConstraint end
 
 # type hierarchy
 

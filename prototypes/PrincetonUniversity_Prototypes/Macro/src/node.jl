@@ -19,7 +19,7 @@ time_interval(n::AbstractNode) = n.time_interval;
 
 commodity_type(n::AbstractNode{T}) where {T} = T;
 
-node_id(n::AbstractNode) = n.id;
+get_id(n::AbstractNode) = n.id;
 
 demand(n::AbstractNode) = n.demand;
 
@@ -38,7 +38,7 @@ function add_operation_variables!(n::AbstractNode, model::Model)
         model,
         [t in time_interval(n)],
         lower_bound = 0.0,
-        base_name = "vNSE_$(commodity_type(n))_$(node_id(n))"
+        base_name = "vNSE_$(commodity_type(n))_$(get_id(n))"
     )
 
     n.operation_expr[:net_energy_production] =

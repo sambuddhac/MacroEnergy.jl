@@ -18,6 +18,8 @@ inputs = load_inputs(settings, example_path);
 
 model = generate_model(inputs);
 
+# @profview generate_model(inputs);
+
 println()
 
 

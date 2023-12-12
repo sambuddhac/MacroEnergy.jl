@@ -1,0 +1,38 @@
+┌ Error: Some duplicate column names detected in the header of c:\Users\pecci\Code\MACRO-dev\prototypes\PrincetonUniversity_Prototypes\Macro\ExampleSystems\Dolphyn_3Zone_SmallNewEngland\readDolphyn\Generators_data.csv: SubString{String}["LDS"].
+│ Duplicate column names may cause errors, as only the first is used.
+└ @ Dolphyn C:\Users\pecci\.julia\packages\Dolphyn\QyHqs\src\GenX\src\load_inputs\load_dataframe.jl:64
+┌ Info: 2023-12-12 18:01:37 Reading H2 Input CSV Files
+└ @ Dolphyn C:\Users\pecci\.julia\packages\Dolphyn\QyHqs\src\core\print_and_log.jl:29
+┌ Info: 2023-12-12 18:01:37 HSC_load_data.csv Successfully Read!
+└ @ Dolphyn C:\Users\pecci\.julia\packages\Dolphyn\QyHqs\src\core\print_and_log.jl:29
+┌ Info: 2023-12-12 18:01:37 HSC_generators_variability.csv Successfully Read!
+└ @ Dolphyn C:\Users\pecci\.julia\packages\Dolphyn\QyHqs\src\core\print_and_log.jl:29
+┌ Info: 2023-12-12 18:01:37 HSC_pipelines.csv Successfully Read!
+└ @ Dolphyn C:\Users\pecci\.julia\packages\Dolphyn\QyHqs\src\core\print_and_log.jl:29
+┌ Info: 2023-12-12 18:01:37 HSC_zone_truck_distances_miles.csv Successfully Read!
+└ @ Dolphyn C:\Users\pecci\.julia\packages\Dolphyn\QyHqs\src\core\print_and_log.jl:29
+┌ Info: 2023-12-12 18:01:37 HSC_trucks.csv Successfully Read!
+└ @ Dolphyn C:\Users\pecci\.julia\packages\Dolphyn\QyHqs\src\core\print_and_log.jl:29
+┌ Info: 2023-12-12 18:01:37 HSC_g2p_variability.csv Successfully Read!
+└ @ Dolphyn C:\Users\pecci\.julia\packages\Dolphyn\QyHqs\src\core\print_and_log.jl:29
+┌ Info: 2023-12-12 18:01:37 HSC Input CSV Files Successfully Read In From c:\Users\pecci\Code\MACRO-dev\prototypes\PrincetonUniversity_Prototypes\Macro\ExampleSystems\Dolphyn_3Zone_SmallNewEngland\readDolphyn\
+└ @ Dolphyn C:\Users\pecci\.julia\packages\Dolphyn\QyHqs\src\core\print_and_log.jl:29
+┌ Debug: getting prompt info failed
+│   exception = (MethodError(REPL.LineEdit.write_prompt, (Base.TTY(Base.Libc.WindowsRawSocket(0x0000000000000260) open, 0 bytes waiting), "Prompt(\"julia> \",...)"), 0x000000000000833c), Union{Ptr{Nothing}, Base.InterpreterIP}[Ptr{Nothing} @0x00007ffe6faaeeac, Ptr{Nothing} @0x00007ffe6fab56c5, Ptr{Nothing} @0x00007ffe6fab58e2, Ptr{Nothing} @0x00007ffe6fab9ddd, Ptr{Nothing} @0x000001891c05f219, Ptr{Nothing} @0x000001891c05f56e, Ptr{Nothing} @0x000001891c060f19, Ptr{Nothing} @0x000001891c060f43, Ptr{Nothing} @0x00007ffe00a325ca, Ptr{Nothing} @0x000001891c060cda, Ptr{Nothing} @0x000001891c060dd3, Ptr{Nothing} @0x00007ffe6fac476a, Ptr{Nothing} @0x0000018967431ff3, Ptr{Nothing} @0x0000018967432016, Ptr{Nothing} @0x00007ffe6fac6663, Ptr{Nothing} @0x0000018967416cb9, Ptr{Nothing} @0x0000018967416fc3, Ptr{Nothing} @0x00007ffe6fad84fb])
+└ @ VSCodeServer c:\Users\pecci\.vscode\extensions\julialang.language-julia-1.61.2\scripts\packages\VSCodeServer\src\eval.jl:165
+┌ Debug: getting prompt info failed
+│   exception = (MethodError(REPL.LineEdit.write_prompt, (Base.TTY(Base.Libc.WindowsRawSocket(0x0000000000000260) open, 0 bytes waiting), "Prompt(\"julia> \",...)"), 0x000000000000833c), Union{Ptr{Nothing}, Base.InterpreterIP}[Ptr{Nothing} @0x00007ffe6faaeeac, Ptr{Nothing} @0x00007ffe6fab56c5, Ptr{Nothing} @0x00007ffe6fab58e2, Ptr{Nothing} @0x00007ffe6fab9ddd, Ptr{Nothing} @0x000001891c05f219, Ptr{Nothing} @0x000001891c05f56e, Ptr{Nothing} @0x000001891c060f19, Ptr{Nothing} @0x000001891c060f43, Ptr{Nothing} @0x00007ffe00a325ca, Ptr{Nothing} @0x000001891c060cda, Ptr{Nothing} @0x000001891c060dd3, Ptr{Nothing} @0x00007ffe6fac476a, Ptr{Nothing} @0x0000018967431ff3, Ptr{Nothing} @0x0000018967432016, Ptr{Nothing} @0x00007ffe6fac6663, Ptr{Nothing} @0x0000018967416cb9, Ptr{Nothing} @0x0000018967416fc3, Ptr{Nothing} @0x00007ffe6fad84fb])
+└ @ VSCodeServer c:\Users\pecci\.vscode\extensions\julialang.language-julia-1.61.2\scripts\packages\VSCodeServer\src\eval.jl:165
+┌ Debug: getting prompt info failed
+│   exception = (MethodError(REPL.LineEdit.write_prompt, (Base.TTY(Base.Libc.WindowsRawSocket(0x0000000000000260) open, 0 bytes waiting), "Prompt(\"julia> \",...)"), 0x000000000000833c), Union{Ptr{Nothing}, Base.InterpreterIP}[Ptr{Nothing} @0x00007ffe6faaeeac, Ptr{Nothing} @0x00007ffe6fab56c5, Ptr{Nothing} @0x00007ffe6fab58e2, Ptr{Nothing} @0x00007ffe6fab9ddd, Ptr{Nothing} @0x000001891c05f219, Ptr{Nothing} @0x000001891c05f56e, Ptr{Nothing} @0x000001891c060f19, Ptr{Nothing} @0x000001891c060f43, Ptr{Nothing} @0x00007ffe00a325ca, Ptr{Nothing} @0x000001891c060cda, Ptr{Nothing} @0x000001891c060dd3, Ptr{Nothing} @0x00007ffe6fac476a, Ptr{Nothing} @0x0000018967431ff3, Ptr{Nothing} @0x0000018967432016, Ptr{Nothing} @0x00007ffe6fac6663, Ptr{Nothing} @0x0000018967416cb9, Ptr{Nothing} @0x0000018967416fc3, Ptr{Nothing} @0x00007ffe6fad84fb])
+└ @ VSCodeServer c:\Users\pecci\.vscode\extensions\julialang.language-julia-1.61.2\scripts\packages\VSCodeServer\src\eval.jl:165
+┌ Debug: getting prompt info failed
+│   exception = (MethodError(REPL.LineEdit.write_prompt, (Base.TTY(Base.Libc.WindowsRawSocket(0x0000000000000260) open, 0 bytes waiting), "Prompt(\"julia> \",...)"), 0x000000000000833c), Union{Ptr{Nothing}, Base.InterpreterIP}[Ptr{Nothing} @0x00007ffe6faaeeac, Ptr{Nothing} @0x00007ffe6fab56c5, Ptr{Nothing} @0x00007ffe6fab58e2, Ptr{Nothing} @0x00007ffe6fab9ddd, Ptr{Nothing} @0x000001891c05f219, Ptr{Nothing} @0x000001891c05f56e, Ptr{Nothing} @0x000001891c060f19, Ptr{Nothing} @0x000001891c060f43, Ptr{Nothing} @0x00007ffe00a325ca, Ptr{Nothing} @0x000001891c060cda, Ptr{Nothing} @0x000001891c060dd3, Ptr{Nothing} @0x00007ffe6fac476a, Ptr{Nothing} @0x0000018967431ff3, Ptr{Nothing} @0x0000018967432016, Ptr{Nothing} @0x00007ffe6fac6663, Ptr{Nothing} @0x0000018967416cb9, Ptr{Nothing} @0x0000018967416fc3, Ptr{Nothing} @0x00007ffe6fad84fb])
+└ @ VSCodeServer c:\Users\pecci\.vscode\extensions\julialang.language-julia-1.61.2\scripts\packages\VSCodeServer\src\eval.jl:165
+┌ Debug: getting prompt info failed
+│   exception = (MethodError(REPL.LineEdit.write_prompt, (Base.TTY(Base.Libc.WindowsRawSocket(0x0000000000000260) open, 0 bytes waiting), "Prompt(\"julia> \",...)"), 0x000000000000833c), Union{Ptr{Nothing}, Base.InterpreterIP}[Ptr{Nothing} @0x00007ffe6faaeeac, Ptr{Nothing} @0x00007ffe6fab56c5, Ptr{Nothing} @0x00007ffe6fab58e2, Ptr{Nothing} @0x00007ffe6fab9ddd, Ptr{Nothing} @0x000001891c05f219, Ptr{Nothing} @0x000001891c05f56e, Ptr{Nothing} @0x000001891c060f19, Ptr{Nothing} @0x000001891c060f43, Ptr{Nothing} @0x00007ffe00a325ca, Ptr{Nothing} @0x000001891c060cda, Ptr{Nothing} @0x000001891c060dd3, Ptr{Nothing} @0x00007ffe6fac476a, Ptr{Nothing} @0x0000018967431ff3, Ptr{Nothing} @0x0000018967432016, Ptr{Nothing} @0x00007ffe6fac6663, Ptr{Nothing} @0x0000018967416cb9, Ptr{Nothing} @0x0000018967416fc3, Ptr{Nothing} @0x00007ffe6fad84fb])
+└ @ VSCodeServer c:\Users\pecci\.vscode\extensions\julialang.language-julia-1.61.2\scripts\packages\VSCodeServer\src\eval.jl:165
+┌ Debug: remote closed the connection
+└ @ VSCodeServer c:\Users\pecci\.vscode\extensions\julialang.language-julia-1.61.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:157
+┌ Debug: JSONRPC dispatcher task finished
+└ @ VSCodeServer c:\Users\pecci\.vscode\extensions\julialang.language-julia-1.61.2\scripts\packages\VSCodeServer\src\VSCodeServer.jl:166

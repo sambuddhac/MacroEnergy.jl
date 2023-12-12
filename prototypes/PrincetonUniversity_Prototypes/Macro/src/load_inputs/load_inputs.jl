@@ -135,15 +135,17 @@ function load_inputs(settings::NamedTuple, input_path::AbstractString)
     # collect all nodes actoss commodities
     nodes = merge([nodes_all[i] for i in commodities]...)
 
-    # Read in transformation related inputs
-    tedges_file = filenames.tedges
-    transformations_file = filenames.transformations
-    transformations = load_tedges(
-        joinpath(input_path, tedges_file),
-        joinpath(input_path, transformations_file),
-        nodes,
-    )
+    # # Read in transformation related inputs
+    # tedges_file = filenames.tedges
+    # transformations_file = filenames.transformations
+    # transformations = load_tedges(
+    #     joinpath(input_path, tedges_file),
+    #     joinpath(input_path, transformations_file),
+    #     nodes,
+    # )
+
+    transformations = (node)
 
     @info "CSV Files Successfully Read In From $input_path"
-    return InputData(settings, nodes, networks, resources, storages, transformations)
+    return  InputData(settings, nodes, networks, resources, storages, transformations)
 end

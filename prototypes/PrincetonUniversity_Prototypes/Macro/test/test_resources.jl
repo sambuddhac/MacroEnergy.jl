@@ -30,7 +30,7 @@ function test_resource_ctor()
     @test Macro.existing_capacity(r) == 0.0
     @test Macro.can_expand(r) == true
     @test Macro.can_retire(r) == true
-    @test Macro.resource_id(r) == test_inputs.id
+    @test Macro.get_id(r) == test_inputs.id
     @test Macro.capacity_factor(r) == test_inputs.capacity_factor
     @test Macro.investment_cost(r) == test_inputs.investment_cost
     @test Macro.fixed_om_cost(r) == test_inputs.fixed_om_cost

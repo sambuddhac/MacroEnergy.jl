@@ -14,7 +14,7 @@ subperiods(g::AbstractResource) = g.subperiods;
 existing_capacity(g::AbstractResource) = g.existing_capacity;
 capacity_factor(g::AbstractResource) = g.capacity_factor;
 price(g::AbstractResource) = g.price;
-resource_id(g::AbstractResource) = g.id;
+get_id(g::AbstractResource) = g.id;
 node(g::AbstractResource) = g.node;
 investment_cost(g::AbstractResource) = g.investment_cost;
 fixed_om_cost(g::AbstractResource) = g.fixed_om_cost;
@@ -78,19 +78,19 @@ function add_planning_variables!(g::AbstractResource, model::Model)
     g.planning_vars[:new_capacity] = @variable(
         model,
         lower_bound = 0.0,
-        base_name = "vNEWCAP_$(commodity_type(g))_$(resource_id(g))"
+        base_name = "vNEWCAP_$(commodity_type(g))_$(get_id(g))"
     )
 
     g.planning_vars[:ret_capacity] = @variable(
         model,
         lower_bound = 0.0,
-        base_name = "vRETCAP_$(commodity_type(g))_$(resource_id(g))"
+        base_name = "vRETCAP_$(commodity_type(g))_$(get_id(g))"
     )
 
     g.planning_vars[:capacity] = @variable(
         model,
         lower_bound = 0.0,
-        base_name = "vCAP_$(commodity_type(g))_$(resource_id(g))"
+        base_name = "vCAP_$(commodity_type(g))_$(get_id(g))"
     )
 
     ### This constraint is just to set the auxiliary capacity variable. Capacity variable could be an expression if we don't want to have this constraint.
@@ -122,7 +122,7 @@ function add_operation_variables!(
         model,
         [t in time_interval(g)],
         lower_bound = 0.0,
-        base_name = "vINJ_$(commodity_type(g))_$(resource_id(g))"
+        base_name = "vINJ_$(commodity_type(g))_$(get_id(g))"
     )
 
     for t in time_interval(g)

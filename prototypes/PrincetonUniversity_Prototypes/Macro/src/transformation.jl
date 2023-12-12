@@ -1,115 +1,116 @@
-abstract type AbstractTransformation end
+abstract type AbstractTransformationNode end
 
+abstract type AbstractTransformationEdge{T<:Commodity} end
 
-Base.@kwdef mutable struct Transformation <: AbstractTransformation
+Base.@kwdef mutable struct TNode <: AbstractTransformationNode
     id::Symbol
-    tedges::Vector{TEdge}
+    time_interval::StepRange{Int64,Int64}
+    operation_expr::Dict = Dict()
+    constraints::Vector{AbstractTypeStochiometryConstraint} = [StochiometryBalanceConstraint()]    
+end
 
-    num_edges::Int64 = length(tedges)
+get_id(n::AbstractTransformationNode) = n.id;
+time_interval(n::AbstractTransformationNode) = n.time_interval;
+all_constraints(n::AbstractTransformationNode) = n.constraints;
+stochiometry_balance(n::AbstractTransformationNode) = n.operation_expr[:stochiometry_balance];
 
+function initialize_stochiometry_balance!(n::AbstractTransformationNode,model::Model)
+    n.operation_expr[:stochiometry_balance] =
+        @expression(model, [t in time_interval(n)], 0 * model[:vREF])
+end
+
+Base.@kwdef mutable struct TEdge{T} <: AbstractTransformationEdge{T}
+    id::Symbol
+    start_node::Union{AbstractNode{T},AbstractTransformationNode}
+    end_node::Union{AbstractNode{T},AbstractTransformationNode}
+    time_interval::StepRange{Int64,Int64} = 1:1
+    subperiods::Vector{StepRange{Int64,Int64}} = StepRange{Int64,Int64}[]
+    st_coeff::Float64 = 1.0
     min_capacity::Float64 = 0.0
     max_capacity::Float64 = Inf
     existing_capacity::Float64 = 0.0
-    can_expand::Bool = true
-    can_retire::Bool = true
     investment_cost::Float64 = 0.0
     fixed_om_cost::Float64 = 0.0
     variable_om_cost::Float64 = 0.0
-
     start_cost_per_mw::Float64 = 0.0
     ramp_up_percentage::Float64 = 0.0
     ramp_down_percentage::Float64 = 0.0
     up_time::Int64 = 0
     down_time::Int64 = 0
-    electricity_st::Float64 = 0.0
-    ng_st::Float64 = 0.0
-    h2_st::Float64 = 0.0
-    min_output_elec::Float64 = 0.0
-    min_output_h2::Float64 = 0.0
-
+    min_flow::Float64 = 0.0
     planning_vars::Dict = Dict()
     operation_vars::Dict = Dict()
-    constraints::Vector{AbstractTypeTransformationConstraint} =
-        [TransformationCapacityConstraint()]
+    constraints::Vector{AbstractTypeConstraint}  =  [CapacityConstraint{T}]
 end
 
-
-time_interval(g::AbstractTransformation) = g.time_interval;
-subperiods(g::AbstractTransformation) = g.subperiods;
-existing_capacity(g::AbstractTransformation) = g.existing_capacity;
-min_capacity(g::AbstractTransformation) = g.min_capacity;
-max_capacity(g::AbstractTransformation) = g.max_capacity;
-can_expand(g::AbstractTransformation) = g.can_expand;
-can_retire(g::AbstractTransformation) = g.can_retire;
-new_capacity(g::AbstractTransformation) = g.planning_vars[:new_capacity];
-ret_capacity(g::AbstractTransformation) = g.planning_vars[:ret_capacity];
-capacity(g::AbstractTransformation) = g.planning_vars[:capacity];
-injection(g::AbstractTransformation) = g.operation_vars[:injection];
-all_constraints(g::AbstractTransformation) = g.constraints;
-start_node(g::AbstractTransformation) = g.tedges[1].start_node;
-base_commodity_type(g::AbstractTransformation) = commodity_type(start_node(g));
-transformation_id(g::AbstractTransformation) = g.id;
-tedges(g::AbstractTransformation) = g.tedges;
+commodity_type(e::AbstractTransformationEdge{T}) where {T} = T;
+time_interval(e::AbstractTransformationEdge) = e.time_interval;
+subperiods(e::AbstractTransformationEdge) = e.subperiods;
+existing_capacity(e::AbstractTransformationEdge) = e.existing_capacity;
+min_capacity(e::AbstractTransformationEdge) = e.min_capacity;
+max_capacity(e::AbstractTransformationEdge) = e.max_capacity;
+can_expand(e::AbstractTransformationEdge) = e.can_expand;
+can_retire(e::AbstractTransformationEdge) = e.can_retire;
+new_capacity(e::AbstractTransformationEdge) = e.planning_vars[:new_capacity];
+ret_capacity(e::AbstractTransformationEdge) = e.planning_vars[:ret_capacity];
+capacity(e::AbstractTransformationEdge) = e.planning_vars[:capacity];
+flow(e::AbstractTransformationEdge) = e.operation_vars[:flow];
+all_constraints(e::AbstractTransformationEdge) = e.constraints;
+start_node(e::AbstractTransformationEdge) = e.start_node;
+end_node(e::AbstractTransformationEdge) = e.end_node;
+get_id(e::AbstractTransformationEdge) = e.id;
+st_coeff(e::AbstractTransformationEdge) = e.st_coeff;
 
 
 # add_variable  functions
-function add_planning_variables!(g::AbstractTransformation, model::Model)
+function add_planning_variables!(e::AbstractTransformationEdge, model::Model)
 
-    g.planning_vars[:new_capacity] = @variable(
+    e.planning_vars[:new_capacity] = @variable(
         model,
         lower_bound = 0.0,
-        base_name = "vNEWCAP_$(base_commodity_type(g))_$(transformation_id(g))"
+        base_name = "vNEWCAP_$(commodity_type(e))_$(get_id(e))"
     )
 
-    # g.planning_vars[:ret_capacity] = @variable(model, lower_bound = 0.0, base_name = "vRETCAP_$(base_commodity_type(g))_$(transformation_id(g))")
+    e.planning_vars[:ret_capacity] = @variable(model, lower_bound = 0.0, base_name = "vRETCAP_$(commodity_type(e))_$(get_id(e))")
 
-    # g.planning_vars[:capacity] = @variable(model, lower_bound = 0.0, base_name = "vCAP_$(base_commodity_type(g))_$(transformation_id(g))")
+    e.planning_vars[:capacity] = @variable(model, lower_bound = 0.0, base_name = "vCAP_$(commodity_type(e))_$(get_id(e))")
 
     ### This constraint is just to set the auxiliary capacity variable. Capacity variable could be an expression if we don't want to have this constraint.
-    # @constraint(model, capacity(g) == new_capacity(g) - ret_capacity(g) + existing_capacity(g))
+    @constraint(model, capacity(e) == new_capacity(e) - ret_capacity(e) + existing_capacity(e))
 
-    # if !can_expand(g)
-    #     fix(new_capacity(g), 0.0; force=true)
-    # end
+    if !can_expand(e)
+        fix(new_capacity(e), 0.0; force=true)
+    end
 
-    # if !can_retire(g)
-    #     fix(ret_capacity(g), 0.0; force=true)
-    # end
+    if !can_retire(e)
+        fix(ret_capacity(e), 0.0; force=true)
+    end
 
     return nothing
 
 end
 
-function add_operation_variables!(g::AbstractTransformation, model::Model)
+function add_operation_variables!(e::AbstractTransformationEdge, model::Model)
 
-    n = start_node(g)
-
-    g.operation_vars[:injection] = @variable(
-        model,
-        [t in time_interval(g)],
-        lower_bound = 0.0,
-        base_name = "vINJ_$(base_commodity_type(g))_$(transformation_id(g))"
+    e.operation_vars[:flow] = @variable(
+            model,
+            [t in time_interval(e)],
+            lower_bound = 0.0,
+            base_name = "vFLOW_$(commodity_type(e))_$(get_id(e))"
     )
+    
 
-    for t in time_interval(g)
-        add_to_expression!(net_energy_production(n)[t], -injection(g)[t])
-
-        for tedge in edges(g)
-            end_node = end_node(tedge)
-            flow_direction = flow_direction(tedge)
-            st = get_st(g, tedge)   # stoichiometric coefficient
-            add_to_expression!(
-                net_energy_production(end_node)[t],
-                flow_direction * injection(g)[t] * st,
-            )
+    for t in time_interval(e)
+        if isa(start_node(e),AbstractNode)
+            add_to_expression!(net_energy_production(start_node(e))[t], -flow(e)[t])
+            add_to_expression!(stochiometry_balance(end_node(e))[t], st_coeff(e)*flow(e)[t])
+        elseif isa(end_node(e),AbstractNode)
+            add_to_expression!(net_energy_production(start_node(e))[t], flow(e)[t])
+            add_to_expression!(stochiometry_balance(end_node(e))[t], -st_coeff(e)*flow(e)[t])
+        else
+            error("Either the start or end node of a trasnformation edge has to be a transformation node")
         end
     end
 
     return nothing
-end
-
-function get_st(t::AbstractTransformation, e::AbstractTEdge)
-    end_node_commodity_type(e) == Electricity && return t.electricity_st
-    end_node_commodity_type(e) == NaturalGas && return t.ng_st
-    end_node_commodity_type(e) == Hydrogen && return t.h2_st
 end
