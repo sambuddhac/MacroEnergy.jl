@@ -42,6 +42,7 @@ include("load_inputs/load_transformations.jl")
 include("load_inputs/load_resources.jl")
 include("load_inputs/load_storage.jl")
 include("load_inputs/load_variability.jl")
+include("input_translation/dolphyn_to_macro.jl")
 include("generate_model.jl")
 include("prepare_inputs.jl")
 include("constraints.jl")
@@ -79,6 +80,6 @@ export Electricity,
     networks,
     resources,
     storage,
-    transformations
+    dolphyn_to_macro
 
 end # module Macro

@@ -37,6 +37,7 @@ Base.@kwdef mutable struct Resource{T} <: AbstractResource{T}
     ### price::Vector{Float64} = Float64[]    #TODO: talk with Filippo about this
     time_interval::StepRange{Int64,Int64} = 1:1
     subperiods::Vector{StepRange{Int64,Int64}} = StepRange{Int64,Int64}[]
+    cap_size::Float64 = 0.0
     min_capacity::Float64 = 0.0
     max_capacity::Float64 = Inf
     existing_capacity::Float64 = 0.0
@@ -112,11 +113,8 @@ function add_planning_variables!(g::AbstractResource, model::Model)
 end
 
 
-function add_operation_variables!(
-    g::AbstractResource,
-    model::Model,
-)
-    n = node(g);
+function add_operation_variables!(g::AbstractResource, model::Model)
+    n = node(g)
 
     g.operation_vars[:injection] = @variable(
         model,

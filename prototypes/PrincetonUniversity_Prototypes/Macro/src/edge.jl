@@ -68,10 +68,7 @@ function add_planning_variables!(e::AbstractEdge, model::Model)
 
 end
 
-function add_operation_variables!(
-    e::AbstractEdge,
-    model::Model,
-)
+function add_operation_variables!(e::AbstractEdge, model::Model)
     if e.unidirectional
         e.operation_vars[:flow] = @variable(
             model,

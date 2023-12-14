@@ -25,12 +25,17 @@ dfH2Gen = inputs["dfH2Gen"]
 dfH2G2P = inputs["dfH2G2P"]
 
 electrolyzer_st_coeff_E = 1;
-electrolyzer_st_coeff_H2 = dfH2Gen[1,:etaP2G_MWh_p_tonne]/H2_MWh;
+electrolyzer_st_coeff_H2 = dfH2Gen[1, :etaP2G_MWh_p_tonne] / H2_MWh;
 
 fuelcell_st_coeff_E = 1;
-fuelcell_st_coeff_H2 = dfH2G2P[2,:etaG2P_MWh_p_tonne]/H2_MWh;
+fuelcell_st_coeff_H2 = dfH2G2P[2, :etaG2P_MWh_p_tonne] / H2_MWh;
 
 #dfGen[!,:Heat_Rate_MMBTU_per_MWh]
 
 #EP = generate_model(setup, inputs, OPTIMIZER)
 
+using Macro
+
+macro_settings = Macro.configure_settings(joinpath(settings_path, "macro_settings.yml"))
+
+macro_inputs = dolphyn_to_macro(inputs, macro_settings)

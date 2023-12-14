@@ -21,5 +21,3 @@ model = generate_model(inputs);
 # @profview generate_model(inputs);
 
 println()
-
-

@@ -6,15 +6,17 @@ Base.@kwdef mutable struct TNode <: AbstractTransformationNode
     id::Symbol
     time_interval::StepRange{Int64,Int64}
     operation_expr::Dict = Dict()
-    constraints::Vector{AbstractTypeStochiometryConstraint} = [StochiometryBalanceConstraint()]    
+    constraints::Vector{AbstractTypeStochiometryConstraint} =
+        [StochiometryBalanceConstraint()]
 end
 
 get_id(n::AbstractTransformationNode) = n.id;
 time_interval(n::AbstractTransformationNode) = n.time_interval;
 all_constraints(n::AbstractTransformationNode) = n.constraints;
-stochiometry_balance(n::AbstractTransformationNode) = n.operation_expr[:stochiometry_balance];
+stochiometry_balance(n::AbstractTransformationNode) =
+    n.operation_expr[:stochiometry_balance];
 
-function initialize_stochiometry_balance!(n::AbstractTransformationNode,model::Model)
+function initialize_stochiometry_balance!(n::AbstractTransformationNode, model::Model)
     n.operation_expr[:stochiometry_balance] =
         @expression(model, [t in time_interval(n)], 0 * model[:vREF])
 end
@@ -40,7 +42,7 @@ Base.@kwdef mutable struct TEdge{T} <: AbstractTransformationEdge{T}
     min_flow::Float64 = 0.0
     planning_vars::Dict = Dict()
     operation_vars::Dict = Dict()
-    constraints::Vector{AbstractTypeConstraint}  =  [CapacityConstraint{T}]
+    constraints::Vector{AbstractTypeConstraint} = [CapacityConstraint{T}]
 end
 
 commodity_type(e::AbstractTransformationEdge{T}) where {T} = T;
@@ -71,19 +73,30 @@ function add_planning_variables!(e::AbstractTransformationEdge, model::Model)
         base_name = "vNEWCAP_$(commodity_type(e))_$(get_id(e))"
     )
 
-    e.planning_vars[:ret_capacity] = @variable(model, lower_bound = 0.0, base_name = "vRETCAP_$(commodity_type(e))_$(get_id(e))")
+    e.planning_vars[:ret_capacity] = @variable(
+        model,
+        lower_bound = 0.0,
+        base_name = "vRETCAP_$(commodity_type(e))_$(get_id(e))"
+    )
 
-    e.planning_vars[:capacity] = @variable(model, lower_bound = 0.0, base_name = "vCAP_$(commodity_type(e))_$(get_id(e))")
+    e.planning_vars[:capacity] = @variable(
+        model,
+        lower_bound = 0.0,
+        base_name = "vCAP_$(commodity_type(e))_$(get_id(e))"
+    )
 
     ### This constraint is just to set the auxiliary capacity variable. Capacity variable could be an expression if we don't want to have this constraint.
-    @constraint(model, capacity(e) == new_capacity(e) - ret_capacity(e) + existing_capacity(e))
+    @constraint(
+        model,
+        capacity(e) == new_capacity(e) - ret_capacity(e) + existing_capacity(e)
+    )
 
     if !can_expand(e)
-        fix(new_capacity(e), 0.0; force=true)
+        fix(new_capacity(e), 0.0; force = true)
     end
 
     if !can_retire(e)
-        fix(ret_capacity(e), 0.0; force=true)
+        fix(ret_capacity(e), 0.0; force = true)
     end
 
     return nothing
@@ -93,22 +106,30 @@ end
 function add_operation_variables!(e::AbstractTransformationEdge, model::Model)
 
     e.operation_vars[:flow] = @variable(
-            model,
-            [t in time_interval(e)],
-            lower_bound = 0.0,
-            base_name = "vFLOW_$(commodity_type(e))_$(get_id(e))"
+        model,
+        [t in time_interval(e)],
+        lower_bound = 0.0,
+        base_name = "vFLOW_$(commodity_type(e))_$(get_id(e))"
     )
-    
+
 
     for t in time_interval(e)
-        if isa(start_node(e),AbstractNode)
+        if isa(start_node(e), AbstractNode)
             add_to_expression!(net_energy_production(start_node(e))[t], -flow(e)[t])
-            add_to_expression!(stochiometry_balance(end_node(e))[t], st_coeff(e)*flow(e)[t])
-        elseif isa(end_node(e),AbstractNode)
+            add_to_expression!(
+                stochiometry_balance(end_node(e))[t],
+                st_coeff(e) * flow(e)[t],
+            )
+        elseif isa(end_node(e), AbstractNode)
             add_to_expression!(net_energy_production(start_node(e))[t], flow(e)[t])
-            add_to_expression!(stochiometry_balance(end_node(e))[t], -st_coeff(e)*flow(e)[t])
+            add_to_expression!(
+                stochiometry_balance(end_node(e))[t],
+                -st_coeff(e) * flow(e)[t],
+            )
         else
-            error("Either the start or end node of a trasnformation edge has to be a transformation node")
+            error(
+                "Either the start or end node of a trasnformation edge has to be a transformation node",
+            )
         end
     end
 

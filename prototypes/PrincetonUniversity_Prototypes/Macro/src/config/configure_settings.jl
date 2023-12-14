@@ -1,10 +1,5 @@
 function default_settings()
-    (
-        Commodities = "",
-        PeriodLength = 24,
-        NetworkExpansion = 0,
-        MultiStage = 0,
-    )
+    (Commodities = "", PeriodLength = 24, NetworkExpansion = 0, MultiStage = 0)
 end
 
 namedtuple(d::Dict) = (; (Symbol(k) => v for (k, v) in d)...)

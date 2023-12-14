@@ -17,7 +17,7 @@ struct InputData
     networks::Dict
     resources::Dict
     storage::Dict
-    transformations::Vector{Transformation}
+    # transformations:: #TODO add transformation
 end
 settings(data::InputData) = data.settings
 nodes(data::InputData) = data.nodes
@@ -147,5 +147,5 @@ function load_inputs(settings::NamedTuple, input_path::AbstractString)
     transformations = (node)
 
     @info "CSV Files Successfully Read In From $input_path"
-    return  InputData(settings, nodes, networks, resources, storages, transformations)
+    return InputData(settings, nodes, networks, resources, storages, transformations)
 end

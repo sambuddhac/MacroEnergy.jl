@@ -1,16 +1,19 @@
 function generate_model(inputs::InputData)
 
-    resources = reduce(vcat,[inputs.resources[c] for c in keys(inputs.resources)]);
+    resources = reduce(vcat, [inputs.resources[c] for c in keys(inputs.resources)])
 
-    edges = reduce(vcat,[inputs.networks[c] for c in keys(inputs.networks)]);
+    edges = reduce(vcat, [inputs.networks[c] for c in keys(inputs.networks)])
 
-    nodes = reduce(vcat,[inputs.nodes[c] for c in keys(inputs.nodes)]);
- 
-    storage =  [reduce(vcat,[inputs.storage[c].s for c in keys(inputs.storage)]);reduce(vcat,[inputs.storage[c].a for c in keys(inputs.storage)])];
+    nodes = reduce(vcat, [inputs.nodes[c] for c in keys(inputs.nodes)])
 
-    components = [resources; storage; edges];
+    storage = [
+        reduce(vcat, [inputs.storage[c].s for c in keys(inputs.storage)])
+        reduce(vcat, [inputs.storage[c].a for c in keys(inputs.storage)])
+    ]
 
-    system = [nodes; components];
+    components = [resources; storage; edges]
+
+    system = [nodes; components]
 
     model = Model()
 
@@ -23,7 +26,7 @@ function generate_model(inputs::InputData)
     add_planning_variables!.(components, Ref(model))
 
     add_operation_variables!.(system, Ref(model))
-   
+
     add_all_model_constraints!.(system, Ref(model))
 
     add_fixed_costs!.(components, Ref(model))

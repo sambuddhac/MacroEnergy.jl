@@ -46,6 +46,7 @@ Base.@kwdef mutable struct SymmetricStorage{T} <: AbstractStorage{T}
     subperiods::Vector{StepRange{Int64,Int64}}
     #### Fields with defaults
     capacity_factor::Vector{Float64} = ones(length(time_interval))
+    cap_size::Float64 = 0.0
     min_capacity::Float64 = 0.0
     max_capacity::Float64 = Inf
     min_capacity_storage::Float64 = 0.0
@@ -160,11 +161,8 @@ function add_planning_variables!(g::SymmetricStorage, model::Model)
         base_name = "vRETCAP_$(commodity_type(g))_$(g.id)"
     )
 
-    g.planning_vars[:capacity] = @variable(
-        model,
-        lower_bound = 0.0,
-        base_name = "vCAP_$(commodity_type(g))_$(g.id)"
-    )
+    g.planning_vars[:capacity] =
+        @variable(model, lower_bound = 0.0, base_name = "vCAP_$(commodity_type(g))_$(g.id)")
 
     g.planning_vars[:new_capacity_storage] = @variable(
         model,
@@ -226,11 +224,8 @@ function add_planning_variables!(g::AsymmetricStorage, model::Model)
         base_name = "vRETCAP_$(commodity_type(g))_$(g.id)"
     )
 
-    g.planning_vars[:capacity] = @variable(
-        model,
-        lower_bound = 0.0,
-        base_name = "vCAP_$(commodity_type(g))_$(g.id)"
-    )
+    g.planning_vars[:capacity] =
+        @variable(model, lower_bound = 0.0, base_name = "vCAP_$(commodity_type(g))_$(g.id)")
 
     g.planning_vars[:new_capacity_storage] = @variable(
         model,
@@ -310,10 +305,7 @@ function add_planning_variables!(g::AsymmetricStorage, model::Model)
 end
 
 
-function add_operation_variables!(
-    g::AbstractStorage,
-    model::Model,
-)
+function add_operation_variables!(g::AbstractStorage, model::Model)
 
     g.operation_vars[:injection] = @variable(
         model,
@@ -361,7 +353,7 @@ function add_operation_variables!(
 
     unregister(model, :aux_expr)
 
-    n = node(g);
+    n = node(g)
 
     for t in time_interval(g)
         add_to_expression!(

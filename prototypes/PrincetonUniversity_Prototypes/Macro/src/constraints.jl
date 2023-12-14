@@ -49,7 +49,8 @@ Base.@kwdef mutable struct MaxNonServedEnergyConstraint{T} <: AbstractTypeConstr
     constraint_ref::Union{Missing,JuMPConstraint} = missing
 end
 
-Base.@kwdef mutable struct StochiometryBalanceConstraint <: AbstractTypeStochiometryConstraint
+Base.@kwdef mutable struct StochiometryBalanceConstraint <:
+                           AbstractTypeStochiometryConstraint
     value::Union{Missing,Vector{Float64}} = missing
     lagrangian_multiplier::Union{Missing,Vector{Float64}} = missing
     constraint_ref::Union{Missing,JuMPConstraint} = missing
@@ -100,9 +101,14 @@ function add_model_constraint!(ct::CapacityConstraint, e::AbstractEdge, model::M
 
 end
 
-function add_model_constraint!(ct::CapacityConstraint, e::AbstractTransformationEdge, model::Model)
+function add_model_constraint!(
+    ct::CapacityConstraint,
+    e::AbstractTransformationEdge,
+    model::Model,
+)
 
-    ct.constraint_ref =  @constraint(model, [t in time_interval(e)], flow(e)[t] <= capacity(e))
+    ct.constraint_ref =
+        @constraint(model, [t in time_interval(e)], flow(e)[t] <= capacity(e))
 
     return nothing
 
@@ -187,8 +193,10 @@ end
 function add_model_constraint!(
     ct::StochiometryBalanceConstraint,
     n::AbstractTransformationNode,
-    model::Model)
+    model::Model,
+)
 
-    ct.constraint_ref = @constraint(model,[t in time_interval(n)], stochiometry_balance(n)[t] == 0.0)
+    ct.constraint_ref =
+        @constraint(model, [t in time_interval(n)], stochiometry_balance(n)[t] == 0.0)
 
 end
