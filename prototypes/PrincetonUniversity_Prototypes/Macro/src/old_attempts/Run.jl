@@ -16,7 +16,7 @@ settings = configure_settings(joinpath(example_path, "macro_settings.yml"))
 
 inputs = load_inputs(settings, example_path);
 
-model = generate_model(inputs);
+# model = generate_model(inputs);
 
 # @profview generate_model(inputs);
 

@@ -1,4 +1,9 @@
+using Pkg
+### Activate environment where Macro package is
+Pkg.activate(dirname(dirname(@__DIR__)))
+
 using Dolphyn
+using Revise
 
 settings_path = joinpath(@__DIR__, "Settings")
 
@@ -36,6 +41,4 @@ fuelcell_st_coeff_H2 = dfH2G2P[2, :etaG2P_MWh_p_tonne] / H2_MWh;
 
 using Macro
 
-macro_settings = Macro.configure_settings(joinpath(settings_path, "macro_settings.yml"))
-
-macro_inputs = dolphyn_to_macro(inputs, macro_settings)
+macro_inputs, macro_settings = dolphyn_to_macro(inputs,settings_path)

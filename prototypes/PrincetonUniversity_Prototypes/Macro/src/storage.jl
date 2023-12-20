@@ -5,7 +5,7 @@ This type defines the common fields of all storage resources.
 Base.@kwdef mutable struct BaseStorage{T<:Commodity}
     existing_capacity_storage::Float64 = 0.0
     min_capacity_storage::Float64 = 0.0
-    max_capacity_storage::Float64 = 100.0
+    max_capacity_storage::Float64 = Inf
     investment_cost_storage::Float64 = 0.0
     fixed_om_cost_storage::Float64 = 0.0
     variable_om_cost_withdrawal::Float64 = 0.0
@@ -50,7 +50,7 @@ Base.@kwdef mutable struct SymmetricStorage{T} <: AbstractStorage{T}
     min_capacity::Float64 = 0.0
     max_capacity::Float64 = Inf
     min_capacity_storage::Float64 = 0.0
-    max_capacity_storage::Float64 = 100.0
+    max_capacity_storage::Float64 = Inf
     existing_capacity::Float64 = 0.0
     existing_capacity_storage::Float64 = 0.0
     can_expand::Bool = true
@@ -97,7 +97,7 @@ Base.@kwdef mutable struct AsymmetricStorage{T} <: AbstractStorage{T}
     operation_vars::Dict = Dict()
     existing_capacity_storage::Float64 = 0.0
     min_capacity_storage::Float64 = 0.0
-    max_capacity_storage::Float64 = 100.0
+    max_capacity_storage::Float64 = Inf
     investment_cost_storage::Float64 = 0.0
     fixed_om_cost_storage::Float64 = 0.0
     variable_om_cost_withdrawal::Float64 = 0.0
@@ -107,7 +107,7 @@ Base.@kwdef mutable struct AsymmetricStorage{T} <: AbstractStorage{T}
     self_discharge::Float64 = 0.0
     # other fields specific to AsymmetricStorage
     min_capacity_withdrawal::Float64 = 0.0
-    max_capacity_withdrawal::Float64 = 100.0
+    max_capacity_withdrawal::Float64 = Inf
     existing_capacity_withdrawal::Float64 = 0.0
     investment_cost_withdrawal::Float64 = 0.0
     fixed_om_cost_withdrawal::Float64 = 0.0
