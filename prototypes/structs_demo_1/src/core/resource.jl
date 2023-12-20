@@ -9,7 +9,13 @@ struct Resource
     variablecost::Float64
 end
 
-function makeresource(name::String, type::String, zone::String, fixedcost::Float64, variablecost::Float64)
+function makeresource(
+    name::String,
+    type::String,
+    zone::String,
+    fixedcost::Float64,
+    variablecost::Float64,
+)
     return Resource(name, type, zone, fixedcost, variablecost)
 end
 

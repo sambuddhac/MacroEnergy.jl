@@ -8,8 +8,13 @@ struct Demand
     profiletype::String
 end
 
-function makeelecdemand(zone::String, demand::Vector{Float64}, sector::String="electricity", profiletype::String="components")
-    return Demand(zone, demand, sector,  profiletype)
+function makeelecdemand(
+    zone::String,
+    demand::Vector{Float64},
+    sector::String = "electricity",
+    profiletype::String = "components",
+)
+    return Demand(zone, demand, sector, profiletype)
 end
 
 function loadelecdemands(filepath)
@@ -21,7 +26,7 @@ function loadelecdemands(filepath)
     return elec_demands
 end
 
-function calcfft(demand::Vector{Float64}, ffttype::String="real")
+function calcfft(demand::Vector{Float64}, ffttype::String = "real")
     # TODO: swap all the defaults to real and make the inverse ffts responsive
     if !(ffttype in ["real", "complex"])
         error("ffttype must be either real or complex")

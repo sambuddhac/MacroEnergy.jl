@@ -1,37 +1,78 @@
 function prepare_inputs!(setup::Dict)
 
-    PeriodLength = setup["PeriodLength"];
+    PeriodLength = setup["PeriodLength"]
 
-    hours_per_subperiod = setup["hours_per_subperiod"];
+    hours_per_subperiod = setup["hours_per_subperiod"]
 
-    hours_per_timestep = Dict(c=>setup[c]["hours_per_timestep"] for c in setup["commodities"]);
+    hours_per_timestep =
+        Dict(c => setup[c]["hours_per_timestep"] for c in setup["commodities"])
 
-    time_interval_map = Dict(c=>1:hours_per_timestep[c]:PeriodLength for c in setup["commodities"])
+    time_interval_map =
+        Dict(c => 1:hours_per_timestep[c]:PeriodLength for c in setup["commodities"])
 
-    subperiod_map = Dict(c=>collect(Iterators.partition(time_interval_map[c],Int(hours_per_subperiod/hours_per_timestep[c]))) for c in setup["commodities"])
+    subperiod_map = Dict(
+        c => collect(
+            Iterators.partition(
+                time_interval_map[c],
+                Int(hours_per_subperiod / hours_per_timestep[c]),
+            ),
+        ) for c in setup["commodities"]
+    )
 
-    setup["subperiod_map"] = subperiod_map;
+    setup["subperiod_map"] = subperiod_map
 
-    setup["time_interval_map"] = time_interval_map;
-     
-    return loadresources(setup),loadedges(setup),loadnodes(setup)#,loadtransformations(setup)
+    setup["time_interval_map"] = time_interval_map
+
+    return loadresources(setup), loadedges(setup), loadnodes(setup)#,loadtransformations(setup)
 end
 
-function makeresource(c::DataType,row::DataFrameRow,time_interval::StepRange{Int64, Int64},subperiods::Vector{StepRange{Int64, Int64}})
-    
-    if row.storage==0
-        return Resource{c}(node = row.node,r_id=row.r_id,time_interval=time_interval,subperiods=subperiods,investment_cost=row.investment_cost,fixed_om_cost = row.fixed_om_cost,capacity_factor=ones(length(time_interval)),price=zeros(length(time_interval)));
-    elseif row.storage==1
-        return SymmetricStorage{c}(node = row.node,r_id=row.r_id,time_interval=time_interval,subperiods=subperiods,investment_cost=row.investment_cost,fixed_om_cost = row.fixed_om_cost,capacity_factor=ones(length(time_interval)),price=zeros(length(time_interval)));
-    elseif row.storage==2
-        return AsymmetricStorage{c}(node = row.node,r_id=row.r_id,time_interval=time_interval,subperiods=subperiods,investment_cost=row.investment_cost,fixed_om_cost = row.fixed_om_cost,capacity_factor=ones(length(time_interval)),price=zeros(length(time_interval)));
+function makeresource(
+    c::DataType,
+    row::DataFrameRow,
+    time_interval::StepRange{Int64,Int64},
+    subperiods::Vector{StepRange{Int64,Int64}},
+)
+
+    if row.storage == 0
+        return Resource{c}(
+            node = row.node,
+            r_id = row.r_id,
+            time_interval = time_interval,
+            subperiods = subperiods,
+            investment_cost = row.investment_cost,
+            fixed_om_cost = row.fixed_om_cost,
+            capacity_factor = ones(length(time_interval)),
+            price = zeros(length(time_interval)),
+        )
+    elseif row.storage == 1
+        return SymmetricStorage{c}(
+            node = row.node,
+            r_id = row.r_id,
+            time_interval = time_interval,
+            subperiods = subperiods,
+            investment_cost = row.investment_cost,
+            fixed_om_cost = row.fixed_om_cost,
+            capacity_factor = ones(length(time_interval)),
+            price = zeros(length(time_interval)),
+        )
+    elseif row.storage == 2
+        return AsymmetricStorage{c}(
+            node = row.node,
+            r_id = row.r_id,
+            time_interval = time_interval,
+            subperiods = subperiods,
+            investment_cost = row.investment_cost,
+            fixed_om_cost = row.fixed_om_cost,
+            capacity_factor = ones(length(time_interval)),
+            price = zeros(length(time_interval)),
+        )
     end
 
 end
 
 
 # function maketransformation(row::DataFrameRow,setup::Dict)
-    
+
 #     number_of_commodities = length(setup["commodities"]);
 
 #     return Transformation(id = row.id,
@@ -45,15 +86,25 @@ end
 # end
 
 
-function makeedge(c::DataType,row::DataFrameRow,time_interval::StepRange{Int64, Int64})
+function makeedge(c::DataType, row::DataFrameRow, time_interval::StepRange{Int64,Int64})
 
-    return Edge{c}(start_node = row.start_node, end_node = row.end_node,existing_capacity = row.existing_capacity,time_interval=time_interval)
+    return Edge{c}(
+        start_node = row.start_node,
+        end_node = row.end_node,
+        existing_capacity = row.existing_capacity,
+        time_interval = time_interval,
+    )
 
 end
 
-function makenode(c::DataType,row::DataFrameRow,time_interval::StepRange{Int64, Int64})
+function makenode(c::DataType, row::DataFrameRow, time_interval::StepRange{Int64,Int64})
 
-    return Node{c}(id = row.id, demand = collect(row[2+first(time_interval):2+last(time_interval)]),max_nse = row.max_nse,time_interval=time_interval)
+    return Node{c}(
+        id = row.id,
+        demand = collect(row[2+first(time_interval):2+last(time_interval)]),
+        max_nse = row.max_nse,
+        time_interval = time_interval,
+    )
 
 end
 
@@ -61,12 +112,20 @@ function loadresources(setup::Dict)
     resources = AbstractResource[]
 
     for c in setup["commodities"]
-        filepath = setup[c]["resource_filepath"];
+        filepath = setup[c]["resource_filepath"]
         if !ismissing(filepath)
             nt = length(setup["time_interval_map"][c])
             df = CSV.read(filepath, DataFrame)
             for row in eachrow(df)
-                push!(resources, makeresource(c,row,setup["time_interval_map"][c],setup["subperiod_map"][c]))
+                push!(
+                    resources,
+                    makeresource(
+                        c,
+                        row,
+                        setup["time_interval_map"][c],
+                        setup["subperiod_map"][c],
+                    ),
+                )
             end
         end
     end
@@ -78,11 +137,11 @@ function loadedges(setup::Dict)
     edges = AbstractEdge[]
 
     for c in setup["commodities"]
-        filepath = setup[c]["edge_filepath"];
+        filepath = setup[c]["edge_filepath"]
         if !ismissing(filepath)
             df = CSV.read(filepath, DataFrame)
             for row in eachrow(df)
-                push!(edges, makeedge(c,row,setup["time_interval_map"][c]))
+                push!(edges, makeedge(c, row, setup["time_interval_map"][c]))
             end
         end
     end
@@ -93,11 +152,11 @@ function loadnodes(setup::Dict)
     nodes = AbstractNode[]
 
     for c in setup["commodities"]
-        filepath = setup[c]["node_filepath"];
+        filepath = setup[c]["node_filepath"]
         if !ismissing(filepath)
             df = CSV.read(filepath, DataFrame)
             for row in eachrow(df)
-                push!(nodes, makenode(c,row,setup["time_interval_map"][c]))
+                push!(nodes, makenode(c, row, setup["time_interval_map"][c]))
             end
         end
     end

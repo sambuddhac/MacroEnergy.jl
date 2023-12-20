@@ -1,8 +1,9 @@
 module Macro
 
-using JuMP
-using DataFrames
+using YAML
 using CSV
+using DataFrames
+using JuMP
 
 # Type parameter for Macro data structures
 abstract type Commodity end
@@ -11,9 +12,10 @@ abstract type Electricity <: Commodity end
 abstract type Hydrogen <: Commodity end
 abstract type NaturalGas <: Commodity end
 
-abstract type AbstractTypeConstraint{T <: Commodity} end
+abstract type AbstractTypeConstraint{T<:Commodity} end
 
-#abstract type AbstractTypeTransformationConstraint end
+
+abstract type AbstractTypeStochiometryConstraint end
 
 # type hierarchy
 
@@ -30,32 +32,54 @@ include("node.jl")
 include("edge.jl")
 include("resource.jl")
 include("storage.jl")
-#include("transformation.jl")
+include("transformation.jl")
+include("config/configure_settings.jl")
+include("load_inputs/load_dataframe.jl")
+include("load_inputs/load_timeseries.jl")
+include("load_inputs/load_inputs.jl")
+include("load_inputs/load_network.jl")
+include("load_inputs/load_transformations.jl")
+include("load_inputs/load_resources.jl")
+include("load_inputs/load_storage.jl")
+include("load_inputs/load_variability.jl")
+include("input_translation/dolphyn_to_macro.jl")
 include("generate_model.jl")
 include("prepare_inputs.jl")
 include("constraints.jl")
 include("costs.jl")
 
-function commodity_type(c::AbstractString)
-        T::DataType = eval(Symbol(c))
-        @assert (T <: Commodity)
-        return T
-end
-
-
 # exports
-export  Electricity, Hydrogen, 
-        Resource, Thermal, BaseResource,
-        SymmetricStorage, AsymmetricStorage, 
-        Edge, 
-        CapacityConstraint, 
-        add_planning_variables!, 
-        add_operation_variables!, 
-        add_fixed_cost!, add_variable_cost!, 
-        add_model_constraint!,
-        add_all_model_constraints!,
-        generate_model,
-        prepare_inputs!,
-        loadresources,
-        makeresource
+export Electricity,
+    Hydrogen,
+    Resource,
+    Thermal,
+    BaseResource,
+    AbstractStorage,
+    SymmetricStorage,
+    AsymmetricStorage,
+    Transformation,
+    InputFilesNames,
+    Node,
+    Edge,
+    TEdge,
+    CapacityConstraint,
+    configure_settings,
+    add_planning_variables!,
+    add_operation_variables!,
+    add_fixed_cost!,
+    add_variable_cost!,
+    add_model_constraint!,
+    add_all_model_constraints!,
+    generate_model,
+    prepare_inputs!,
+    loadresources,
+    makeresource,
+    load_inputs,
+    settings,
+    nodes,
+    networks,
+    resources,
+    storage,
+    dolphyn_to_macro
+
 end # module Macro

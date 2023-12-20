@@ -1,31 +1,39 @@
-function generate_model(resources::Vector{AbstractResource},edges::Vector{AbstractEdge},nodes::Vector{AbstractNode},setup::Dict)
-    components = [resources;edges];
+function generate_model(inputs::InputData)
 
-    system = [resources;edges;nodes];
+    resources = reduce(vcat, [inputs.resources[c] for c in keys(inputs.resources)])
+
+    edges = reduce(vcat, [inputs.networks[c] for c in keys(inputs.networks)])
+
+    nodes = reduce(vcat, [inputs.nodes[c] for c in keys(inputs.nodes)])
+
+    storage = [
+        reduce(vcat, [inputs.storage[c].s for c in keys(inputs.storage)])
+        reduce(vcat, [inputs.storage[c].a for c in keys(inputs.storage)])
+    ]
+
+    components = [resources; storage; edges]
+
+    system = [nodes; components]
 
     model = Model()
 
-    @variable(model,vREF==1);
+    @variable(model, vREF == 1)
 
-    @expression(model,eFixedCost,0*model[:vREF]);
-    
-    @expression(model,eVariableCost,0*model[:vREF]);
+    @expression(model, eFixedCost, 0 * model[:vREF])
 
-    add_planning_variables!.(components,model)
+    @expression(model, eVariableCost, 0 * model[:vREF])
 
-    add_operation_variables!.(nodes,model)
+    add_planning_variables!.(components, Ref(model))
 
-    for y in components
-        add_operation_variables!(y,nodes,model)
-    end
+    add_operation_variables!.(system, Ref(model))
 
-    add_all_model_constraints!.(system,model)
+    add_all_model_constraints!.(system, Ref(model))
 
-    add_fixed_costs!.(components,model)
+    add_fixed_costs!.(components, Ref(model))
 
-    add_variable_costs!.(resources,model)
+    add_variable_costs!.(resources, Ref(model))
 
-    @objective(model,Min,model[:eFixedCost] + model[:eVariableCost])
+    @objective(model, Min, model[:eFixedCost] + model[:eVariableCost])
 
     return model
 
