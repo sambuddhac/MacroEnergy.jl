@@ -11,7 +11,7 @@ function load_nodes(
     # load demand data
     dict_demand = load_timeseries(demand_path, time_interval)
     # load fuel prices data
-    dict_fuel_prices = load_timeseries(fuel_prices_path, time_interval)
+    #dict_fuel_prices = load_timeseries(fuel_prices_path, time_interval)
 
     rename!(df_nodes, Symbol.(lowercase.(names(df_nodes))))
     adjust_cols_types!(df_nodes)
@@ -25,13 +25,13 @@ function load_nodes(
     for (i, row) in enumerate(eachrow(df_nodes))
         id = nodes_ids[i]
         demand = id ∈ keys(dict_demand) ? dict_demand[id] : zeros(length(time_interval))
-        fuel_price =
-            id ∈ keys(dict_fuel_prices) ? dict_fuel_prices[id] :
-            zeros(length(time_interval))
+        # fuel_price =
+        #     id ∈ keys(dict_fuel_prices) ? dict_fuel_prices[id] :
+        #     zeros(length(time_interval))
         nodes[id] = Node{commodity}(;
             id = id,
             demand = demand,
-            fuel_price = fuel_price,
+            #fuel_price = fuel_price,
             time_interval = time_interval,
             row...,
         )

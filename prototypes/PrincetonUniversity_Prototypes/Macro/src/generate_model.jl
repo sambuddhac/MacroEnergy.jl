@@ -29,10 +29,6 @@ function generate_model(inputs::InputData)
 
     add_all_model_constraints!.(system, Ref(model))
 
-    add_fixed_costs!.(components, Ref(model))
-
-    add_variable_costs!.(resources, Ref(model))
-
     @objective(model, Min, model[:eFixedCost] + model[:eVariableCost])
 
     return model

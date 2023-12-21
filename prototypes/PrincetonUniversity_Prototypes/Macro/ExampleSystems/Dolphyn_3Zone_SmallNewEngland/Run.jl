@@ -42,3 +42,9 @@ fuelcell_st_coeff_H2 = dfH2G2P[2, :etaG2P_MWh_p_tonne] / H2_MWh;
 using Macro
 
 macro_inputs, macro_settings = dolphyn_to_macro(inputs,settings_path)
+
+model = Macro.generate_model(macro_inputs);
+
+using JuMP, Gurobi
+set_optimizer(model,Gurobi.Optimizer())
+optimize!(model)

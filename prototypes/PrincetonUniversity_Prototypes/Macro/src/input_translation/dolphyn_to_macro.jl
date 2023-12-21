@@ -14,7 +14,10 @@ function _get_resource_types(c::Type{Electricity})
 end
 
 function _get_storage_types(c::Type{Electricity})
-    return (:battery_mid, :hydroelectric_pumped_storage, :hydrogen_storage)
+    return (:battery_mid, 
+            #:hydroelectric_pumped_storage, 
+            #:hydrogen_storage
+            )
 end
 
 function _get_transformationtype_names()
@@ -34,23 +37,26 @@ end
 
 function create_nodes_from_dolphyn(
     dolphyn_inputs::Dict,
-    commodity,
+    commodity::Type{Electricity},
     time_interval::StepRange{Int64,Int64},
 )
     # read number of nodes and demand from dolphyn inputs
     n_nodes = dolphyn_inputs["Z"]
     demand = dolphyn_inputs["pD"]
-    fuel_price = zeros(length(time_interval)) # TODO: get this from dolphyn_inputs
+    max_nse = dolphyn_inputs["pMax_D_Curtail"];
+    price_nse = dolphyn_inputs["pC_D_Curtail"];
     # select only the time interval of interest
     demand = demand[first(time_interval):last(time_interval), :]
+
     # create nodes
     nodes = Vector{Node}()
-    for i = 1:n_nodes
+    for i in 1:n_nodes
         node = Node{commodity}(;
             id = Symbol("node_", i),
             demand = demand[:, i],
-            fuel_price = fuel_price,
             time_interval = time_interval,
+            max_nse = max_nse,
+            price_nse = price_nse,
         )
         push!(nodes, node)
     end
@@ -60,27 +66,28 @@ end
 function create_networks_from_dolphyn(
     dolphyn_inputs::Dict,
     nodes,
-    commodity,
+    commodity::Type{Electricity},
     time_interval::StepRange{Int64,Int64},
 )
-    # TODO: implement this
-    return
-end
+    number_of_edges = dolphyn_inputs["L"];
+    network = Vector{Edge}()
+    for i in 1:number_of_edges
 
-function create_resource(
-    row::DataFrameRow,
-    node::Node,
-    commodity,
-    time_interval::StepRange{Int64,Int64},
-    subperiods::Vector{StepRange{Int64,Int64}},
-)
-
-    return Resource{commodity}(;
-        node = node,
+        edge = Edge{commodity}(
         time_interval = time_interval,
-        subperiods = subperiods,
-        row...,
-    )
+        start_node = nodes[findfirst(dolphyn_inputs["pNet_Map"][i,:].==-1)],
+        end_node = nodes[findfirst(dolphyn_inputs["pNet_Map"][i,:].==1)],
+        existing_capacity = dolphyn_inputs["pTrans_Max"][i],
+        unidirectional = false,
+        max_line_reinforcement = dolphyn_inputs["pMax_Line_Reinforcement"][i],
+        line_reinforcement_cost = dolphyn_inputs["pC_Line_Reinforcement"][i],
+        can_expand = in(i,dolphyn_inputs["EXPANSION_LINES"]),
+        line_loss_percentage = dolphyn_inputs["pTrans_Loss_Coef"][i],
+        )
+
+        push!(network,edge)
+    end
+    return network
 end
 
 function create_resources_from_dolphyn(
@@ -107,6 +114,8 @@ function create_resources_from_dolphyn(
     data[!,:can_expand] = dfGen[!,:New_Build].==1;
     data[!,:can_retire] = dfGen[!,:New_Build].>=0;
 
+    capacity_factor = dolphyn_inputs["pP_Max"];
+
     resources = Vector{Resource}()
     # create resource
     zones = dfGen.Zone
@@ -114,27 +123,17 @@ function create_resources_from_dolphyn(
         resource_type = Symbol(dfGen.Resource_Type[dfGen.Resource.==string(row.id)][1]);
         if resource_type in macro_resource_types
             node = nodes[zones[i]]  # select the correct node
-            resource = create_resource(row, node, commodity, time_interval, subperiods)
+            resource =  Resource{commodity}(;
+            node = node,
+            time_interval = time_interval,
+            subperiods = subperiods,
+            capacity_factor = capacity_factor[i,time_interval],
+            row...,
+        )
             push!(resources, resource)
         end
     end
     return resources
-end
-
-function create_symmetric_storage(
-    row::DataFrameRow,
-    node::Node,
-    commodity,
-    time_interval::StepRange{Int64,Int64},
-    subperiods::Vector{StepRange{Int64,Int64}},
-)
-    # create symmetric storage
-    return SymmetricStorage{commodity}(;
-        node = node,
-        time_interval = time_interval,
-        subperiods = subperiods,
-        row...,
-    )
 end
 
 function create_storage_from_dolphyn(
@@ -160,7 +159,6 @@ function create_storage_from_dolphyn(
     # select only the columns of interest
     data = rename(dfGen, pairs(all_attrs))[:, syms_attr]
     data[!, :id] = Symbol.(data[!, :id])
-    data[!,:variable_om_cost_storage] = data[!,:variable_om_cost];
     data[!,:can_expand] = dfGen[!,:New_Build].==1;
     data[!,:can_retire] = dfGen[!,:New_Build].>=0;
 
@@ -175,13 +173,22 @@ function create_storage_from_dolphyn(
             # if storage is symmetric, create a SymmetricStorage and push it to sym_storage
             dfGen[i, :STOR] == 1 && push!(
                 sym_storage,
-                create_symmetric_storage(row, node, commodity, time_interval, subperiods),
-            )
+                SymmetricStorage{commodity}(;
+                node = node,
+                time_interval = time_interval,
+                subperiods = subperiods,
+                row...,
+                ))
+                
             # if storage is asymmetric, create an AsymmetricStorage and push it to asym_storage
             dfGen[i, :STOR] == 2 && push!(
                 asym_storage,
-                create_asymmetric_storage(row, node, commodity, time_interval, subperiods),
-            )
+                AsymmetricStorage{commodity}(;
+                node = node,
+                time_interval = time_interval,
+                subperiods = subperiods,
+                row...,
+                ))
         end
     end
     return Storage(sym_storage, asym_storage)
@@ -263,17 +270,17 @@ function dolphyn_cols_to_macro_attrs(c::Type{Electricity})
         existing_capacity_storage = :Existing_Cap_MWh,
         investment_cost = :Inv_Cost_per_MWyr,
         investment_cost_storage = :Inv_Cost_per_MWhyr,
-        investment_cost_charge = :Inv_Cost_Charge_per_MWyr,
+        investment_cost_withdrawal = :Inv_Cost_Charge_per_MWyr,
         fixed_om_cost = :Fixed_OM_Cost_per_MWyr,
         fixed_om_cost_storage = :Fixed_OM_Cost_per_MWhyr,
-        fixed_om_cost_charge = :Fixed_OM_Cost_Charge_per_MWyr,
+        fixed_om_cost_withdrawal = :Fixed_OM_Cost_Charge_per_MWyr,
         variable_om_cost = :Var_OM_Cost_per_MWh,
-        variable_om_cost_charge = :Var_OM_Cost_per_MWh_In, 
-        efficiency_charge = :Eff_Up,
-        efficiency_discharge = :Eff_Down,
+        variable_om_cost_withdrawal = :Var_OM_Cost_per_MWh_In, 
+        efficiency_withdrawal = :Eff_Up,
+        efficiency_injection = :Eff_Down,
         min_duration = :Min_Duration,
         max_duration = :Max_Duration,
-        self_discharge = :Self_Disch,
+        storage_loss_percentage = :Self_Disch,
     )
 end
 

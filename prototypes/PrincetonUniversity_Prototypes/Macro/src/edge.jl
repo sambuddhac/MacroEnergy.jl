@@ -9,13 +9,12 @@ Base.@kwdef mutable struct Edge{T} <: AbstractEdge{T}
     end_node::Node{T}
     existing_capacity::Float64
     unidirectional::Bool = false
-    max_line_flow_capacity::Float64 = Inf
     max_line_reinforcement::Float64 = Inf
     line_reinforcement_cost::Float64 = 0.0
-    num_lines_existing::Int64 = 1
+    #### num_lines_existing::Int64 = 1
     can_expand::Bool = true
-    max_num_lines_expanded::Int64 = Inf
-    investment_cost::Float64 = 0.0
+    ####max_num_lines_expanded::Int64 = Inf
+    ####investment_cost_per_line::Float64 = 0.0
     op_cost::Float64 = 0.0
     distance::Float64 = 0.0
     line_loss_percentage::Float64 = 0.0
@@ -33,6 +32,8 @@ end_node_id(e::AbstractEdge) = get_id(e.end_node);
 time_interval(e::AbstractEdge) = e.time_interval;
 commodity_type(e::AbstractEdge{T}) where {T} = T;
 existing_capacity(e::AbstractEdge) = e.existing_capacity;
+max_line_reinforcement(e::AbstractEdge) = e.max_line_reinforcement;
+line_reinforcement_cost(e::AbstractEdge) = e.line_reinforcement_cost;
 can_expand(e::AbstractEdge) = e.can_expand;
 new_capacity(e::AbstractEdge) = e.planning_vars[:new_capacity];
 capacity(e::AbstractEdge) = e.planning_vars[:capacity];
@@ -49,6 +50,7 @@ function add_planning_variables!(e::AbstractEdge, model::Model)
     e.planning_vars[:new_capacity] = @variable(
         model,
         lower_bound = 0.0,
+        upper_bound = max_line_reinforcement(e),
         base_name = "vNEWCAPEDGE_$(commodity_type(e))_$(start_node_id(e))_$(end_node_id(e))"
     )
 
@@ -62,6 +64,8 @@ function add_planning_variables!(e::AbstractEdge, model::Model)
 
     if !can_expand(e)
         fix(new_capacity(e), 0.0; force = true)
+    else
+        add_to_expression!(model[:eFixedCost], line_reinforcement_cost(e) * new_capacity(e))
     end
 
     return nothing

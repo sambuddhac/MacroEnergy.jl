@@ -9,10 +9,10 @@ Base.@kwdef mutable struct BaseStorage{T<:Commodity}
     investment_cost_storage::Float64 = 0.0
     fixed_om_cost_storage::Float64 = 0.0
     variable_om_cost_withdrawal::Float64 = 0.0
-    efficiency_charge::Float64 = 1.0
-    efficiency_discharge::Float64 = 1.0
+    efficiency_withdrawal::Float64 = 1.0
+    efficiency_injection::Float64 = 1.0
     min_storage_level::Float64 = 0.0
-    self_discharge::Float64 = 0.0
+    storage_loss_percentage::Float64 = 0.0
 end
 
 """
@@ -31,11 +31,14 @@ new_capacity_storage(g::AbstractStorage) = g.planning_vars[:new_capacity_storage
 ret_capacity_storage(g::AbstractStorage) = g.planning_vars[:ret_capacity_storage];
 capacity_storage(g::AbstractStorage) = g.planning_vars[:capacity_storage];
 withdrawal(g::AbstractStorage) = g.operation_vars[:withdrawal];
+variable_om_cost_withdrawal(g::AbstractStorage) = g.variable_om_cost_withdrawal;
+investment_cost_storage(g::AbstractStorage) = g.investment_cost_storage;
+fixed_om_cost_storage(g::AbstractStorage) = g.fixed_om_cost_storage;
 storage_level(g::AbstractStorage) = g.operation_vars[:storage_level];
 
-efficiency_charge(g::AbstractStorage) = g.efficiency_charge;
-efficiency_discharge(g::AbstractStorage) = g.efficiency_discharge;
-self_discharge(g::AbstractStorage) = g.self_discharge;
+efficiency_withdrawal(g::AbstractStorage) = g.efficiency_withdrawal;
+efficiency_injection(g::AbstractStorage) = g.efficiency_injection;
+storage_loss_percentage(g::AbstractStorage) = g.storage_loss_percentage;
 
 Base.@kwdef mutable struct SymmetricStorage{T} <: AbstractStorage{T}
     ### Fields without defaults
@@ -57,19 +60,19 @@ Base.@kwdef mutable struct SymmetricStorage{T} <: AbstractStorage{T}
     can_retire::Bool = true
     investment_cost::Float64 = 0.0
     investment_cost_storage::Float64 = 0.0
-    investment_cost_charge::Float64 = 0.0
+    investment_cost_withdrawal::Float64 = 0.0
     fixed_om_cost::Float64 = 0.0
     fixed_om_cost_storage::Float64 = 0.0
-    fixed_om_cost_charge::Float64 = 0.0
+    fixed_om_cost_withdrawal::Float64 = 0.0
     variable_om_cost::Float64 = 0.0
     variable_om_cost_storage::Float64 = 0.0
-    variable_om_cost_charge::Float64 = 0.0
-    efficiency_charge::Float64 = 1.0
-    efficiency_discharge::Float64 = 1.0
+    variable_om_cost_withdrawal::Float64 = 0.0
+    efficiency_withdrawal::Float64 = 1.0
+    efficiency_injection::Float64 = 1.0
     min_storage_level::Float64 = 0.0
     min_duration::Float64 = 1.0
     max_duration::Float64 = 10.0
-    self_discharge::Float64 = 0.0
+    storage_loss_percentage::Float64 = 0.0
     planning_vars::Dict = Dict()
     operation_vars::Dict = Dict()
     constraints::Vector{AbstractTypeConstraint} =
@@ -101,10 +104,10 @@ Base.@kwdef mutable struct AsymmetricStorage{T} <: AbstractStorage{T}
     investment_cost_storage::Float64 = 0.0
     fixed_om_cost_storage::Float64 = 0.0
     variable_om_cost_withdrawal::Float64 = 0.0
-    efficiency_charge::Float64 = 1.0
-    efficiency_discharge::Float64 = 1.0
+    efficiency_withdrawal::Float64 = 1.0
+    efficiency_injection::Float64 = 1.0
     min_storage_level::Float64 = 0.0
-    self_discharge::Float64 = 0.0
+    storage_loss_percentage::Float64 = 0.0
     # other fields specific to AsymmetricStorage
     min_capacity_withdrawal::Float64 = 0.0
     max_capacity_withdrawal::Float64 = Inf
@@ -123,6 +126,8 @@ existing_capacity_withdrawal(g::AsymmetricStorage) = g.existing_capacity_withdra
 new_capacity_withdrawal(g::AsymmetricStorage) = g.planning_vars[:new_capacity_withdrawal];
 ret_capacity_withdrawal(g::AsymmetricStorage) = g.planning_vars[:ret_capacity_withdrawal];
 capacity_withdrawal(g::AsymmetricStorage) = g.planning_vars[:capacity_withdrawal];
+investment_cost_withdrawal(g::AsymmetricStorage) = g.investment_cost_withdrawal;
+fixed_om_cost_withdrawal(g::AsymmetricStorage) = g.fixed_om_cost_withdrawal;
 
 struct Storage
     s::Array{SymmetricStorage}
@@ -193,18 +198,28 @@ function add_planning_variables!(g::SymmetricStorage, model::Model)
         new_capacity_storage(g) - ret_capacity_storage(g) + existing_capacity_storage(g)
     )
 
-    if !g.can_expand
-        fix(new_capacity_storage(g), 0.0; force = true)
-    end
-
-    if !g.can_retire
-        fix(ret_capacity_storage(g), 0.0; force = true)
-    end
-
+    
     @constraint(model, ret_capacity(g) <= existing_capacity(g))
 
     @constraint(model, ret_capacity_storage(g) <= existing_capacity_storage(g))
 
+    if !g.can_expand
+        fix(new_capacity(g), 0.0; force = true)
+        fix(new_capacity_storage(g), 0.0; force = true)
+    else
+        add_to_expression!(model[:eFixedCost],investment_cost(g) * new_capacity(g)) 
+        add_to_expression!(model[:eFixedCost],investment_cost_storage(g) * new_capacity_storage(g)) 
+    end
+
+    if !g.can_retire
+        fix(ret_capacity(g), 0.0; force = true)
+        fix(ret_capacity_storage(g), 0.0; force = true)
+    end
+
+
+    add_to_expression!(model[:eFixedCost],fixed_om_cost(g) * capacity(g))
+
+    add_to_expression!(model[:eFixedCost],fixed_om_cost_storage(g) * capacity_storage(g))
 
     return nothing
 
@@ -291,6 +306,10 @@ function add_planning_variables!(g::AsymmetricStorage, model::Model)
         fix(new_capacity(g), 0.0; force = true)
         fix(new_capacity_storage(g), 0.0; force = true)
         fix(new_capacity_withdrawal(g), 0.0; force = true)
+    else
+        add_to_expression!(model[:eFixedCost],investment_cost(g) * new_capacity(g)) 
+        add_to_expression!(model[:eFixedCost],investment_cost_storage(g) * new_capacity_storage(g)) 
+        add_to_expression!(model[:eFixedCost],investment_cost_withdrawal(g) * new_capacity_withdrawal(g)) 
     end
 
     if !g.can_retire
@@ -298,6 +317,13 @@ function add_planning_variables!(g::AsymmetricStorage, model::Model)
         fix(ret_capacity_storage(g), 0.0; force = true)
         fix(ret_capacity_withdrawal(g), 0.0; force = true)
     end
+
+
+    add_to_expression!(model[:eFixedCost],fixed_om_cost(g) * capacity(g))
+
+    add_to_expression!(model[:eFixedCost],fixed_om_cost_storage(g) * capacity_storage(g))
+
+    add_to_expression!(model[:eFixedCost],fixed_om_cost_withdrawal(g) * capacity_withdrawal(g))
 
 
     return nothing
@@ -334,12 +360,12 @@ function add_operation_variables!(g::AbstractStorage, model::Model)
         t_end = last(p)
         add_to_expression!(
             aux_expr[t_start],
-            storage_level(g)[t_start] - (1 - self_discharge(g)) * storage_level(g)[t_end],
+            storage_level(g)[t_start] - (1 - storage_loss_percentage(g)) * storage_level(g)[t_end],
         )
         for t in p[2:end]
             add_to_expression!(
                 aux_expr[t],
-                storage_level(g)[t] - (1 - self_discharge(g)) * storage_level(g)[t-1],
+                storage_level(g)[t] - (1 - storage_loss_percentage(g)) * storage_level(g)[t-1],
             )
         end
     end
@@ -348,7 +374,7 @@ function add_operation_variables!(g::AbstractStorage, model::Model)
         model,
         [t in time_interval(g)],
         aux_expr[t] ==
-        efficiency_discharge(g) * injection(g)[t] - efficiency_charge(g) * withdrawal(g)[t]
+        efficiency_injection(g) * injection(g)[t] - efficiency_withdrawal(g) * withdrawal(g)[t]
     )
 
     unregister(model, :aux_expr)
@@ -356,10 +382,15 @@ function add_operation_variables!(g::AbstractStorage, model::Model)
     n = node(g)
 
     for t in time_interval(g)
+
         add_to_expression!(
             n.operation_expr[:net_energy_production][t],
             injection(g)[t] - withdrawal(g)[t],
         )
+
+        add_to_expression!(model[:eVariableCost], variable_om_cost(g) * injection(g)[t])
+
+        add_to_expression!(model[:eVariableCost], variable_om_cost_withdrawal(g) * withdrawal(g)[t])
     end
 
     return nothing

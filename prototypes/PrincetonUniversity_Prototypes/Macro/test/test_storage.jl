@@ -31,19 +31,19 @@ function compare_storage(storage_test::AbstractStorage, storage_true::AbstractSt
     @test storage_test.can_retire == storage_true.can_retire
     @test storage_test.investment_cost == storage_true.investment_cost
     @test storage_test.investment_cost_storage == storage_true.investment_cost_storage
-    @test storage_test.investment_cost_charge == storage_true.investment_cost_charge
+    @test storage_test.investment_cost_withdrawal == storage_true.investment_cost_withdrawal
     @test storage_test.fixed_om_cost == storage_true.fixed_om_cost
     @test storage_test.fixed_om_cost_storage == storage_true.fixed_om_cost_storage
-    @test storage_test.fixed_om_cost_charge == storage_true.fixed_om_cost_charge
+    @test storage_test.fixed_om_cost_withdrawal == storage_true.fixed_om_cost_withdrawal
     @test storage_test.variable_om_cost == storage_true.variable_om_cost
     @test storage_test.variable_om_cost_storage == storage_true.variable_om_cost_storage
-    @test storage_test.variable_om_cost_charge == storage_true.variable_om_cost_charge
-    @test storage_test.efficiency_charge == storage_true.efficiency_charge
-    @test storage_test.efficiency_discharge == storage_true.efficiency_discharge
+    @test storage_test.variable_om_cost_withdrawal == storage_true.variable_om_cost_withdrawal
+    @test storage_test.efficiency_withdrawal == storage_true.efficiency_withdrawal
+    @test storage_test.efficiency_injection == storage_true.efficiency_injection
     @test storage_test.min_storage_level == storage_true.min_storage_level
     @test storage_test.min_duration == storage_true.min_duration
     @test storage_test.max_duration == storage_true.max_duration
-    @test storage_test.self_discharge == storage_true.self_discharge
+    @test storage_test.storage_loss_percentage == storage_true.storage_loss_percentage
     @test storage_test.planning_vars == storage_true.planning_vars
     @test storage_test.operation_vars == storage_true.operation_vars
     @test storage_test.constraints == storage_true.constraints broken = true

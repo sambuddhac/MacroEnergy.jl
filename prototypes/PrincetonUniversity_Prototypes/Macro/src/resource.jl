@@ -18,6 +18,7 @@ get_id(g::AbstractResource) = g.id;
 node(g::AbstractResource) = g.node;
 investment_cost(g::AbstractResource) = g.investment_cost;
 fixed_om_cost(g::AbstractResource) = g.fixed_om_cost;
+variable_om_cost(g::AbstractResource) = g.variable_om_cost;
 min_capacity(g::AbstractResource) = g.min_capacity;
 max_capacity(g::AbstractResource) = g.max_capacity;
 can_expand(g::AbstractResource) = g.can_expand;
@@ -102,11 +103,15 @@ function add_planning_variables!(g::AbstractResource, model::Model)
 
     if !can_expand(g)
         fix(new_capacity(g), 0.0; force = true)
+    else
+        add_to_expression!(model[:eFixedCost], investment_cost(g) * new_capacity(g))
     end
 
     if !can_retire(g)
         fix(ret_capacity(g), 0.0; force = true)
     end
+
+    add_to_expression!(model[:eFixedCost], fixed_om_cost(g) * capacity(g))
 
     return nothing
 
@@ -124,7 +129,11 @@ function add_operation_variables!(g::AbstractResource, model::Model)
     )
 
     for t in time_interval(g)
+
         add_to_expression!(net_energy_production(n)[t], injection(g)[t])
+
+        add_to_expression!(model[:eVariableCost], variable_om_cost(g) * injection(g)[t])
+
     end
 
     return nothing

@@ -46,7 +46,6 @@ include("input_translation/dolphyn_to_macro.jl")
 include("generate_model.jl")
 include("prepare_inputs.jl")
 include("constraints.jl")
-include("costs.jl")
 
 # exports
 export Electricity,
@@ -66,8 +65,6 @@ export Electricity,
     configure_settings,
     add_planning_variables!,
     add_operation_variables!,
-    add_fixed_cost!,
-    add_variable_cost!,
     add_model_constraint!,
     add_all_model_constraints!,
     generate_model,

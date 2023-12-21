@@ -170,7 +170,7 @@ function add_model_constraint!(ct::EnergyBalanceConstraint, n::AbstractNode, mod
     ct.constraint_ref = @constraint(
         model,
         [t in time_interval(n)],
-        net_energy_production(n)[t] + non_served_energy(n)[t] == demand(n)[t]
+        net_energy_production(n)[t]  == demand(n)[t]
     )
 
 end
@@ -180,11 +180,11 @@ function add_model_constraint!(
     n::AbstractNode,
     model::Model,
 )
-
+    
     ct.constraint_ref = @constraint(
         model,
-        [t in time_interval(n)],
-        non_served_energy(n)[t] <= max_non_served_energy(n) * demand(n)[t]
+        [s in segments_non_served_energy(n), t in time_interval(n)],
+        non_served_energy(n)[s,t] <= max_non_served_energy(n)[s] * demand(n)[t]
     )
 
 end

@@ -7,7 +7,7 @@ end
 function compare_nodes(node::Node, node_true::Node)
     @test node.id == node_true.id
     @test node.demand == node_true.demand
-    @test node.fuel_price == node_true.fuel_price
+    ###@test node.fuel_price == node_true.fuel_price
     @test node.time_interval == node_true.time_interval
     @test node.max_nse == node_true.max_nse
     @test node.price_nse == node_true.price_nse
