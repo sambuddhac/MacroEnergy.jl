@@ -2,6 +2,12 @@ Commodities:
     Electricity:
         HoursPerTimeStep: 1
         HoursPerSubperiod: 168
+    Hydrogen:
+        HoursPerTimeStep: 1
+        HoursPerSubperiod: 168
+    NaturalGas:
+        HoursPerTimeStep: 1
+        HoursPerSubperiod: 168
 PeriodLength: 8760
 
 

@@ -102,7 +102,7 @@ function makenode(c::DataType, row::DataFrameRow, time_interval::StepRange{Int64
     return Node{c}(
         id = row.id,
         demand = collect(row[2+first(time_interval):2+last(time_interval)]),
-        max_nse = row.max_nse,
+        max_nsd = row.max_nsd,
         time_interval = time_interval,
     )
 

@@ -49,7 +49,6 @@ Base.@kwdef mutable struct SymmetricStorage{T} <: AbstractStorage{T}
     subperiods::Vector{StepRange{Int64,Int64}}
     #### Fields with defaults
     capacity_factor::Vector{Float64} = ones(length(time_interval))
-    cap_size::Float64 = 0.0
     min_capacity::Float64 = 0.0
     max_capacity::Float64 = Inf
     min_capacity_storage::Float64 = 0.0
@@ -216,10 +215,13 @@ function add_planning_variables!(g::SymmetricStorage, model::Model)
         fix(ret_capacity_storage(g), 0.0; force = true)
     end
 
+    if fixed_om_cost(g)>0
+        add_to_expression!(model[:eFixedCost],fixed_om_cost(g) * capacity(g))
+    end
 
-    add_to_expression!(model[:eFixedCost],fixed_om_cost(g) * capacity(g))
-
-    add_to_expression!(model[:eFixedCost],fixed_om_cost_storage(g) * capacity_storage(g))
+    if fixed_om_cost_storage(g)>0
+        add_to_expression!(model[:eFixedCost],fixed_om_cost_storage(g) * capacity_storage(g))
+    end
 
     return nothing
 
@@ -318,13 +320,17 @@ function add_planning_variables!(g::AsymmetricStorage, model::Model)
         fix(ret_capacity_withdrawal(g), 0.0; force = true)
     end
 
+    if fixed_om_cost(g)>0
+        add_to_expression!(model[:eFixedCost],fixed_om_cost(g) * capacity(g))
+    end
 
-    add_to_expression!(model[:eFixedCost],fixed_om_cost(g) * capacity(g))
+    if fixed_om_cost_storage(g)>0
+        add_to_expression!(model[:eFixedCost],fixed_om_cost_storage(g) * capacity_storage(g))
+    end
 
-    add_to_expression!(model[:eFixedCost],fixed_om_cost_storage(g) * capacity_storage(g))
-
-    add_to_expression!(model[:eFixedCost],fixed_om_cost_withdrawal(g) * capacity_withdrawal(g))
-
+    if fixed_om_cost_withdrawal(g)>0
+        add_to_expression!(model[:eFixedCost],fixed_om_cost_withdrawal(g) * capacity_withdrawal(g))
+    end
 
     return nothing
 
@@ -384,13 +390,18 @@ function add_operation_variables!(g::AbstractStorage, model::Model)
     for t in time_interval(g)
 
         add_to_expression!(
-            n.operation_expr[:net_energy_production][t],
+            n.operation_expr[:net_production][t],
             injection(g)[t] - withdrawal(g)[t],
         )
 
-        add_to_expression!(model[:eVariableCost], variable_om_cost(g) * injection(g)[t])
+        if variable_om_cost(g)>0
+            add_to_expression!(model[:eVariableCost], variable_om_cost(g) * injection(g)[t])
+        end
 
-        add_to_expression!(model[:eVariableCost], variable_om_cost_withdrawal(g) * withdrawal(g)[t])
+        if variable_om_cost_withdrawal(g)>0
+            add_to_expression!(model[:eVariableCost], variable_om_cost_withdrawal(g) * withdrawal(g)[t])
+        end
+        
     end
 
     return nothing

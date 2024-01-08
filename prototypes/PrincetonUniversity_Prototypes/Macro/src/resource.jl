@@ -31,14 +31,13 @@ all_constraints(g::AbstractResource) = g.constraints;
 
 Base.@kwdef mutable struct Resource{T} <: AbstractResource{T}
     ### Mandatory fields: (fields without defaults)
-    node::Node{T}
+    node::AbstractNode{T}
     id::Symbol
     #### Optional fields - (fields with defaults)
     capacity_factor::Vector{Float64} = Float64[]
-    ### price::Vector{Float64} = Float64[]    #TODO: talk with Filippo about this
+    price::Vector{Float64} = Float64[]
     time_interval::StepRange{Int64,Int64} = 1:1
     subperiods::Vector{StepRange{Int64,Int64}} = StepRange{Int64,Int64}[]
-    cap_size::Float64 = 0.0
     min_capacity::Float64 = 0.0
     max_capacity::Float64 = Inf
     existing_capacity::Float64 = 0.0
@@ -51,28 +50,6 @@ Base.@kwdef mutable struct Resource{T} <: AbstractResource{T}
     operation_vars::Dict = Dict{Symbol,Any}()
     constraints::Vector{AbstractTypeConstraint} = [CapacityConstraint{T}()]
 end
-
-# Base.@kwdef mutable struct Thermal{T} <: AbstractResource{T}
-#     ### Fields without defaults
-#     node::Int64
-#     r_id::Int64
-#     capacity_factor::Vector{Float64}  # = ones(length(time_interval_map[T]))
-#     # price::Vector{Float64} # = zeros(length(time_interval_map[T]))    #TODO: talk with Filippo about this
-#     time_interval::StepRange{Int64,Int64}
-#     subperiods::Vector{StepRange{Int64,Int64}}
-#     #### Fields with defaults
-#     min_capacity::Float64 = 0.0
-#     max_capacity::Float64 = Inf
-#     existing_capacity::Float64 = 0.0
-#     can_expand::Bool = true
-#     can_retire::Bool = true
-#     investment_cost::Float64 = 0.0
-#     fixed_om_cost::Float64 = 0.0
-#     variable_om_cost::Float64 = 0.0
-#     planning_vars::Dict = Dict()
-#     operation_vars::Dict = Dict()
-# end
-
 
 # add_variable  functions
 function add_planning_variables!(g::AbstractResource, model::Model)
@@ -111,7 +88,9 @@ function add_planning_variables!(g::AbstractResource, model::Model)
         fix(ret_capacity(g), 0.0; force = true)
     end
 
-    add_to_expression!(model[:eFixedCost], fixed_om_cost(g) * capacity(g))
+    if fixed_om_cost(g)>0
+        add_to_expression!(model[:eFixedCost], fixed_om_cost(g) * capacity(g))
+    end
 
     return nothing
 
@@ -130,9 +109,15 @@ function add_operation_variables!(g::AbstractResource, model::Model)
 
     for t in time_interval(g)
 
-        add_to_expression!(net_energy_production(n)[t], injection(g)[t])
+        add_to_expression!(net_production(n)[t], injection(g)[t])
 
-        add_to_expression!(model[:eVariableCost], variable_om_cost(g) * injection(g)[t])
+        if !isempty(price(g))
+            add_to_expression!(model[:eVariableCost], price(g)[t] * injection(g)[t])
+        end
+
+        if variable_om_cost(g)>0
+            add_to_expression!(model[:eVariableCost], variable_om_cost(g) * injection(g)[t])
+        end
 
     end
 

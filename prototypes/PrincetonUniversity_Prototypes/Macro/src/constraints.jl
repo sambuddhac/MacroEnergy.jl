@@ -12,7 +12,7 @@ Base.@kwdef mutable struct CapacityConstraint{T} <: AbstractTypeConstraint{T}
 end
 
 
-Base.@kwdef mutable struct EnergyBalanceConstraint{T} <: AbstractTypeConstraint{T}
+Base.@kwdef mutable struct DemandBalanceConstraint{T} <: AbstractTypeConstraint{T}
     value::Union{Missing,Vector{Float64}} = missing
     lagrangian_multiplier::Union{Missing,Vector{Float64}} = missing
     constraint_ref::Union{Missing,JuMPConstraint} = missing
@@ -43,7 +43,7 @@ Base.@kwdef mutable struct MaxStorageDurationConstraint{T} <: AbstractTypeConstr
     constraint_ref::Union{Missing,JuMPConstraint} = missing
 end
 
-Base.@kwdef mutable struct MaxNonServedEnergyConstraint{T} <: AbstractTypeConstraint{T}
+Base.@kwdef mutable struct MaxNonServedDemandConstraint{T} <: AbstractTypeConstraint{T}
     value::Union{Missing,Vector{Float64}} = missing
     lagrangian_multiplier::Union{Missing,Vector{Float64}} = missing
     constraint_ref::Union{Missing,JuMPConstraint} = missing
@@ -165,26 +165,36 @@ function add_model_constraint!(
 
 end
 
-function add_model_constraint!(ct::EnergyBalanceConstraint, n::AbstractNode, model::Model)
+function add_model_constraint!(ct::DemandBalanceConstraint, n::AbstractNode, model::Model)
 
     ct.constraint_ref = @constraint(
         model,
         [t in time_interval(n)],
-        net_energy_production(n)[t]  == demand(n)[t]
+        net_production(n)[t]  == demand(n)[t]
+    )
+
+end
+
+function add_model_constraint!(ct::DemandBalanceConstraint, n::Union{SinkNode,SourceNode}, model::Model)
+
+    ct.constraint_ref = @constraint(
+        model,
+        [t in time_interval(n)],
+        net_production(n)[t]  == 0.0
     )
 
 end
 
 function add_model_constraint!(
-    ct::MaxNonServedEnergyConstraint,
+    ct::MaxNonServedDemandConstraint,
     n::AbstractNode,
     model::Model,
 )
     
     ct.constraint_ref = @constraint(
         model,
-        [s in segments_non_served_energy(n), t in time_interval(n)],
-        non_served_energy(n)[s,t] <= max_non_served_energy(n)[s] * demand(n)[t]
+        [s in segments_non_served_demand(n), t in time_interval(n)],
+        non_served_demand(n)[s,t] <= max_non_served_demand(n)[s] * demand(n)[t]
     )
 
 end

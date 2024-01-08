@@ -29,22 +29,22 @@ dfGen = inputs["dfGen"]
 dfH2Gen = inputs["dfH2Gen"]
 dfH2G2P = inputs["dfH2G2P"]
 
-electrolyzer_st_coeff_E = 1;
-electrolyzer_st_coeff_H2 = dfH2Gen[1, :etaP2G_MWh_p_tonne] / H2_MWh;
+# electrolyzer_st_coeff_E = 1;
+# electrolyzer_st_coeff_H2 = dfH2Gen[1, :etaP2G_MWh_p_tonne] / H2_MWh;
 
-fuelcell_st_coeff_E = 1;
-fuelcell_st_coeff_H2 = dfH2G2P[2, :etaG2P_MWh_p_tonne] / H2_MWh;
+# fuelcell_st_coeff_E = 1;
+# fuelcell_st_coeff_H2 = dfH2G2P[2, :etaG2P_MWh_p_tonne] / H2_MWh;
 
-#dfGen[!,:Heat_Rate_MMBTU_per_MWh]
+# #dfGen[!,:Heat_Rate_MMBTU_per_MWh]
 
-#EP = generate_model(setup, inputs, OPTIMIZER)
+# #EP = generate_model(setup, inputs, OPTIMIZER)
 
 using Macro
 
 macro_inputs, macro_settings = dolphyn_to_macro(inputs,settings_path)
 
-model = Macro.generate_model(macro_inputs);
+# model = Macro.generate_model(macro_inputs);
 
-using JuMP, Gurobi
-set_optimizer(model,Gurobi.Optimizer())
-optimize!(model)
+# using JuMP, Gurobi
+# set_optimizer(model,Gurobi.Optimizer())
+# optimize!(model)

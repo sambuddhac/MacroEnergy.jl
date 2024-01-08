@@ -115,13 +115,13 @@ function add_operation_variables!(e::AbstractTransformationEdge, model::Model)
 
     for t in time_interval(e)
         if isa(start_node(e), AbstractNode)
-            add_to_expression!(net_energy_production(start_node(e))[t], -flow(e)[t])
+            add_to_expression!(net_production(start_node(e))[t], -flow(e)[t])
             add_to_expression!(
                 stochiometry_balance(end_node(e))[t],
                 st_coeff(e) * flow(e)[t],
             )
         elseif isa(end_node(e), AbstractNode)
-            add_to_expression!(net_energy_production(start_node(e))[t], flow(e)[t])
+            add_to_expression!(net_production(start_node(e))[t], flow(e)[t])
             add_to_expression!(
                 stochiometry_balance(end_node(e))[t],
                 -st_coeff(e) * flow(e)[t],

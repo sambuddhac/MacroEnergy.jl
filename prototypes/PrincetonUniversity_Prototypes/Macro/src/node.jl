@@ -7,12 +7,30 @@ Base.@kwdef mutable struct Node{T} <: AbstractNode{T}
     time_interval::StepRange{Int64,Int64}
     ######### fuel_price::Vector{Float64}
     #### Fields with defaults
-    max_nse::Vector{Float64} = [1.0]
-    price_nse::Vector{Float64} = [5000]
+    max_nsd::Vector{Float64} = [1.0]
+    price_nsd::Vector{Float64} = [5000]
     operation_vars::Dict = Dict()
     operation_expr::Dict = Dict()
     constraints::Vector{AbstractTypeConstraint} =
-        [EnergyBalanceConstraint{T}(), MaxNonServedEnergyConstraint{T}()]
+        [DemandBalanceConstraint{T}(), MaxNonServedDemandConstraint{T}()]
+end
+
+Base.@kwdef mutable struct SourceNode{T} <: AbstractNode{T}
+    id::Symbol
+    time_interval::StepRange{Int64,Int64}
+    operation_vars::Dict = Dict()
+    operation_expr::Dict = Dict()
+    constraints::Vector{AbstractTypeConstraint} =
+        [DemandBalanceConstraint{T}()]
+end
+
+Base.@kwdef mutable struct SinkNode{T} <: AbstractNode{T}
+    id::Symbol
+    time_interval::StepRange{Int64,Int64}
+    operation_vars::Dict = Dict()
+    operation_expr::Dict = Dict()
+    constraints::Vector{AbstractTypeConstraint} =
+        [DemandBalanceConstraint{T}()]
 end
 
 time_interval(n::AbstractNode) = n.time_interval;
@@ -23,37 +41,46 @@ get_id(n::AbstractNode) = n.id;
 
 demand(n::AbstractNode) = n.demand;
 
-non_served_energy(n::AbstractNode) = n.operation_vars[:non_served_energy];
+non_served_demand(n::AbstractNode) = n.operation_vars[:non_served_demand];
 
-net_energy_production(n::AbstractNode) = n.operation_expr[:net_energy_production];
+net_production(n::AbstractNode) = n.operation_expr[:net_production];
 
-max_non_served_energy(n::AbstractNode) = n.max_nse;
+max_non_served_demand(n::AbstractNode) = n.max_nsd;
 
-price_non_served_energy(n::AbstractNode) = n.price_nse;
+price_non_served_demand(n::AbstractNode) = n.price_nsd;
 
-segments_non_served_energy(n::AbstractNode) = 1:length(n.max_nse);
+segments_non_served_demand(n::AbstractNode) = 1:length(n.max_nsd);
 
 all_constraints(g::AbstractNode) = g.constraints;
 
 
 function add_operation_variables!(n::AbstractNode, model::Model)
 
-    n.operation_vars[:non_served_energy] = @variable(
+    n.operation_vars[:non_served_demand] = @variable(
         model,
-        [s in segments_non_served_energy(n) ,t in time_interval(n)],
+        [s in segments_non_served_demand(n) ,t in time_interval(n)],
         lower_bound = 0.0,
         base_name = "vNSE_$(commodity_type(n))_$(get_id(n))_$(s)_$(t)"
     )
 
-    n.operation_expr[:net_energy_production] =
+    n.operation_expr[:net_production] =
         @expression(model, [t in time_interval(n)], 0 * model[:vREF])
 
     for t in time_interval(n)
-        for s in segments_non_served_energy(n)
-            add_to_expression!(model[:eVariableCost], price_non_served_energy(n)[s]*non_served_energy(n)[s,t])
-            add_to_expression!(net_energy_production(n)[t], non_served_energy(n)[s,t])
+        for s in segments_non_served_demand(n)
+            add_to_expression!(model[:eVariableCost], price_non_served_demand(n)[s]*non_served_demand(n)[s,t])
+            add_to_expression!(net_production(n)[t], non_served_demand(n)[s,t])
         end
     end
+
+    return nothing
+end
+
+function add_operation_variables!(n::SourceNode, model::Model)
+
+    n.operation_expr[:net_production] =
+        @expression(model, [t in time_interval(n)], 0 * model[:vREF])
+
 
     return nothing
 end

@@ -89,8 +89,8 @@ function add_operation_variables!(e::AbstractEdge, model::Model)
     end
 
     for t in time_interval(e)
-        add_to_expression!(net_energy_production(start_node(e))[t], -flow(e)[t])
-        add_to_expression!(net_energy_production(end_node(e))[t], flow(e)[t])
+        add_to_expression!(net_production(start_node(e))[t], -flow(e)[t])
+        add_to_expression!(net_production(end_node(e))[t], flow(e)[t])
     end
 
 end

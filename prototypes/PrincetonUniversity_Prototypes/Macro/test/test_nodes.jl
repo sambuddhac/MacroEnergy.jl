@@ -9,8 +9,8 @@ function compare_nodes(node::Node, node_true::Node)
     @test node.demand == node_true.demand
     ###@test node.fuel_price == node_true.fuel_price
     @test node.time_interval == node_true.time_interval
-    @test node.max_nse == node_true.max_nse
-    @test node.price_nse == node_true.price_nse
+    @test node.max_nsd == node_true.max_nsd
+    @test node.price_nsd == node_true.price_nsd
     @test node.operation_vars == node_true.operation_vars
     @test node.operation_expr == node_true.operation_expr
     @test node.constraints == node_true.constraints broken = true

@@ -13,13 +13,6 @@ function _get_resource_types(c::Type{Electricity})
     )
 end
 
-function _get_storage_types(c::Type{Electricity})
-    return (:battery_mid, 
-            #:hydroelectric_pumped_storage, 
-            #:hydrogen_storage
-            )
-end
-
 function _get_transformationtype_names()
     return (
         # :biomass,
@@ -43,8 +36,8 @@ function create_nodes_from_dolphyn(
     # read number of nodes and demand from dolphyn inputs
     n_nodes = dolphyn_inputs["Z"]
     demand = dolphyn_inputs["pD"]
-    max_nse = dolphyn_inputs["pMax_D_Curtail"];
-    price_nse = dolphyn_inputs["pC_D_Curtail"];
+    max_nsd = dolphyn_inputs["pMax_D_Curtail"];
+    price_nsd = dolphyn_inputs["pC_D_Curtail"];
     # select only the time interval of interest
     demand = demand[first(time_interval):last(time_interval), :]
 
@@ -55,8 +48,60 @@ function create_nodes_from_dolphyn(
             id = Symbol("node_", i),
             demand = demand[:, i],
             time_interval = time_interval,
-            max_nse = max_nse,
-            price_nse = price_nse,
+            max_nsd = max_nsd,
+            price_nsd = price_nsd,
+        )
+        push!(nodes, node)
+    end
+    return nodes
+end
+
+function create_nodes_from_dolphyn(
+    dolphyn_inputs::Dict,
+    commodity::Type{NaturalGas},
+    time_interval::StepRange{Int64,Int64},
+)
+   
+    # read number of nodes and demand from dolphyn inputs
+    n_nodes = dolphyn_inputs["Z"]
+      
+    # create nodes
+    nodes = Vector{SourceNode}()
+
+    for i in 1:n_nodes
+        node = SourceNode{commodity}(;
+        id = Symbol("node_", i),
+        time_interval = time_interval
+        )
+        push!(nodes, node)
+    end
+
+    return nodes
+end
+
+
+function create_nodes_from_dolphyn(
+    dolphyn_inputs::Dict,
+    commodity::Type{Hydrogen},
+    time_interval::StepRange{Int64,Int64},
+)
+    # read number of nodes and demand from dolphyn inputs
+    n_nodes = dolphyn_inputs["Z"]
+    demand = dolphyn_inputs["H2_D"]
+    max_nsd = dolphyn_inputs["pMax_H2_D_Curtail"];
+    price_nsd = dolphyn_inputs["pC_H2_D_Curtail"];
+    # select only the time interval of interest
+    demand = demand[first(time_interval):last(time_interval), :]
+
+    # create nodes
+    nodes = Vector{Node}()
+    for i in 1:n_nodes
+        node = Node{commodity}(;
+            id = Symbol("node_", i),
+            demand = demand[:, i],
+            time_interval = time_interval,
+            max_nsd = max_nsd,
+            price_nsd = price_nsd,
         )
         push!(nodes, node)
     end
@@ -136,22 +181,54 @@ function create_resources_from_dolphyn(
     return resources
 end
 
-function create_storage_from_dolphyn(
+function create_resources_from_dolphyn(
     dolphyn_inputs::Dict,
     nodes,
-    commodity::Type{Electricity},
+    commodity::Type{NaturalGas},
     time_interval::StepRange{Int64,Int64},
     subperiods::Vector{StepRange{Int64,Int64}},
 )
-    # resources available in macro
-    macro_storage_types = _get_storage_types(commodity)
+    dfGen = dolphyn_inputs["dfGen"];
+    fuel_costs = dolphyn_inputs["fuel_costs"];
+
+    resources = Vector{Resource}()
+
+    for n in 1:dolphyn_inputs["Z"]
+        gen_at_node = dfGen[dfGen.Zone.==n,:];
+
+        i = findfirst(occursin.("natural_gas",gen_at_node.Resource));
+
+        push!(resources , Resource{commodity}(;
+        node = nodes[n],
+        id = Symbol(gen_at_node[i,:Fuel]),
+        time_interval = time_interval,
+        subperiods = subperiods,
+        price = fuel_costs[gen_at_node[i,:Fuel]][time_interval],
+        can_expand = false,
+        can_retire = false,
+        constraints = Vector{AbstractTypeConstraint}(),
+        ))
+    end
+  
+        
+    return resources
+end
+
+
+function create_storage_from_dolphyn(
+    dolphyn_inputs::Dict,
+    nodes,
+    commodity::Type{Hydrogen},
+    time_interval::StepRange{Int64,Int64},
+    subperiods::Vector{StepRange{Int64,Int64}},
+)
     # read dolphyn inputs
-    dfGen = dolphyn_inputs["dfGen"]
+    dfGen = dolphyn_inputs["dfH2Gen"]
 
     # get map from dolphyn columns to macro attributes
     all_attrs = dolphyn_cols_to_macro_attrs(commodity)
     # select only the attributes that are part of a symmetric storage struct
-    syms_attr = intersect(propertynames(all_attrs), fieldnames(SymmetricStorage))
+    syms_attr = intersect(propertynames(all_attrs), union(fieldnames(SymmetricStorage),fieldnames(AsymmetricStorage)))
 
     # swap keys and values
     all_attrs = Dict(all_attrs[key] => key for key in syms_attr)
@@ -167,11 +244,53 @@ function create_storage_from_dolphyn(
     # create storage
     zones = dfGen.Zone
     for (i, row) in enumerate(eachrow(data))
-        resource_type = Symbol(dfGen.Resource_Type[dfGen.Resource.==string(row.id)][1]);
-        if resource_type in macro_storage_types
-            node = nodes[zones[i]]  # select the correct node
-            # if storage is symmetric, create a SymmetricStorage and push it to sym_storage
-            dfGen[i, :STOR] == 1 && push!(
+        node = nodes[zones[i]]  # select the correct node              
+        # Create an AsymmetricStorage and push it to asym_storage
+        dfGen[i, :H2_STOR] == 1 && push!(
+                asym_storage,
+                AsymmetricStorage{commodity}(;
+                node = node,
+                time_interval = time_interval,
+                subperiods = subperiods,
+                row...,
+            ))
+
+    end
+    return Storage(sym_storage, asym_storage)
+end
+
+function create_storage_from_dolphyn(
+    dolphyn_inputs::Dict,
+    nodes,
+    commodity::Type{Electricity},
+    time_interval::StepRange{Int64,Int64},
+    subperiods::Vector{StepRange{Int64,Int64}},
+)
+    # read dolphyn inputs
+    dfGen = dolphyn_inputs["dfGen"]
+
+    # get map from dolphyn columns to macro attributes
+    all_attrs = dolphyn_cols_to_macro_attrs(commodity)
+    # select only the attributes that are part of a symmetric storage struct
+    syms_attr = intersect(propertynames(all_attrs), union(fieldnames(SymmetricStorage),fieldnames(AsymmetricStorage)))
+
+    # swap keys and values
+    all_attrs = Dict(all_attrs[key] => key for key in syms_attr)
+
+    # select only the columns of interest
+    data = rename(dfGen, pairs(all_attrs))[:, syms_attr]
+    data[!, :id] = Symbol.(data[!, :id])
+    data[!,:can_expand] = dfGen[!,:New_Build].==1;
+    data[!,:can_retire] = dfGen[!,:New_Build].>=0;
+
+    sym_storage = Vector{SymmetricStorage}()
+    asym_storage = Vector{AsymmetricStorage}()
+    # create storage
+    zones = dfGen.Zone
+    for (i, row) in enumerate(eachrow(data))
+        node = nodes[zones[i]]  # select the correct node
+        # if storage is symmetric, create a SymmetricStorage and push it to sym_storage
+        dfGen[i, :STOR] == 1 && push!(
                 sym_storage,
                 SymmetricStorage{commodity}(;
                 node = node,
@@ -180,8 +299,8 @@ function create_storage_from_dolphyn(
                 row...,
                 ))
                 
-            # if storage is asymmetric, create an AsymmetricStorage and push it to asym_storage
-            dfGen[i, :STOR] == 2 && push!(
+        # if storage is asymmetric, create an AsymmetricStorage and push it to asym_storage
+        dfGen[i, :STOR] == 2 && push!(
                 asym_storage,
                 AsymmetricStorage{commodity}(;
                 node = node,
@@ -189,12 +308,10 @@ function create_storage_from_dolphyn(
                 subperiods = subperiods,
                 row...,
                 ))
-        end
     end
     return Storage(sym_storage, asym_storage)
 end
 
-# NOTE 1: right now, this is for electricy only
 # NOTE 2: TODO: remove double renaming of columns
 function dolphyn_to_macro(dolphyn_inputs::Dict,settings_path::String)
 
@@ -229,26 +346,40 @@ function dolphyn_to_macro(dolphyn_inputs::Dict,settings_path::String)
         node_d[commodity] = nodes
 
         # load networks
-        network_d[commodity] =
-            create_networks_from_dolphyn(dolphyn_inputs, nodes, commodity, time_interval)
+        if commodity==Hydrogen
+            # Do nothing. For now, we ignore hydrogen pipelines or other forms of H2 transportation.
+        elseif commodity==NaturalGas
+            # Do nothing. For now, we ignore natural gas pipelines or other forms of NG transportation.
+        else
+            network_d[commodity] =
+                create_networks_from_dolphyn(dolphyn_inputs, nodes, commodity, time_interval)
+        end
 
-        # load resources
-        resource_d[commodity] = create_resources_from_dolphyn(
-            dolphyn_inputs,
-            nodes,
-            commodity,
-            time_interval,
-            subperiods,
-        )
+        # load resources 
+        if commodity==Hydrogen
+            # Do nothing. Dolphyn does not model any hydrogen resource (hydrogen is only produced from either electricity or natural gas)
+        else
+           resource_d[commodity] = create_resources_from_dolphyn(
+                dolphyn_inputs,
+                nodes,
+                commodity,
+                time_interval,
+                subperiods,
+            )
+        end
 
         # load storage
-        storage_d[commodity] = create_storage_from_dolphyn(
+        if commodity == NaturalGas
+            # Do nothing. Dolphyn does not model natural gas storage.
+        else
+            storage_d[commodity] = create_storage_from_dolphyn(
             dolphyn_inputs,
             nodes,
             commodity,
             time_interval,
             subperiods,
-        )
+            )
+        end
 
         # load transformation
     end
@@ -286,7 +417,28 @@ end
 
 function dolphyn_cols_to_macro_attrs(c::Type{Hydrogen})
     return (
-        id = :Resource_Type,
-
+        id = :H2_Resource,
+        cap_size = :Cap_Size_tonne_p_hr,
+        min_capacity = :Min_Cap_tonne_p_hr,
+        max_capacity = :Max_Cap_tonne_p_hr,
+        min_capacity_storage = :Min_Energy_Cap_tonne,
+        max_capacity_storage = :Max_Energy_Cap_tonne,
+        min_capacity_withdrawal = :Min_Charge_Cap_tonne_p_hr,
+        max_capacity_withdrawal = :Max_Charge_Cap_tonne_p_hr,
+        existing_capacity = :Existing_Cap_tonne_p_hr,
+        existing_capacity_storage = :Existing_Energy_Cap_tonne,
+        existing_capacity_withdrawal = :Existing_Charge_Cap_tonne_p_hr,
+        investment_cost = :Inv_Cost_p_tonne_p_hr_yr,
+        investment_cost_storage = :Inv_Cost_Energy_p_tonne_yr,
+        investment_cost_withdrawal = :Inv_Cost_Charge_p_tonne_p_hr_yr,
+        fixed_om_cost = :Fixed_OM_Cost_p_tonne_p_hr_yr,
+        fixed_om_cost_storage = :Fixed_OM_Cost_Energy_p_tonne_yr,
+        fixed_om_cost_withdrawal = :Fixed_OM_Cost_Charge_p_tonne_p_hr_yr,
+        variable_om_cost = :Var_OM_Cost_p_tonne,
+        variable_om_cost_withdrawal = :Var_OM_Cost_Charge_p_tonne,
+        efficiency_withdrawal = :H2Stor_eff_charge,
+        efficiency_injection = :H2Stor_eff_discharge,
+        storage_loss_percentage = :H2Stor_self_discharge_rate_p_hour,
+        min_storage_level = :H2Stor_min_level,
     )
 end
