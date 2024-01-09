@@ -5,6 +5,7 @@
 abstract type AbstractEdge{T<:Commodity} end
 Base.@kwdef mutable struct Edge{T} <: AbstractEdge{T}
     time_interval::StepRange{Int64,Int64}
+    subperiods::Vector{StepRange{Int64,Int64}} = StepRange{Int64,Int64}[]
     start_node::Node{T}
     end_node::Node{T}
     existing_capacity::Float64
@@ -20,7 +21,7 @@ Base.@kwdef mutable struct Edge{T} <: AbstractEdge{T}
     line_loss_percentage::Float64 = 0.0
     planning_vars::Dict = Dict()
     operation_vars::Dict = Dict()
-    constraints::Vector{AbstractTypeConstraint} = [CapacityConstraint{T}()]
+    constraints::Vector{AbstractTypeConstraint} = [CapacityConstraint()]
 end
 
 start_node(e::AbstractEdge) = e.start_node;
@@ -30,6 +31,7 @@ start_node_id(e::AbstractEdge) = get_id(e.start_node);
 end_node_id(e::AbstractEdge) = get_id(e.end_node);
 
 time_interval(e::AbstractEdge) = e.time_interval;
+subperiods(e::AbstractEdge) = e.subperiods;
 commodity_type(e::AbstractEdge{T}) where {T} = T;
 existing_capacity(e::AbstractEdge) = e.existing_capacity;
 max_line_reinforcement(e::AbstractEdge) = e.max_line_reinforcement;

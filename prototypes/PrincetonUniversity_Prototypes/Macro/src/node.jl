@@ -5,6 +5,7 @@ Base.@kwdef mutable struct Node{T} <: AbstractNode{T}
     id::Symbol
     demand::Vector{Float64}
     time_interval::StepRange{Int64,Int64}
+    subperiods::Vector{StepRange{Int64,Int64}} = StepRange{Int64,Int64}[]
     ######### fuel_price::Vector{Float64}
     #### Fields with defaults
     max_nsd::Vector{Float64} = [1.0]
@@ -12,28 +13,32 @@ Base.@kwdef mutable struct Node{T} <: AbstractNode{T}
     operation_vars::Dict = Dict()
     operation_expr::Dict = Dict()
     constraints::Vector{AbstractTypeConstraint} =
-        [DemandBalanceConstraint{T}(), MaxNonServedDemandConstraint{T}()]
+        [DemandBalanceConstraint(), MaxNonServedDemandConstraint()]
 end
 
 Base.@kwdef mutable struct SourceNode{T} <: AbstractNode{T}
     id::Symbol
     time_interval::StepRange{Int64,Int64}
+    subperiods::Vector{StepRange{Int64,Int64}} = StepRange{Int64,Int64}[]
     operation_vars::Dict = Dict()
     operation_expr::Dict = Dict()
     constraints::Vector{AbstractTypeConstraint} =
-        [DemandBalanceConstraint{T}()]
+        [DemandBalanceConstraint()]
 end
 
 Base.@kwdef mutable struct SinkNode{T} <: AbstractNode{T}
     id::Symbol
     time_interval::StepRange{Int64,Int64}
+    subperiods::Vector{StepRange{Int64,Int64}} = StepRange{Int64,Int64}[]
     operation_vars::Dict = Dict()
     operation_expr::Dict = Dict()
     constraints::Vector{AbstractTypeConstraint} =
-        [DemandBalanceConstraint{T}()]
+        [DemandBalanceConstraint()]
 end
 
 time_interval(n::AbstractNode) = n.time_interval;
+subperiods(n::AbstractNode) = n.subperiods;
+
 
 commodity_type(n::AbstractNode{T}) where {T} = T;
 

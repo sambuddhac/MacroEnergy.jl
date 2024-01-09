@@ -32,10 +32,12 @@ dfH2G2P = inputs["dfH2G2P"]
 
 using Macro
 
-macro_inputs, macro_settings = dolphyn_to_macro(inputs,settings_path)
+macro_inputs, macro_settings = dolphyn_to_macro(inputs,settings_path);
 
 # model = Macro.generate_model(macro_inputs);
 
 # using JuMP, Gurobi
 # set_optimizer(model,Gurobi.Optimizer())
 # optimize!(model)
+
+println()

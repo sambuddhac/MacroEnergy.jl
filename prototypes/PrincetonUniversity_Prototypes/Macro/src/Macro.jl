@@ -12,10 +12,7 @@ abstract type Electricity <: Commodity end
 abstract type Hydrogen <: Commodity end
 abstract type NaturalGas <: Commodity end
 
-abstract type AbstractTypeConstraint{T<:Commodity} end
-
-
-abstract type AbstractTypeStochiometryConstraint end
+abstract type AbstractTypeConstraint end
 
 # type hierarchy
 
@@ -74,5 +71,5 @@ export Electricity,
     resources,
     storage,
     dolphyn_to_macro,
-    apply_unit_conversion!
+    apply_unit_conversion
 end # module Macro

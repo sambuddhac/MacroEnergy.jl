@@ -1,37 +1,8 @@
-function _get_resource_types(c::Type{Electricity})
-    return (
-        :solar_photovoltaic,
-        # :utilitypv_losangeles_mid_100_0_2,
-        # :utilitypv_losangeles_mid_80_0_2,
-        :onshore_wind_turbine,
-        # :landbasedwind_ltrg1_mid_110,
-        # :landbasedwind_ltrg1_mid_130,
-        :offshore_wind_turbine,
-        # :offshorewind_otrg3_mid_fixed_1_176_77,
-        # :conventional_hydroelectric,
-        # :small_hydroelectric,
-    )
-end
-
-function _get_transformationtype_names()
-    return (
-        # :biomass,
-        # :heat_load_shifting,
-        # :hydroelectric_pumped_storage,
-        :natural_gas_fired_combined_cycle,
-        :natural_gas_fired_combustion_turbine,
-        :natural_gas_steam_turbine,
-        #:naturalgas_ccavgcf_mid,
-        #:naturalgas_ccccsavgcf_mid,
-        #:naturalgas_ccs100_mid,
-        #:naturalgas_ctavgcf_mid,
-    )
-end
-
 function create_nodes_from_dolphyn(
     dolphyn_inputs::Dict,
     commodity::Type{Electricity},
     time_interval::StepRange{Int64,Int64},
+    subperiods::Vector{StepRange{Int64,Int64}}
 )
     # read number of nodes and demand from dolphyn inputs
     n_nodes = dolphyn_inputs["Z"]
@@ -48,6 +19,7 @@ function create_nodes_from_dolphyn(
             id = Symbol("node_", i),
             demand = demand[:, i],
             time_interval = time_interval,
+            subperiods = subperiods,
             max_nsd = max_nsd,
             price_nsd = price_nsd,
         )
@@ -60,6 +32,7 @@ function create_nodes_from_dolphyn(
     dolphyn_inputs::Dict,
     commodity::Type{NaturalGas},
     time_interval::StepRange{Int64,Int64},
+    subperiods::Vector{StepRange{Int64,Int64}}
 )
    
     # read number of nodes and demand from dolphyn inputs
@@ -71,7 +44,8 @@ function create_nodes_from_dolphyn(
     for i in 1:n_nodes
         node = SourceNode{commodity}(;
         id = Symbol("node_", i),
-        time_interval = time_interval
+        time_interval = time_interval,
+        subperiods = subperiods
         )
         push!(nodes, node)
     end
@@ -84,6 +58,7 @@ function create_nodes_from_dolphyn(
     dolphyn_inputs::Dict,
     commodity::Type{Hydrogen},
     time_interval::StepRange{Int64,Int64},
+    subperiods::Vector{StepRange{Int64,Int64}}
 )
     # read number of nodes and demand from dolphyn inputs
     n_nodes = dolphyn_inputs["Z"]
@@ -100,6 +75,7 @@ function create_nodes_from_dolphyn(
             id = Symbol("node_", i),
             demand = demand[:, i],
             time_interval = time_interval,
+            subperiods = subperiods,
             max_nsd = max_nsd,
             price_nsd = price_nsd,
         )
@@ -113,6 +89,7 @@ function create_networks_from_dolphyn(
     nodes,
     commodity::Type{Electricity},
     time_interval::StepRange{Int64,Int64},
+    subperiods::Vector{StepRange{Int64,Int64}}
 )
     number_of_edges = dolphyn_inputs["L"];
     network = Vector{Edge}()
@@ -120,6 +97,7 @@ function create_networks_from_dolphyn(
 
         edge = Edge{commodity}(
         time_interval = time_interval,
+        subperiods = subperiods,
         start_node = nodes[findfirst(dolphyn_inputs["pNet_Map"][i,:].==-1)],
         end_node = nodes[findfirst(dolphyn_inputs["pNet_Map"][i,:].==1)],
         existing_capacity = dolphyn_inputs["pTrans_Max"][i],
@@ -143,7 +121,13 @@ function create_resources_from_dolphyn(
     subperiods::Vector{StepRange{Int64,Int64}},
 )
     # resources available in macro
-    macro_resource_types = _get_resource_types(commodity)
+    macro_resource_types = (
+        :solar_photovoltaic,
+        :onshore_wind_turbine,
+        :offshore_wind_turbine,
+        # :conventional_hydroelectric,
+        # :small_hydroelectric,
+    )
     # read dolphyn inputs
     dfGen = dolphyn_inputs["dfGen"]
     # get map from dolphyn columns to macro attributes
@@ -190,7 +174,7 @@ function create_resources_from_dolphyn(
 )
     dfGen = dolphyn_inputs["dfGen"];
     fuel_costs = dolphyn_inputs["fuel_costs"];
-
+    
     resources = Vector{Resource}()
 
     for n in 1:dolphyn_inputs["Z"]
@@ -312,6 +296,22 @@ function create_storage_from_dolphyn(
     return Storage(sym_storage, asym_storage)
 end
 
+function create_transformations_from_dolphyn(dolphyn_inputs::Dict, nodes)
+
+    dfGen = dolphyn_inputs["dfGen"]
+    dfH2Gen = dolphyn_inputs["dfH2Gen"]
+    dfH2G2P = dolphyn_inputs["dfH2G2P"]
+
+    tnodes = Vector{TNode}()
+    tedges = Vector{TEdge}()
+
+    
+
+    return tnodes,tedges
+
+end
+
+
 # NOTE 2: TODO: remove double renaming of columns
 function dolphyn_to_macro(dolphyn_inputs_original_units::Dict,settings_path::String)
 
@@ -324,6 +324,7 @@ function dolphyn_to_macro(dolphyn_inputs_original_units::Dict,settings_path::Str
     network_d = Dict()
     resource_d = Dict()
     storage_d = Dict()
+    transformations_d = Dict()
 
     macro_settings = (; macro_settings..., PeriodLength=dolphyn_inputs["T"])
 
@@ -344,7 +345,7 @@ function dolphyn_to_macro(dolphyn_inputs_original_units::Dict,settings_path::Str
         )
 
         # load nodes
-        nodes = create_nodes_from_dolphyn(dolphyn_inputs, commodity, time_interval)
+        nodes = create_nodes_from_dolphyn(dolphyn_inputs, commodity, time_interval,subperiods)
         node_d[commodity] = nodes
 
         # load networks
@@ -354,7 +355,7 @@ function dolphyn_to_macro(dolphyn_inputs_original_units::Dict,settings_path::Str
             # Do nothing. For now, we ignore natural gas pipelines or other forms of NG transportation.
         else
             network_d[commodity] =
-                create_networks_from_dolphyn(dolphyn_inputs, nodes, commodity, time_interval)
+                create_networks_from_dolphyn(dolphyn_inputs, nodes, commodity, time_interval,subperiods)
         end
 
         # load resources 
@@ -383,12 +384,13 @@ function dolphyn_to_macro(dolphyn_inputs_original_units::Dict,settings_path::Str
             )
         end
 
-        # load transformation
     end
+
+    transformations_d[:tnodes],transformations_d[:tedges] = create_transformations_from_dolphyn(dolphyn_inputs,nodes)
 
     @info "Dolphyn data successfully read in into MACRO"
 
-    return InputData(macro_settings, node_d, network_d, resource_d, storage_d), macro_settings
+    return InputData(macro_settings, node_d, network_d, resource_d, storage_d,transformations_d), macro_settings
 end
 
 function dolphyn_cols_to_macro_attrs(c::Type{Electricity})

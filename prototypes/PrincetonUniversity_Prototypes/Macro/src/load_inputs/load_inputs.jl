@@ -17,7 +17,7 @@ struct InputData
     networks::Dict
     resources::Dict
     storage::Dict
-    # transformations:: #TODO add transformation
+    transformations::Dict
 end
 settings(data::InputData) = data.settings
 nodes(data::InputData) = data.nodes

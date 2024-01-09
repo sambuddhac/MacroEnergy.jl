@@ -48,7 +48,7 @@ Base.@kwdef mutable struct Resource{T} <: AbstractResource{T}
     variable_om_cost::Float64 = 0.0
     planning_vars::Dict = Dict{Symbol,Any}()
     operation_vars::Dict = Dict{Symbol,Any}()
-    constraints::Vector{AbstractTypeConstraint} = [CapacityConstraint{T}()]
+    constraints::Vector{AbstractTypeConstraint} = [CapacityConstraint()]
 end
 
 # add_variable  functions
