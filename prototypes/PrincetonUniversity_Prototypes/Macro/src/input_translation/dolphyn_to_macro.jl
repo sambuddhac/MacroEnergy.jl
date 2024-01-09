@@ -313,9 +313,11 @@ function create_storage_from_dolphyn(
 end
 
 # NOTE 2: TODO: remove double renaming of columns
-function dolphyn_to_macro(dolphyn_inputs::Dict,settings_path::String)
+function dolphyn_to_macro(dolphyn_inputs_original_units::Dict,settings_path::String)
 
     macro_settings = configure_settings(joinpath(settings_path, "macro_settings.yml"))
+
+    dolphyn_inputs = apply_unit_conversion(dolphyn_inputs_original_units)
 
     # Data structures to store input data
     node_d = Dict()
@@ -441,4 +443,66 @@ function dolphyn_cols_to_macro_attrs(c::Type{Hydrogen})
         storage_loss_percentage = :H2Stor_self_discharge_rate_p_hour,
         min_storage_level = :H2Stor_min_level,
     )
+end
+
+
+function apply_unit_conversion(inputs_0::Dict)
+    # Apply unit conversions to all inputs
+    # NOTE: this function is not complete. It only converts the inputs that are currently used in MACRO.
+
+    inputs = deepcopy(inputs_0);
+
+    H2_MWh = 33.33 # MWh per tonne of H2
+    NG_MWh = 0.29307107 # MWh per MMBTU of NG
+
+    #### Hydrogen
+    inputs["H2_D"] = H2_MWh*inputs["H2_D"]
+
+    columns_p_tonne = [:etaP2G_MWh_p_tonne,
+    :etaFuel_MMBtu_p_tonne,
+    :Inv_Cost_p_tonne_p_hr_yr,
+    :Inv_Cost_Energy_p_tonne_yr,
+    :Inv_Cost_Charge_p_tonne_p_hr_yr,
+    :Fixed_OM_Cost_p_tonne_p_hr_yr,
+    :Fixed_OM_Cost_Energy_p_tonne_yr,
+    :Fixed_OM_Cost_Charge_p_tonne_p_hr_yr,
+    :Var_OM_Cost_p_tonne,
+    :Var_OM_Cost_Charge_p_tonne,
+    :Start_Cost_per_tonne_p_hr,
+    :CO2_per_tonne]
+    
+    columns_tonne = [:Max_Cap_tonne_p_hr,
+    :Min_Cap_tonne_p_hr,
+    :Max_Charge_Cap_tonne_p_hr,
+    :Min_Charge_Cap_tonne_p_hr,
+    :Max_Energy_Cap_tonne,
+    :Min_Energy_Cap_tonne,
+    :Existing_Cap_tonne_p_hr,
+    :Existing_Charge_Cap_tonne_p_hr,
+    :Existing_Energy_Cap_tonne,
+    :Cap_Size_tonne_p_hr,
+    ]
+
+    inputs["dfH2Gen"][!,columns_p_tonne] = Matrix(inputs["dfH2Gen"][!,columns_p_tonne])./H2_MWh
+
+    inputs["dfH2Gen"][!,columns_tonne] = Matrix(inputs["dfH2Gen"][!,columns_tonne]).*H2_MWh;
+    
+    inputs["dfH2G2P"][!,:etaG2P_MWh_p_tonne] = inputs["dfH2G2P"][!,:etaG2P_MWh_p_tonne]###### I think this does not need to be converted (it's a unitless percentage), check with Jesse and Dasun. Otherwise, divide by H2_MWh;
+    
+    #### Natural Gas
+    for fc in keys(inputs["fuel_costs"])
+        inputs["fuel_costs"][fc] = inputs["fuel_costs"][fc]./H2_MWh
+    end
+
+    inputs["dfH2Gen"][!,:etaFuel_MMBtu_p_tonne] = inputs["dfH2Gen"][!,:etaFuel_MMBtu_p_tonne].*NG_MWh;
+    inputs["dfGen"][!,:Heat_Rate_MMBTU_per_MWh] = inputs["dfGen"][!,:Heat_Rate_MMBTU_per_MWh].*NG_MWh;
+    inputs["dfGen"][!,:Start_Fuel_MMBTU_per_MW] = inputs["dfGen"][!,:Start_Fuel_MMBTU_per_MW].*NG_MWh;
+ 
+    ##### CO2 emissions
+    for fc in keys(inputs["fuel_CO2"])
+        inputs["fuel_CO2"][fc] = inputs["fuel_CO2"][fc]./NG_MWh
+    end
+
+    return inputs
+
 end

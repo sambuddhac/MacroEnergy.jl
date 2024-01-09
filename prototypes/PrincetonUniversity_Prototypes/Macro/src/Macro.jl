@@ -73,5 +73,6 @@ export Electricity,
     networks,
     resources,
     storage,
-    dolphyn_to_macro
+    dolphyn_to_macro,
+    apply_unit_conversion!
 end # module Macro
