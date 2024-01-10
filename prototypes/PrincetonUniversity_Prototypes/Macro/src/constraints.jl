@@ -201,11 +201,11 @@ end
 
 function add_model_constraint!(
     ct::StochiometryBalanceConstraint,
-    n::AbstractTransformationNode,
+    g::AbstractTransformation,
     model::Model,
 )
 
     ct.constraint_ref =
-        @constraint(model, [t in time_interval(n)], stochiometry_balance(n)[t] == 0.0)
+        @constraint(model, [i in 1:number_of_stoichiometry_balances(g), t in time_interval(n)], stochiometry_balance(g)[i,t] == 0.0)
 
 end

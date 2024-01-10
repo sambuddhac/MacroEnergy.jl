@@ -302,14 +302,14 @@ function create_transformations_from_dolphyn(dolphyn_inputs::Dict, nodes)
     dfH2Gen = dolphyn_inputs["dfH2Gen"]
     dfH2G2P = dolphyn_inputs["dfH2G2P"]
 
-    tnodes = Vector{TNode}()
-    tedges = Vector{TEdge}()
+    transformations_d = Dict()
 
-    
+    transformations = Vector{Transformation}()  
 
-    return tnodes,tedges
+    return transformations_d
 
 end
+
 
 
 # NOTE 2: TODO: remove double renaming of columns
@@ -324,7 +324,6 @@ function dolphyn_to_macro(dolphyn_inputs_original_units::Dict,settings_path::Str
     network_d = Dict()
     resource_d = Dict()
     storage_d = Dict()
-    transformations_d = Dict()
 
     macro_settings = (; macro_settings..., PeriodLength=dolphyn_inputs["T"])
 
@@ -385,9 +384,9 @@ function dolphyn_to_macro(dolphyn_inputs_original_units::Dict,settings_path::Str
         end
 
     end
-
-    transformations_d[:tnodes],transformations_d[:tedges] = create_transformations_from_dolphyn(dolphyn_inputs,nodes)
-
+    
+    transformations_d = create_transformations_from_dolphyn(dolphyn_inputs,nodes);
+    
     @info "Dolphyn data successfully read in into MACRO"
 
     return InputData(macro_settings, node_d, network_d, resource_d, storage_d,transformations_d), macro_settings

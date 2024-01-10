@@ -1,31 +1,11 @@
-abstract type AbstractTransformationNode end
+abstract type AbstractTransformation end
 
 abstract type AbstractTransformationEdge{T<:Commodity} end
-
-Base.@kwdef mutable struct TNode <: AbstractTransformationNode
-    id::Symbol
-    time_interval::StepRange{Int64,Int64}
-    number_stoichiometry_balances::Int64
-    operation_expr::Dict = Dict()
-    constraints::Vector{AbstractTypeConstraint} =
-        [StochiometryBalanceConstraint()]
-end
-number_stoichiometry_balances(n::AbstractTransformationNode) = n.number_stoichiometry_balances;
-get_id(n::AbstractTransformationNode) = n.id;
-time_interval(n::AbstractTransformationNode) = n.time_interval;
-all_constraints(n::AbstractTransformationNode) = n.constraints;
-stochiometry_balance(n::AbstractTransformationNode) =
-    n.operation_expr[:stochiometry_balance];
-
-function initialize_stochiometry_balance!(n::AbstractTransformationNode, model::Model)
-    n.operation_expr[:stochiometry_balance] =
-        @expression(model, [i in 1:number_stoichiometry_balances(n), t in time_interval(n)], 0 * model[:vREF])
-end
-
 Base.@kwdef mutable struct TEdge{T} <: AbstractTransformationEdge{T}
     id::Symbol
-    start_node::Union{AbstractNode{T},AbstractTransformationNode}
-    end_node::Union{AbstractNode{T},AbstractTransformationNode}
+    node::AbstractNode{T}
+    transformation::AbstractTransformation
+    direction::Symbol = :input
     has_planning_variables::Bool = false
     time_interval::StepRange{Int64,Int64} = 1:1
     subperiods::Vector{StepRange{Int64,Int64}} = StepRange{Int64,Int64}[]
@@ -38,7 +18,7 @@ Base.@kwdef mutable struct TEdge{T} <: AbstractTransformationEdge{T}
     variable_om_cost::Float64 = 0.0
     ###### Fuel price is set by defining a resource with the same commodity type as the transformation edge
     #####price::Vector{Float64} = Float64[]
-    start_cost_per_mw::Float64 = 0.0
+    start_cost::Float64 = 0.0
     ucommit::Bool = false
     ramp_up_percentage::Float64 = 0.0
     ramp_down_percentage::Float64 = 0.0
@@ -50,10 +30,29 @@ Base.@kwdef mutable struct TEdge{T} <: AbstractTransformationEdge{T}
     constraints::Vector{AbstractTypeConstraint} = []
 end
 
+Base.@kwdef mutable struct Transformation <: AbstractTransformation
+    id::Symbol
+    time_interval::StepRange{Int64,Int64}
+    number_of_stoichiometry_balances::Int64
+    TEdges::Vector{AbstractTransformationEdge}
+    operation_expr::Dict = Dict()
+    constraints::Vector{AbstractTypeConstraint} =
+        [StochiometryBalanceConstraint()]
+end
+
+
+number_of_stoichiometry_balances(g::AbstractTransformation) = g.number_of_stoichiometry_balances;
+get_id(g::AbstractTransformation) = g.id;
+time_interval(g::AbstractTransformation) = g.time_interval;
+all_constraints(g::AbstractTransformation) = g.constraints;
+stochiometry_balance(g::AbstractTransformation) = g.operation_expr[:stochiometry_balance];
+edges(g::AbstractTransformation) = g.TEdges;
+
 commodity_type(e::AbstractTransformationEdge{T}) where {T} = T;
 time_interval(e::AbstractTransformationEdge) = e.time_interval;
 subperiods(e::AbstractTransformationEdge) = e.subperiods;
 has_planning_variables(e::AbstractTransformationEdge) = e.has_planning_variables;
+direction(e::AbstractTransformationEdge) = e.direction;
 existing_capacity(e::AbstractTransformationEdge) = e.existing_capacity;
 investment_cost(e::AbstractTransformationEdge) = e.investment_cost;
 fixed_om_cost(e::AbstractTransformationEdge) = e.fixed_om_cost;
@@ -75,13 +74,28 @@ min_flow(e::AbstractTransformationEdge) = e.min_flow;
 capacity(e::AbstractTransformationEdge) = e.planning_vars[:capacity];
 flow(e::AbstractTransformationEdge) = e.operation_vars[:flow];
 all_constraints(e::AbstractTransformationEdge) = e.constraints;
-start_node(e::AbstractTransformationEdge) = e.start_node;
-end_node(e::AbstractTransformationEdge) = e.end_node;
+node(e::AbstractTransformationEdge) = e.node;
+stoichiometry_balance(e::AbstractTransformationEdge) = stochiometry_balance(e.transformation);
 get_id(e::AbstractTransformationEdge) = e.id;
 st_coeff(e::AbstractTransformationEdge) = e.st_coeff;
 unit_commitment(e::AbstractTransformationEdge) = e.ucommit;
 
 # add_variable  functions
+
+function add_planning_variables!(g::AbstractTransformation,model::Model)
+
+    add_planning_variables!.(edges(g),model)
+
+end
+
+function add_operation_variables!(g::AbstractTransformation,model::Model)
+
+    g.operation_expr[:stochiometry_balance] = @expression(model, [i in 1:number_of_stoichiometry_balances(g), t in time_interval(g)], 0 * model[:vREF])
+
+    add_operation_variables!.(edges(g),model)
+
+end
+
 function add_planning_variables!(e::AbstractTransformationEdge, model::Model)
 
     if has_planning_variables(e)
@@ -138,33 +152,17 @@ function add_operation_variables!(e::AbstractTransformationEdge, model::Model)
         base_name = "vFLOW_$(commodity_type(e))_$(get_id(e))"
     )
 
-    _st_coeff = st_coeff(e);
-    _start_node = start_node(e);
-    _end_node = end_node(e);
+    dir_coeff =  (direction(e) == :input) ? -1 : (direction(e) == :output) ? 1 : error("Invalid TEdge direction")
+
+    e_st_coeff = st_coeff(e);
+    e_node = node(e);
 
     for t in time_interval(e)
-        if isa(_start_node, AbstractNode)
-            #### The start node is a demand node and the end node is a transformation node
-            add_to_expression!(net_production(_start_node)[t], -flow(e)[t])
-            for i in 1:length(_st_coeff)
-                add_to_expression!(
-                stochiometry_balance(_end_node)[i,t],
-                _st_coeff[i] * flow(e)[t],
-                )
-            end
-        elseif isa(_end_node, AbstractNode)
-            #### The end node is a demand node and the start node is a transformation node
-            add_to_expression!(net_production(_end_node)[t], flow(e)[t])
-            for i in 1:length(_st_coeff)
-                add_to_expression!(
-                    stochiometry_balance(_start_node)[i,t],
-                    -_st_coeff[i] * flow(e)[t],
-                )
-            end
-        else
-            error(
-                "Either the start or end node of a transformation edge has to be a transformation node",
-            )
+
+        add_to_expression!(net_production(e_node)[t], dir_coeff * flow(e)[t])
+
+        for i in 1:length(e_st_coeff)
+            add_to_expression!(stochiometry_balance(e)[i,t], dir_coeff * e_st_coeff[i] * flow(e)[t])
         end
 
         if variable_om_cost(e)>0
