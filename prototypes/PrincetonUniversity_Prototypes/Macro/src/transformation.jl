@@ -95,7 +95,7 @@ function add_operation_variables!(g::AbstractTransformation,model::Model)
 
     g.operation_expr[:stoichiometry_balance] = @expression(model, [i in 1:number_of_stoichiometry_balances(g), t in time_interval(g)], 0 * model[:vREF])
 
-    add_operation_variables!.(edges(g),model)
+    add_operation_variables!.(edges(g),Ref(model))
 
 end
 
@@ -124,13 +124,13 @@ function add_planning_variables!(e::AbstractTransformationEdge, model::Model)
         ### This constraint is just to set the auxiliary capacity variable. Capacity variable could be an expression if we don't want to have this constraint.
         @constraint(
             model,
-            capacity(e) == new_capacity(e) - ret_capacity(e) + existing_capacity(e)
+            capacity(e) == capacity_size(e)*(new_capacity(e) - ret_capacity(e)) + existing_capacity(e)
         )
 
         if !can_expand(e)
             fix(new_capacity(e), 0.0; force = true)
         else
-            add_to_expression!(model[:eFixedCost], investment_cost(e) * new_capacity(e))
+            add_to_expression!(model[:eFixedCost], investment_cost(e) * capacity_size(e)*new_capacity(e))
         end
 
         if !can_retire(e)
@@ -158,14 +158,17 @@ function add_operation_variables!(e::AbstractTransformationEdge, model::Model)
     dir_coeff =  (direction(e) == :input) ? -1 : (direction(e) == :output) ? 1 : error("Invalid TEdge direction")
 
     e_st_coeff = st_coeff(e);
+    
     e_node = node(e);
+
+    directional_flow = dir_coeff * flow(e);
+
+    add_to_expression!.(net_production(e_node),directional_flow)
 
     for t in time_interval(e)
 
-        add_to_expression!(net_production(e_node)[t], dir_coeff * flow(e)[t])
-
         for i in 1:length(e_st_coeff)
-            add_to_expression!(stoichiometry_balance(e)[i,t], dir_coeff * e_st_coeff[i] * flow(e)[t])
+            add_to_expression!(stoichiometry_balance(e)[i,t], e_st_coeff[i]*directional_flow[t])
         end
 
         if variable_om_cost(e)>0
@@ -173,6 +176,7 @@ function add_operation_variables!(e::AbstractTransformationEdge, model::Model)
         end
 
     end
+
 
     return nothing
 end

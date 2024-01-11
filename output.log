@@ -1,0 +1,23 @@
+┌ Error: Some duplicate column names detected in the header of c:\Users\pecci\Code\MACRO-dev\prototypes\PrincetonUniversity_Prototypes\Macro\ExampleSystems\Dolphyn_3Zone_SmallNewEngland\Generators_data.csv: SubString{String}["LDS"].
+│ Duplicate column names may cause errors, as only the first is used.
+└ @ Dolphyn C:\Users\pecci\.julia\packages\Dolphyn\QyHqs\src\GenX\src\load_inputs\load_dataframe.jl:64
+┌ Info: 2024-01-11 10:22:34 Reading H2 Input CSV Files
+└ @ Dolphyn C:\Users\pecci\.julia\packages\Dolphyn\QyHqs\src\core\print_and_log.jl:29
+┌ Info: 2024-01-11 10:22:35 HSC_load_data.csv Successfully Read!
+└ @ Dolphyn C:\Users\pecci\.julia\packages\Dolphyn\QyHqs\src\core\print_and_log.jl:29
+┌ Info: 2024-01-11 10:22:35 HSC_generators_variability.csv Successfully Read!
+└ @ Dolphyn C:\Users\pecci\.julia\packages\Dolphyn\QyHqs\src\core\print_and_log.jl:29
+┌ Info: 2024-01-11 10:22:36 HSC_pipelines.csv Successfully Read!
+└ @ Dolphyn C:\Users\pecci\.julia\packages\Dolphyn\QyHqs\src\core\print_and_log.jl:29
+┌ Info: 2024-01-11 10:22:36 HSC_zone_truck_distances_miles.csv Successfully Read!
+└ @ Dolphyn C:\Users\pecci\.julia\packages\Dolphyn\QyHqs\src\core\print_and_log.jl:29
+┌ Info: 2024-01-11 10:22:36 HSC_trucks.csv Successfully Read!
+└ @ Dolphyn C:\Users\pecci\.julia\packages\Dolphyn\QyHqs\src\core\print_and_log.jl:29
+┌ Info: 2024-01-11 10:22:36 HSC_g2p_variability.csv Successfully Read!
+└ @ Dolphyn C:\Users\pecci\.julia\packages\Dolphyn\QyHqs\src\core\print_and_log.jl:29
+┌ Info: 2024-01-11 10:22:36 HSC Input CSV Files Successfully Read In From c:\Users\pecci\Code\MACRO-dev\prototypes\PrincetonUniversity_Prototypes\Macro\ExampleSystems\Dolphyn_3Zone_SmallNewEngland\
+└ @ Dolphyn C:\Users\pecci\.julia\packages\Dolphyn\QyHqs\src\core\print_and_log.jl:29
+┌ Info: Precompiling Macro [260b7737-bf0e-4e84-9335-3af14438b1f5]
+└ @ Base loading.jl:2180
+┌ Info: Dolphyn data successfully read in into MACRO
+└ @ Macro c:\Users\pecci\Code\MACRO-dev\prototypes\PrincetonUniversity_Prototypes\Macro\src\input_translation\dolphyn_to_macro.jl:732

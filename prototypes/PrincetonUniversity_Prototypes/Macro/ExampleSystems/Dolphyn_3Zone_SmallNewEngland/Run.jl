@@ -24,30 +24,30 @@ if setup["ModelH2"] == 1
     inputs = load_h2_inputs(inputs, setup, inputs_path)
 end
 
-dfGen = inputs["dfGen"]
-dfH2Gen = inputs["dfH2Gen"]
-dfH2G2P = inputs["dfH2G2P"]
+#dolphyn_model = Dolphyn.generate_model(setup, inputs, OPTIMIZER)
+#optimize!(dolphyn_model)
 
-#EP = generate_model(setup, inputs, OPTIMIZER)
-
-using Macro
+using Macro, BenchmarkTools
 
 macro_inputs, macro_settings = dolphyn_to_macro(inputs,settings_path);
 
 model = Macro.generate_model(macro_inputs);
 
-# using JuMP, Gurobi
-# set_optimizer(model,Gurobi.Optimizer)
-# optimize!(model)
-compute_conflict!(model)
-list_of_conflicting_constraints = ConstraintRef[];
-for (F, S) in list_of_constraint_types(model)
-    for con in all_constraints(model, F, S)
-        if get_attribute(con, MOI.ConstraintConflictStatus()) == MOI.IN_CONFLICT
-            push!(list_of_conflicting_constraints, con)
-        end
-    end
-end
-display(list_of_conflicting_constraints)
+b_model_building = @benchmark Macro.generate_model($macro_inputs);
+
+using JuMP, Gurobi
+set_optimizer(model,Gurobi.Optimizer)
+optimize!(model)
+
+# compute_conflict!(model)
+# list_of_conflicting_constraints = ConstraintRef[];
+# for (F, S) in list_of_constraint_types(model)
+#     for con in all_constraints(model, F, S)
+#         if get_attribute(con, MOI.ConstraintConflictStatus()) == MOI.IN_CONFLICT
+#             push!(list_of_conflicting_constraints, con)
+#         end
+#     end
+# end
+# display(list_of_conflicting_constraints)
 
 println()

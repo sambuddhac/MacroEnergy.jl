@@ -80,13 +80,13 @@ function add_planning_variables!(g::AbstractResource, model::Model)
         ### This constraint is just to set the auxiliary capacity variable. Capacity variable could be an expression if we don't want to have this constraint.
         @constraint(
             model,
-            capacity(g) == new_capacity(g) - ret_capacity(g) + existing_capacity(g)
+            capacity(g) == capacity_size(g)*(new_capacity(g) - ret_capacity(g)) + existing_capacity(g)
         )
 
         if !can_expand(g)
             fix(new_capacity(g), 0.0; force = true)
         else
-            add_to_expression!(model[:eFixedCost], investment_cost(g) * new_capacity(g))
+            add_to_expression!(model[:eFixedCost], investment_cost(g) * capacity_size(g)*new_capacity(g))
         end
 
         if !can_retire(g)
@@ -112,9 +112,11 @@ function add_operation_variables!(g::AbstractResource, model::Model)
         base_name = "vINJ_$(commodity_type(g))_$(get_id(g))"
     )
 
+    add_to_expression!.(net_production(n), injection(g))
+
     for t in time_interval(g)
 
-        add_to_expression!(net_production(n)[t], injection(g)[t])
+        # add_to_expression!(net_production(n)[t], injection(g)[t])
 
         if !isempty(price(g))
             add_to_expression!(model[:eVariableCost], price(g)[t] * injection(g)[t])
@@ -158,9 +160,11 @@ function add_operation_variables!(g::Sink, model::Model)
         base_name = "vWDW_$(commodity_type(g))_$(get_id(g))"
     )
 
+    add_to_expression!.(net_production(n), -withdrawal(g))
+
     for t in time_interval(g)
 
-        add_to_expression!(net_production(n)[t], -withdrawal(g)[t])
+        #add_to_expression!(net_production(n)[t], -withdrawal(g)[t])
 
         if !isempty(price(g))
             add_to_expression!(model[:eVariableCost], price(g)[t] *withdrawal(g)[t])

@@ -334,17 +334,12 @@ function create_transformations_from_dolphyn(
     subperiods_commodity_map::Dict)
 
     dfGen = dolphyn_inputs["dfGen"]
-    #dfH2Gen = dolphyn_inputs["dfH2Gen"]
-    #dfH2G2P = dolphyn_inputs["dfH2G2P"]
 
     transformations = Vector{Transformation{NaturalGasPower}}()  
 
     for i in 1:size(dfGen,1)
 
         if occursin("natural_gas",dfGen.Resource[i])
-            electricity_node = node_d[Electricity][dfGen.Zone[i]];
-            natural_gas_node = node_d[NaturalGas][dfGen.Zone[i]];   
-            co2_node = node_d[CO2][1];
 
             transformation = Transformation{NaturalGasPower}(;
                 id = Symbol(dfGen.Resource[i]),
@@ -354,7 +349,7 @@ function create_transformations_from_dolphyn(
             
             push!(transformation.TEdges,TEdge{Electricity}(;
             id = Symbol(dfGen.Resource[i]*"_E"),
-            node = electricity_node,
+            node = node_d[Electricity][dfGen.Zone[i]],
             transformation = transformation,
             direction = :output,
             has_planning_variables = true,
@@ -383,7 +378,7 @@ function create_transformations_from_dolphyn(
 
             push!(transformation.TEdges,TEdge{NaturalGas}(;
             id = Symbol(dfGen.Resource[i]*"_NG"),
-            node = natural_gas_node,
+            node = node_d[NaturalGas][dfGen.Zone[i]],
             transformation = transformation,
             direction = :input,
             has_planning_variables = false,
@@ -394,7 +389,7 @@ function create_transformations_from_dolphyn(
             
             push!(transformation.TEdges,TEdge{CO2}(;
             id = Symbol(dfGen.Resource[i]*"_CO2"),
-            node = co2_node,
+            node = node_d[CO2][1],
             transformation = transformation,
             direction = :output,
             has_planning_variables = false,

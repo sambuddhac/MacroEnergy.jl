@@ -49,7 +49,6 @@ Base.@kwdef mutable struct SymmetricStorage{T} <: AbstractStorage{T}
     subperiods::Vector{StepRange{Int64,Int64}}
     #### Fields with defaults
     capacity_factor::Vector{Float64} = ones(length(time_interval))
-    capacity_size::Float64 = 1.0
     min_capacity::Float64 = 0.0
     max_capacity::Float64 = Inf
     min_capacity_storage::Float64 = 0.0
@@ -88,7 +87,6 @@ Base.@kwdef mutable struct AsymmetricStorage{T} <: AbstractStorage{T}
     subperiods::Vector{StepRange{Int64,Int64}}
     #### Fields with defaults
     capacity_factor::Vector{Float64} = ones(length(time_interval))
-    capacity_size::Float64 = 1.0
     min_capacity::Float64 = 0.0
     max_capacity::Float64 = Inf
     existing_capacity::Float64 = 0.0
