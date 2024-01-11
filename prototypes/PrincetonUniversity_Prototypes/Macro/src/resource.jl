@@ -9,6 +9,7 @@ abstract type AbstractResource{T<:Commodity} end
 
 # Resource interface
 commodity_type(g::AbstractResource{T}) where {T} = T;
+capacity_size(g::AbstractResource) = g.capacity_size;
 time_interval(g::AbstractResource) = g.time_interval;
 subperiods(g::AbstractResource) = g.subperiods;
 existing_capacity(g::AbstractResource) = g.existing_capacity;
@@ -35,6 +36,7 @@ Base.@kwdef mutable struct Resource{T} <: AbstractResource{T}
     id::Symbol
     #### Optional fields - (fields with defaults)
     capacity_factor::Vector{Float64} = Float64[]
+    capacity_size::Float64 = 1.0
     price::Vector{Float64} = Float64[]
     time_interval::StepRange{Int64,Int64} = 1:1
     subperiods::Vector{StepRange{Int64,Int64}} = StepRange{Int64,Int64}[]
@@ -54,48 +56,51 @@ end
 # add_variable  functions
 function add_planning_variables!(g::AbstractResource, model::Model)
 
-    g.planning_vars[:new_capacity] = @variable(
+    if existing_capacity(g) == Inf
+        return nothing
+    else
+        g.planning_vars[:new_capacity] = @variable(
         model,
         lower_bound = 0.0,
         base_name = "vNEWCAP_$(commodity_type(g))_$(get_id(g))"
-    )
+        )
 
-    g.planning_vars[:ret_capacity] = @variable(
+        g.planning_vars[:ret_capacity] = @variable(
         model,
         lower_bound = 0.0,
         base_name = "vRETCAP_$(commodity_type(g))_$(get_id(g))"
-    )
+        )
 
-    g.planning_vars[:capacity] = @variable(
+        g.planning_vars[:capacity] = @variable(
         model,
         lower_bound = 0.0,
         base_name = "vCAP_$(commodity_type(g))_$(get_id(g))"
-    )
+        )
 
-    ### This constraint is just to set the auxiliary capacity variable. Capacity variable could be an expression if we don't want to have this constraint.
-    @constraint(
-        model,
-        capacity(g) == new_capacity(g) - ret_capacity(g) + existing_capacity(g)
-    )
+        ### This constraint is just to set the auxiliary capacity variable. Capacity variable could be an expression if we don't want to have this constraint.
+        @constraint(
+            model,
+            capacity(g) == new_capacity(g) - ret_capacity(g) + existing_capacity(g)
+        )
 
-    if !can_expand(g)
-        fix(new_capacity(g), 0.0; force = true)
-    else
-        add_to_expression!(model[:eFixedCost], investment_cost(g) * new_capacity(g))
+        if !can_expand(g)
+            fix(new_capacity(g), 0.0; force = true)
+        else
+            add_to_expression!(model[:eFixedCost], investment_cost(g) * new_capacity(g))
+        end
+
+        if !can_retire(g)
+            fix(ret_capacity(g), 0.0; force = true)
+        end
+
+        if fixed_om_cost(g)>0
+            add_to_expression!(model[:eFixedCost], fixed_om_cost(g) * capacity(g))
+        end
+
+        return nothing
     end
-
-    if !can_retire(g)
-        fix(ret_capacity(g), 0.0; force = true)
-    end
-
-    if fixed_om_cost(g)>0
-        add_to_expression!(model[:eFixedCost], fixed_om_cost(g) * capacity(g))
-    end
-
-    return nothing
 
 end
-
 
 function add_operation_variables!(g::AbstractResource, model::Model)
     n = node(g)
@@ -123,3 +128,46 @@ function add_operation_variables!(g::AbstractResource, model::Model)
 
     return nothing
 end
+
+Base.@kwdef mutable struct Sink{T} <: AbstractResource{T}
+    ### Mandatory fields: (fields without defaults)
+    node::AbstractNode{T}
+    id::Symbol
+    #### Optional fields - (fields with defaults)
+    price::Vector{Float64} = Float64[]
+    time_interval::StepRange{Int64,Int64} = 1:1
+    subperiods::Vector{StepRange{Int64,Int64}} = StepRange{Int64,Int64}[]
+    operation_vars::Dict = Dict{Symbol,Any}()
+    constraints::Vector{AbstractTypeConstraint} = []
+end
+withdrawal(g::Sink) = g.operation_vars[:withdrawal];
+
+function add_planning_variables!(g::Sink, model::Model)
+    
+    return nothing
+
+end
+
+function add_operation_variables!(g::Sink, model::Model)
+    n = node(g)
+
+    g.operation_vars[:withdrawal] = @variable(
+        model,
+        [t in time_interval(g)],
+        lower_bound = 0.0,
+        base_name = "vWDW_$(commodity_type(g))_$(get_id(g))"
+    )
+
+    for t in time_interval(g)
+
+        add_to_expression!(net_production(n)[t], -withdrawal(g)[t])
+
+        if !isempty(price(g))
+            add_to_expression!(model[:eVariableCost], price(g)[t] *withdrawal(g)[t])
+        end
+    end
+
+    return nothing
+end
+
+

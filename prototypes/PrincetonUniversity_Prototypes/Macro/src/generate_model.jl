@@ -11,7 +11,9 @@ function generate_model(inputs::InputData)
         reduce(vcat, [inputs.storage[c].a for c in keys(inputs.storage)])
     ]
 
-    components = [resources; storage; edges]
+    transformations = reduce(vcat, [inputs.transformations[c] for c in keys(inputs.transformations)]);
+
+    components = [resources; storage; edges; transformations]
 
     system = [nodes; components]
 

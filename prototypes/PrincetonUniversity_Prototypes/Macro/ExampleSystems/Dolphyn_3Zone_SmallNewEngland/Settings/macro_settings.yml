@@ -8,6 +8,9 @@ Commodities:
     NaturalGas:
         HoursPerTimeStep: 1
         HoursPerSubperiod: 168
+    CO2:
+        HoursPerTimeStep: 1
+        HoursPerSubperiod: 168
 PeriodLength: 8760
 
 

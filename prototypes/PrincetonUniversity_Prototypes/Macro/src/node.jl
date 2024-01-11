@@ -81,7 +81,7 @@ function add_operation_variables!(n::AbstractNode, model::Model)
     return nothing
 end
 
-function add_operation_variables!(n::SourceNode, model::Model)
+function add_operation_variables!(n::Union{SourceNode,SinkNode}, model::Model)
 
     n.operation_expr[:net_production] =
         @expression(model, [t in time_interval(n)], 0 * model[:vREF])

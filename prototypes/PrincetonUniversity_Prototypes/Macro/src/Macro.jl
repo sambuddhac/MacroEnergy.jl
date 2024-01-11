@@ -11,8 +11,16 @@ abstract type Commodity end
 abstract type Electricity <: Commodity end
 abstract type Hydrogen <: Commodity end
 abstract type NaturalGas <: Commodity end
+abstract type CO2 <: Commodity end
 
 abstract type AbstractTypeConstraint end
+
+abstract type TransformationType end
+
+abstract type NaturalGasPower <: TransformationType  end
+abstract type NaturalGasHydrogen <: TransformationType  end
+abstract type FuelCell <: TransformationType end
+abstract type Electrolyzer <: TransformationType  end
 
 # type hierarchy
 
@@ -48,13 +56,23 @@ include("constraints.jl")
 export Electricity,
     Hydrogen,
     NaturalGas,
+    CO2,
+    NaturalGasPower,
+    NaturalGasHydrogen,
+    FuelCell,
+    Electrolyzer,
     Resource,
+    Sink,
     AbstractStorage,
     SymmetricStorage,
     AsymmetricStorage,
     InputFilesNames,
     Node,
+    SourceNode,
+    SinkNode,
     Edge,
+    Transformation,
+    TEdge,
     CapacityConstraint,
     configure_settings,
     add_planning_variables!,

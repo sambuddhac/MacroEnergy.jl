@@ -34,10 +34,20 @@ using Macro
 
 macro_inputs, macro_settings = dolphyn_to_macro(inputs,settings_path);
 
-# model = Macro.generate_model(macro_inputs);
+model = Macro.generate_model(macro_inputs);
 
 # using JuMP, Gurobi
-# set_optimizer(model,Gurobi.Optimizer())
+# set_optimizer(model,Gurobi.Optimizer)
 # optimize!(model)
+compute_conflict!(model)
+list_of_conflicting_constraints = ConstraintRef[];
+for (F, S) in list_of_constraint_types(model)
+    for con in all_constraints(model, F, S)
+        if get_attribute(con, MOI.ConstraintConflictStatus()) == MOI.IN_CONFLICT
+            push!(list_of_conflicting_constraints, con)
+        end
+    end
+end
+display(list_of_conflicting_constraints)
 
 println()

@@ -1,4 +1,4 @@
-abstract type AbstractTransformation end
+abstract type AbstractTransformation{T<:TransformationType} end
 
 abstract type AbstractTransformationEdge{T<:Commodity} end
 Base.@kwdef mutable struct TEdge{T} <: AbstractTransformationEdge{T}
@@ -7,6 +7,9 @@ Base.@kwdef mutable struct TEdge{T} <: AbstractTransformationEdge{T}
     transformation::AbstractTransformation
     direction::Symbol = :input
     has_planning_variables::Bool = false
+    can_retire::Bool = false
+    can_expand::Bool = false 
+    capacity_size :: Float64 = 1.0
     time_interval::StepRange{Int64,Int64} = 1:1
     subperiods::Vector{StepRange{Int64,Int64}} = StepRange{Int64,Int64}[]
     st_coeff::Vector{Float64} = Float64[]
@@ -30,22 +33,21 @@ Base.@kwdef mutable struct TEdge{T} <: AbstractTransformationEdge{T}
     constraints::Vector{AbstractTypeConstraint} = []
 end
 
-Base.@kwdef mutable struct Transformation <: AbstractTransformation
+Base.@kwdef mutable struct Transformation{T} <: AbstractTransformation{T}
     id::Symbol
     time_interval::StepRange{Int64,Int64}
     number_of_stoichiometry_balances::Int64
-    TEdges::Vector{AbstractTransformationEdge}
+    TEdges::Vector{TEdge} = TEdge[]
     operation_expr::Dict = Dict()
-    constraints::Vector{AbstractTypeConstraint} =
-        [StochiometryBalanceConstraint()]
+    constraints::Vector{AbstractTypeConstraint} = [StochiometryBalanceConstraint()]
 end
 
-
+transformation_type(g::AbstractTransformation{T}) where {T} = T;
 number_of_stoichiometry_balances(g::AbstractTransformation) = g.number_of_stoichiometry_balances;
 get_id(g::AbstractTransformation) = g.id;
 time_interval(g::AbstractTransformation) = g.time_interval;
 all_constraints(g::AbstractTransformation) = g.constraints;
-stochiometry_balance(g::AbstractTransformation) = g.operation_expr[:stochiometry_balance];
+stoichiometry_balance(g::AbstractTransformation) = g.operation_expr[:stoichiometry_balance];
 edges(g::AbstractTransformation) = g.TEdges;
 
 commodity_type(e::AbstractTransformationEdge{T}) where {T} = T;
@@ -54,6 +56,7 @@ subperiods(e::AbstractTransformationEdge) = e.subperiods;
 has_planning_variables(e::AbstractTransformationEdge) = e.has_planning_variables;
 direction(e::AbstractTransformationEdge) = e.direction;
 existing_capacity(e::AbstractTransformationEdge) = e.existing_capacity;
+capacity_size(e::AbstractTransformationEdge) = e.capacity_size;
 investment_cost(e::AbstractTransformationEdge) = e.investment_cost;
 fixed_om_cost(e::AbstractTransformationEdge) = e.fixed_om_cost;
 variable_om_cost(e::AbstractTransformationEdge) = e.variable_om_cost;
@@ -75,7 +78,7 @@ capacity(e::AbstractTransformationEdge) = e.planning_vars[:capacity];
 flow(e::AbstractTransformationEdge) = e.operation_vars[:flow];
 all_constraints(e::AbstractTransformationEdge) = e.constraints;
 node(e::AbstractTransformationEdge) = e.node;
-stoichiometry_balance(e::AbstractTransformationEdge) = stochiometry_balance(e.transformation);
+stoichiometry_balance(e::AbstractTransformationEdge) = stoichiometry_balance(e.transformation);
 get_id(e::AbstractTransformationEdge) = e.id;
 st_coeff(e::AbstractTransformationEdge) = e.st_coeff;
 unit_commitment(e::AbstractTransformationEdge) = e.ucommit;
@@ -90,7 +93,7 @@ end
 
 function add_operation_variables!(g::AbstractTransformation,model::Model)
 
-    g.operation_expr[:stochiometry_balance] = @expression(model, [i in 1:number_of_stoichiometry_balances(g), t in time_interval(g)], 0 * model[:vREF])
+    g.operation_expr[:stoichiometry_balance] = @expression(model, [i in 1:number_of_stoichiometry_balances(g), t in time_interval(g)], 0 * model[:vREF])
 
     add_operation_variables!.(edges(g),model)
 
@@ -162,7 +165,7 @@ function add_operation_variables!(e::AbstractTransformationEdge, model::Model)
         add_to_expression!(net_production(e_node)[t], dir_coeff * flow(e)[t])
 
         for i in 1:length(e_st_coeff)
-            add_to_expression!(stochiometry_balance(e)[i,t], dir_coeff * e_st_coeff[i] * flow(e)[t])
+            add_to_expression!(stoichiometry_balance(e)[i,t], dir_coeff * e_st_coeff[i] * flow(e)[t])
         end
 
         if variable_om_cost(e)>0
