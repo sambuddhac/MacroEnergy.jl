@@ -206,8 +206,8 @@ function add_planning_variables!(g::SymmetricStorage, model::Model)
         fix(new_capacity(g), 0.0; force = true)
         fix(new_capacity_storage(g), 0.0; force = true)
     else
-        add_to_expression!(model[:eFixedCost],investment_cost(g) * new_capacity(g)) 
-        add_to_expression!(model[:eFixedCost],investment_cost_storage(g) * new_capacity_storage(g)) 
+        add_to_expression!(model[:eFixedCost],investment_cost(g), new_capacity(g)) 
+        add_to_expression!(model[:eFixedCost],investment_cost_storage(g), new_capacity_storage(g)) 
     end
 
     if !g.can_retire
@@ -216,11 +216,11 @@ function add_planning_variables!(g::SymmetricStorage, model::Model)
     end
 
     if fixed_om_cost(g)>0
-        add_to_expression!(model[:eFixedCost],fixed_om_cost(g) * capacity(g))
+        add_to_expression!(model[:eFixedCost],fixed_om_cost(g), capacity(g))
     end
 
     if fixed_om_cost_storage(g)>0
-        add_to_expression!(model[:eFixedCost],fixed_om_cost_storage(g) * capacity_storage(g))
+        add_to_expression!(model[:eFixedCost],fixed_om_cost_storage(g), capacity_storage(g))
     end
 
     return nothing
@@ -309,9 +309,9 @@ function add_planning_variables!(g::AsymmetricStorage, model::Model)
         fix(new_capacity_storage(g), 0.0; force = true)
         fix(new_capacity_withdrawal(g), 0.0; force = true)
     else
-        add_to_expression!(model[:eFixedCost],investment_cost(g) * new_capacity(g)) 
-        add_to_expression!(model[:eFixedCost],investment_cost_storage(g) * new_capacity_storage(g)) 
-        add_to_expression!(model[:eFixedCost],investment_cost_withdrawal(g) * new_capacity_withdrawal(g)) 
+        add_to_expression!(model[:eFixedCost],investment_cost(g), new_capacity(g)) 
+        add_to_expression!(model[:eFixedCost],investment_cost_storage(g), new_capacity_storage(g)) 
+        add_to_expression!(model[:eFixedCost],investment_cost_withdrawal(g), new_capacity_withdrawal(g)) 
     end
 
     if !g.can_retire
@@ -321,15 +321,15 @@ function add_planning_variables!(g::AsymmetricStorage, model::Model)
     end
 
     if fixed_om_cost(g)>0
-        add_to_expression!(model[:eFixedCost],fixed_om_cost(g) * capacity(g))
+        add_to_expression!(model[:eFixedCost],fixed_om_cost(g), capacity(g))
     end
 
     if fixed_om_cost_storage(g)>0
-        add_to_expression!(model[:eFixedCost],fixed_om_cost_storage(g) * capacity_storage(g))
+        add_to_expression!(model[:eFixedCost],fixed_om_cost_storage(g), capacity_storage(g))
     end
 
     if fixed_om_cost_withdrawal(g)>0
-        add_to_expression!(model[:eFixedCost],fixed_om_cost_withdrawal(g) * capacity_withdrawal(g))
+        add_to_expression!(model[:eFixedCost],fixed_om_cost_withdrawal(g), capacity_withdrawal(g))
     end
 
     return nothing
@@ -383,8 +383,9 @@ function add_operation_variables!(g::AbstractStorage, model::Model)
         efficiency_injection(g) * injection(g)[t] - efficiency_withdrawal(g) * withdrawal(g)[t]
     )
 
-    unregister(model, :aux_expr)
-
+    #delete(model,model[:aux_expr])
+    #unregister(model, :aux_expr)
+    
     n = node(g)
 
     for t in time_interval(g)
@@ -395,11 +396,11 @@ function add_operation_variables!(g::AbstractStorage, model::Model)
         )
 
         if variable_om_cost(g)>0
-            add_to_expression!(model[:eVariableCost], variable_om_cost(g) * injection(g)[t])
+            add_to_expression!(model[:eVariableCost], variable_om_cost(g), injection(g)[t])
         end
 
         if variable_om_cost_withdrawal(g)>0
-            add_to_expression!(model[:eVariableCost], variable_om_cost_withdrawal(g) * withdrawal(g)[t])
+            add_to_expression!(model[:eVariableCost], variable_om_cost_withdrawal(g), withdrawal(g)[t])
         end
         
     end

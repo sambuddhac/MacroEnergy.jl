@@ -73,7 +73,7 @@ function add_operation_variables!(n::AbstractNode, model::Model)
 
     for t in time_interval(n)
         for s in segments_non_served_demand(n)
-            add_to_expression!(model[:eVariableCost], price_non_served_demand(n)[s]*non_served_demand(n)[s,t])
+            add_to_expression!(model[:eVariableCost], price_non_served_demand(n)[s], non_served_demand(n)[s,t])
             add_to_expression!(net_production(n)[t], non_served_demand(n)[s,t])
         end
     end

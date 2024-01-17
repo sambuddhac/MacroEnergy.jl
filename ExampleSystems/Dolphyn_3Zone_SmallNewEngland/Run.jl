@@ -35,9 +35,9 @@ model = Macro.generate_model(macro_inputs);
 
 b_model_building = @benchmark Macro.generate_model($macro_inputs);
 
-using JuMP, Gurobi
-set_optimizer(model,Gurobi.Optimizer)
-optimize!(model)
+# using JuMP, Gurobi
+# set_optimizer(model,Gurobi.Optimizer)
+# optimize!(model)
 
 # compute_conflict!(model)
 # list_of_conflicting_constraints = ConstraintRef[];

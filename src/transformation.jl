@@ -95,7 +95,7 @@ function add_operation_variables!(g::AbstractTransformation,model::Model)
 
     g.operation_expr[:stoichiometry_balance] = @expression(model, [i in 1:number_of_stoichiometry_balances(g), t in time_interval(g)], 0 * model[:vREF])
 
-    add_operation_variables!.(edges(g),Ref(model))
+    add_operation_variables!.(edges(g),model)
 
 end
 
@@ -130,7 +130,7 @@ function add_planning_variables!(e::AbstractTransformationEdge, model::Model)
         if !can_expand(e)
             fix(new_capacity(e), 0.0; force = true)
         else
-            add_to_expression!(model[:eFixedCost], investment_cost(e) * capacity_size(e)*new_capacity(e))
+            add_to_expression!(model[:eFixedCost], investment_cost(e) *capacity_size(e), new_capacity(e))
         end
 
         if !can_retire(e)
@@ -138,7 +138,7 @@ function add_planning_variables!(e::AbstractTransformationEdge, model::Model)
         end
 
         if fixed_om_cost(e)>0
-            add_to_expression!(model[:eFixedCost], fixed_om_cost(e) * capacity(e))
+            add_to_expression!(model[:eFixedCost], fixed_om_cost(e), capacity(e))
         end
     end
 
@@ -168,11 +168,11 @@ function add_operation_variables!(e::AbstractTransformationEdge, model::Model)
     for t in time_interval(e)
 
         for i in 1:length(e_st_coeff)
-            add_to_expression!(stoichiometry_balance(e)[i,t], e_st_coeff[i]*directional_flow[t])
+            add_to_expression!(stoichiometry_balance(e)[i,t], e_st_coeff[i], directional_flow[t])
         end
 
         if variable_om_cost(e)>0
-            add_to_expression!(model[:eVariableCost], variable_om_cost(e) * flow(e)[t])
+            add_to_expression!(model[:eVariableCost], variable_om_cost(e), flow(e)[t])
         end
 
     end

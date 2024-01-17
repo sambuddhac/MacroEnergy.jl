@@ -86,7 +86,7 @@ function add_planning_variables!(g::AbstractResource, model::Model)
         if !can_expand(g)
             fix(new_capacity(g), 0.0; force = true)
         else
-            add_to_expression!(model[:eFixedCost], investment_cost(g) * capacity_size(g)*new_capacity(g))
+            add_to_expression!(model[:eFixedCost], investment_cost(g)*capacity_size(g), new_capacity(g))
         end
 
         if !can_retire(g)
@@ -94,7 +94,7 @@ function add_planning_variables!(g::AbstractResource, model::Model)
         end
 
         if fixed_om_cost(g)>0
-            add_to_expression!(model[:eFixedCost], fixed_om_cost(g) * capacity(g))
+            add_to_expression!(model[:eFixedCost], fixed_om_cost(g), capacity(g))
         end
 
         return nothing
@@ -119,11 +119,11 @@ function add_operation_variables!(g::AbstractResource, model::Model)
         # add_to_expression!(net_production(n)[t], injection(g)[t])
 
         if !isempty(price(g))
-            add_to_expression!(model[:eVariableCost], price(g)[t] * injection(g)[t])
+            add_to_expression!(model[:eVariableCost], price(g)[t], injection(g)[t])
         end
 
         if variable_om_cost(g)>0
-            add_to_expression!(model[:eVariableCost], variable_om_cost(g) * injection(g)[t])
+            add_to_expression!(model[:eVariableCost], variable_om_cost(g), injection(g)[t])
         end
 
     end
@@ -167,7 +167,7 @@ function add_operation_variables!(g::Sink, model::Model)
         #add_to_expression!(net_production(n)[t], -withdrawal(g)[t])
 
         if !isempty(price(g))
-            add_to_expression!(model[:eVariableCost], price(g)[t] *withdrawal(g)[t])
+            add_to_expression!(model[:eVariableCost], price(g)[t], withdrawal(g)[t])
         end
     end
 

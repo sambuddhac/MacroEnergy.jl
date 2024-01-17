@@ -67,7 +67,7 @@ function add_planning_variables!(e::AbstractEdge, model::Model)
     if !can_expand(e)
         fix(new_capacity(e), 0.0; force = true)
     else
-        add_to_expression!(model[:eFixedCost], line_reinforcement_cost(e) * new_capacity(e))
+        add_to_expression!(model[:eFixedCost], line_reinforcement_cost(e), new_capacity(e))
     end
 
     return nothing
