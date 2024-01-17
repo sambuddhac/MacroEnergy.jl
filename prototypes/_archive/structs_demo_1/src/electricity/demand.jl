@@ -11,7 +11,7 @@ function loadElecDemand(filepath)
     elec_demands = Vector(elec_demand)
     df = CSV.read(filepath, DataFrame)
     for (name, col) in pairs(eachcol(df))
-        elec_demands = push!(elec_demands, elec_demand(zone=name, demand=col))
+        elec_demands = push!(elec_demands, elec_demand(zone = name, demand = col))
     end
     return elec_demands
 end

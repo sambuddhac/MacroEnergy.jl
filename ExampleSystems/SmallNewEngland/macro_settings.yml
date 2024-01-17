@@ -1,0 +1,16 @@
+Commodities:
+    Electricity:
+        InputDataPath: "ExampleSystems/SmallNewEngland/Electricity"
+        HoursPerTimeStep: 1
+        HoursPerSubperiod: 168
+    Hydrogen:
+        InputDataPath: "ExampleSystems/SmallNewEngland/Hydrogen"
+        HoursPerTimeStep: 1
+        HoursPerSubperiod: 168
+    NaturalGas:
+        InputDataPath: "ExampleSystems/SmallNewEngland/NaturalGas"
+        HoursPerTimeStep: 1
+        HoursPerSubperiod: 168
+PeriodLength: 8760
+
+
