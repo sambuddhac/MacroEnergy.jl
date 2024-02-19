@@ -22,6 +22,7 @@ function create_nodes_from_dolphyn(
             subperiods = subperiods,
             max_nsd = max_nsd,
             price_nsd = price_nsd,
+            constraints = [DemandBalanceConstraint(),MaxNonServedDemandConstraint()]
         )
         push!(nodes, node)
     end
@@ -37,16 +38,27 @@ function create_nodes_from_dolphyn(
    
     # read number of nodes and demand from dolphyn inputs
     n_nodes = dolphyn_inputs["Z"]
-      
+
+    dfGen = dolphyn_inputs["dfGen"];
+
     # create nodes
     nodes = Vector{SourceNode{NaturalGas}}()
 
+    fuel_costs = dolphyn_inputs["fuel_costs"];
+    
     for i in 1:n_nodes
+
+        gen_at_node = dfGen[dfGen.Zone.==i,:];
+
+        ng = findfirst(occursin.("natural_gas",gen_at_node.Resource));
+
         node = SourceNode{NaturalGas}(;
         id = Symbol("NG_node_", i),
         time_interval = time_interval,
-        subperiods = subperiods
+        subperiods = subperiods,
+        price = fuel_costs[gen_at_node[ng,:Fuel]][time_interval],
         )
+
         push!(nodes, node)
     end
 
@@ -65,7 +77,7 @@ function create_nodes_from_dolphyn(
     nodes = [SinkNode{CO2}(;
         id = Symbol("CO2_node_", 1),
         time_interval = time_interval,
-        subperiods = subperiods
+        subperiods = subperiods,
         )]
 
     return nodes
@@ -96,6 +108,7 @@ function create_nodes_from_dolphyn(
             subperiods = subperiods,
             max_nsd = max_nsd,
             price_nsd = price_nsd,
+            constraints = [DemandBalanceConstraint(),MaxNonServedDemandConstraint()]
         )
         push!(nodes, node)
     end
@@ -124,6 +137,7 @@ function create_networks_from_dolphyn(
         line_reinforcement_cost = dolphyn_inputs["pC_Line_Reinforcement"][i],
         can_expand = in(i,dolphyn_inputs["EXPANSION_LINES"]),
         line_loss_percentage = dolphyn_inputs["pTrans_Loss_Coef"][i],
+        constraints=[CapacityConstraint()]
         )
 
         push!(network,edge)
@@ -174,6 +188,7 @@ function create_resources_from_dolphyn(
             time_interval = time_interval,
             subperiods = subperiods,
             capacity_factor = capacity_factor[i,time_interval],
+            constraints=[CapacityConstraint()],
             row...,
         )
             push!(resources, resource)
@@ -182,54 +197,55 @@ function create_resources_from_dolphyn(
     return resources
 end
 
-function create_resources_from_dolphyn(
-    dolphyn_inputs::Dict,
-    nodes::Vector{SourceNode{NaturalGas}},
-    time_interval::StepRange{Int64,Int64},
-    subperiods::Vector{StepRange{Int64,Int64}},
-)
-    dfGen = dolphyn_inputs["dfGen"];
-    fuel_costs = dolphyn_inputs["fuel_costs"];
+# function create_resources_from_dolphyn(
+#     dolphyn_inputs::Dict,
+#     nodes::Vector{SourceNode{NaturalGas}},
+#     time_interval::StepRange{Int64,Int64},
+#     subperiods::Vector{StepRange{Int64,Int64}},
+# )
+#     dfGen = dolphyn_inputs["dfGen"];
+#     fuel_costs = dolphyn_inputs["fuel_costs"];
     
-    resources = Vector{Resource{NaturalGas}}()
+#     resources = Vector{Resource{NaturalGas}}()
 
-    for n in 1:dolphyn_inputs["Z"]
-        gen_at_node = dfGen[dfGen.Zone.==n,:];
+#     for n in 1:dolphyn_inputs["Z"]
+#         gen_at_node = dfGen[dfGen.Zone.==n,:];
 
-        i = findfirst(occursin.("natural_gas",gen_at_node.Resource));
+#         i = findfirst(occursin.("natural_gas",gen_at_node.Resource));
 
-        push!(resources , Resource{NaturalGas}(;
-        node = nodes[n],
-        id = Symbol(gen_at_node[i,:Fuel]),
-        time_interval = time_interval,
-        subperiods = subperiods,
-        price = fuel_costs[gen_at_node[i,:Fuel]][time_interval],
-        can_expand = false,
-        can_retire = false,
-        constraints = Vector{AbstractTypeConstraint}(),
-        ))
-    end
+#         push!(resources , Resource{NaturalGas}(;
+#         node = nodes[n],
+#         id = Symbol(gen_at_node[i,:Fuel]),
+#         time_interval = time_interval,
+#         subperiods = subperiods,
+#         price = fuel_costs[gen_at_node[i,:Fuel]][time_interval],
+#         can_expand = false,
+#         can_retire = false,
+#         constraints = Vector{AbstractTypeConstraint}(),
+#         ))
+#     end
   
         
-    return resources
-end
+#     return resources
+# end
 
-function create_resources_from_dolphyn(
-    dolphyn_inputs::Dict,
-    nodes::Vector{SinkNode{CO2}},
-    time_interval::StepRange{Int64,Int64},
-    subperiods::Vector{StepRange{Int64,Int64}},
-)
+# function create_resources_from_dolphyn(
+#     dolphyn_inputs::Dict,
+#     nodes::Vector{SinkNode{CO2}},
+#     time_interval::StepRange{Int64,Int64},
+#     subperiods::Vector{StepRange{Int64,Int64}},
+# )
     
-    resources = [Sink{CO2}(;
-        node = nodes[1],
-        id = :CO2_sink,
-        time_interval = time_interval,
-        subperiods = subperiods,
-        )]
+#     # resources = [Sink{CO2}(;
+#     #     node = nodes[1],
+#     #     id = :CO2_sink,
+#     #     time_interval = time_interval,
+#     #     subperiods = subperiods,
+#     #     constraints = []
+#     #     )]
           
-    return resources
-end
+#     return nothing
+# end
 
 function create_storage_from_dolphyn(
     dolphyn_inputs::Dict,
@@ -267,6 +283,7 @@ function create_storage_from_dolphyn(
                 node = node,
                 time_interval = time_interval,
                 subperiods = subperiods,
+                constraints = [CapacityConstraint(),StorageCapacityConstraint(),WithdrawalCapacityConstraint()],
                 row...,
             ))
 
@@ -310,6 +327,7 @@ function create_storage_from_dolphyn(
                 node = node,
                 time_interval = time_interval,
                 subperiods = subperiods,
+                constraints = [CapacityConstraint(),StorageCapacityConstraint()],
                 row...,
                 ))
                 
@@ -320,6 +338,7 @@ function create_storage_from_dolphyn(
                 node = node,
                 time_interval = time_interval,
                 subperiods = subperiods,
+                constraints = [CapacityConstraint(),StorageCapacityConstraint(),WithdrawalCapacityConstraint()],
                 row...,
                 ))
     end
@@ -345,6 +364,7 @@ function create_transformations_from_dolphyn(
                 id = Symbol(dfGen.Resource[i]),
                 time_interval = time_interval_commodity_map[Electricity],
                 number_of_stoichiometry_balances = 2,
+                constraints = [StoichiometryBalanceConstraint()]
                 )
             
             push!(transformation.TEdges,TEdge{Electricity}(;
@@ -427,6 +447,7 @@ function create_transformations_from_dolphyn(
                 id = Symbol(dfH2Gen.H2_Resource[i]),
                 time_interval = time_interval_commodity_map[Hydrogen],
                 number_of_stoichiometry_balances = 2,
+                constraints = [StoichiometryBalanceConstraint()]
                 )
             
             push!(transformation.TEdges,TEdge{Hydrogen}(;
@@ -510,6 +531,7 @@ function create_transformations_from_dolphyn(
                 id = Symbol(dfH2Gen.H2_Resource[i]),
                 time_interval = time_interval_commodity_map[Electricity],
                 number_of_stoichiometry_balances = 1,
+                constraints = [StoichiometryBalanceConstraint()]
                 )
             
             push!(transformation.TEdges,TEdge{Hydrogen}(;
@@ -571,16 +593,17 @@ function create_transformations_from_dolphyn(
 
     dfH2G2P = dolphyn_inputs["dfH2G2P"]
 
-    transformations = Vector{Transformation{NaturalGasPower}}()  
+    transformations = Vector{Transformation{FuelCell}}()  
 
     for i in 1:size(dfH2G2P,1)
 
         if occursin("G2P",dfH2G2P.H2_Resource[i])
 
-            transformation = Transformation{NaturalGasPower}(;
+            transformation = Transformation{FuelCell}(;
                 id = Symbol(dfH2G2P.H2_Resource[i]),
                 time_interval = time_interval_commodity_map[Electricity],
                 number_of_stoichiometry_balances = 1,
+                constraints = [StoichiometryBalanceConstraint()]
                 )
             
             push!(transformation.TEdges,TEdge{Electricity}(;
@@ -691,15 +714,15 @@ function dolphyn_to_macro(dolphyn_inputs_original_units::Dict,settings_path::Str
         end
 
         # load resources 
-        if commodity==Hydrogen
-            # Do nothing. Dolphyn does not model any hydrogen resource (hydrogen is only produced from either electricity or natural gas)
-        else
+        if commodity==Electricity
            resource_d[commodity] = create_resources_from_dolphyn(
                 dolphyn_inputs,
                 nodes,
                 time_interval,
                 subperiods,
             )
+        else
+            # Do nothing. Dolphyn does not model hydrogen/natural gas/co2 resources (hydrogen is only produced from either electricity or natural gas)
         end
 
         # load storage

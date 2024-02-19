@@ -33,7 +33,7 @@ macro_inputs, macro_settings = dolphyn_to_macro(inputs,settings_path);
 
 model = Macro.generate_model(macro_inputs);
 
-b_model_building = @benchmark Macro.generate_model($macro_inputs);
+# b_model_building = @benchmark Macro.generate_model($macro_inputs);
 
 # using JuMP, Gurobi
 # set_optimizer(model,Gurobi.Optimizer)

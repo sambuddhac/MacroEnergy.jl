@@ -21,7 +21,7 @@ Base.@kwdef mutable struct Edge{T} <: AbstractEdge{T}
     line_loss_percentage::Float64 = 0.0
     planning_vars::Dict = Dict()
     operation_vars::Dict = Dict()
-    constraints::Vector{AbstractTypeConstraint} = [CapacityConstraint()]
+    constraints::Vector{AbstractTypeConstraint} = Vector{AbstractTypeConstraint}()
 end
 
 start_node(e::AbstractEdge) = e.start_node;

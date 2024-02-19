@@ -77,7 +77,7 @@ end
 
 #     return Transformation(id = row.id,
 #         nodes = Dict(commodity_type(row[Symbol("commodity_$i")])=>row[Symbol("node_$i")] for i in 1:number_of_commodities), 
-#         stochiometry = Dict(commodity_type(row[Symbol("commodity_$i")])=>row[Symbol("stochiometry_$i")] for i in 1:number_of_commodities),
+#         stoichiometry = Dict(commodity_type(row[Symbol("commodity_$i")])=>row[Symbol("stoichiometry_$i")] for i in 1:number_of_commodities),
 #         direction =  Dict(commodity_type(row[Symbol("commodity_$i")])=>row[Symbol("direction_$i")] for i in 1:number_of_commodities), 
 #         time_interval = Dict(commodity_type(row[Symbol("commodity_$i")])=>setup["time_interval_map"][commodity_type(row[Symbol("commodity_$i")])] for i in 1:number_of_commodities), 
 #         subperiods = Dict(commodity_type(row[Symbol("commodity_$i")])=>setup["subperiod_map"][commodity_type(row[Symbol("commodity_$i")])] for i in 1:number_of_commodities), 

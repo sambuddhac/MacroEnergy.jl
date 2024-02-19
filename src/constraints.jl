@@ -18,6 +18,11 @@ Base.@kwdef mutable struct DemandBalanceConstraint <: AbstractTypeConstraint
     constraint_ref::Union{Missing,JuMPConstraint} = missing
 end
 
+Base.@kwdef mutable struct FlowBalanceConstraint <: AbstractTypeConstraint
+    value::Union{Missing,Vector{Float64}} = missing
+    lagrangian_multiplier::Union{Missing,Vector{Float64}} = missing
+    constraint_ref::Union{Missing,JuMPConstraint} = missing
+end
 
 Base.@kwdef mutable struct StorageCapacityConstraint <: AbstractTypeConstraint
     value::Union{Missing,Vector{Float64}} = missing
@@ -49,7 +54,7 @@ Base.@kwdef mutable struct MaxNonServedDemandConstraint <: AbstractTypeConstrain
     constraint_ref::Union{Missing,JuMPConstraint} = missing
 end
 
-Base.@kwdef mutable struct StochiometryBalanceConstraint <:AbstractTypeConstraint
+Base.@kwdef mutable struct StoichiometryBalanceConstraint <:AbstractTypeConstraint
     value::Union{Missing,Vector{Float64}} = missing
     lagrangian_multiplier::Union{Missing,Vector{Float64}} = missing
     constraint_ref::Union{Missing,JuMPConstraint} = missing
@@ -190,16 +195,6 @@ function add_model_constraint!(ct::DemandBalanceConstraint, n::AbstractNode, mod
 
 end
 
-function add_model_constraint!(ct::DemandBalanceConstraint, n::Union{SinkNode,SourceNode}, model::Model)
-
-    ct.constraint_ref = @constraint(
-        model,
-        [t in time_interval(n)],
-        net_production(n)[t]  == 0.0
-    )
-
-end
-
 function add_model_constraint!(
     ct::MaxNonServedDemandConstraint,
     n::AbstractNode,
@@ -216,7 +211,7 @@ end
 
 
 function add_model_constraint!(
-    ct::StochiometryBalanceConstraint,
+    ct::StoichiometryBalanceConstraint,
     g::AbstractTransformation,
     model::Model,
 )

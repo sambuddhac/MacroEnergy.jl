@@ -30,7 +30,7 @@ Base.@kwdef mutable struct TEdge{T} <: AbstractTransformationEdge{T}
     min_flow::Float64 = 0.0
     planning_vars::Dict = Dict()
     operation_vars::Dict = Dict()
-    constraints::Vector{AbstractTypeConstraint} = []
+    constraints::Vector{AbstractTypeConstraint} = Vector{AbstractTypeConstraint}()
 end
 
 Base.@kwdef mutable struct Transformation{T} <: AbstractTransformation{T}
@@ -39,7 +39,7 @@ Base.@kwdef mutable struct Transformation{T} <: AbstractTransformation{T}
     number_of_stoichiometry_balances::Int64
     TEdges::Vector{TEdge} = TEdge[]
     operation_expr::Dict = Dict()
-    constraints::Vector{AbstractTypeConstraint} = [StochiometryBalanceConstraint()]
+    constraints::Vector{AbstractTypeConstraint} = Vector{AbstractTypeConstraint}()
 end
 
 transformation_type(g::AbstractTransformation{T}) where {T} = T;

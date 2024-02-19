@@ -74,8 +74,7 @@ Base.@kwdef mutable struct SymmetricStorage{T} <: AbstractStorage{T}
     storage_loss_percentage::Float64 = 0.0
     planning_vars::Dict = Dict()
     operation_vars::Dict = Dict()
-    constraints::Vector{AbstractTypeConstraint} =
-        [CapacityConstraint(), StorageCapacityConstraint()]
+    constraints::Vector{AbstractTypeConstraint} =Vector{AbstractTypeConstraint}()
 end
 
 Base.@kwdef mutable struct AsymmetricStorage{T} <: AbstractStorage{T}
@@ -113,11 +112,7 @@ Base.@kwdef mutable struct AsymmetricStorage{T} <: AbstractStorage{T}
     existing_capacity_withdrawal::Float64 = 0.0
     investment_cost_withdrawal::Float64 = 0.0
     fixed_om_cost_withdrawal::Float64 = 0.0
-    constraints::Vector{AbstractTypeConstraint} = [
-        CapacityConstraint(),
-        StorageCapacityConstraint(),
-        WithdrawalCapacityConstraint(),
-    ]
+    constraints::Vector{AbstractTypeConstraint} = Vector{AbstractTypeConstraint}()
 end
 
 # Asymmetric Storage interface
