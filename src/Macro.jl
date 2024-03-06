@@ -11,16 +11,23 @@ abstract type Commodity end
 abstract type Electricity <: Commodity end
 abstract type Hydrogen <: Commodity end
 abstract type NaturalGas <: Commodity end
+abstract type NaturalGasFossil <: Commodity end
 abstract type CO2 <: Commodity end
+abstract type CO2_Captured <: Commodity end
+abstract type CO2_Atmosphere <: Commodity end
 
 abstract type AbstractTypeConstraint end
 
 abstract type TransformationType end
 
 abstract type NaturalGasPower <: TransformationType  end
+abstract type NaturalGasPowerCCS <: TransformationType  end
 abstract type NaturalGasHydrogen <: TransformationType  end
+abstract type NaturalGasHydrogenCCS <: TransformationType  end
 abstract type FuelCell <: TransformationType end
 abstract type Electrolyzer <: TransformationType  end
+abstract type DACElectric <: TransformationType  end
+abstract type SyntheticNG <: TransformationType  end
 
 # type hierarchy
 
@@ -56,11 +63,18 @@ include("constraints.jl")
 export Electricity,
     Hydrogen,
     NaturalGas,
+    NaturalGasFossil,
     CO2,
+    CO2_Captured,
+    CO2_Atmosphere,
     NaturalGasPower,
+    NaturalGasPowerCCS,
     NaturalGasHydrogen,
+    NaturalGasHydrogenCCS,
     FuelCell,
     Electrolyzer,
+    DACElectric,
+    SyntheticNG,
     Resource,
     Sink,
     AbstractStorage,
