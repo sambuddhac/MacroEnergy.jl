@@ -131,46 +131,43 @@ function add_operation_variables!(g::AbstractResource, model::Model)
     return nothing
 end
 
-# Base.@kwdef mutable struct Sink{T} <: AbstractResource{T}
-#     ### Mandatory fields: (fields without defaults)
-#     node::AbstractNode{T}
-#     id::Symbol
-#     #### Optional fields - (fields with defaults)
-#     price::Vector{Float64} = Float64[]
-#     time_interval::StepRange{Int64,Int64} = 1:1
-#     subperiods::Vector{StepRange{Int64,Int64}} = StepRange{Int64,Int64}[]
-#     operation_vars::Dict = Dict{Symbol,Any}()
-#     constraints::Vector{AbstractTypeConstraint} = Vector{AbstractTypeConstraint}()
-# end
-# withdrawal(g::Sink) = g.operation_vars[:withdrawal];
+Base.@kwdef mutable struct Sink{T} <: AbstractResource{T}
+    ### Mandatory fields: (fields without defaults)
+    node::AbstractNode{T}
+    id::Symbol
+    #### Optional fields - (fields with defaults)
+    price::Vector{Float64} = Float64[]
+    time_interval::StepRange{Int64,Int64} = 1:1
+    subperiods::Vector{StepRange{Int64,Int64}} = StepRange{Int64,Int64}[]
+    operation_vars::Dict = Dict{Symbol,Any}()
+    constraints::Vector{AbstractTypeConstraint} = Vector{AbstractTypeConstraint}()
+end
+withdrawal(g::Sink) = g.operation_vars[:withdrawal];
 
-# function add_planning_variables!(g::Sink, model::Model)
+function add_planning_variables!(g::Sink, model::Model)
     
-#     return nothing
+    return nothing
 
-# end
+end
 
-# function add_operation_variables!(g::Sink, model::Model)
-#     n = node(g)
+function add_operation_variables!(g::Sink, model::Model)
+    n = node(g)
 
-#     g.operation_vars[:withdrawal] = @variable(
-#         model,
-#         [t in time_interval(g)],
-#         lower_bound = 0.0,
-#         base_name = "vWDW_$(commodity_type(g))_$(get_id(g))"
-#     )
+    g.operation_vars[:withdrawal] = @variable(
+        model,
+        [t in time_interval(g)],
+        lower_bound = 0.0,
+        base_name = "vWDW_$(commodity_type(g))_$(get_id(g))"
+    )
 
-#     add_to_expression!.(net_production(n), -withdrawal(g))
+    add_to_expression!.(net_production(n), -withdrawal(g))
 
-#     for t in time_interval(g)
+    for t in time_interval(g)
+        if !isempty(price(g))
+            add_to_expression!(model[:eVariableCost], price(g)[t], withdrawal(g)[t])
+        end
+    end
 
-#         #add_to_expression!(net_production(n)[t], -withdrawal(g)[t])
-
-#         if !isempty(price(g))
-#             add_to_expression!(model[:eVariableCost], price(g)[t], withdrawal(g)[t])
-#         end
-#     end
-
-#     return nothing
-# end
+    return nothing
+end
 

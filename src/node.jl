@@ -14,26 +14,6 @@ Base.@kwdef mutable struct Node{T} <: AbstractNode{T}
     constraints::Vector{AbstractTypeConstraint} = Vector{AbstractTypeConstraint}()
 end
 
-Base.@kwdef mutable struct SourceNode{T} <: AbstractNode{T}
-    id::Symbol
-    time_interval::StepRange{Int64,Int64}
-    subperiods::Vector{StepRange{Int64,Int64}} = StepRange{Int64,Int64}[]
-    price::Vector{Float64} = Float64[]
-    operation_vars::Dict = Dict()
-    operation_expr::Dict = Dict()
-    constraints::Vector{AbstractTypeConstraint} = Vector{AbstractTypeConstraint}()
-end
-
-Base.@kwdef mutable struct SinkNode{T} <: AbstractNode{T}
-    id::Symbol
-    time_interval::StepRange{Int64,Int64}
-    subperiods::Vector{StepRange{Int64,Int64}} = StepRange{Int64,Int64}[]
-    price::Vector{Float64} = Float64[]
-    operation_vars::Dict = Dict()
-    operation_expr::Dict = Dict()
-    constraints::Vector{AbstractTypeConstraint} =Vector{AbstractTypeConstraint}()
-end
-
 time_interval(n::AbstractNode) = n.time_interval;
 subperiods(n::AbstractNode) = n.subperiods;
 
@@ -54,14 +34,6 @@ price_non_served_demand(n::AbstractNode) = n.price_nsd;
 segments_non_served_demand(n::AbstractNode) = 1:length(n.max_nsd);
 
 all_constraints(n::AbstractNode) = n.constraints;
-
-inflow(n::SourceNode) = n.operation_vars[:inflow];
-
-outflow(n::SinkNode) = n.operation_vars[:outflow];
-
-price(n::Union{SinkNode,SourceNode}) = n.price;
-
-demand(n::Union{SinkNode,SourceNode}) = zeros(length(n.time_interval));
 
 function add_operation_variables!(n::AbstractNode, model::Model)
 
@@ -84,6 +56,35 @@ function add_operation_variables!(n::AbstractNode, model::Model)
 
     return nothing
 end
+
+Base.@kwdef mutable struct SourceNode{T} <: AbstractNode{T}
+    id::Symbol
+    time_interval::StepRange{Int64,Int64}
+    subperiods::Vector{StepRange{Int64,Int64}} = StepRange{Int64,Int64}[]
+    price::Vector{Float64} = Float64[]
+    operation_vars::Dict = Dict()
+    operation_expr::Dict = Dict()
+    constraints::Vector{AbstractTypeConstraint} = Vector{AbstractTypeConstraint}()
+end
+
+Base.@kwdef mutable struct SinkNode{T} <: AbstractNode{T}
+    id::Symbol
+    time_interval::StepRange{Int64,Int64}
+    subperiods::Vector{StepRange{Int64,Int64}} = StepRange{Int64,Int64}[]
+    price::Vector{Float64} = Float64[]
+    operation_vars::Dict = Dict()
+    operation_expr::Dict = Dict()
+    constraints::Vector{AbstractTypeConstraint} =Vector{AbstractTypeConstraint}()
+end
+
+inflow(n::SourceNode) = n.operation_vars[:inflow];
+
+outflow(n::SinkNode) = n.operation_vars[:outflow];
+
+price(n::Union{SinkNode,SourceNode}) = n.price;
+
+demand(n::Union{SinkNode,SourceNode}) = zeros(length(n.time_interval));
+
 
 function add_operation_variables!(n::SourceNode, model::Model)
 
