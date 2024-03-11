@@ -11,10 +11,7 @@ abstract type Commodity end
 abstract type Electricity <: Commodity end
 abstract type Hydrogen <: Commodity end
 abstract type NaturalGas <: Commodity end
-abstract type NaturalGasFossil <: Commodity end
 abstract type CO2 <: Commodity end
-abstract type CO2_Captured <: Commodity end
-abstract type CO2_Atmosphere <: Commodity end
 
 abstract type AbstractTypeConstraint end
 
@@ -40,6 +37,7 @@ const JuMPConstraint = Union{Array,Containers.DenseAxisArray,Containers.SparseAx
 # const DataFrame = DataFrames.DataFrame;
 
 # include files
+include("constraints.jl")
 include("node.jl")
 include("edge.jl")
 include("resource.jl")
@@ -57,16 +55,12 @@ include("load_inputs/load_variability.jl")
 include("input_translation/dolphyn_to_macro.jl")
 include("generate_model.jl")
 include("prepare_inputs.jl")
-include("constraints.jl")
 
 # exports
 export Electricity,
     Hydrogen,
     NaturalGas,
-    NaturalGasFossil,
     CO2,
-    CO2_Captured,
-    CO2_Atmosphere,
     NaturalGasPower,
     NaturalGasPowerCCS,
     NaturalGasHydrogen,
@@ -82,8 +76,6 @@ export Electricity,
     AsymmetricStorage,
     InputFilesNames,
     Node,
-    SourceNode,
-    SinkNode,
     Edge,
     Transformation,
     TEdge,

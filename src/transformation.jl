@@ -180,3 +180,45 @@ function add_operation_variables!(e::AbstractTransformationEdge, model::Model)
 
     return nothing
 end
+
+function add_all_model_constraints!(y::AbstractTransformation, model::Model)
+
+    for ct in all_constraints(y)
+        add_model_constraint!(ct, y, model)
+    end
+
+    add_all_model_constraints!.(edges(y),model)
+
+    return nothing
+end
+
+function add_all_model_constraints!(e::AbstractTransformationEdge, model::Model)
+
+    for ct in all_constraints(e)
+        add_model_constraint!(ct, e, model)
+    end
+
+    return nothing
+end
+
+function add_model_constraint!(ct::CapacityConstraint, e::AbstractTransformationEdge, model::Model)
+
+    ct.constraint_ref =
+        @constraint(model, [t in time_interval(e)], flow(e)[t] <= capacity(e))
+
+    return nothing
+
+end
+
+
+
+function add_model_constraint!(
+    ct::StoichiometryBalanceConstraint,
+    g::AbstractTransformation,
+    model::Model,
+)
+
+    ct.constraint_ref =
+        @constraint(model, [i in 1:number_of_stoichiometry_balances(g), t in time_interval(g)], stoichiometry_balance(g)[i,t] == 0.0)
+
+end

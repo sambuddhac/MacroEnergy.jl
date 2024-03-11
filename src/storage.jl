@@ -374,8 +374,7 @@ function add_operation_variables!(g::AbstractStorage, model::Model)
     @constraint(
         model,
         [t in time_interval(g)],
-        aux_expr[t] ==
-        efficiency_injection(g) * injection(g)[t] - efficiency_withdrawal(g) * withdrawal(g)[t]
+        aux_expr[t] ==  efficiency_withdrawal(g) * withdrawal(g)[t] - (1/efficiency_injection(g)) * injection(g)[t]
     )
 
     #delete(model,model[:aux_expr])
@@ -402,5 +401,57 @@ function add_operation_variables!(g::AbstractStorage, model::Model)
 
     return nothing
 
+
+end
+
+
+function add_model_constraint!(
+    ct::StorageCapacityConstraint,
+    g::AbstractStorage,
+    model::Model,
+)
+
+    ct.constraint_ref = @constraint(
+        model,
+        [t in time_interval(g)],
+        storage_level(g)[t] <= capacity_storage(g)
+    )
+
+end
+
+
+function add_model_constraint!(
+    ct::WithdrawalCapacityConstraint,
+    g::AsymmetricStorage,
+    model::Model,
+)
+
+    ct.constraint_ref = @constraint(
+        model,
+        [t in time_interval(g)],
+        withdrawal(g)[t] <= capacity_withdrawal(g)
+    )
+
+end
+
+function add_model_constraint!(
+    ct::MinStorageDurationConstraint,
+    g::AbstractStorage,
+    model::Model,
+)
+
+    ct.constraint_ref =
+        @constraint(model, capacity_storage(g) >= g.min_duration * capacity(g))
+
+end
+
+function add_model_constraint!(
+    ct::MaxStorageDurationConstraint,
+    g::AbstractStorage,
+    model::Model,
+)
+
+    ct.constraint_ref =
+        @constraint(model, capacity_storage(g) <= g.max_duration * capacity(g))
 
 end

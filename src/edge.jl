@@ -99,3 +99,20 @@ function add_operation_variables!(e::AbstractEdge, model::Model)
     # end
 
 end
+
+function add_model_constraint!(ct::CapacityConstraint, e::AbstractEdge, model::Model)
+
+    if e.unidirectional
+        ct.constraint_ref =
+            @constraint(model, [t in time_interval(e)], flow(e)[t] <= capacity(e))
+    else
+        ct.constraint_ref = @constraint(
+            model,
+            [i in [-1, 1], t in time_interval(e)],
+            i * flow(e)[t] <= capacity(e)
+        )
+    end
+
+    return nothing
+
+end

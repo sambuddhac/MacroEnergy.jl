@@ -53,6 +53,19 @@ Base.@kwdef mutable struct Resource{T} <: AbstractResource{T}
     constraints::Vector{AbstractTypeConstraint} = Vector{AbstractTypeConstraint}()
 end
 
+Base.@kwdef mutable struct Sink{T} <: AbstractResource{T}
+    ### Mandatory fields: (fields without defaults)
+    node::AbstractNode{T}
+    id::Symbol
+    #### Optional fields - (fields with defaults)
+    price::Vector{Float64} = Float64[]
+    time_interval::StepRange{Int64,Int64} = 1:1
+    subperiods::Vector{StepRange{Int64,Int64}} = StepRange{Int64,Int64}[]
+    operation_vars::Dict = Dict{Symbol,Any}()
+    constraints::Vector{AbstractTypeConstraint} = Vector{AbstractTypeConstraint}()
+end
+withdrawal(g::Sink) = g.operation_vars[:withdrawal];
+
 # add_variable  functions
 function add_planning_variables!(g::AbstractResource, model::Model)
 
@@ -131,19 +144,6 @@ function add_operation_variables!(g::AbstractResource, model::Model)
     return nothing
 end
 
-Base.@kwdef mutable struct Sink{T} <: AbstractResource{T}
-    ### Mandatory fields: (fields without defaults)
-    node::AbstractNode{T}
-    id::Symbol
-    #### Optional fields - (fields with defaults)
-    price::Vector{Float64} = Float64[]
-    time_interval::StepRange{Int64,Int64} = 1:1
-    subperiods::Vector{StepRange{Int64,Int64}} = StepRange{Int64,Int64}[]
-    operation_vars::Dict = Dict{Symbol,Any}()
-    constraints::Vector{AbstractTypeConstraint} = Vector{AbstractTypeConstraint}()
-end
-withdrawal(g::Sink) = g.operation_vars[:withdrawal];
-
 function add_planning_variables!(g::Sink, model::Model)
     
     return nothing
@@ -171,3 +171,16 @@ function add_operation_variables!(g::Sink, model::Model)
     return nothing
 end
 
+function add_model_constraint!(ct::CapacityConstraint, g::AbstractResource, model::Model)
+
+    cap_factor = Dict(collect(time_interval(g)) .=> capacity_factor(g))
+
+    ct.constraint_ref = @constraint(
+        model,
+        [t in time_interval(g)],
+        injection(g)[t] <= cap_factor[t] * capacity(g)
+    )
+
+    return nothing
+
+end

@@ -1,3 +1,17 @@
+
+function add_all_model_constraints!(
+    y::Union{AbstractResource,AbstractEdge,AbstractNode},
+    model::Model,
+)
+
+    for ct in all_constraints(y)
+        add_model_constraint!(ct, y, model)
+    end
+    ##### This does not work because can't broadcast when passing g : add_model_constraints!.(all_constraints(g),g,model);
+
+    return nothing
+end
+
 function generate_model(inputs::InputData)
 
     resources = reduce(vcat, [inputs.resources[c] for c in keys(inputs.resources)])
