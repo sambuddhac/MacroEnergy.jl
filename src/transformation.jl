@@ -80,6 +80,7 @@ all_constraints(e::AbstractTransformationEdge) = e.constraints;
 node(e::AbstractTransformationEdge) = e.node;
 stoichiometry_balance(e::AbstractTransformationEdge) = stoichiometry_balance(e.transformation);
 get_id(e::AbstractTransformationEdge) = e.id;
+get_id_transformation(e::AbstractTransformationEdge) = get_id(e.transformation);
 st_coeff(e::AbstractTransformationEdge) = e.st_coeff;
 unit_commitment(e::AbstractTransformationEdge) = e.ucommit;
 
@@ -106,19 +107,19 @@ function add_planning_variables!(e::AbstractTransformationEdge, model::Model)
         e.planning_vars[:new_capacity] = @variable(
             model,
             lower_bound = 0.0,
-            base_name = "vNEWCAP_$(commodity_type(e))_$(get_id(e))"
+            base_name = "vNEWCAP_$(get_id_transformation(e))_$(get_id(e))"
         )
 
         e.planning_vars[:ret_capacity] = @variable(
             model,
             lower_bound = 0.0,
-            base_name = "vRETCAP_$(commodity_type(e))_$(get_id(e))"
+            base_name = "vRETCAP_$(get_id_transformation(e))_$(get_id(e))"
         )
 
         e.planning_vars[:capacity] = @variable(
             model,
             lower_bound = 0.0,
-            base_name = "vCAP_$(commodity_type(e))_$(get_id(e))"
+            base_name = "vCAP_$(get_id_transformation(e))_$(get_id(e))"
         )
 
         ### This constraint is just to set the auxiliary capacity variable. Capacity variable could be an expression if we don't want to have this constraint.
@@ -152,7 +153,7 @@ function add_operation_variables!(e::AbstractTransformationEdge, model::Model)
         model,
         [t in time_interval(e)],
         lower_bound = 0.0,
-        base_name = "vFLOW_$(commodity_type(e))_$(get_id(e))"
+        base_name = "vFLOW_$(get_id_transformation(e))_$(get_id(e))"
     )
 
     dir_coeff =  (direction(e) == :input) ? -1 : (direction(e) == :output) ? 1 : error("Invalid TEdge direction")

@@ -53,13 +53,13 @@ function add_planning_variables!(e::AbstractEdge, model::Model)
         model,
         lower_bound = 0.0,
         upper_bound = max_line_reinforcement(e),
-        base_name = "vNEWCAPEDGE_$(commodity_type(e))_$(start_node_id(e))_$(end_node_id(e))"
+        base_name = "vNEWCAPEDGE_$(start_node_id(e))_$(end_node_id(e))"
     )
 
     e.planning_vars[:capacity] = @variable(
         model,
         lower_bound = 0.0,
-        base_name = "vCAPEDGE_$(commodity_type(e))_$(start_node_id(e))_$(end_node_id(e))"
+        base_name = "vCAPEDGE_$(start_node_id(e))_$(end_node_id(e))"
     )
 
     @constraint(model, capacity(e) == new_capacity(e) + existing_capacity(e))
@@ -80,13 +80,13 @@ function add_operation_variables!(e::AbstractEdge, model::Model)
             model,
             [t in time_interval(e)],
             lower_bound = 0.0,
-            base_name = "vFLOW_$(commodity_type(e))_$(start_node_id(e))_$(end_node_id(e))"
+            base_name = "vFLOW_$(start_node_id(e))_$(end_node_id(e))"
         )
     else
         e.operation_vars[:flow] = @variable(
             model,
             [t in time_interval(e)],
-            base_name = "vFLOW_$(commodity_type(e))_$(start_node_id(e))_$(end_node_id(e))"
+            base_name = "vFLOW_$(start_node_id(e))_$(end_node_id(e))"
         )
     end
 

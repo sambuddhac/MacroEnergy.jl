@@ -41,7 +41,7 @@ function add_operation_variables!(n::AbstractNode, model::Model)
         model,
         [s in segments_non_served_demand(n) ,t in time_interval(n)],
         lower_bound = 0.0,
-        base_name = "vNSD_$(commodity_type(n))_$(get_id(n))"
+        base_name = "vNSD_$(get_id(n))"
     )
 
     n.operation_expr[:net_production] =
