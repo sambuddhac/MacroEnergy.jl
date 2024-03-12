@@ -12,7 +12,7 @@ Base.@kwdef mutable struct TEdge{T} <: AbstractTransformationEdge{T}
     capacity_size :: Float64 = 1.0
     time_interval::StepRange{Int64,Int64} = 1:1
     subperiods::Vector{StepRange{Int64,Int64}} = StepRange{Int64,Int64}[]
-    st_coeff::Vector{Float64} = Float64[]
+    st_coeff::Dict{Symbol,Float64} = Dict{Symbol,Float64}()
     min_capacity::Float64 = 0.0
     max_capacity::Float64 = Inf
     existing_capacity::Float64 = 0.0
@@ -36,14 +36,14 @@ end
 Base.@kwdef mutable struct Transformation{T} <: AbstractTransformation{T}
     id::Symbol
     time_interval::StepRange{Int64,Int64}
-    number_of_stoichiometry_balances::Int64
-    TEdges::Vector{TEdge} = TEdge[]
+    stoichiometry_balance_names::Vector{Symbol}
+    TEdges::Dict{Symbol,TEdge} = Dict{Symbol,TEdge}()
     operation_expr::Dict = Dict()
     constraints::Vector{AbstractTypeConstraint} = Vector{AbstractTypeConstraint}()
 end
 
 transformation_type(g::AbstractTransformation{T}) where {T} = T;
-number_of_stoichiometry_balances(g::AbstractTransformation) = g.number_of_stoichiometry_balances;
+stoichiometry_balance_names(g::AbstractTransformation) = g.stoichiometry_balance_names;
 get_id(g::AbstractTransformation) = g.id;
 time_interval(g::AbstractTransformation) = g.time_interval;
 all_constraints(g::AbstractTransformation) = g.constraints;
@@ -79,8 +79,9 @@ flow(e::AbstractTransformationEdge) = e.operation_vars[:flow];
 all_constraints(e::AbstractTransformationEdge) = e.constraints;
 node(e::AbstractTransformationEdge) = e.node;
 stoichiometry_balance(e::AbstractTransformationEdge) = stoichiometry_balance(e.transformation);
+stoichiometry_balance_names(e::AbstractTransformationEdge) = stoichiometry_balance_names(e.transformation);
+get_transformation_id(e::AbstractTransformationEdge) = get_id(e.transformation);
 get_id(e::AbstractTransformationEdge) = e.id;
-get_id_transformation(e::AbstractTransformationEdge) = get_id(e.transformation);
 st_coeff(e::AbstractTransformationEdge) = e.st_coeff;
 unit_commitment(e::AbstractTransformationEdge) = e.ucommit;
 
@@ -88,15 +89,19 @@ unit_commitment(e::AbstractTransformationEdge) = e.ucommit;
 
 function add_planning_variables!(g::AbstractTransformation,model::Model)
 
-    add_planning_variables!.(edges(g),model)
+    edges_vec = collect(values(edges(g)));
+
+    add_planning_variables!.(edges_vec,model)
 
 end
 
 function add_operation_variables!(g::AbstractTransformation,model::Model)
 
-    g.operation_expr[:stoichiometry_balance] = @expression(model, [i in 1:number_of_stoichiometry_balances(g), t in time_interval(g)], 0 * model[:vREF])
+    g.operation_expr[:stoichiometry_balance] = @expression(model, [i in stoichiometry_balance_names(g), t in time_interval(g)], 0 * model[:vREF])
 
-    add_operation_variables!.(edges(g),model)
+    edges_vec = collect(values(edges(g)));
+
+    add_operation_variables!.(edges_vec,model)
 
 end
 
@@ -107,19 +112,19 @@ function add_planning_variables!(e::AbstractTransformationEdge, model::Model)
         e.planning_vars[:new_capacity] = @variable(
             model,
             lower_bound = 0.0,
-            base_name = "vNEWCAP_$(get_id_transformation(e))_$(get_id(e))"
+            base_name = "vNEWCAP_$(get_transformation_id(e))_$(get_id(e))"
         )
 
         e.planning_vars[:ret_capacity] = @variable(
             model,
             lower_bound = 0.0,
-            base_name = "vRETCAP_$(get_id_transformation(e))_$(get_id(e))"
+            base_name = "vRETCAP_$(get_transformation_id(e))_$(get_id(e))"
         )
 
         e.planning_vars[:capacity] = @variable(
             model,
             lower_bound = 0.0,
-            base_name = "vCAP_$(get_id_transformation(e))_$(get_id(e))"
+            base_name = "vCAP_$(get_transformation_id(e))_$(get_id(e))"
         )
 
         ### This constraint is just to set the auxiliary capacity variable. Capacity variable could be an expression if we don't want to have this constraint.
@@ -153,7 +158,7 @@ function add_operation_variables!(e::AbstractTransformationEdge, model::Model)
         model,
         [t in time_interval(e)],
         lower_bound = 0.0,
-        base_name = "vFLOW_$(get_id_transformation(e))_$(get_id(e))"
+        base_name = "vFLOW_$(get_transformation_id(e))_$(get_id(e))"
     )
 
     dir_coeff =  (direction(e) == :input) ? -1 : (direction(e) == :output) ? 1 : error("Invalid TEdge direction")
@@ -168,7 +173,7 @@ function add_operation_variables!(e::AbstractTransformationEdge, model::Model)
 
     for t in time_interval(e)
 
-        for i in 1:length(e_st_coeff)
+        for i in stoichiometry_balance_names(e)
             add_to_expression!(stoichiometry_balance(e)[i,t], e_st_coeff[i], directional_flow[t])
         end
 
@@ -188,7 +193,9 @@ function add_all_model_constraints!(y::AbstractTransformation, model::Model)
         add_model_constraint!(ct, y, model)
     end
 
-    add_all_model_constraints!.(edges(y),model)
+    edges_vec = collect(values(edges(y)));
+
+    add_all_model_constraints!.(edges_vec,model)
 
     return nothing
 end
@@ -220,6 +227,6 @@ function add_model_constraint!(
 )
 
     ct.constraint_ref =
-        @constraint(model, [i in 1:number_of_stoichiometry_balances(g), t in time_interval(g)], stoichiometry_balance(g)[i,t] == 0.0)
+        @constraint(model, [i in stoichiometry_balance_names(g), t in time_interval(g)], stoichiometry_balance(g)[i,t] == 0.0)
 
 end
