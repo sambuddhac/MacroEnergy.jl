@@ -60,7 +60,7 @@ Base.@kwdef mutable struct StoichiometryBalanceConstraint <:AbstractTypeConstrai
     constraint_ref::Union{Missing,JuMPConstraint} = missing
 end
 
-Base.@kwdef mutable struct CO2Cap <:AbstractTypeConstraint
+Base.@kwdef mutable struct CO2CapConstraint <:AbstractTypeConstraint
     value::Union{Missing,Vector{Float64}} = missing
     lagrangian_multiplier::Union{Missing,Vector{Float64}} = missing
     constraint_ref::Union{Missing,JuMPConstraint} = missing

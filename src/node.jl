@@ -11,6 +11,8 @@ Base.@kwdef mutable struct Node{T} <: AbstractNode{T}
     price_nsd::Vector{Float64} = [0.0]
     operation_vars::Dict = Dict()
     operation_expr::Dict = Dict()
+    price_unmet_policy::Dict{DataType,Float64} = Dict{DataType,Float64}()
+    rhs_policy::Dict{DataType,Float64} = Dict{DataType,Float64}()
     constraints::Vector{AbstractTypeConstraint} = Vector{AbstractTypeConstraint}()
 end
 
@@ -34,6 +36,10 @@ price_non_served_demand(n::AbstractNode) = n.price_nsd;
 segments_non_served_demand(n::AbstractNode) = 1:length(n.max_nsd);
 
 all_constraints(n::AbstractNode) = n.constraints;
+
+price_unmet_policy(n::AbstractNode) = n.price_unmet_policy;
+
+rhs_policy(n::AbstractNode) = n.rhs_policy;
 
 function add_operation_variables!(n::AbstractNode, model::Model)
 
@@ -87,11 +93,25 @@ function add_model_constraint!(
 end
 
 
-function add_model_constraint!(ct::CO2Cap,
-    n::AbstractNode,
+function add_model_constraint!(ct::CO2CapConstraint,
+    n::Node{CO2},
     model::Model
 )
-    
-    
+    ct_type = typeof(ct);
+
+    total_net_production = sum(net_production(n));
+
+    if haskey(price_unmet_policy(n),ct_type)
+        n.operation_vars[Symbol(string(ct_type)*"_Slack")] = @variable(
+            model,
+            lower_bound = 0.0,
+            base_name = "v"*string(ct_type)*"_Slack_$(get_id(n))"
+        )
+        add_to_expression!(model[:eVariableCost], price_unmet_policy(n)[ct_type],n.operation_vars[Symbol(string(ct_type)*"_Slack")])
+        add_to_expression!.(total_net_production, -n.operation_vars[Symbol(string(ct_type)*"_Slack")])
+    end
+
+    ct.constraint_ref = @constraint(model, [i in [1]], total_net_production <= rhs_policy(n)[ct_type])
+
 
 end

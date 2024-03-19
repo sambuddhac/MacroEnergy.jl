@@ -24,8 +24,8 @@ if setup["ModelH2"] == 1
     inputs = load_h2_inputs(inputs, setup, inputs_path)
 end
 
-#dolphyn_model = Dolphyn.generate_model(setup, inputs, OPTIMIZER)
-#optimize!(dolphyn_model)
+# dolphyn_model = Dolphyn.generate_model(setup, inputs, OPTIMIZER)
+# optimize!(dolphyn_model)
 
 using Macro, BenchmarkTools
 
@@ -33,13 +33,16 @@ macro_inputs, macro_settings = dolphyn_to_macro(inputs,settings_path);
 
 model = Macro.generate_model(macro_inputs);
 
-
-
 # b_model_building = @benchmark Macro.generate_model($macro_inputs);
 
-# using JuMP, Gurobi
-# set_optimizer(model,Gurobi.Optimizer)
-# optimize!(model)
+using JuMP, Gurobi
+set_optimizer(model,Gurobi.Optimizer)
+optimize!(model)
+
+total_capacity_ngcc = sum(value(Macro.capacity(macro_inputs.transformations[NaturalGasPower][i].TEdges[:E])) for i in 1:3)
+total_capacity_smr = sum(value(Macro.capacity(macro_inputs.transformations[NaturalGasHydrogen][i].TEdges[:H2])) for i in 1:3)
+total_capacity_smr_ccs = sum(value(Macro.capacity(macro_inputs.transformations[NaturalGasHydrogen][i].TEdges[:H2])) for i in 4:6)
+
 
 # compute_conflict!(model)
 # list_of_conflicting_constraints = ConstraintRef[];
