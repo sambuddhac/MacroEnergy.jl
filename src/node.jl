@@ -37,20 +37,22 @@ all_constraints(n::AbstractNode) = n.constraints;
 
 function add_operation_variables!(n::AbstractNode, model::Model)
 
-    n.operation_vars[:non_served_demand] = @variable(
-        model,
-        [s in segments_non_served_demand(n) ,t in time_interval(n)],
-        lower_bound = 0.0,
-        base_name = "vNSD_$(get_id(n))"
-    )
-
     n.operation_expr[:net_production] =
         @expression(model, [t in time_interval(n)], 0 * model[:vREF])
 
-    for t in time_interval(n)
-        for s in segments_non_served_demand(n)
-            add_to_expression!(model[:eVariableCost], price_non_served_demand(n)[s], non_served_demand(n)[s,t])
-            add_to_expression!(net_production(n)[t], non_served_demand(n)[s,t])
+    if !all(max_non_served_demand(n).==0)
+        n.operation_vars[:non_served_demand] = @variable(
+            model,
+            [s in segments_non_served_demand(n) ,t in time_interval(n)],
+            lower_bound = 0.0,
+            base_name = "vNSD_$(get_id(n))"
+        )
+
+        for t in time_interval(n)
+            for s in segments_non_served_demand(n)
+                add_to_expression!(model[:eVariableCost], price_non_served_demand(n)[s], non_served_demand(n)[s,t])
+                add_to_expression!(net_production(n)[t], non_served_demand(n)[s,t])
+            end
         end
     end
 
@@ -72,11 +74,24 @@ function add_model_constraint!(
     n::AbstractNode,
     model::Model,
 )
+    if haskey(n.operation_vars,:non_served_demand)
+        ct.constraint_ref = @constraint(
+            model,
+            [s in segments_non_served_demand(n), t in time_interval(n)],
+            non_served_demand(n)[s,t] <= max_non_served_demand(n)[s] * demand(n)[t]
+        )
+    else
+        @warn "MaxNonServedDemandConstraint required for a node that does not have a non-served demand variable so MACRO will not create this constraint"
+    end
+
+end
+
+
+function add_model_constraint!(ct::CO2Cap,
+    n::AbstractNode,
+    model::Model
+)
     
-    ct.constraint_ref = @constraint(
-        model,
-        [s in segments_non_served_demand(n), t in time_interval(n)],
-        non_served_demand(n)[s,t] <= max_non_served_demand(n)[s] * demand(n)[t]
-    )
+    
 
 end
