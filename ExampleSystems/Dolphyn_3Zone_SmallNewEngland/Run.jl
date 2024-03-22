@@ -39,9 +39,9 @@ using JuMP, Gurobi
 set_optimizer(model,Gurobi.Optimizer)
 optimize!(model)
 
-total_capacity_ngcc = sum(value(Macro.capacity(macro_inputs.transformations[NaturalGasPower][i].TEdges[:E])) for i in 1:3)
-total_capacity_smr = sum(value(Macro.capacity(macro_inputs.transformations[NaturalGasHydrogen][i].TEdges[:H2])) for i in 1:3)
-total_capacity_smr_ccs = sum(value(Macro.capacity(macro_inputs.transformations[NaturalGasHydrogen][i].TEdges[:H2])) for i in 4:6)
+# total_capacity_ngcc = sum(value(Macro.capacity(macro_inputs.transformations[NaturalGasPower][i].TEdges[:E])) for i in 1:3)
+# total_capacity_smr = sum(value(Macro.capacity(macro_inputs.transformations[NaturalGasHydrogen][i].TEdges[:H2])) for i in 1:3)
+# total_capacity_smr_ccs = sum(value(Macro.capacity(macro_inputs.transformations[NaturalGasHydrogen][i].TEdges[:H2])) for i in 4:6)
 
 
 # compute_conflict!(model)

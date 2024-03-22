@@ -1,5 +1,3 @@
-abstract type AbstractNode{T<:Commodity} end
-
 Base.@kwdef mutable struct Node{T} <: AbstractNode{T}
     ### Fields without defaults
     id::Symbol
@@ -27,7 +25,7 @@ demand(n::AbstractNode) = n.demand;
 
 non_served_demand(n::AbstractNode) = n.operation_vars[:non_served_demand];
 
-net_production(n::AbstractNode) = n.operation_expr[:net_production];
+net_balance(n::AbstractNode) = n.operation_expr[:net_balance];
 
 max_non_served_demand(n::AbstractNode) = n.max_nsd;
 
@@ -43,7 +41,7 @@ rhs_policy(n::AbstractNode) = n.rhs_policy;
 
 function add_operation_variables!(n::AbstractNode, model::Model)
 
-    n.operation_expr[:net_production] =
+    n.operation_expr[:net_balance] =
         @expression(model, [t in time_interval(n)], 0 * model[:vREF])
 
     if !all(max_non_served_demand(n).==0)
@@ -57,11 +55,15 @@ function add_operation_variables!(n::AbstractNode, model::Model)
         for t in time_interval(n)
             for s in segments_non_served_demand(n)
                 add_to_expression!(model[:eVariableCost], price_non_served_demand(n)[s], non_served_demand(n)[s,t])
-                add_to_expression!(net_production(n)[t], non_served_demand(n)[s,t])
+                add_to_expression!(net_balance(n)[t], non_served_demand(n)[s,t])
             end
         end
     end
 
+    return nothing
+end
+
+function add_planning_variables!(n::AbstractNode,model::Model)
     return nothing
 end
 
@@ -70,7 +72,7 @@ function add_model_constraint!(ct::DemandBalanceConstraint, n::AbstractNode, mod
     ct.constraint_ref = @constraint(
         model,
         [t in time_interval(n)],
-        net_production(n)[t]  == demand(n)[t]
+        net_balance(n)[t]  == demand(n)[t]
     )
 
 end
@@ -99,7 +101,7 @@ function add_model_constraint!(ct::CO2CapConstraint,
 )
     ct_type = typeof(ct);
 
-    total_net_production = sum(net_production(n));
+    total_net_balance = sum(net_balance(n));
 
     if haskey(price_unmet_policy(n),ct_type)
         n.operation_vars[Symbol(string(ct_type)*"_Slack")] = @variable(
@@ -108,10 +110,10 @@ function add_model_constraint!(ct::CO2CapConstraint,
             base_name = "v"*string(ct_type)*"_Slack_$(get_id(n))"
         )
         add_to_expression!(model[:eVariableCost], price_unmet_policy(n)[ct_type],n.operation_vars[Symbol(string(ct_type)*"_Slack")])
-        add_to_expression!.(total_net_production, -n.operation_vars[Symbol(string(ct_type)*"_Slack")])
+        add_to_expression!.(total_net_balance, -n.operation_vars[Symbol(string(ct_type)*"_Slack")])
     end
 
-    ct.constraint_ref = @constraint(model, [i in [1]], total_net_production <= rhs_policy(n)[ct_type])
+    ct.constraint_ref = @constraint(model, [i in [1]], total_net_balance <= rhs_policy(n)[ct_type])
 
 
 end

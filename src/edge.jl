@@ -1,8 +1,3 @@
-# abstract type AbstractTEdge{T1<:Commodity,T2<:Commodity} end
-
-# abstract type AbstractEdge{T<:Commodity} <: AbstractTEdge{T,T} end
-
-abstract type AbstractEdge{T<:Commodity} end
 Base.@kwdef mutable struct Edge{T} <: AbstractEdge{T}
     time_interval::StepRange{Int64,Int64}
     subperiods::Vector{StepRange{Int64,Int64}} = StepRange{Int64,Int64}[]
@@ -90,12 +85,12 @@ function add_operation_variables!(e::AbstractEdge, model::Model)
         )
     end
 
-    add_to_expression!.(net_production(start_node(e)), -flow(e))
+    add_to_expression!.(net_balance(start_node(e)), -flow(e))
     
-    add_to_expression!.(net_production(end_node(e)), flow(e))
+    add_to_expression!.(net_balance(end_node(e)), flow(e))
     # for t in time_interval(e)
-    #     add_to_expression!(net_production(start_node(e))[t], -flow(e)[t])
-    #     add_to_expression!(net_production(end_node(e))[t], flow(e)[t])
+    #     add_to_expression!(net_balance(start_node(e))[t], -flow(e)[t])
+    #     add_to_expression!(net_balance(end_node(e))[t], flow(e)[t])
     # end
 
 end

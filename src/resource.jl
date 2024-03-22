@@ -125,11 +125,11 @@ function add_operation_variables!(g::AbstractResource, model::Model)
         base_name = "vINJ_$(get_id(g))"
     )
 
-    add_to_expression!.(net_production(n), injection(g))
+    add_to_expression!.(net_balance(n), injection(g))
 
     for t in time_interval(g)
 
-        # add_to_expression!(net_production(n)[t], injection(g)[t])
+        # add_to_expression!(net_balance(n)[t], injection(g)[t])
 
         if !isempty(price(g))
             add_to_expression!(model[:eVariableCost], price(g)[t], injection(g)[t])
@@ -160,7 +160,7 @@ function add_operation_variables!(g::Sink, model::Model)
         base_name = "vWDW_$(get_id(g))"
     )
 
-    add_to_expression!.(net_production(n), -withdrawal(g))
+    add_to_expression!.(net_balance(n), -withdrawal(g))
 
     for t in time_interval(g)
         if !isempty(price(g))
