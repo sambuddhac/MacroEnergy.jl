@@ -28,9 +28,9 @@ function compare_transformations(
     @test transformation_test.fixed_om_cost == transformation_true.fixed_om_cost
     @test transformation_test.variable_om_cost == transformation_true.variable_om_cost
     @test transformation_test.start_cost_per_mw == transformation_true.start_cost_per_mw
-    @test transformation_test.ramp_up_percentage == transformation_true.ramp_up_percentage
-    @test transformation_test.ramp_down_percentage ==
-          transformation_true.ramp_down_percentage
+    @test transformation_test.ramp_up_fraction == transformation_true.ramp_up_fraction
+    @test transformation_test.ramp_down_fraction ==
+          transformation_true.ramp_down_fraction
     @test transformation_test.up_time == transformation_true.up_time
     @test transformation_test.down_time == transformation_true.down_time
 

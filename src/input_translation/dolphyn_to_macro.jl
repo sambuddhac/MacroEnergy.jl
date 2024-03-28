@@ -138,7 +138,7 @@ function create_networks_from_dolphyn(
         max_line_reinforcement = dolphyn_inputs["pMax_Line_Reinforcement"][i],
         line_reinforcement_cost = dolphyn_inputs["pC_Line_Reinforcement"][i],
         can_expand = in(i,dolphyn_inputs["EXPANSION_LINES"]),
-        line_loss_percentage = dolphyn_inputs["pTrans_Loss_Coef"][i],
+        line_loss_fraction = dolphyn_inputs["pTrans_Loss_Coef"][i],
         constraints=[CapacityConstraint()]
         )
 
@@ -383,8 +383,8 @@ function create_transformations_from_dolphyn(
             ##### Ignore UC for now
             ######start_cost = dfGen.Start_Cost_per_MW[i],
             ######ucommit = false,
-            ramp_up_percentage = dfGen.Ramp_Up_Percentage[i],
-            ramp_down_percentage = dfGen.Ramp_Dn_Percentage[i],
+            ramp_up_fraction = dfGen.Ramp_Up_fraction[i],
+            ramp_down_fraction = dfGen.Ramp_Dn_fraction[i],
             up_time = dfGen.Up_Time[i],
             down_time = dfGen.Down_Time[i],
             min_flow = dfGen.Min_Power[i],
@@ -471,8 +471,8 @@ function create_transformations_from_dolphyn(
             ##### Ignore UC for now
             ######start_cost = dfGen.Start_Cost_per_MW[i],
             ######ucommit = false,
-            ramp_up_percentage = dfH2Gen.Ramp_Up_Percentage[i],
-            ramp_down_percentage = dfH2Gen.Ramp_Down_Percentage[i],
+            ramp_up_fraction = dfH2Gen.Ramp_Up_fraction[i],
+            ramp_down_fraction = dfH2Gen.Ramp_Down_fraction[i],
             up_time = dfH2Gen.Up_Time[i],
             down_time = dfH2Gen.Down_Time[i],
             min_flow = dfH2Gen.H2Gen_min_output[i],
@@ -555,8 +555,8 @@ function create_transformations_from_dolphyn(
             ##### Ignore UC for now
             ######start_cost = dfGen.Start_Cost_per_MW[i],
             ######ucommit = false,
-            ramp_up_percentage = dfH2Gen.Ramp_Up_Percentage[i],
-            ramp_down_percentage = dfH2Gen.Ramp_Down_Percentage[i],
+            ramp_up_fraction = dfH2Gen.Ramp_Up_fraction[i],
+            ramp_down_fraction = dfH2Gen.Ramp_Down_fraction[i],
             up_time = dfH2Gen.Up_Time[i],
             down_time = dfH2Gen.Down_Time[i],
             min_flow = dfH2Gen.H2Gen_min_output[i],
@@ -627,8 +627,8 @@ function create_transformations_from_dolphyn(
             ##### Ignore UC for now
             ######start_cost = dfGen.Start_Cost_per_MW[i],
             ######ucommit = false,
-            ramp_up_percentage = dfH2G2P.Ramp_Up_Percentage[i],
-            ramp_down_percentage = dfH2G2P.Ramp_Down_Percentage[i],
+            ramp_up_fraction = dfH2G2P.Ramp_Up_fraction[i],
+            ramp_down_fraction = dfH2G2P.Ramp_Down_fraction[i],
             up_time = dfH2G2P.Up_Time[i],
             down_time = dfH2G2P.Down_Time[i],
             min_flow = dfH2G2P.G2P_min_output[i],
@@ -779,7 +779,7 @@ function dolphyn_cols_to_macro_attrs(c::Type{Electricity})
         efficiency_injection = :Eff_Down,
         min_duration = :Min_Duration,
         max_duration = :Max_Duration,
-        storage_loss_percentage = :Self_Disch,
+        storage_loss_fraction = :Self_Disch,
     )
 end
 
@@ -806,7 +806,7 @@ function dolphyn_cols_to_macro_attrs(c::Type{Hydrogen})
         variable_om_cost_withdrawal = :Var_OM_Cost_Charge_p_tonne,
         efficiency_withdrawal = :H2Stor_eff_charge,
         efficiency_injection = :H2Stor_eff_discharge,
-        storage_loss_percentage = :H2Stor_self_discharge_rate_p_hour,
+        storage_loss_fraction = :H2Stor_self_discharge_rate_p_hour,
         min_storage_level = :H2Stor_min_level,
     )
 end

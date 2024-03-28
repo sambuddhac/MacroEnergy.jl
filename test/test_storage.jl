@@ -43,7 +43,7 @@ function compare_storage(storage_test::AbstractStorage, storage_true::AbstractSt
     @test storage_test.min_storage_level == storage_true.min_storage_level
     @test storage_test.min_duration == storage_true.min_duration
     @test storage_test.max_duration == storage_true.max_duration
-    @test storage_test.storage_loss_percentage == storage_true.storage_loss_percentage
+    @test storage_test.storage_loss_fraction == storage_true.storage_loss_fraction
     @test storage_test.planning_vars == storage_true.planning_vars
     @test storage_test.operation_vars == storage_true.operation_vars
     @test storage_test.constraints == storage_true.constraints broken = true

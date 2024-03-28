@@ -1,4 +1,4 @@
-﻿Id,Min_Capacity,Max_Capacity,Existing_Capacity,Can_Expand,Can_Retire,Investment_Cost,Fixed_Om_Cost,Variable_Om_Cost,Start_Cost_Per_Mw,Ramp_Up_Percentage,Ramp_Down_Percentage,Up_Time,Down_Time,Electricity_St,Ng_St,H2_St,Min_Output_Elec,Min_Output_H2
+﻿Id,Min_Capacity,Max_Capacity,Existing_Capacity,Can_Expand,Can_Retire,Investment_Cost,Fixed_Om_Cost,Variable_Om_Cost,Start_Cost_Per_Mw,Ramp_Up_fraction,Ramp_Down_fraction,Up_Time,Down_Time,Electricity_St,Ng_St,H2_St,Min_Output_Elec,Min_Output_H2
 H2_E_1,0,Inf,0,TRUE,TRUE,1170000,11000,1.67,50,1,1,2,2,0.6,0,1,0,0
 E_H2_1,0,Inf,0,TRUE,TRUE,67934.0149,1019.010391,0,0,1,1,0,0,1,0,0.671,0,0.1
 GT_1,0,Inf,0,TRUE,TRUE,65400,10287,3.55,91,0.64,0.64,6,6,0.459238553,1,0,0.468,0

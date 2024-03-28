@@ -187,7 +187,7 @@ stoichiometry_balance_names = [:energy,:emissions],
 constraints = [Macro.StoichiometryBalanceConstraint()]
 )
 
-ngcc.TEdges[:E] = TEdge{Electricity}(;
+ngcc.TEdges[:E] = TEdgeWithUC{Electricity}(;
 id = :E,
 node = e_node,
 transformation = ngcc,
@@ -203,9 +203,9 @@ existing_capacity = 0.0,
 investment_cost = ngcc_inv_cost,
 fixed_om_cost = ngcc_fom_cost,
 variable_om_cost =ngcc_vom_cost,
-ramp_up_percentage = ngcc_ramp_up,
-ramp_down_percentage = ngcc_ramp_down,
-min_flow_percentage = ngcc_min_flow,
+ramp_up_fraction = ngcc_ramp_up,
+ramp_down_fraction = ngcc_ramp_down,
+min_flow_fraction = ngcc_min_flow,
 constraints = [Macro.CapacityConstraint(),Macro.RampingLimitConstraint(),Macro.MinFlowConstraint()]
 )
 

@@ -31,7 +31,7 @@ function compare_edges(edge::Edge, edge_true::Edge)
     @test edge.investment_cost == edge_true.investment_cost
     @test edge.op_cost == edge_true.op_cost
     @test edge.distance == edge_true.distance
-    @test edge.line_loss_percentage == edge_true.line_loss_percentage
+    @test edge.line_loss_fraction == edge_true.line_loss_fraction
     @test edge.planning_vars == edge_true.planning_vars
     @test edge.operation_vars == edge_true.operation_vars
     @test edge.constraints == edge_true.constraints broken = true

@@ -13,7 +13,7 @@ Base.@kwdef mutable struct Edge{T} <: AbstractEdge{T}
     ####investment_cost_per_line::Float64 = 0.0
     op_cost::Float64 = 0.0
     distance::Float64 = 0.0
-    line_loss_percentage::Float64 = 0.0
+    line_loss_fraction::Float64 = 0.0
     planning_vars::Dict = Dict()
     operation_vars::Dict = Dict()
     constraints::Vector{AbstractTypeConstraint} = Vector{AbstractTypeConstraint}()

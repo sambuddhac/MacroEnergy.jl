@@ -12,7 +12,7 @@ Base.@kwdef mutable struct BaseStorage{T<:Commodity}
     efficiency_withdrawal::Float64 = 1.0
     efficiency_injection::Float64 = 1.0
     min_storage_level::Float64 = 0.0
-    storage_loss_percentage::Float64 = 0.0
+    storage_loss_fraction::Float64 = 0.0
 end
 
 """
@@ -38,7 +38,7 @@ storage_level(g::AbstractStorage) = g.operation_vars[:storage_level];
 
 efficiency_withdrawal(g::AbstractStorage) = g.efficiency_withdrawal;
 efficiency_injection(g::AbstractStorage) = g.efficiency_injection;
-storage_loss_percentage(g::AbstractStorage) = g.storage_loss_percentage;
+storage_loss_fraction(g::AbstractStorage) = g.storage_loss_fraction;
 
 Base.@kwdef mutable struct SymmetricStorage{T} <: AbstractStorage{T}
     ### Fields without defaults
@@ -71,7 +71,7 @@ Base.@kwdef mutable struct SymmetricStorage{T} <: AbstractStorage{T}
     min_storage_level::Float64 = 0.0
     min_duration::Float64 = 1.0
     max_duration::Float64 = 10.0
-    storage_loss_percentage::Float64 = 0.0
+    storage_loss_fraction::Float64 = 0.0
     planning_vars::Dict = Dict()
     operation_vars::Dict = Dict()
     constraints::Vector{AbstractTypeConstraint} =Vector{AbstractTypeConstraint}()
@@ -105,7 +105,7 @@ Base.@kwdef mutable struct AsymmetricStorage{T} <: AbstractStorage{T}
     efficiency_withdrawal::Float64 = 1.0
     efficiency_injection::Float64 = 1.0
     min_storage_level::Float64 = 0.0
-    storage_loss_percentage::Float64 = 0.0
+    storage_loss_fraction::Float64 = 0.0
     # other fields specific to AsymmetricStorage
     min_capacity_withdrawal::Float64 = 0.0
     max_capacity_withdrawal::Float64 = Inf
@@ -361,12 +361,12 @@ function add_operation_variables!(g::AbstractStorage, model::Model)
         t_end = last(p)
         add_to_expression!(
             aux_expr[t_start],
-            storage_level(g)[t_start] - (1 - storage_loss_percentage(g)) * storage_level(g)[t_end],
+            storage_level(g)[t_start] - (1 - storage_loss_fraction(g)) * storage_level(g)[t_end],
         )
         for t in p[2:end]
             add_to_expression!(
                 aux_expr[t],
-                storage_level(g)[t] - (1 - storage_loss_percentage(g)) * storage_level(g)[t-1],
+                storage_level(g)[t] - (1 - storage_loss_fraction(g)) * storage_level(g)[t-1],
             )
         end
     end
