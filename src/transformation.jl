@@ -25,7 +25,7 @@ Base.@kwdef mutable struct TEdge{T} <: AbstractTransformationEdge{T}
     ramp_down_percentage::Float64 = 1.0
     up_time::Int64 = 0.0
     down_time::Int64 = 0.0
-    min_flow::Float64 = 0.0
+    min_flow_percentage::Float64 = 0.0
     planning_vars::Dict = Dict()
     operation_vars::Dict = Dict()
     constraints::Vector{AbstractTypeConstraint} = Vector{AbstractTypeConstraint}()
@@ -97,7 +97,7 @@ ramp_up_percentage(e::AbstractTransformationEdge) = e.ramp_up_percentage;
 ramp_down_percentage(e::AbstractTransformationEdge) = e.ramp_down_percentage;
 up_time(e::AbstractTransformationEdge) = e.up_time;
 down_time(e::AbstractTransformationEdge) = e.down_time;
-min_flow(e::AbstractTransformationEdge) = e.min_flow;
+min_flow_percentage(e::AbstractTransformationEdge) = e.min_flow_percentage;
 capacity(e::AbstractTransformationEdge) = e.planning_vars[:capacity];
 flow(e::AbstractTransformationEdge) = e.operation_vars[:flow];
 all_constraints(e::AbstractTransformationEdge) = e.constraints;
@@ -344,5 +344,68 @@ function add_model_constraint!(
         [t in time_interval(g)],
         storage_level(g)[t] <= capacity_storage(g)
     )
+
+end
+
+
+function add_model_constraint!(
+ct::RampingLimitConstraint,
+e::AbstractTransformationEdge,
+model::Model,
+)
+
+    @expression(model, eRampUp[t in time_interval(e)], 0 * model[:vREF])
+    @expression(model, eRampDown[t in time_interval(e)], 0 * model[:vREF])
+
+    #### For now these are set to zero because we are not modeling reserves
+    @expression(model,reserves_term[t in time_interval(e)],0 * model[:vREF])
+    @expression(model,regulation_term[t in time_interval(e)],0 * model[:vREF])
+
+    for p in subperiods(e)
+        t_start = first(p)
+        t_end = last(p)
+        add_to_expression!(
+            eRampUp[t_start],
+            flow(e)[t_start] - flow(e)[t_end] + regulation_term[t_start] + reserves_term[t_start]
+        )
+        add_to_expression!(
+            eRampDown[t_start],
+            flow(e)[t_end] - flow(e)[t_start] - regulation_term[t_start] + reserves_term[t_end]
+        )
+        for t in p[2:end]
+            add_to_expression!(
+                eRampUp[t],
+                flow(e)[t] - flow(e)[t-1] + regulation_term[t] + reserves_term[t]
+            )
+            add_to_expression!(
+                eRampDown[t],
+                flow(e)[t-1] - flow(e)[t] - regulation_term[t] + reserves_term[t-1]
+            )
+        end
+
+    end
+
+    ramp_expr_dict = Dict(:RampUp=>eRampUp,:RampDown=>eRampDown)
+    ramp_percentage_dict = Dict(:RampUp=>ramp_up_percentage(e),:RampDown=>ramp_down_percentage(e))
+
+    ct.constraint_ref = @constraint(
+        model,
+        [s in [:RampUp,:RampDown], t in time_interval(e)],
+        ramp_expr_dict[s][t] <= capacity(e)*ramp_percentage_dict[s]
+    )
+
+end
+
+
+function add_model_constraint!(
+    ct::MinFlowConstraint,
+    e::AbstractTransformationEdge,
+    model::Model,
+    )
+
+    ct.constraint_ref = @constraint(
+            model, 
+            [t in time_interval(e)], 
+            flow(e)[t] >= min_flow_percentage(e)*capacity(e))
 
 end

@@ -48,7 +48,17 @@ Base.@kwdef mutable struct CO2CapConstraint <:OperationConstraint
     constraint_ref::Union{Missing,JuMPConstraint} = missing
 end
 
+Base.@kwdef mutable struct RampingLimitConstraint <:OperationConstraint
+    value::Union{Missing,Vector{Float64}} = missing
+    lagrangian_multiplier::Union{Missing,Vector{Float64}} = missing
+    constraint_ref::Union{Missing,JuMPConstraint} = missing
+end
 
+Base.@kwdef mutable struct MinFlowConstraint <:OperationConstraint
+    value::Union{Missing,Vector{Float64}} = missing
+    lagrangian_multiplier::Union{Missing,Vector{Float64}} = missing
+    constraint_ref::Union{Missing,JuMPConstraint} = missing
+end
 
 function add_all_model_constraints!(
     y::Union{AbstractEdge,AbstractNode},
