@@ -1,6 +1,15 @@
-abstract type AbstractSubperiod{T<:Commodity} end
+@doc raw"""
+    hoursbefore(t::Int, h::Int,subperiods::Vector{StepRange{Int64,Int64})
 
-Base.@kwdef mutable struct Subperiod{T<:Commodity}
-    start_time::Int64 = first(time_interval_map[T])
-    end_time::Int64 = last(time_interval_map[T])
+Determines the time index that is h hours before index t in
+subperiod p with circular indexing.
+
+"""
+function hoursbefore(t::Int, h::Int,subperiods::Vector{StepRange{Int64,Int64}})::Int
+    #Find the subperiod that contains time t
+    p = findfirst(t .∈ subperiods); 
+    n = length(p);
+    
+    return mod1(t-h-1,n)+1
+
 end

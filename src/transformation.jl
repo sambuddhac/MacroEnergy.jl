@@ -36,8 +36,8 @@ abstract type AbstractTransformationEdgeWithUC{T} <: AbstractTransformationEdge{
 
 Base.@kwdef mutable struct TEdgeWithUC{T} <: AbstractTransformationEdgeWithUC{T}
     @AbstractTransformationEdgeBaseAttributes()
-    up_time::Int64 = 0.0
-    down_time::Int64 = 0.0
+    min_up_time::Int64 = 0.0
+    min_down_time::Int64 = 0.0
     start_cost::Float64 = 0.0
 end
 
@@ -115,8 +115,8 @@ get_transformation_id(e::AbstractTransformationEdge) = get_id(e.transformation);
 get_id(e::AbstractTransformationEdge) = e.id;
 st_coeff(e::AbstractTransformationEdge) = e.st_coeff;
 
-up_time(e::AbstractTransformationEdgeWithUC) = e.up_time;
-down_time(e::AbstractTransformationEdgeWithUC) = e.down_time;
+min_up_time(e::AbstractTransformationEdgeWithUC) = e.min_up_time;
+min_down_time(e::AbstractTransformationEdgeWithUC) = e.min_down_time;
 start_cost(e::AbstractTransformationEdgeWithUC) = e.start_cost;
 
 ucommit(e::AbstractTransformationEdgeWithUC) = e.operation_vars[:ucommit];
@@ -206,21 +206,13 @@ function add_operation_variables!(g::AbstractTransformation,model::Model)
             lower_bound = 0.0,
             base_name = "vSTOR_$(g.id)"
         )
-        time_subperiods = subperiods(g)
-        for p in time_subperiods
-            t_start = first(p)
-            t_end = last(p)
+        for t in time_interval(g)
             add_to_expression!(
-                stoichiometry_balance(g)[:storage,t_start],
-                storage_level(g)[t_start] - (1 - storage_loss_fraction(g)) * storage_level(g)[t_end],
+            stoichiometry_balance(g)[:storage,t],
+            storage_level(g)[t] - (1 - storage_loss_fraction(g)) * storage_level(g)[hoursbefore(t,1,subperiods(g))],
             )
-            for t in p[2:end]
-                add_to_expression!(
-                    stoichiometry_balance(g)[:storage,t],
-                    storage_level(g)[t] - (1 - storage_loss_fraction(g)) * storage_level(g)[t-1],
-                )
-            end
         end
+
     end
 
 end
@@ -377,24 +369,10 @@ function add_operation_variables!(e::AbstractTransformationEdgeWithUC, model::Mo
     [t in time_interval(e)], ushut(e)[t] <= capacity(e)/capacity_size(e)  
     end)
 
-    @expression(model,eCommitDiff[t in time_interval(e)],0*model[:vREF])
-
-    for p in subperiods(e)
-        t_start = first(p)
-        t_end = last(p)
-        add_to_expression!(
-            eCommitDiff[t_start],
-            ucommit(e)[t_start] - ucommit(e)[t_end],
-        )
-        for t in p[2:end]
-            add_to_expression!(
-                eCommitDiff[t],
-                ucommit(e)[t] - ucommit(e)[t-1]
-            )
-        end
-    end
-
-    @constraint(model,[t in time_interval(e)], eCommitDiff[t] == ustart(e)[t] - ushut(e)[t])
+    @constraint(model,
+    [t in time_interval(e)], 
+    ucommit(e)[t]-ucommit(e)[hoursbefore(t,1,subperiods(e))] == ustart(e)[t] - ushut(e)[t]
+    )
 
     return nothing
 end
@@ -430,6 +408,7 @@ function add_model_constraint!(
     ct.constraint_ref =
         @constraint(model, [i in stoichiometry_balance_names(g), t in time_interval(g)], stoichiometry_balance(g)[i,t] == 0.0)
 
+    return nothing
 end
 
 
@@ -445,6 +424,7 @@ function add_model_constraint!(
         storage_level(g)[t] <= capacity_storage(g)
     )
 
+    return nothing
 end
 
 
@@ -454,46 +434,19 @@ e::AbstractTransformationEdge,
 model::Model,
 )
 
-    @expression(model, eRampUp[t in time_interval(e)], 0 * model[:vREF])
-    @expression(model, eRampDown[t in time_interval(e)], 0 * model[:vREF])
-
     #### For now these are set to zero because we are not modeling reserves
     @expression(model,reserves_term[t in time_interval(e)],0 * model[:vREF])
     @expression(model,regulation_term[t in time_interval(e)],0 * model[:vREF])
 
-    for p in subperiods(e)
-        t_start = first(p)
-        t_end = last(p)
-        add_to_expression!(
-            eRampUp[t_start],
-            flow(e)[t_start] - flow(e)[t_end] + regulation_term[t_start] + reserves_term[t_start]
-            )
-        add_to_expression!(
-            eRampDown[t_start],
-            flow(e)[t_end] - flow(e)[t_start] - regulation_term[t_start] + reserves_term[t_end]
-            )
-        for t in p[2:end]
-            add_to_expression!(
-                eRampUp[t],
-                flow(e)[t] - flow(e)[t-1] + regulation_term[t] + reserves_term[t]
-                )
-            add_to_expression!(
-                eRampDown[t],
-                flow(e)[t-1] - flow(e)[t] - regulation_term[t] + reserves_term[t-1]
-                )
-        end
+    @expression(model, 
+    eRampUp[t in time_interval(e)], 
+    flow(e)[t] - flow(e)[hoursbefore(t,1,subperiods(e))] + regulation_term[t] + reserves_term[t] - ramp_up_fraction(e)*capacity(e)
+    )
 
-        for t in p
-            add_to_expression!(eRampUp[t],
-            -ramp_up_fraction(e)*capacity(e)
-            )
-
-            add_to_expression!(eRampDown[t],
-            -ramp_down_fraction(e)*capacity(e)
-            )
-        end
-
-    end
+    @expression(model, 
+    eRampDown[t in time_interval(e)], 
+    flow(e)[hoursbefore(t,1,subperiods(e))] - flow(e)[t] - regulation_term[t] + reserves_term[hoursbefore(t,1,subperiods(e)) - ramp_down_fraction(e)*capacity(e)]
+    )
 
     ramp_expr_dict = Dict(:RampUp=>eRampUp,:RampDown=>eRampDown)
 
@@ -503,6 +456,7 @@ model::Model,
         ramp_expr_dict[s][t] <= 0
     )
 
+    return nothing
 end
 
 
@@ -517,7 +471,7 @@ function add_model_constraint!(
             [t in time_interval(e)], 
             flow(e)[t] >= min_flow_fraction(e)*capacity(e)
             )
-
+    return nothing
 end
 
 function add_model_constraint!(
@@ -531,6 +485,7 @@ function add_model_constraint!(
             [t in time_interval(e)], 
             flow(e)[t] >= min_flow_fraction(e)*capacity_size(e)*ucommit(e)[t]
             )
+    return nothing
 
 end
 
@@ -560,9 +515,6 @@ function add_model_constraint!(
     model::Model,
     )
     
-        @expression(model, eRampUp[t in time_interval(e)], 0 * model[:vREF])
-        @expression(model, eRampDown[t in time_interval(e)], 0 * model[:vREF])
-    
         #### For now these are set to zero because we are not modeling reserves
         @expression(model,reserves_term[t in time_interval(e)],0 * model[:vREF])
         @expression(model,regulation_term[t in time_interval(e)],0 * model[:vREF])
@@ -571,43 +523,23 @@ function add_model_constraint!(
         if isempty(cap_factor)
             cap_factor = ones(length(time_interval(e)));
         end
-        for p in subperiods(e)
-            t_start = first(p)
-            t_end = last(p)
-            add_to_expression!(
-                eRampUp[t_start],
-                flow(e)[t_start] - flow(e)[t_end] + regulation_term[t_start] + reserves_term[t_start]
-                )
-            add_to_expression!(
-                eRampDown[t_start],
-                flow(e)[t_end] - flow(e)[t_start] - regulation_term[t_start] + reserves_term[t_end]
-                )
-            for t in p[2:end]
-                add_to_expression!(
-                    eRampUp[t],
-                    flow(e)[t] - flow(e)[t-1] + regulation_term[t] + reserves_term[t]
-                    )
-                add_to_expression!(
-                    eRampDown[t],
-                    flow(e)[t-1] - flow(e)[t] - regulation_term[t] + reserves_term[t-1]
-                    )
-            end
+        
+        @expression(model, 
+        eRampUp[t in time_interval(e)],
+        flow(e)[t] - flow(e)[hoursbefore(t,1,subperiods(e))] + regulation_term[t] + reserves_term[t] 
+        -(ramp_up_fraction(e)*capacity_size(e)*(ucommit(e)[t]-ustart(e)[t])
+        + min(cap_factor[t],max(min_flow_fraction(e),ramp_up_fraction(e)))*capacity_size(e)*ustart(e)[t]
+        - min_flow_fraction(e)*capacity_size(e)*ushut(e)[t])
+        )
 
-            for t in p
-                add_to_expression!(eRampUp[t],
-                -(ramp_up_fraction(e)*capacity_size(e)*(ucommit(e)[t]-ustart(e)[t])
-                + min(cap_factor[t],max(min_flow_fraction(e),ramp_up_fraction(e)))*capacity_size(e)*ustart(e)[t]
-                - min_flow_fraction(e)*capacity_size(e)*ushut(e)[t]
-                ))
-
-                add_to_expression!(eRampDown[t],
-                -(ramp_down_fraction(e)*capacity_size(e)*(ucommit(e)[t]-ustart(e)[t])
-                - min_flow_fraction(e)*capacity_size(e)*ustart(e)[t]
-                + min(cap_factor[t],max(min_flow_fraction(e),ramp_down_fraction(e)))*capacity_size(e)*ushut(e)[t]
-                ))
-            end
-    
-        end
+        @expression(model,
+        eRampDown[t in time_interval(e)],
+        flow(e)[hoursbefore(t,1,subperiods(e))] - flow(e)[t] - regulation_term[t] + reserves_term[hoursbefore(t,1,subperiods(e))]
+        -(ramp_down_fraction(e)*capacity_size(e)*(ucommit(e)[t]-ustart(e)[t])
+            - min_flow_fraction(e)*capacity_size(e)*ustart(e)[t]
+            + min(cap_factor[t],max(min_flow_fraction(e),ramp_down_fraction(e)))*capacity_size(e)*ushut(e)[t]
+            )
+        )
     
         ramp_expr_dict = Dict(:RampUp=>eRampUp,:RampDown=>eRampDown)
     
@@ -616,5 +548,43 @@ function add_model_constraint!(
             [s in [:RampUp,:RampDown], t in time_interval(e)],
             ramp_expr_dict[s][t] <= 0
         )
-    
+        return nothing
     end
+
+
+function add_model_constraint!(
+    ct::MinUpTimeConstraint,
+    e::AbstractTransformationEdgeWithUC,
+    model::Model,
+    )
+    if min_up_time(e)>minimum(length.(subperiods(e)))
+        error("The minimum up time for $(get_transformation_id(e))_$(get_id(e)) is longer than the length of one subperiod")
+    else
+        ct.constraint_ref = @constraint(model,
+        [t in time_interval(e)],
+        ucommit(e)[t] >= sum(ustart(e)[s] for s  in [hoursbefore(t,h,subperiods(e)) for h in 0:min_up_time(e)-1])
+        )
+    end
+    
+    return nothing
+end
+
+function add_model_constraint!(
+    ct::MinDownTimeConstraint,
+    e::AbstractTransformationEdgeWithUC,
+    model::Model,
+    )
+
+    if min_down_time(e) > minimum(length.(subperiods(e)))
+        error("The minimum down time for $(get_transformation_id(e))_$(get_id(e)) is longer than the length of one subperiod")
+    else
+        ct.constraint_ref = @constraint(model,
+        [t in time_interval(e)],
+        capacity(e)/capacity_size(e) - ucommit(e)[t] >= sum(ushut(e)[s] for s in [hoursbefore(t,h,subperiods(e)) for h in 0:min_down_time(e)-1])
+        )
+    end
+   
+
+    
+    return nothing
+end

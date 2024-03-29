@@ -206,7 +206,14 @@ variable_om_cost =ngcc_vom_cost,
 ramp_up_fraction = ngcc_ramp_up,
 ramp_down_fraction = ngcc_ramp_down,
 min_flow_fraction = ngcc_min_flow,
-constraints = [Macro.CapacityConstraint(),Macro.RampingLimitConstraint(),Macro.MinFlowConstraint()]
+min_up_time = 7,
+min_down_time = 10,
+constraints = [ Macro.CapacityConstraint(),
+                Macro.RampingLimitConstraint(),
+                Macro.MinFlowConstraint(),
+                Macro.MinUpTimeConstraint(),
+                Macro.MinDownTimeConstraint(),
+            ]
 )
 
 ngcc.TEdges[:NG] = TEdge{NaturalGas}(;
