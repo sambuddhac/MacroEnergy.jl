@@ -1,8 +1,8 @@
 Base.@kwdef mutable struct Edge{T} <: AbstractEdge{T}
     time_interval::StepRange{Int64,Int64}
     subperiods::Vector{StepRange{Int64,Int64}} = StepRange{Int64,Int64}[]
-    start_node::Node{T}
-    end_node::Node{T}
+    start_node::AbstractNode{T}
+    end_node::AbstractNode{T}
     existing_capacity::Float64
     unidirectional::Bool = false
     max_line_reinforcement::Float64 = Inf
@@ -35,12 +35,9 @@ can_expand(e::AbstractEdge) = e.can_expand;
 new_capacity(e::AbstractEdge) = e.planning_vars[:new_capacity];
 capacity(e::AbstractEdge) = e.planning_vars[:capacity];
 flow(e::AbstractEdge) = e.operation_vars[:flow];
+flow(e::AbstractEdge,t::Int64) = flow(e)[t];
 
 all_constraints(e::AbstractEdge) = e.constraints;
-
-
-
-const Network = Union{Vector{Edge},Vector{Node}}
 
 function add_planning_variables!(e::AbstractEdge, model::Model)
 
@@ -88,26 +85,6 @@ function add_operation_variables!(e::AbstractEdge, model::Model)
     add_to_expression!.(net_balance(start_node(e)), -flow(e))
     
     add_to_expression!.(net_balance(end_node(e)), flow(e))
-    # for t in time_interval(e)
-    #     add_to_expression!(net_balance(start_node(e))[t], -flow(e)[t])
-    #     add_to_expression!(net_balance(end_node(e))[t], flow(e)[t])
-    # end
 
 end
 
-function add_model_constraint!(ct::CapacityConstraint, e::AbstractEdge, model::Model)
-
-    if e.unidirectional
-        ct.constraint_ref =
-            @constraint(model, [t in time_interval(e)], flow(e)[t] <= capacity(e))
-    else
-        ct.constraint_ref = @constraint(
-            model,
-            [i in [-1, 1], t in time_interval(e)],
-            i * flow(e)[t] <= capacity(e)
-        )
-    end
-
-    return nothing
-
-end

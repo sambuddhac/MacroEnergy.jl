@@ -16,6 +16,7 @@ abstract type CO2Captured <: CO2 end
 
 abstract type AbstractNode{T<:Commodity} end
 abstract type AbstractTransformationEdge{T<:Commodity} end
+abstract type AbstractTransformationEdgeWithUC{T} <: AbstractTransformationEdge{T} end
 
 abstract type AbstractEdge{T<:Commodity} end
 
@@ -25,7 +26,7 @@ abstract type PlanningConstraint <: AbstractTypeConstraint end
 
 abstract type TransformationType end
 
-abstract type AbstractTransformation{T<:Union{Commodity,TransformationType}} end
+abstract type AbstractTransformation{T<:TransformationType} end
 
 abstract type NaturalGasPower <: TransformationType  end
 abstract type NaturalGasPowerCCS <: NaturalGasPower  end
@@ -46,15 +47,23 @@ abstract type Storage <: TransformationType end
 const JuMPConstraint = Union{Array,Containers.DenseAxisArray,Containers.SparseAxisArray}
 # const DataFrameRow = DataFrames.DataFrameRow;
 # const DataFrame = DataFrames.DataFrame;
-
+function include_all_in_folder(folder)
+    base_path = joinpath(@__DIR__, folder)
+    for (root, dirs, files) in Base.Filesystem.walkdir(base_path)
+        for file in files
+            if endswith(file, ".jl")
+                include(joinpath(root, file))
+            end
+        end
+    end
+end
 # include files
-include("constraints.jl")
-include("node.jl")
-include("edge.jl")
-# include("resource.jl")
-# include("storage.jl")
-include("transformation.jl")
-include("subperiods.jl")
+include_all_in_folder("model/networks")
+include_all_in_folder("model/transformations")
+include_all_in_folder("model/constraints")
+
+include("time_management.jl")
+
 # include("config/configure_settings.jl")
 # include("load_inputs/load_dataframe.jl")
 # include("load_inputs/load_timeseries.jl")

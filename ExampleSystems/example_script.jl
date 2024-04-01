@@ -148,27 +148,7 @@ ng_node = Node{NaturalGas}(;
     time_interval = time_interval(NaturalGas),
     subperiods = subperiods(NaturalGas),
     demand = zeros(length(time_interval(NaturalGas))),
-    max_nsd = [0.0],
-    price_nsd = [0.0],
-    constraints = [Macro.DemandBalanceConstraint()]
-)
-
-ng_source = Transformation{NaturalGas}(;
-id = :NGImport,
-time_interval = time_interval(NaturalGas),
-subperiods = subperiods(NaturalGas),
-#### Note that this transformation does not have a stoichiometry balance because we are modeling exogenous inflow of NG
-)
-
-ng_source.TEdges[:ng_source] = TEdge{NaturalGas}(;
-id = :ng_source,
-node = ng_node,
-transformation = ng_source,
-direction = :output,
-time_interval = time_interval(NaturalGas),
-subperiods = subperiods(NaturalGas),
-has_planning_variables = false,
-price = ng_fuel_price,
+     #### Note that this node does not have a demand balance because we are modeling exogenous inflow of NG
 )
 
 co2_node = Node{CO2}(;
@@ -224,7 +204,8 @@ direction = :input,
 has_planning_variables = false,
 time_interval = time_interval(NaturalGas),
 subperiods = subperiods(NaturalGas),
-st_coeff = Dict(:energy=>1.0,:emissions=>ngcc_fuel_CO2)
+st_coeff = Dict(:energy=>1.0,:emissions=>ngcc_fuel_CO2),
+price = ng_fuel_price,
 )
 
 ngcc.TEdges[:CO2] = TEdge{CO2}(;
@@ -238,7 +219,7 @@ ngcc.TEdges[:CO2] = TEdge{CO2}(;
     st_coeff = Dict(:energy=>0.0,:emissions=>1.0)
     )
 
-system = [e_node;ng_node;co2_node;solar_pv;battery;ng_source;ngcc]
+system = [e_node;ng_node;co2_node;solar_pv;battery;ngcc]
 
 model = Macro.Model()
 Macro.@variable(model, vREF == 1)

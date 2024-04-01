@@ -1,0 +1,79 @@
+Base.@kwdef mutable struct RampingLimitConstraint <:OperationConstraint
+    value::Union{Missing,Vector{Float64}} = missing
+    lagrangian_multiplier::Union{Missing,Vector{Float64}} = missing
+    constraint_ref::Union{Missing,JuMPConstraint} = missing
+end
+
+function add_model_constraint!(
+    ct::RampingLimitConstraint,
+    e::AbstractTransformationEdge,
+    model::Model,
+    )
+    
+        #### For now these are set to zero because we are not modeling reserves
+        @expression(model,reserves_term[t in time_interval(e)],0 * model[:vREF])
+        @expression(model,regulation_term[t in time_interval(e)],0 * model[:vREF])
+    
+        @expression(model, 
+        eRampUp[t in time_interval(e)], 
+        flow(e,t) - flow(e,timestepbefore(t,1,subperiods(e))) + regulation_term[t] + reserves_term[t] - ramp_up_fraction(e)*capacity(e)
+        )
+    
+        @expression(model, 
+        eRampDown[t in time_interval(e)], 
+        flow(e,timestepbefore(t,1,subperiods(e))) - flow(e,t) - regulation_term[t] + reserves_term[timestepbefore(t,1,subperiods(e)) - ramp_down_fraction(e)*capacity(e)]
+        )
+    
+        ramp_expr_dict = Dict(:RampUp=>eRampUp,:RampDown=>eRampDown)
+    
+        ct.constraint_ref = @constraint(
+            model,
+            [s in [:RampUp,:RampDown], t in time_interval(e)],
+            ramp_expr_dict[s][t] <= 0
+        )
+    
+        return nothing
+end
+
+
+function add_model_constraint!(
+    ct::RampingLimitConstraint,
+    e::AbstractTransformationEdgeWithUC,
+    model::Model,
+    )
+    
+        #### For now these are set to zero because we are not modeling reserves
+        @expression(model,reserves_term[t in time_interval(e)],0 * model[:vREF])
+        @expression(model,regulation_term[t in time_interval(e)],0 * model[:vREF])
+    
+        cap_factor = capacity_factor(e);
+        if isempty(cap_factor)
+            cap_factor = ones(length(time_interval(e)));
+        end
+        
+        @expression(model, 
+        eRampUp[t in time_interval(e)],
+        flow(e,t) - flow(e,timestepbefore(t,1,subperiods(e))) + regulation_term[t] + reserves_term[t] 
+        -(ramp_up_fraction(e)*capacity_size(e)*(ucommit(e,t)-ustart(e,t))
+        + min(cap_factor[t],max(min_flow_fraction(e),ramp_up_fraction(e)))*capacity_size(e)*ustart(e,t)
+        - min_flow_fraction(e)*capacity_size(e)*ushut(e,t))
+        )
+
+        @expression(model,
+        eRampDown[t in time_interval(e)],
+        flow(e,timestepbefore(t,1,subperiods(e))) - flow(e,t) - regulation_term[t] + reserves_term[timestepbefore(t,1,subperiods(e))]
+        -(ramp_down_fraction(e)*capacity_size(e)*(ucommit(e,t)-ustart(e,t))
+            - min_flow_fraction(e)*capacity_size(e)*ustart(e,t)
+            + min(cap_factor[t],max(min_flow_fraction(e),ramp_down_fraction(e)))*capacity_size(e)*ushut(e,t)
+            )
+        )
+    
+        ramp_expr_dict = Dict(:RampUp=>eRampUp,:RampDown=>eRampDown)
+    
+        ct.constraint_ref = @constraint(
+            model,
+            [s in [:RampUp,:RampDown], t in time_interval(e)],
+            ramp_expr_dict[s][t] <= 0
+        )
+        return nothing
+end

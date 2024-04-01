@@ -32,15 +32,6 @@ Base.@kwdef mutable struct TEdge{T} <: AbstractTransformationEdge{T}
     @AbstractTransformationEdgeBaseAttributes()
 end
 
-abstract type AbstractTransformationEdgeWithUC{T} <: AbstractTransformationEdge{T} end
-
-Base.@kwdef mutable struct TEdgeWithUC{T} <: AbstractTransformationEdgeWithUC{T}
-    @AbstractTransformationEdgeBaseAttributes()
-    min_up_time::Int64 = 0.0
-    min_down_time::Int64 = 0.0
-    start_cost::Float64 = 0.0
-end
-
 Base.@kwdef mutable struct Transformation{T} <: AbstractTransformation{T}
     id::Symbol
     time_interval::StepRange{Int64,Int64}
@@ -73,6 +64,7 @@ get_id(g::AbstractTransformation) = g.id;
 time_interval(g::AbstractTransformation) = g.time_interval;
 all_constraints(g::AbstractTransformation) = g.constraints;
 stoichiometry_balance(g::AbstractTransformation) = g.operation_expr[:stoichiometry_balance];
+stoichiometry_balance(g::AbstractTransformation,i::Symbol,t::Int64) = stoichiometry_balance(g)[i,t];
 edges(g::AbstractTransformation) = g.TEdges;
 existing_capacity_storage(g::AbstractTransformation) = g.existing_capacity_storage;
 new_capacity_storage(g::AbstractTransformation) = g.planning_vars[:new_capacity_storage];
@@ -81,6 +73,7 @@ capacity_storage(g::AbstractTransformation) = g.planning_vars[:capacity_storage]
 investment_cost_storage(g::AbstractTransformation) = g.investment_cost_storage;
 fixed_om_cost_storage(g::AbstractTransformation) = g.fixed_om_cost_storage;
 storage_level(g::AbstractTransformation) = g.operation_vars[:storage_level];
+storage_level(g::AbstractTransformation,t::Int64) = storage_level(g)[t];
 storage_loss_fraction(g::AbstractTransformation) = g.storage_loss_fraction;
 subperiods(g::AbstractTransformation) = g.subperiods;
 #### Transformation Edge interface
@@ -92,10 +85,12 @@ direction(e::AbstractTransformationEdge) = e.direction;
 existing_capacity(e::AbstractTransformationEdge) = e.existing_capacity;
 capacity_size(e::AbstractTransformationEdge) = e.capacity_size;
 capacity_factor(e::AbstractTransformationEdge) = e.capacity_factor;
+capacity_factor(e::AbstractTransformationEdge,t::Int64) = capacity_factor(e)[t];
 investment_cost(e::AbstractTransformationEdge) = e.investment_cost;
 fixed_om_cost(e::AbstractTransformationEdge) = e.fixed_om_cost;
 variable_om_cost(e::AbstractTransformationEdge) = e.variable_om_cost;
 price(e::AbstractTransformationEdge) = e.price;
+price(e::AbstractTransformationEdge,t::Int64) = price(e)[t];
 min_capacity(e::AbstractTransformationEdge) = e.min_capacity;
 max_capacity(e::AbstractTransformationEdge) = e.max_capacity;
 can_expand(e::AbstractTransformationEdge) = e.can_expand;
@@ -107,21 +102,17 @@ ramp_down_fraction(e::AbstractTransformationEdge) = e.ramp_down_fraction;
 min_flow_fraction(e::AbstractTransformationEdge) = e.min_flow_fraction;
 capacity(e::AbstractTransformationEdge) = e.planning_vars[:capacity];
 flow(e::AbstractTransformationEdge) = e.operation_vars[:flow];
+flow(e::AbstractTransformationEdge,t::Int64) = flow(e)[t];
 all_constraints(e::AbstractTransformationEdge) = e.constraints;
 node(e::AbstractTransformationEdge) = e.node;
 stoichiometry_balance(e::AbstractTransformationEdge) = stoichiometry_balance(e.transformation);
+stoichiometry_balance(e::AbstractTransformationEdge,i::Symbol,t::Int64) = stoichiometry_balance(e.transformation)[i,t];
+
 stoichiometry_balance_names(e::AbstractTransformationEdge) = stoichiometry_balance_names(e.transformation);
 get_transformation_id(e::AbstractTransformationEdge) = get_id(e.transformation);
 get_id(e::AbstractTransformationEdge) = e.id;
 st_coeff(e::AbstractTransformationEdge) = e.st_coeff;
 
-min_up_time(e::AbstractTransformationEdgeWithUC) = e.min_up_time;
-min_down_time(e::AbstractTransformationEdgeWithUC) = e.min_down_time;
-start_cost(e::AbstractTransformationEdgeWithUC) = e.start_cost;
-
-ucommit(e::AbstractTransformationEdgeWithUC) = e.operation_vars[:ucommit];
-ustart(e::AbstractTransformationEdgeWithUC) = e.operation_vars[:ustart];
-ushut(e::AbstractTransformationEdgeWithUC) = e.operation_vars[:ushut];
 
 function add_planning_variables!(g::AbstractTransformation,model::Model)
 
@@ -208,8 +199,8 @@ function add_operation_variables!(g::AbstractTransformation,model::Model)
         )
         for t in time_interval(g)
             add_to_expression!(
-            stoichiometry_balance(g)[:storage,t],
-            storage_level(g)[t] - (1 - storage_loss_fraction(g)) * storage_level(g)[hoursbefore(t,1,subperiods(g))],
+            stoichiometry_balance(g,:storage,t),
+            storage_level(g,t) - (1 - storage_loss_fraction(g)) * storage_level(g,timestepbefore(t,1,subperiods(g))),
             )
         end
 
@@ -286,305 +277,19 @@ function add_operation_variables!(e::AbstractTransformationEdge, model::Model)
     for t in time_interval(e)
 
         for i in stoichiometry_balance_names(e)
-            add_to_expression!(stoichiometry_balance(e)[i,t], e_st_coeff[i], directional_flow[t])
+            add_to_expression!(stoichiometry_balance(e,i,t), e_st_coeff[i], directional_flow[t])
         end
 
         if variable_om_cost(e)>0
-            add_to_expression!(model[:eVariableCost], variable_om_cost(e), flow(e)[t])
+            add_to_expression!(model[:eVariableCost], variable_om_cost(e), flow(e,t))
         end
 
         if !isempty(price(e))
-            add_to_expression!(model[:eVariableCost], price(e)[t], flow(e)[t])
+            add_to_expression!(model[:eVariableCost], price(e,t), flow(e,t))
         end
 
     end
 
 
-    return nothing
-end
-
-function add_operation_variables!(e::AbstractTransformationEdgeWithUC, model::Model)
-
-    e.operation_vars[:flow] = @variable(
-        model,
-        [t in time_interval(e)],
-        lower_bound = 0.0,
-        base_name = "vFLOW_$(get_transformation_id(e))_$(get_id(e))"
-    )
-
-    e.operation_vars[:ucommit] = @variable(
-        model,
-        [t in time_interval(e)],
-        lower_bound = 0.0,
-        base_name = "vCOMMIT_$(get_transformation_id(e))_$(get_id(e))"
-    )
-
-    e.operation_vars[:ustart] = @variable(
-        model,
-        [t in time_interval(e)],
-        lower_bound = 0.0,
-        base_name = "vSTART_$(get_transformation_id(e))_$(get_id(e))"
-    )
-
-    e.operation_vars[:ushut] = @variable(
-        model,
-        [t in time_interval(e)],
-        lower_bound = 0.0,
-        base_name = "vSHUT_$(get_transformation_id(e))_$(get_id(e))"
-    )
-
-    dir_coeff =  (direction(e) == :input) ? -1 : (direction(e) == :output) ? 1 : error("Invalid TEdge direction")
-
-    e_st_coeff = st_coeff(e);
-    
-    e_node = node(e);
-
-    directional_flow = dir_coeff * flow(e);
-
-    add_to_expression!.(net_balance(e_node),directional_flow)
-
-    for t in time_interval(e)
-
-        for i in stoichiometry_balance_names(e)
-            add_to_expression!(stoichiometry_balance(e)[i,t], e_st_coeff[i], directional_flow[t])
-        end
-
-        if variable_om_cost(e)>0
-            add_to_expression!(model[:eVariableCost], variable_om_cost(e), flow(e)[t])
-        end
-
-        if !isempty(price(e))
-            add_to_expression!(model[:eVariableCost], price(e)[t], flow(e)[t])
-        end
-
-        if start_cost(e)>0
-            add_to_expression!(model[:eVariableCost], start_cost(e), ustart(e)[t])
-        end
-
-    end
-
-    @constraints(model, begin
-    [t in time_interval(e)], ucommit(e)[t] <= capacity(e)/capacity_size(e)    
-    [t in time_interval(e)], ustart(e)[t] <= capacity(e)/capacity_size(e)   
-    [t in time_interval(e)], ushut(e)[t] <= capacity(e)/capacity_size(e)  
-    end)
-
-    @constraint(model,
-    [t in time_interval(e)], 
-    ucommit(e)[t]-ucommit(e)[hoursbefore(t,1,subperiods(e))] == ustart(e)[t] - ushut(e)[t]
-    )
-
-    return nothing
-end
-
-
-function add_model_constraint!(ct::CapacityConstraint, e::AbstractTransformationEdge, model::Model)
-
-    if isempty(capacity_factor(e))
-        ct.constraint_ref = @constraint(
-            model, 
-            [t in time_interval(e)], 
-            flow(e)[t] <= capacity(e))
-    else
-        ct.constraint_ref = @constraint(
-            model,
-            [t in time_interval(e)],
-            flow(e)[t] <= capacity_factor(e)[t]*capacity(e)
-            )
-    end
-
-    return nothing
-
-end
-
-
-
-function add_model_constraint!(
-    ct::StoichiometryBalanceConstraint,
-    g::AbstractTransformation,
-    model::Model,
-)
-
-    ct.constraint_ref =
-        @constraint(model, [i in stoichiometry_balance_names(g), t in time_interval(g)], stoichiometry_balance(g)[i,t] == 0.0)
-
-    return nothing
-end
-
-
-function add_model_constraint!(
-    ct::StorageCapacityConstraint,
-    g::AbstractTransformation,
-    model::Model,
-)
-
-    ct.constraint_ref = @constraint(
-        model,
-        [t in time_interval(g)],
-        storage_level(g)[t] <= capacity_storage(g)
-    )
-
-    return nothing
-end
-
-
-function add_model_constraint!(
-ct::RampingLimitConstraint,
-e::AbstractTransformationEdge,
-model::Model,
-)
-
-    #### For now these are set to zero because we are not modeling reserves
-    @expression(model,reserves_term[t in time_interval(e)],0 * model[:vREF])
-    @expression(model,regulation_term[t in time_interval(e)],0 * model[:vREF])
-
-    @expression(model, 
-    eRampUp[t in time_interval(e)], 
-    flow(e)[t] - flow(e)[hoursbefore(t,1,subperiods(e))] + regulation_term[t] + reserves_term[t] - ramp_up_fraction(e)*capacity(e)
-    )
-
-    @expression(model, 
-    eRampDown[t in time_interval(e)], 
-    flow(e)[hoursbefore(t,1,subperiods(e))] - flow(e)[t] - regulation_term[t] + reserves_term[hoursbefore(t,1,subperiods(e)) - ramp_down_fraction(e)*capacity(e)]
-    )
-
-    ramp_expr_dict = Dict(:RampUp=>eRampUp,:RampDown=>eRampDown)
-
-    ct.constraint_ref = @constraint(
-        model,
-        [s in [:RampUp,:RampDown], t in time_interval(e)],
-        ramp_expr_dict[s][t] <= 0
-    )
-
-    return nothing
-end
-
-
-function add_model_constraint!(
-    ct::MinFlowConstraint,
-    e::AbstractTransformationEdge,
-    model::Model,
-    )
-
-    ct.constraint_ref = @constraint(
-            model, 
-            [t in time_interval(e)], 
-            flow(e)[t] >= min_flow_fraction(e)*capacity(e)
-            )
-    return nothing
-end
-
-function add_model_constraint!(
-    ct::MinFlowConstraint,
-    e::AbstractTransformationEdgeWithUC,
-    model::Model,
-    )
-
-    ct.constraint_ref = @constraint(
-            model, 
-            [t in time_interval(e)], 
-            flow(e)[t] >= min_flow_fraction(e)*capacity_size(e)*ucommit(e)[t]
-            )
-    return nothing
-
-end
-
-function add_model_constraint!(ct::CapacityConstraint, e::AbstractTransformationEdgeWithUC, model::Model)
-
-    if isempty(capacity_factor(e))
-        ct.constraint_ref = @constraint(
-            model, 
-            [t in time_interval(e)], 
-            flow(e)[t] <= capacity_size(e)*ucommit(e)[t])
-    else
-        ct.constraint_ref = @constraint(
-            model,
-            [t in time_interval(e)],
-            flow(e)[t] <= capacity_factor(e)[t]*capacity_size(e)*ucommit(e)[t]
-            )
-    end
-
-    return nothing
-
-end
-
-
-function add_model_constraint!(
-    ct::RampingLimitConstraint,
-    e::AbstractTransformationEdgeWithUC,
-    model::Model,
-    )
-    
-        #### For now these are set to zero because we are not modeling reserves
-        @expression(model,reserves_term[t in time_interval(e)],0 * model[:vREF])
-        @expression(model,regulation_term[t in time_interval(e)],0 * model[:vREF])
-    
-        cap_factor = capacity_factor(e);
-        if isempty(cap_factor)
-            cap_factor = ones(length(time_interval(e)));
-        end
-        
-        @expression(model, 
-        eRampUp[t in time_interval(e)],
-        flow(e)[t] - flow(e)[hoursbefore(t,1,subperiods(e))] + regulation_term[t] + reserves_term[t] 
-        -(ramp_up_fraction(e)*capacity_size(e)*(ucommit(e)[t]-ustart(e)[t])
-        + min(cap_factor[t],max(min_flow_fraction(e),ramp_up_fraction(e)))*capacity_size(e)*ustart(e)[t]
-        - min_flow_fraction(e)*capacity_size(e)*ushut(e)[t])
-        )
-
-        @expression(model,
-        eRampDown[t in time_interval(e)],
-        flow(e)[hoursbefore(t,1,subperiods(e))] - flow(e)[t] - regulation_term[t] + reserves_term[hoursbefore(t,1,subperiods(e))]
-        -(ramp_down_fraction(e)*capacity_size(e)*(ucommit(e)[t]-ustart(e)[t])
-            - min_flow_fraction(e)*capacity_size(e)*ustart(e)[t]
-            + min(cap_factor[t],max(min_flow_fraction(e),ramp_down_fraction(e)))*capacity_size(e)*ushut(e)[t]
-            )
-        )
-    
-        ramp_expr_dict = Dict(:RampUp=>eRampUp,:RampDown=>eRampDown)
-    
-        ct.constraint_ref = @constraint(
-            model,
-            [s in [:RampUp,:RampDown], t in time_interval(e)],
-            ramp_expr_dict[s][t] <= 0
-        )
-        return nothing
-    end
-
-
-function add_model_constraint!(
-    ct::MinUpTimeConstraint,
-    e::AbstractTransformationEdgeWithUC,
-    model::Model,
-    )
-    if min_up_time(e)>minimum(length.(subperiods(e)))
-        error("The minimum up time for $(get_transformation_id(e))_$(get_id(e)) is longer than the length of one subperiod")
-    else
-        ct.constraint_ref = @constraint(model,
-        [t in time_interval(e)],
-        ucommit(e)[t] >= sum(ustart(e)[s] for s  in [hoursbefore(t,h,subperiods(e)) for h in 0:min_up_time(e)-1])
-        )
-    end
-    
-    return nothing
-end
-
-function add_model_constraint!(
-    ct::MinDownTimeConstraint,
-    e::AbstractTransformationEdgeWithUC,
-    model::Model,
-    )
-
-    if min_down_time(e) > minimum(length.(subperiods(e)))
-        error("The minimum down time for $(get_transformation_id(e))_$(get_id(e)) is longer than the length of one subperiod")
-    else
-        ct.constraint_ref = @constraint(model,
-        [t in time_interval(e)],
-        capacity(e)/capacity_size(e) - ucommit(e)[t] >= sum(ushut(e)[s] for s in [hoursbefore(t,h,subperiods(e)) for h in 0:min_down_time(e)-1])
-        )
-    end
-   
-
-    
     return nothing
 end

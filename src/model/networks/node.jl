@@ -22,22 +22,29 @@ commodity_type(n::AbstractNode{T}) where {T} = T;
 get_id(n::AbstractNode) = n.id;
 
 demand(n::AbstractNode) = n.demand;
+demand(n::AbstractNode,t::Int64) = demand(n)[t];
 
 non_served_demand(n::AbstractNode) = n.operation_vars[:non_served_demand];
+non_served_demand(n::AbstractNode,s::Int64,t::Int64) = non_served_demand(n)[s,t];
 
 net_balance(n::AbstractNode) = n.operation_expr[:net_balance];
+net_balance(n::AbstractNode,t::Int64) = net_balance(n)[t];
 
 max_non_served_demand(n::AbstractNode) = n.max_nsd;
+max_non_served_demand(n::AbstractNode,s::Int64) = max_non_served_demand(n)[s];
 
 price_non_served_demand(n::AbstractNode) = n.price_nsd;
+price_non_served_demand(n::AbstractNode,s::Int64) = price_non_served_demand(n)[s];
 
 segments_non_served_demand(n::AbstractNode) = 1:length(n.max_nsd);
 
 all_constraints(n::AbstractNode) = n.constraints;
 
 price_unmet_policy(n::AbstractNode) = n.price_unmet_policy;
+price_unmet_policy(n::AbstractNode,c::DataType) = price_unmet_policy(n)[c];
 
 rhs_policy(n::AbstractNode) = n.rhs_policy;
+rhs_policy(n::AbstractNode,c::DataType) = rhs_policy(n)[c];
 
 function add_operation_variables!(n::AbstractNode, model::Model)
 
@@ -54,8 +61,8 @@ function add_operation_variables!(n::AbstractNode, model::Model)
 
         for t in time_interval(n)
             for s in segments_non_served_demand(n)
-                add_to_expression!(model[:eVariableCost], price_non_served_demand(n)[s], non_served_demand(n)[s,t])
-                add_to_expression!(net_balance(n)[t], non_served_demand(n)[s,t])
+                add_to_expression!(model[:eVariableCost], price_non_served_demand(n,s), non_served_demand(n,s,t))
+                add_to_expression!(net_balance(n,t), non_served_demand(n,s,t))
             end
         end
     end
@@ -65,55 +72,4 @@ end
 
 function add_planning_variables!(n::AbstractNode,model::Model)
     return nothing
-end
-
-function add_model_constraint!(ct::DemandBalanceConstraint, n::AbstractNode, model::Model)
-
-    ct.constraint_ref = @constraint(
-        model,
-        [t in time_interval(n)],
-        net_balance(n)[t]  == demand(n)[t]
-    )
-
-end
-
-function add_model_constraint!(
-    ct::MaxNonServedDemandConstraint,
-    n::AbstractNode,
-    model::Model,
-)
-    if haskey(n.operation_vars,:non_served_demand)
-        ct.constraint_ref = @constraint(
-            model,
-            [s in segments_non_served_demand(n), t in time_interval(n)],
-            non_served_demand(n)[s,t] <= max_non_served_demand(n)[s] * demand(n)[t]
-        )
-    else
-        @warn "MaxNonServedDemandConstraint required for a node that does not have a non-served demand variable so MACRO will not create this constraint"
-    end
-
-end
-
-
-function add_model_constraint!(ct::CO2CapConstraint,
-    n::Node{CO2},
-    model::Model
-)
-    ct_type = typeof(ct);
-
-    total_net_balance = sum(net_balance(n));
-
-    if haskey(price_unmet_policy(n),ct_type)
-        n.operation_vars[Symbol(string(ct_type)*"_Slack")] = @variable(
-            model,
-            lower_bound = 0.0,
-            base_name = "v"*string(ct_type)*"_Slack_$(get_id(n))"
-        )
-        add_to_expression!(model[:eVariableCost], price_unmet_policy(n)[ct_type],n.operation_vars[Symbol(string(ct_type)*"_Slack")])
-        add_to_expression!.(total_net_balance, -n.operation_vars[Symbol(string(ct_type)*"_Slack")])
-    end
-
-    ct.constraint_ref = @constraint(model, [i in [1]], total_net_balance <= rhs_policy(n)[ct_type])
-
-
 end
