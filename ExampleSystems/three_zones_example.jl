@@ -7,7 +7,7 @@ using Gurobi
 using CSV
 using DataFrames
 
-T = 10*24;
+T = 8760;
 macro_settings = (Commodities = Dict(Electricity=>Dict(:HoursPerTimeStep=>1,:HoursPerSubperiod=>24),
                                     Hydrogen=>Dict(:HoursPerTimeStep=>1,:HoursPerSubperiod=>24),
                                     NaturalGas=>Dict(:HoursPerTimeStep=>1,:HoursPerSubperiod=>24),
@@ -47,21 +47,21 @@ battery_max_duration = 10;
 battery_eff_up = 0.92;
 battery_eff_down = 0.92;
 
-ngcc_inv_cost = 65400;# $/MW
-ngcc_fom_cost = 10287.0;# $/MW
-ngcc_vom_cost = 3.55; #$/MW
-ngcc_capsize = 250.0;
-ngcc_ramp_up = 0.64;
-ngcc_ramp_down = 0.64;
-ngcc_min_flow = 0.468;
-ngcc_heatrate = 7.43*NG_MWh; # MWh of natural gas / MWh of electricity
-ngcc_fuel_CO2 = 0.05306/NG_MWh; # Tons of CO2 / MWh of natural gas
+ngcc_inv_cost_1 = 65400;# $/MW
+ngcc_fom_cost_1 = 10287.0;# $/MW
+ngcc_vom_cost_1 = 3.55; #$/MW
+ngcc_capsize_1 = 250.0;
+ngcc_ramp_up_1 = 0.64;
+ngcc_ramp_down_1 = 0.64;
+ngcc_min_flow_1 = 0.468;
+ngcc_heatrate_1 = 7.43*NG_MWh; # MWh of natural gas / MWh of electricity
+ngcc_fuel_CO2_1 = 0.05306/NG_MWh; # Tons of CO2 / MWh of natural gas
+ngcc_min_uptime_1 = 6;
+ngcc_min_downtime_1 = 6;
+ngcc_start_cost_per_mw_1 = 91;
+ngcc_start_fuel_1 = 2*NG_MWh; #MWh of natural gas / MW of electricity
+ngcc_start_cost_1 = ngcc_start_cost_per_mw_1 * ngcc_capsize_1;
 
-electrolyzer_capsize = 2*H2_MWh # MWh of H2
-electrolyzer_efficiency = 1/(45/H2_MWh) # MWh of H2 / MWh of electricity
-electrolyzer_inv_cost = 2033333/H2_MWh # $/MWh of H2
-electrolyzer_fom_cost = 30500/H2_MWh # $/MWh of H2
-electrolyzer_vom_cost = 0.0;
 
 e_node = Node{Electricity}(;
     id = Symbol("E_node"),
@@ -175,21 +175,21 @@ direction = :output,
 has_planning_variables = true,
 can_expand = true,
 can_retire = false,
-capacity_size = ngcc_capsize,
+capacity_size = ngcc_capsize_1,
 time_interval = time_interval(Electricity),
 subperiods = subperiods(Electricity),
-st_coeff = Dict(:energy=>ngcc_heatrate,:emissions=>0.0),
+st_coeff = Dict(:energy=>ngcc_heatrate_1,:emissions=>0.0),
 existing_capacity = 0.0,
-investment_cost = ngcc_inv_cost,
-fixed_om_cost = ngcc_fom_cost,
-variable_om_cost =ngcc_vom_cost,
-ramp_up_fraction = ngcc_ramp_up,
-ramp_down_fraction = ngcc_ramp_down,
-min_flow_fraction = ngcc_min_flow,
-min_up_time = 7,
-min_down_time = 10,
-start_cost = 91,
-start_fuel = 2*NG_MWh,
+investment_cost = ngcc_inv_cost_1,
+fixed_om_cost = ngcc_fom_cost_1,
+variable_om_cost =ngcc_vom_cost_1,
+ramp_up_fraction = ngcc_ramp_up_1,
+ramp_down_fraction = ngcc_ramp_down_1,
+min_flow_fraction = ngcc_min_flow_1,
+min_up_time = ngcc_min_uptime_1,
+min_down_time = ngcc_min_downtime_1,
+start_cost = ngcc_start_cost_1,
+start_fuel = ngcc_start_fuel_1,
 start_fuel_stoichiometry_name = :energy,
 constraints = [ Macro.CapacityConstraint(),
                 Macro.RampingLimitConstraint(),
@@ -207,8 +207,8 @@ direction = :input,
 has_planning_variables = false,
 time_interval = time_interval(NaturalGas),
 subperiods = subperiods(NaturalGas),
-st_coeff = Dict(:energy=>1.0,:emissions=>ngcc_fuel_CO2),
-price = ng_fuel_price,
+st_coeff = Dict(:energy=>1.0,:emissions=>ngcc_fuel_CO2_1),
+price = ng_fuel_price_1,
 )
 
 ngcc.TEdges[:CO2] = TEdge{CO2}(;
