@@ -1,0 +1,54 @@
+{
+    "ngcc": {
+        "type": "NaturalGasPower",
+        "global": {
+            "time_interval": "Electricity",
+            "capacity_size": 1,
+            "investment_cost": 100000,
+            "fixed_om_cost": 1000,
+            "variable_om_cost": 10,
+            "ramp_up_percentage": 0.1,
+            "ramp_down_percentage": 0.1,
+            "up_time": 0,
+            "down_time": 0,
+            "min_flow": 0,
+            "Heat_Rate_MMBTU_per_MWh": 8.0,
+            "can_retire": true,
+            "availability": 1.0,
+            "fuel": "nat_gas",
+            "fuel_co2": 0.2,
+            "edge_commodities": {
+                "E": "Electricity",
+                "NG": "NaturalGas",
+                "CO2": "CO2"
+            }
+        },
+        "instance": [
+            {
+                "nodes": {"NG": "z1_natgas", "E": "z1_elec", "CO2": "z1_emiss"},
+                "can_expand": true,
+                "can_retire": false,
+                "min_capacity": 0,
+                "max_capacity": -1,
+                "existing_capacity": 0,
+                "id": "special_ngcc"
+            },
+            {
+                "nodes": {"NG": "z2_natgas", "E": "z2_elec", "CO2": "z2_emiss"},
+                "can_expand": true,
+                "can_retire": false,
+                "min_capacity": 0,
+                "max_capacity": -1,
+                "existing_capacity": 0
+            },
+            {
+                "nodes": {"NG": "z3_natgas", "E": "z3_elec", "CO2": "z3_emiss"},
+                "can_expand": true,
+                "can_retire": false,
+                "min_capacity": 0,
+                "max_capacity": -1,
+                "existing_capacity": 0
+            }
+        ]
+    }
+}

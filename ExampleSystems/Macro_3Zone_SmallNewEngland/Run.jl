@@ -1,5 +1,5 @@
 # using Pkg
-# ### Activate environment where Macro package is
+### Activate environment where Macro package is
 # Pkg.activate(dirname(dirname(@__DIR__)))
 
 using Dolphyn
