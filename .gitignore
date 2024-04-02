@@ -37,3 +37,4 @@ Manifest.toml
 *.vsix
 # pre-commit hooks
 .pre-commit-config.yaml
+output.log
