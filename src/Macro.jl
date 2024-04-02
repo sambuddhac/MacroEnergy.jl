@@ -4,6 +4,7 @@ using YAML
 using CSV
 using DataFrames
 using JuMP
+using Revise
 
 # Type parameter for Macro data structures
 abstract type Commodity end
@@ -52,20 +53,22 @@ include("constraints.jl")
 include("node.jl")
 include("edge.jl")
 # include("resource.jl")
-# include("storage.jl")
+include("storage.jl")
 include("transformation.jl")
-# include("config/configure_settings.jl")
+include("config/configure_settings.jl")
 # include("load_inputs/load_dataframe.jl")
 # include("load_inputs/load_timeseries.jl")
-# include("load_inputs/load_inputs.jl")
-# include("load_inputs/load_network.jl")
-# include("load_inputs/load_transformations.jl")
-# include("load_inputs/load_resources.jl")
+include("load_inputs/load_inputs.jl")
+include("load_inputs/load_network.jl")
+include("load_inputs/load_transformations.jl")
+include("load_inputs/load_resources.jl")
 # include("load_inputs/load_storage.jl")
 # include("load_inputs/load_variability.jl")
-# include("input_translation/dolphyn_to_macro.jl")
-# include("generate_model.jl")
+include("input_translation/dolphyn_to_macro.jl")
+include("generate_model.jl")
 # include("prepare_inputs.jl")
+# include("transformations/electrolyzer.jl")
+include("transformations/natgaspower.jl")
 
 # exports
 export Electricity,
@@ -83,6 +86,7 @@ export Electricity,
     SyntheticNG,
     SolarPV,
     Storage,
+    TransformationType,
     #Resource,
     #Sink,
     #AbstractStorage,
@@ -105,12 +109,18 @@ export Electricity,
     #makeresource,
     #settings,
     nodes,
-    networks
+    networks,
     #resources,
     #storage,
     #dolphyn_to_macro,
     #apply_unit_conversion
+    configure_settings,
+    load_transformations_json
+
 
 
 
 end # module Macro
+
+# using Macro 
+# q = Macro.get_transformation_types(Macro)

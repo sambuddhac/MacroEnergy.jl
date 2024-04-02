@@ -78,3 +78,63 @@ function load_network(
 
     return network
 end
+
+function load_node_json(data_dir::AbstractString, macro_settings::NamedTuple)
+    commodities = commodity_types()
+    # Make a list of all the .JSON files in the data directory
+    files = filter(x -> endswith(x, ".json"), readdir(data_dir))
+    # Make an empty dictionary of nodes
+    nodes = Dict{Symbol, Node}()
+    for file in files
+        data = JSON3.read(joinpath(data_dir, file))
+        load_nodes!(nodes, data, commodities, macro_settings)
+    end
+end
+
+function load_nodes!(nodes::Dict{Symbol, Node}, data::AbstractDict{Symbol,Any}, commodity_types::Dict{Symbol,DataType}, macro_settings::NamedTuple)
+    for (n_name, n_data) in data
+        sanitize_json!(n_data)
+        n_type = commodity_types[Symbol(n_data[:type])]
+        if typeof(n_data[:instance]) == JSON3.Object
+            # Only one instance
+            instance_data = node_instance_data(n_data[:global], n_data[:instance])
+            haskey(instance_data, :id) ? instance_id = Symbol(instance_data[:id]) : instance_id = n_name
+            instance_data[:id], _ = make_node_id(instance_id, nodes)
+            nodes[instance_data[:id]] = Node(instance_data, macro_settings, n_type)
+        else
+            # Multiple instances
+            # Note, the node instance data has a different structures
+            # than the transformation data.
+            for instance_dict in n_data[:instance]
+                for (instance_name, instance_data) in instance_dict
+                    instance_data = node_instance_data(n_data[:global], instance_data)
+                    haskey(instance_data, :id) ? instance_id = Symbol(instance_data[:id]) : instance_id = default_node_name(instance_name, n_name)
+                    instance_data[:id], _ = make_node_id(instance_id, nodes)
+                    nodes[instance_data[:id]] = Node(instance_data, macro_settings, n_type)
+                end
+            end
+        end
+    end
+end
+
+function default_node_name(instance_name::T, n_name::T) where T<:Union{AbstractString,Symbol}
+    Symbol(string(instance_name, "_", n_name))
+end
+
+function node_instance_data(global_data::AbstractDict{Symbol,Any}, instance_data::AbstractDict{Symbol,Any})
+    instance_data = merge(global_data, instance_data)
+    return instance_data
+end
+
+function make_node_id(id::Symbol, nodes::Dict{Symbol, Node}, count::UInt8=UInt8(1))
+    existing_ids = collect(keys(nodes))
+    # Unlike the transformations, we won't add a count by default
+    if !(id in existing_ids)
+        return id, count
+    end
+    # Otherwise, keep incrementing the count till we find a unique ID
+    while Symbol(string(id, "_", count)) in existing_ids
+        count += UInt8(1)
+    end
+    return Symbol(string(id, "_", count)), count
+end
