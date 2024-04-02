@@ -36,7 +36,7 @@ abstract type FuelCell <: TransformationType end
 abstract type Electrolyzer <: TransformationType  end
 abstract type DACElectric <: TransformationType  end
 abstract type SyntheticNG <: TransformationType  end
-abstract type SolarPV <: TransformationType end
+abstract type VRE <: TransformationType end
 abstract type Storage <: TransformationType end
 # type hierarchy
 
@@ -63,6 +63,7 @@ include_all_in_folder("model/transformations")
 include_all_in_folder("model/constraints")
 
 include("time_management.jl")
+include("generate_model.jl")
 
 # include("config/configure_settings.jl")
 # include("load_inputs/load_dataframe.jl")
@@ -91,7 +92,7 @@ export Electricity,
     Electrolyzer,
     DACElectric,
     SyntheticNG,
-    SolarPV,
+    VRE,
     Storage,
     #Resource,
     #Sink,

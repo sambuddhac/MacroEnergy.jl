@@ -7,9 +7,10 @@ subperiod p with circular indexing.
 """
 function timestepbefore(t::Int, h::Int,subperiods::Vector{StepRange{Int64,Int64}})::Int
     #Find the subperiod that contains time t
-    p = findfirst(t .∈ subperiods); 
-    n = length(p);
-    
-    return mod1(t-h-1,n)+1
+    p = subperiods[findfirst(t .∈ subperiods)]; 
+    #circular shift of the subperiod forward by h steps
+    pc = circshift(p,h); 
+
+    return pc[findfirst(p.==t)]
 
 end

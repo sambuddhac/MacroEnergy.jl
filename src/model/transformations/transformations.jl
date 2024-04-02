@@ -53,7 +53,8 @@ Base.@kwdef mutable struct Transformation{T} <: AbstractTransformation{T}
     min_duration::Float64 = 0.0
     max_duration::Float64 = 0.0
     storage_loss_fraction::Float64 = 0.0
-    discharge_capacity_edge::Symbol = Symbol(".")
+    discharge_edge::Symbol = Symbol(".")
+    charge_edge::Symbol = Symbol(".")
 end
 
 #### Transformation interface
@@ -166,12 +167,12 @@ function add_planning_variables!(g::AbstractTransformation,model::Model)
 
         if g.max_duration > 0
     
-            e_inj = g.TEdges[g.discharge_capacity_edge];
+            e_discharge = g.TEdges[g.discharge_edge];
 
-            @constraint(model, capacity_storage(g) <= g.max_duration * capacity(e_inj))
+            @constraint(model, capacity_storage(g) <= g.max_duration * capacity(e_discharge))
 
             if g.min_duration > 0
-                @constraint(model, capacity_storage(g) >= g.min_duration * capacity(e_inj))
+                @constraint(model, capacity_storage(g) >= g.min_duration * capacity(e_discharge))
             end
 
         end
@@ -203,6 +204,10 @@ function add_operation_variables!(g::AbstractTransformation,model::Model)
             storage_level(g,t) - (1 - storage_loss_fraction(g)) * storage_level(g,timestepbefore(t,1,subperiods(g))),
             )
         end
+        e_discharge = g.TEdges[g.discharge_edge]
+        @constraint(model,
+        [t in time_interval(g)], 
+        st_coeff(e_discharge)[:storage]*flow(e_discharge,t)<=storage_level(g,timestepbefore(t,1,subperiods(g))))
 
     end
 
@@ -239,7 +244,7 @@ function add_planning_variables!(e::AbstractTransformationEdge, model::Model)
         if !can_expand(e)
             fix(new_capacity(e), 0.0; force = true)
         else
-            add_to_expression!(model[:eFixedCost], investment_cost(e) *capacity_size(e), new_capacity(e))
+            add_to_expression!(model[:eFixedCost], investment_cost(e)*capacity_size(e), new_capacity(e))
         end
 
         if !can_retire(e)

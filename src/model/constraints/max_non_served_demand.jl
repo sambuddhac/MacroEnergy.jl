@@ -12,8 +12,8 @@ function add_model_constraint!(
     if haskey(n.operation_vars,:non_served_demand)
         ct.constraint_ref = @constraint(
             model,
-            [s in segments_non_served_demand(n), t in time_interval(n)],
-            non_served_demand(n,s,t) <= max_non_served_demand(n,s) * demand(n,t)
+            [t in time_interval(n)],
+            sum(non_served_demand(n,s,t) for s in segments_non_served_demand(n)) <= demand(n,t)
         )
     else
         @warn "MaxNonServedDemandConstraint required for a node that does not have a non-served demand variable so MACRO will not create this constraint"

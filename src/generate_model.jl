@@ -1,12 +1,4 @@
-function generate_model(inputs::InputData)
-
-    edges = reduce(vcat, [inputs.networks[c] for c in keys(inputs.networks)])
-
-    nodes = reduce(vcat, [inputs.nodes[c] for c in keys(inputs.nodes)])
-
-    transformations = reduce(vcat, [inputs.transformations[c] for c in keys(inputs.transformations)]);
-
-    system = [nodes; edges; transformations]
+function generate_model(system::Vector{Any})
 
     model = Model()
 

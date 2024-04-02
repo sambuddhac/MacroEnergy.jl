@@ -3,7 +3,7 @@ NetworkExpansion: 1
 TimeDomainReductionFolder: "TDR_results"
 WriteOutputs: "full"
 SystemFolder: "system"
-EnableJuMPStringNames: false
+EnableJuMPStringNames: 1
 Trans_Loss_Segments: 1
 ModelingtoGenerateAlternativeSlack: 0.1
 PoliciesFolder: "policies"
