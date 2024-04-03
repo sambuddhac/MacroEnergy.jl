@@ -7,18 +7,13 @@ end
 
 function add_model_constraint!(ct::CapacityConstraint, e::AbstractTransformationEdge, model::Model)
 
-    if isempty(capacity_factor(e))
-        ct.constraint_ref = @constraint(
-            model, 
-            [t in time_interval(e)], 
-            flow(e,t) <= capacity(e))
-    else
-        ct.constraint_ref = @constraint(
+
+    ct.constraint_ref = @constraint(
             model,
             [t in time_interval(e)],
             flow(e,t) <= capacity_factor(e,t)*capacity(e)
-            )
-    end
+        )
+    
 
     return nothing
 
@@ -26,19 +21,13 @@ end
 
 function add_model_constraint!(ct::CapacityConstraint, e::AbstractTransformationEdgeWithUC, model::Model)
 
-    if isempty(capacity_factor(e))
-        ct.constraint_ref = @constraint(
-            model, 
-            [t in time_interval(e)], 
-            flow(e,t) <= capacity_size(e)*ucommit(e,t))
-    else
-        ct.constraint_ref = @constraint(
+    
+    ct.constraint_ref = @constraint(
             model,
             [t in time_interval(e)],
             flow(e,t) <= capacity_factor(e,t)*capacity_size(e)*ucommit(e,t)
-            )
-    end
-
+        )
+ 
     return nothing
 
 end

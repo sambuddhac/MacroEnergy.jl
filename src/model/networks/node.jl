@@ -8,6 +8,7 @@ Base.@kwdef mutable struct Node{T} <: AbstractNode{T}
     price_nsd::Vector{Float64} = [0.0]
     operation_vars::Dict = Dict()
     operation_expr::Dict = Dict()
+    planning_vars::Dict = Dict()
     price_unmet_policy::Dict{DataType,Float64} = Dict{DataType,Float64}()
     rhs_policy::Dict{DataType,Float64} = Dict{DataType,Float64}()
     constraints::Vector{AbstractTypeConstraint} = Vector{AbstractTypeConstraint}()
@@ -73,5 +74,19 @@ function add_operation_variables!(n::AbstractNode, model::Model)
 end
 
 function add_planning_variables!(n::AbstractNode,model::Model)
+    if in(PolicyConstraint,supertype.(typeof.(n.constraints)))
+        ct_all = findall(PolicyConstraint.==supertype.(typeof.(n.constraints)));
+        for ct in ct_all
+            
+            ct_type = typeof(n.constraints[ct]);
+            
+            n.planning_vars[Symbol(string(ct_type)*"_Budget")] = @variable(
+            model,
+            [w in subperiods(n)],
+            base_name = "v"*string(ct_type)*"_Budget_$(get_id(n))"
+            )
+            @constraint(model,sum(n.planning_vars[Symbol(string(ct_type)*"_Budget")]) == rhs_policy(n,ct_type))
+        end
+    end
     return nothing
 end

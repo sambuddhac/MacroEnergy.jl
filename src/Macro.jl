@@ -24,6 +24,7 @@ abstract type AbstractEdge{T<:Commodity} end
 
 abstract type AbstractTypeConstraint end
 abstract type OperationConstraint <: AbstractTypeConstraint end
+abstract type PolicyConstraint <: OperationConstraint end
 abstract type PlanningConstraint <: AbstractTypeConstraint end
 
 abstract type TransformationType end
@@ -59,6 +60,9 @@ function include_all_in_folder(folder)
         end
     end
 end
+
+namedtuple(d::Dict) = (; (Symbol(k) => v for (k, v) in d)...)
+
 # include files
 
 include("time_management.jl")
@@ -66,6 +70,8 @@ include_all_in_folder("model/networks")
 include_all_in_folder("model/transformations")
 include_all_in_folder("model/constraints")
 include("generate_model.jl")
+include("benders.jl")
+include("input_translation/load_data_from_genx.jl")
 
 # include("config/configure_settings.jl")
 # include("load_inputs/load_dataframe.jl")
@@ -100,5 +106,6 @@ export Electricity,
     Edge,
     Transformation,
     TEdge,
-    TEdgeWithUC
+    TEdgeWithUC,
+    namedtuple
 end # module Macro

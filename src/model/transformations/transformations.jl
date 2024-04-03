@@ -91,7 +91,7 @@ direction(e::AbstractTransformationEdge) = e.direction;
 existing_capacity(e::AbstractTransformationEdge) = e.existing_capacity;
 capacity_size(e::AbstractTransformationEdge) = e.capacity_size;
 capacity_factor(e::AbstractTransformationEdge) = e.capacity_factor;
-capacity_factor(e::AbstractTransformationEdge,t::Int64) = capacity_factor(e)[t];
+capacity_factor(e::AbstractTransformationEdge,t::Int64) = (isempty(capacity_factor(e)) == true) ? 1.0 : capacity_factor(e)[t];
 investment_cost(e::AbstractTransformationEdge) = e.investment_cost;
 fixed_om_cost(e::AbstractTransformationEdge) = e.fixed_om_cost;
 variable_om_cost(e::AbstractTransformationEdge) = e.variable_om_cost;
