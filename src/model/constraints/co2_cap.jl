@@ -10,7 +10,11 @@ function add_model_constraint!(ct::CO2CapConstraint,
 )
     ct_type = typeof(ct);
 
-    total_net_balance = sum(net_balance(n));
+    total_net_balance = @expression(model,0*model[:vREF]);
+    for t in time_interval(n)
+        w = current_subperiod(n,t);
+        add_to_expression!(total_net_balance,subperiod_weight(n,w),net_balance(n,t));
+    end
 
     if haskey(price_unmet_policy(n),ct_type)
         n.operation_vars[Symbol(string(ct_type)*"_Slack")] = @variable(

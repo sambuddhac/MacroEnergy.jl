@@ -1,6 +1,5 @@
 Base.@kwdef mutable struct Edge{T} <: AbstractEdge{T}
-    time_interval::StepRange{Int64,Int64}
-    subperiods::Vector{StepRange{Int64,Int64}} = StepRange{Int64,Int64}[]
+    timedata::TimeData{T}
     start_node::AbstractNode{T}
     end_node::AbstractNode{T}
     existing_capacity::Float64
@@ -25,8 +24,11 @@ end_node(e::AbstractEdge) = e.end_node;
 start_node_id(e::AbstractEdge) = get_id(e.start_node);
 end_node_id(e::AbstractEdge) = get_id(e.end_node);
 
-time_interval(e::AbstractEdge) = e.time_interval;
-subperiods(e::AbstractEdge) = e.subperiods;
+time_interval(e::AbstractEdge) = e.timedata.time_interval;
+subperiods(e::AbstractEdge) = e.timedata.subperiods;
+subperiod_weight(e::AbstractEdge,w::StepRange{Int64, Int64}) = e.timedata.subperiod_weights[w];
+current_subperiod(e::AbstractEdge,t::Int64) = subperiods(e)[findfirst(t .∈ subperiods(e))];
+
 commodity_type(e::AbstractEdge{T}) where {T} = T;
 existing_capacity(e::AbstractEdge) = e.existing_capacity;
 max_line_reinforcement(e::AbstractEdge) = e.max_line_reinforcement;

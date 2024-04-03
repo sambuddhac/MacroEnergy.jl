@@ -14,6 +14,8 @@ abstract type NaturalGas <: Commodity end
 abstract type CO2 <: Commodity end
 abstract type CO2Captured <: CO2 end
 
+abstract type AbstractTimeData{T<:Commodity} end
+
 abstract type AbstractNode{T<:Commodity} end
 abstract type AbstractTransformationEdge{T<:Commodity} end
 abstract type AbstractTransformationEdgeWithUC{T} <: AbstractTransformationEdge{T} end
@@ -58,11 +60,11 @@ function include_all_in_folder(folder)
     end
 end
 # include files
+
+include("time_management.jl")
 include_all_in_folder("model/networks")
 include_all_in_folder("model/transformations")
 include_all_in_folder("model/constraints")
-
-include("time_management.jl")
 include("generate_model.jl")
 
 # include("config/configure_settings.jl")
@@ -94,35 +96,9 @@ export Electricity,
     SyntheticNG,
     VRE,
     Storage,
-    #Resource,
-    #Sink,
-    #AbstractStorage,
-    #SymmetricStorage,
-    #AsymmetricStorage,
-    #InputFilesNames,
     Node,
     Edge,
     Transformation,
     TEdge,
-    TEdgeWithUC,
-    #CapacityConstraint,
-    #configure_settings,
-    #add_planning_variables!,
-    #add_operation_variables!,
-    #add_model_constraint!,
-    #add_all_model_constraints!,
-    #generate_model,
-    #prepare_inputs!,
-    #loadresources,
-    #makeresource,
-    #settings,
-    nodes,
-    networks
-    #resources,
-    #storage,
-    #dolphyn_to_macro,
-    #apply_unit_conversion
-
-
-
+    TEdgeWithUC
 end # module Macro

@@ -3,14 +3,13 @@ macro AbstractTransformationEdgeBaseAttributes()
         id::Symbol
         node::AbstractNode{T}
         transformation::AbstractTransformation
+        timedata::TimeData{T}
         direction::Symbol = :input
         has_planning_variables::Bool = false
         can_retire::Bool = false
         can_expand::Bool = false 
         capacity_size :: Float64 = 1.0
         capacity_factor::Vector{Float64} = Float64[]
-        time_interval::StepRange{Int64,Int64} = 1:1
-        subperiods::Vector{StepRange{Int64,Int64}} = StepRange{Int64,Int64}[]
         st_coeff::Dict{Symbol,Float64} = Dict{Symbol,Float64}()
         min_capacity::Float64 = 0.0
         max_capacity::Float64 = Inf
@@ -34,8 +33,7 @@ end
 
 Base.@kwdef mutable struct Transformation{T} <: AbstractTransformation{T}
     id::Symbol
-    time_interval::StepRange{Int64,Int64}
-    subperiods::Vector{StepRange{Int64,Int64}}= StepRange{Int64,Int64}[]
+    timedata::TimeData
     stoichiometry_balance_names::Vector{Symbol} = Vector{Symbol}()
     TEdges::Dict{Symbol,AbstractTransformationEdge} = Dict{Symbol,AbstractTransformationEdge}()
     operation_expr::Dict = Dict()
@@ -62,7 +60,11 @@ transformation_type(g::AbstractTransformation{T}) where {T} = T;
 stoichiometry_balance_names(g::AbstractTransformation) = g.stoichiometry_balance_names;
 has_storage(g::AbstractTransformation) = :storage ∈ stoichiometry_balance_names(g);
 get_id(g::AbstractTransformation) = g.id;
-time_interval(g::AbstractTransformation) = g.time_interval;
+time_interval(g::AbstractTransformation) = g.timedata.time_interval;
+subperiods(g::AbstractTransformation) = g.timedata.subperiods;
+subperiod_weight(g::AbstractTransformation,w::StepRange{Int64, Int64}) = g.timedata.subperiod_weights[w];
+current_subperiod(g::AbstractTransformation,t::Int64) = subperiods(g)[findfirst(t .∈ subperiods(g))];
+
 all_constraints(g::AbstractTransformation) = g.constraints;
 stoichiometry_balance(g::AbstractTransformation) = g.operation_expr[:stoichiometry_balance];
 stoichiometry_balance(g::AbstractTransformation,i::Symbol,t::Int64) = stoichiometry_balance(g)[i,t];
@@ -76,11 +78,14 @@ fixed_om_cost_storage(g::AbstractTransformation) = g.fixed_om_cost_storage;
 storage_level(g::AbstractTransformation) = g.operation_vars[:storage_level];
 storage_level(g::AbstractTransformation,t::Int64) = storage_level(g)[t];
 storage_loss_fraction(g::AbstractTransformation) = g.storage_loss_fraction;
-subperiods(g::AbstractTransformation) = g.subperiods;
+
 #### Transformation Edge interface
 commodity_type(e::AbstractTransformationEdge{T}) where {T} = T;
-time_interval(e::AbstractTransformationEdge) = e.time_interval;
-subperiods(e::AbstractTransformationEdge) = e.subperiods;
+time_interval(e::AbstractTransformationEdge) = e.timedata.time_interval;
+subperiods(e::AbstractTransformationEdge) = e.timedata.subperiods;
+subperiod_weight(e::AbstractTransformationEdge,w::StepRange{Int64, Int64}) = e.timedata.subperiod_weights[w];
+current_subperiod(e::AbstractTransformationEdge,t::Int64) = subperiods(e)[findfirst(t .∈ subperiods(e))];
+
 has_planning_variables(e::AbstractTransformationEdge) = e.has_planning_variables;
 direction(e::AbstractTransformationEdge) = e.direction;
 existing_capacity(e::AbstractTransformationEdge) = e.existing_capacity;
@@ -281,16 +286,18 @@ function add_operation_variables!(e::AbstractTransformationEdge, model::Model)
 
     for t in time_interval(e)
 
+        w = current_subperiod(e,t);
+
         for i in stoichiometry_balance_names(e)
             add_to_expression!(stoichiometry_balance(e,i,t), e_st_coeff[i], directional_flow[t])
         end
 
         if variable_om_cost(e)>0
-            add_to_expression!(model[:eVariableCost], variable_om_cost(e), flow(e,t))
+            add_to_expression!(model[:eVariableCost], subperiod_weight(e,w)*variable_om_cost(e), flow(e,t))
         end
 
         if !isempty(price(e))
-            add_to_expression!(model[:eVariableCost], price(e,t), flow(e,t))
+            add_to_expression!(model[:eVariableCost], subperiod_weight(e,w)*price(e,t), flow(e,t))
         end
 
     end

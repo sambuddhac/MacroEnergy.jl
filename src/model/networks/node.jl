@@ -2,8 +2,7 @@ Base.@kwdef mutable struct Node{T} <: AbstractNode{T}
     ### Fields without defaults
     id::Symbol
     demand::Vector{Float64}
-    time_interval::StepRange{Int64,Int64}
-    subperiods::Vector{StepRange{Int64,Int64}} = StepRange{Int64,Int64}[]
+    timedata::TimeData{T}
     #### Fields with defaults
     max_nsd::Vector{Float64} = [0.0]
     price_nsd::Vector{Float64} = [0.0]
@@ -14,8 +13,10 @@ Base.@kwdef mutable struct Node{T} <: AbstractNode{T}
     constraints::Vector{AbstractTypeConstraint} = Vector{AbstractTypeConstraint}()
 end
 
-time_interval(n::AbstractNode) = n.time_interval;
-subperiods(n::AbstractNode) = n.subperiods;
+time_interval(n::AbstractNode) = n.timedata.time_interval;
+subperiods(n::AbstractNode) = n.timedata.subperiods;
+subperiod_weight(n::AbstractNode,w::StepRange{Int64, Int64}) = n.timedata.subperiod_weights[w];
+current_subperiod(n::AbstractNode,t::Int64) = subperiods(n)[findfirst(t .∈ subperiods(n))];
 
 commodity_type(n::AbstractNode{T}) where {T} = T;
 
@@ -60,8 +61,9 @@ function add_operation_variables!(n::AbstractNode, model::Model)
         )
 
         for t in time_interval(n)
+            w = current_subperiod(n,t);
             for s in segments_non_served_demand(n)
-                add_to_expression!(model[:eVariableCost], price_non_served_demand(n,s), non_served_demand(n,s,t))
+                add_to_expression!(model[:eVariableCost], subperiod_weight(n,w)*price_non_served_demand(n,s), non_served_demand(n,s,t))
                 add_to_expression!(net_balance(n,t), non_served_demand(n,s,t))
             end
         end

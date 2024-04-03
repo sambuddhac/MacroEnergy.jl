@@ -64,20 +64,22 @@ function add_operation_variables!(e::AbstractTransformationEdgeWithUC, model::Mo
 
     for t in time_interval(e)
 
+        w = current_subperiod(e,t);
+
         for i in stoichiometry_balance_names(e)
             add_to_expression!(stoichiometry_balance(e,i,t), e_st_coeff[i], directional_flow[t])
         end
 
         if variable_om_cost(e)>0
-            add_to_expression!(model[:eVariableCost], variable_om_cost(e), flow(e,t))
+            add_to_expression!(model[:eVariableCost], subperiod_weight(e,w)*variable_om_cost(e), flow(e,t))
         end
 
         if !isempty(price(e))
-            add_to_expression!(model[:eVariableCost], price(e,t), flow(e,t))
+            add_to_expression!(model[:eVariableCost], subperiod_weight(e,w)*price(e,t), flow(e,t))
         end
 
         if start_cost(e)>0
-            add_to_expression!(model[:eVariableCost], start_cost(e)*capacity_size(e), ustart(e,t))
+            add_to_expression!(model[:eVariableCost], subperiod_weight(e,w)*start_cost(e)*capacity_size(e), ustart(e,t))
         end
 
         if start_fuel(e)>0
