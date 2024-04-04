@@ -31,7 +31,8 @@
                 "min_capacity": 0,
                 "max_capacity": -1,
                 "existing_capacity": 0,
-                "id": "special_ngcc"
+                "id": "special_ngcc",
+                "Heat_Rate_MMBTU_per_MWh": 4.0
             },
             {
                 "nodes": {"NG": "z2_natgas", "E": "z2_elec", "CO2": "z2_emiss"},

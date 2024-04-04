@@ -7,8 +7,6 @@ function make_natgaspower(data::Dict{Symbol,Any}, macro_settings::NamedTuple)::T
         constraints = [StoichiometryBalanceConstraint()]
         )
     
-    println(data)
-
     elec_edge_id = :E
     ngcc.TEdges[elec_edge_id] = TEdge{data[:edge_commodities][elec_edge_id]}(;
     id = :test,

@@ -43,22 +43,35 @@ function load_tedges(
 end
 
 function load_transformations_json(data_dir::AbstractString, macro_settings::NamedTuple)
+    #=============================================
+    This function does the following:
+        - Makes a Dict{Symbol, Any} entry for each instance of a transform
+        - Makes a Dict{Symbol, Transformation} entry for each transformation
+    It would be more efficient to do both steps together for each entry,
+    but this way allows someone to just to the second step with their own data
+    or inject other actions along the way for individual inputs or transformations.
+    =============================================#
     # Make a list of all the TransformationTypes
     t_types = transformation_types(Macro)
     # Make a list of all the .JSON files in the data directory
     files = filter(x -> endswith(x, ".json"), readdir(data_dir))
-    # Make empty Dict of transformations 
-    transformations = Dict{Symbol,Transformation}()
+    # Make empty Dict of transformation data
+    transformation_data = Dict{Symbol, Any}()
     # For each file, load the JSON, extract the transformation data
     # and make the transformation
     for file in files
         data = JSON3.read(joinpath(data_dir, file))
-        load_transformations!(transformations, data, t_types, macro_settings)
+        load_transformations!(transformation_data, data)
     end
-    return transformations
+    # Make empty Dict of transformations 
+    transformations = Dict{Symbol,Transformation}()
+    return transformation_data, transformations
 end
 
-function load_transformations!(transformations::Dict{Symbol,Transformation}, data::JSON3.Object, t_types::Dict{Symbol, DataType}, macro_settings::NamedTuple)
+function load_transformations!(
+    transformation_data::Dict{Symbol,Any}, 
+    data::JSON3.Object, 
+    )
     for (t_name, t_data) in data
         # Get the TransformationType.
         #=============================================
@@ -68,29 +81,36 @@ function load_transformations!(transformations::Dict{Symbol,Transformation}, dat
         sharing costs and / or lists of nodes, which would be odd.
         =============================================#
         sanitize_json!(t_data)
-        t_type = t_types[Symbol(t_data[:type])]
+        commodities = commodity_types(Macro)
         # Check if there are multiple instance_data inputs for this transformation
         if typeof(t_data[:instance]) == JSON3.Object
             # If only one, get the inputs, assign an ID, and make the transformation
-            instance_data = transformation_instance_data(t_data[:global], t_data[:instance])
-            haskey(instance_data, :id) ? instance_id = Symbol(instance_data[:id]) : instance_id = t_name
-            instance_data[:id], _ = make_transformation_id(instance_id, transformations)
-            transformations[instance_data[:id]] = Transformation{t_type}(instance_data, macro_settings)
+            existing_ids = collect(keys(transformation_data))
+            instance_data, _ = transformation_instance_data(t_data[:global], t_data[:instance], t_name, existing_ids, counter, commodities)
+            transformation_data[instance_data[:id]] = instance_data
+            # transformations[instance_data[:id]] = Transformation{t_type}(instance_data, macro_settings)
         else
             # Otherwise, loop over the instance_data inputs and do the same for each
-            counter = UInt8(0)
+            counter = UInt8(1)
             for instance_data in t_data[:instance]
-                counter += UInt8(1)
-                instance_data = transformation_instance_data(t_data[:global], instance_data)
-                haskey(instance_data, :id) ? instance_id = Symbol(instance_data[:id]) : instance_id = t_name
-                instance_data[:id], counter = make_transformation_id(instance_id, transformations, counter)
-                transformations[instance_data[:id]] = Transformation{t_type}(instance_data, macro_settings)
+                # counter += UInt8(1)
+                existing_ids = collect(keys(transformation_data))
+                instance_data, counter = transformation_instance_data(t_data[:global], instance_data, t_name, existing_ids, counter, commodities)
+                transformation_data[instance_data[:id]] = instance_data
+                # transformations[instance_data[:id]] = Transformation{t_type}(instance_data, macro_settings)
             end
         end
     end
 end
 
-function transformation_instance_data(global_data::AbstractDict{Symbol,Any}, instance_data::AbstractDict{Symbol,Any}, c_types::Dict{Symbol, DataType}=commodity_types(Macro))
+function transformation_instance_data(
+    global_data::AbstractDict{Symbol,Any}, 
+    instance_data::AbstractDict{Symbol,Any},
+    default_name::Symbol,
+    existing_ids::Vector{Symbol},
+    counter::UInt8=UInt8(1),
+    c_types::Dict{Symbol, DataType}=commodity_types(Macro)
+    )
     # Merge global and node data, with node data overwriting global data
     instance_data = merge(global_data, instance_data)
     # Convert the JSON3 Object to a Dict{Symbol, Any}
@@ -100,11 +120,13 @@ function transformation_instance_data(global_data::AbstractDict{Symbol,Any}, ins
     for (edge_name, commodity_name) in instance_data[:edge_commodities]
         instance_data[:edge_commodities][edge_name] = c_types[Symbol(commodity_name)]
     end
-    return instance_data
+    haskey(instance_data, :id) ? instance_id = Symbol(instance_data[:id]) : instance_id = default_name
+    instance_data[:id], counter = make_transformation_id(instance_id, existing_ids, counter)
+    return instance_data, counter
 end
 
-function make_transformation_id(id::Symbol, transformations::Dict{Symbol,Transformation}, count::UInt8=UInt8(1))
-    existing_ids = collect(keys(transformations))
+function make_transformation_id(id::Symbol, existing_ids::Vector{Symbol}, count::UInt8=UInt8(1))
+    
     while Symbol(string(id, "_", count)) in existing_ids
         count += UInt8(1)
     end
