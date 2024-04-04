@@ -38,3 +38,4 @@ Manifest.toml
 # pre-commit hooks
 .pre-commit-config.yaml
 output.log
+output.log
