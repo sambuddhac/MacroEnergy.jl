@@ -79,7 +79,7 @@ function load_network(
     return network
 end
 
-function load_node_json(data_dir::AbstractString, macro_settings::NamedTuple)
+function load_nodes_json(data_dir::AbstractString, macro_settings::NamedTuple)
     commodities = commodity_types()
     # Make a list of all the .JSON files in the data directory
     files = filter(x -> endswith(x, ".json"), readdir(data_dir))
