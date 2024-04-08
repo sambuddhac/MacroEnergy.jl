@@ -7,16 +7,16 @@
         },
         "instance": [
             {
-                "id": "z1",
-                "price_header": "natgas_z1"
+                "id": "natgas_MA",
+                "price_header": "natgas_MA"
             },
             {
-                "id": "z2",
-                "price_header": "natgas_z2"
+                "id": "natgas_CT",
+                "price_header": "natgas_CT"
             },
             {
-                "id": "z3",
-                "price_header": "natgas_z3"
+                "id": "natgas_ME",
+                "price_header": "natgas_ME"
             }
         ]
     },
@@ -24,24 +24,19 @@
         "type": "Electricity",
         "global": {
             "time_interval": "Electricity",
-            "price_nsd": 50000.0,
-            "max_nsd": 1000.0,
             "demand_file": "elec_demand.csv"
         },
         "instance": [
             {
-                "id": "z1",
-                "price_nsd": 10000.0,
+                "id": "MA",
                 "demand_header": "MA"
             },
             {
-                "id": "z2",
-                "price_nsd": 20000.0,
+                "id": "CT",
                 "demand_header": "CT"
             },
             {
-                "id": "z3",
-                "price_nsd": 30000.0,
+                "id": "ME",
                 "demand_header": "ME"
             }
         ]
@@ -53,17 +48,17 @@
         },
         "instance": [
             {
-                "id": "z1",
+                "id": "co2_MA",
                 "policy_rhs":
                     {"CO2CapConstraint": 1000.0}
             },
             {
-                "id": "z2",
+                "id": "co2_CT",
                 "policy_rhs":
                     {"CO2CapConstraint": 2000.0}
             },
             {
-                "id": "z3",
+                "id": "co2_ME",
                 "policy_rhs":
                     {"CO2CapConstraint": 3000.0}
             }
@@ -73,24 +68,20 @@
         "type": "Hydrogen",
         "global": {
             "time_interval": "Hydrogen",
-            "price_nsd": 50000.0,
             "demand_file": "h2_demand.csv"
         },
         "instance": [
             {
-                "id": "z1",
-                "price_nsd": 10000.0,
-                "demand_header": "h2_z1"
+                "id": "h2_MA",
+                "demand_header": "h2_MA"
             },
             {
-                "id": "z2",
-                "price_nsd": 20000.0,
-                "demand_header": "h2_z2"
+                "id": "h2_CT",
+                "demand_header": "h2_CT"
             },
             {
-                "id": "z3",
-                "price_nsd": 30000.0,
-                "demand_header": "h2_z3"
+                "id": "h2_ME",
+                "demand_header": "h2_ME"
             }
         ]
     }
