@@ -4,6 +4,7 @@ using YAML
 using CSV
 using DataFrames
 using JuMP
+using Revise
 
 # Type parameter for Macro data structures
 abstract type Commodity end
@@ -76,15 +77,17 @@ include("input_translation/load_data_from_genx.jl")
 # include("config/configure_settings.jl")
 # include("load_inputs/load_dataframe.jl")
 # include("load_inputs/load_timeseries.jl")
-# include("load_inputs/load_inputs.jl")
-# include("load_inputs/load_network.jl")
-# include("load_inputs/load_transformations.jl")
-# include("load_inputs/load_resources.jl")
+include("load_inputs/load_inputs.jl")
+include("load_inputs/load_network.jl")
+include("load_inputs/load_transformations.jl")
+include("load_inputs/load_resources.jl")
 # include("load_inputs/load_storage.jl")
 # include("load_inputs/load_variability.jl")
-# include("input_translation/dolphyn_to_macro.jl")
-# include("generate_model.jl")
+include("input_translation/dolphyn_to_macro.jl")
+include("generate_model.jl")
 # include("prepare_inputs.jl")
+# include("transformations/electrolyzer.jl")
+include("transformations/natgaspower.jl")
 
 # exports
 export Electricity,
@@ -102,10 +105,43 @@ export Electricity,
     SyntheticNG,
     VRE,
     Storage,
+    TransformationType,
+    #Resource,
+    #Sink,
+    #AbstractStorage,
+    #SymmetricStorage,
+    #AsymmetricStorage,
+    #InputFilesNames,
     Node,
     Edge,
     Transformation,
     TEdge,
     TEdgeWithUC,
     namedtuple
+    #CapacityConstraint,
+    #configure_settings,
+    #add_planning_variables!,
+    #add_operation_variables!,
+    #add_model_constraint!,
+    #add_all_model_constraints!,
+    #generate_model,
+    #prepare_inputs!,
+    #loadresources,
+    #makeresource,
+    #settings,
+    nodes,
+    networks,
+    #resources,
+    #storage,
+    #dolphyn_to_macro,
+    #apply_unit_conversion
+    configure_settings,
+    load_transformations_json
+
+
+
+
 end # module Macro
+
+# using Macro 
+# q = Macro.get_transformation_types(Macro)

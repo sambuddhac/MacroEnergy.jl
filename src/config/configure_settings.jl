@@ -14,6 +14,8 @@ function configure_settings(settings_path::String)
 
     settings = merge(settings, model_settings)
 
+    settings = configure_timesteps!(settings)
+
     validate_settings(settings)
     return settings
 end
@@ -37,4 +39,25 @@ function validate_names(settings::NamedTuple)
     if !isempty(unknown_names)
         error("Unknown settings: $(unknown_names)")
     end
+end
+
+function configure_timesteps!(macro_settings::NamedTuple, commodities::Dict{Symbol,DataType}=commodity_types(Macro))
+    time_intervals = Dict{Any, StepRange{Int64, Int64}}()
+    subperiods = Dict{Any, Vector{StepRange{Int64, Int64}}}()
+    for (name, time_details) in macro_settings[:Commodities]
+        commodity_type = commodities[Symbol(name)]
+
+        period_length = macro_settings[:PeriodLength]
+        hours_per_timestep = time_details["HoursPerTimeStep"]
+        hours_per_subperiod = time_details["HoursPerSubperiod"]
+        
+        time_interval = 1:hours_per_timestep:period_length
+        time_intervals[commodity_type] = time_interval
+        
+        subperiods[commodity_type] = collect(
+            Iterators.partition(time_interval, Int(hours_per_subperiod / hours_per_timestep)),
+        )
+    end
+    macro_settings = merge(macro_settings, [:TimeIntervals=>time_intervals, :SubPeriods=>subperiods])
+    return macro_settings    
 end
