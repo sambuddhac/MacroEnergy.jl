@@ -5,6 +5,7 @@ using CSV
 using DataFrames
 using JuMP
 using Revise
+using JSON3
 
 # Type parameter for Macro data structures
 abstract type Commodity end
@@ -62,7 +63,7 @@ function include_all_in_folder(folder)
     end
 end
 
-namedtuple(d::Dict) = (; (Symbol(k) => v for (k, v) in d)...)
+# namedtuple(d::Dict) = (; (Symbol(k) => v for (k, v) in d)...)
 
 # include files
 
@@ -70,21 +71,24 @@ include("time_management.jl")
 include_all_in_folder("model/networks")
 include_all_in_folder("model/transformations")
 include_all_in_folder("model/constraints")
+
 include("generate_model.jl")
 include("benders.jl")
 include("input_translation/load_data_from_genx.jl")
 
-# include("config/configure_settings.jl")
+include("config/configure_settings.jl")
 # include("load_inputs/load_dataframe.jl")
 # include("load_inputs/load_timeseries.jl")
 include("load_inputs/load_inputs.jl")
+include("load_inputs/load_commodities.jl")
+include("load_inputs/load_time_data.jl")
 include("load_inputs/load_network.jl")
 include("load_inputs/load_transformations.jl")
-include("load_inputs/load_resources.jl")
+# include("load_inputs/load_resources.jl")
 # include("load_inputs/load_storage.jl")
 # include("load_inputs/load_variability.jl")
 include("input_translation/dolphyn_to_macro.jl")
-include("generate_model.jl")
+# include("generate_model.jl")
 # include("prepare_inputs.jl")
 # include("transformations/electrolyzer.jl")
 include("transformations/natgaspower.jl")
@@ -129,8 +133,8 @@ export Electricity,
     #loadresources,
     #makeresource,
     #settings,
-    nodes,
-    networks,
+    # nodes,
+    # networks,
     #resources,
     #storage,
     #dolphyn_to_macro,

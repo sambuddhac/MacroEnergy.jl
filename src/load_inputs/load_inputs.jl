@@ -1,30 +1,30 @@
-Base.@kwdef struct InputFilesNames
-    network::String = "Network.csv"
-    tedges::String = "TEdges.csv"
-    demand::String = "Demand.csv"
-    resources::String = "Resources.csv"
-    storage::String = "Storage.csv"
-    nodes::String = "Nodes.csv"
-    transformations::String = "Transformations.csv"
-    variability::String = "Variability.csv"
-    fuel_prices::String = "Fuel_Price.csv"
-    constraints::String = "Constraints.csv"
-end
+# Base.@kwdef struct InputFilesNames
+#     network::String = "Network.csv"
+#     tedges::String = "TEdges.csv"
+#     demand::String = "Demand.csv"
+#     resources::String = "Resources.csv"
+#     storage::String = "Storage.csv"
+#     nodes::String = "Nodes.csv"
+#     transformations::String = "Transformations.csv"
+#     variability::String = "Variability.csv"
+#     fuel_prices::String = "Fuel_Price.csv"
+#     constraints::String = "Constraints.csv"
+# end
 
-struct InputData
-    settings::NamedTuple
-    nodes::Dict
-    networks::Dict
-    resources::Dict
-    storage::Dict
-    transformations::Dict
-end
-settings(data::InputData) = data.settings
-nodes(data::InputData) = data.nodes
-networks(data::InputData) = data.networks
-resources(data::InputData) = data.resources
-storage(data::InputData) = data.storage
-transformations(data::InputData) = data.transformations
+# struct InputData
+#     settings::NamedTuple
+#     nodes::Dict
+#     networks::Dict
+#     resources::Dict
+#     storage::Dict
+#     transformations::Dict
+# end
+# settings(data::InputData) = data.settings
+# nodes(data::InputData) = data.nodes
+# networks(data::InputData) = data.networks
+# resources(data::InputData) = data.resources
+# storage(data::InputData) = data.storage
+# transformations(data::InputData) = data.transformations
 
 # @doc raw"""
 # 	load_inputs(setup::Dict,path::AbstractString)
@@ -37,18 +37,25 @@ transformations(data::InputData) = data.transformations
 
 # returns: Dict (dictionary) object containing all data inputs
 # """
-# function load_inputs(settings::NamedTuple, input_path::AbstractString)
+function load_inputs(settings::NamedTuple, input_path::AbstractString)
 
-#     filenames = InputFilesNames()
-#     @info "Reading in CSV Files from $input_path"
+    # filenames = InputFilesNames()
+    # @info "Reading in CSV Files from $input_path"
 
-#     #hours_per_subperiod = settings.HoursPerSubperiod
-#     period_length = settings.PeriodLength
+    # #hours_per_subperiod = settings.HoursPerSubperiod
+    # period_length = settings.PeriodLength
+    system_path = joinpath(input_path, "system")
+    # Read in all the commodities
+    commodities = load_commodities_json(system_path)
 
-#     # Read in all the commodities
-#     commodities = commodity_type.(keys(settings.Commodities))
+    # Read in time data
+    time_data = load_time_json(system_path, commodities)
 
-#     # Define data structures to store input data
+    # Read in all the nodes
+    nodes = load_nodes_json(system_path, time_data)
+end
+
+    # Define data structures to store input data
 #     nodes_all = Dict()
 #     networks = Dict(zip(commodities, repeat([], length(commodities))))
 #     resources = Dict(zip(commodities, repeat(Vector{Resource}[], length(commodities))))

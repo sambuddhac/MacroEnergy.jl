@@ -14,8 +14,6 @@ function configure_settings(settings_path::String)
 
     settings = merge(settings, model_settings)
 
-    settings = configure_timesteps!(settings)
-
     validate_settings(settings)
     return settings
 end

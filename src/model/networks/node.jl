@@ -14,12 +14,11 @@ Base.@kwdef mutable struct Node{T} <: AbstractNode{T}
     constraints::Vector{AbstractTypeConstraint} = Vector{AbstractTypeConstraint}()
 end
 
-function make_node(data::Dict{Symbol,Any}, macro_settings::NamedTuple, commodity::DataType)
-    node = Node{commodity}(;
+function make_node(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, commodity::DataType)
+    Node{commodity}(;
         id = data[:id],
-        demand = data[:demand],
-        time_interval = macro_settings[:TimeIntervals][commodity_type(Node)],
-        subperiods = macro_settings[:SubPeriods][commodity_type(Node)],
+        demand = get(data, :demand, Vector{Float64}()),
+        timedata = time_data[Symbol(commodity)],
         max_nsd = get(data, :max_nsd, [0.0]),
         price_nsd = get(data, :price_nsd, [0.0]),
         price_unmet_policy = get(data, :price_unmet_policy, Dict{DataType,Float64}()),
@@ -27,6 +26,8 @@ function make_node(data::Dict{Symbol,Any}, macro_settings::NamedTuple, commodity
         constraints = get(data, :constraints, Vector{AbstractTypeConstraint}())
     )
 end
+
+Node(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, commodity::DataType) = make_node(data, time_data, commodity)
 
 time_interval(n::AbstractNode) = n.timedata.time_interval;
 subperiods(n::AbstractNode) = n.timedata.subperiods;

@@ -79,19 +79,21 @@ function load_network(
     return network
 end
 
-function load_nodes_json(data_dir::AbstractString, macro_settings::NamedTuple)
+function load_nodes_json(data_dir::AbstractString, time_data::Dict{Symbol,TimeData})
     commodities = commodity_types()
     # Make a list of all the .JSON files in the data directory
-    files = filter(x -> endswith(x, ".json"), readdir(data_dir))
+    # files = filter(x -> endswith(x, ".json"), readdir(data_dir))
+    files = ["nodes.json"]
     # Make an empty dictionary of nodes
     nodes = Dict{Symbol, Node}()
     for file in files
         data = JSON3.read(joinpath(data_dir, file))
-        load_nodes!(nodes, data, commodities, macro_settings)
+        load_nodes!(nodes, data, commodities, time_data)
     end
+    return nodes
 end
 
-function load_nodes!(nodes::Dict{Symbol, Node}, data::AbstractDict{Symbol,Any}, commodity_types::Dict{Symbol,DataType}, macro_settings::NamedTuple)
+function load_nodes!(nodes::Dict{Symbol, Node}, data::AbstractDict{Symbol,Any}, commodity_types::Dict{Symbol,DataType}, time_data::Dict{Symbol,TimeData})
     for (n_name, n_data) in data
         sanitize_json!(n_data)
         n_type = commodity_types[Symbol(n_data[:type])]
@@ -100,18 +102,16 @@ function load_nodes!(nodes::Dict{Symbol, Node}, data::AbstractDict{Symbol,Any}, 
             instance_data = node_instance_data(n_data[:global], n_data[:instance])
             haskey(instance_data, :id) ? instance_id = Symbol(instance_data[:id]) : instance_id = n_name
             instance_data[:id], _ = make_node_id(instance_id, nodes)
-            nodes[instance_data[:id]] = Node(instance_data, macro_settings, n_type)
+            nodes[instance_data[:id]] = Node(instance_data, time_data, n_type)
         else
             # Multiple instances
             # Note, the node instance data has a different structures
             # than the transformation data.
-            for instance_dict in n_data[:instance]
-                for (instance_name, instance_data) in instance_dict
-                    instance_data = node_instance_data(n_data[:global], instance_data)
-                    haskey(instance_data, :id) ? instance_id = Symbol(instance_data[:id]) : instance_id = default_node_name(instance_name, n_name)
-                    instance_data[:id], _ = make_node_id(instance_id, nodes)
-                    nodes[instance_data[:id]] = Node(instance_data, macro_settings, n_type)
-                end
+            for (instance_idx, instance_data) in enumerate(n_data[:instance])
+                instance_data = node_instance_data(n_data[:global], instance_data)
+                haskey(instance_data, :id) ? instance_id = Symbol(instance_data[:id]) : instance_id = default_node_name(instance_idx, n_name)
+                instance_data[:id], _ = make_node_id(instance_id, nodes)
+                nodes[instance_data[:id]] = Node(instance_data, time_data, n_type)
             end
         end
     end
@@ -121,10 +121,20 @@ function default_node_name(instance_name::T, n_name::T) where T<:Union{AbstractS
     Symbol(string(instance_name, "_", n_name))
 end
 
-function node_instance_data(global_data::AbstractDict{Symbol,Any}, instance_data::AbstractDict{Symbol,Any})
+function default_node_name(instance_idx::Int, n_name::T) where T<:Union{AbstractString,Symbol}
+    Symbol(string("z", instance_idx, "_", n_name))
+end
+
+function node_instance_data(global_data::AbstractDict{Symbol,Any}, instance_data::T) where T<:AbstractDict{Symbol,Any}
     instance_data = merge(global_data, instance_data)
     return instance_data
 end
+
+function node_instance_data(global_data::AbstractDict{Symbol,Any}, instance_data::T) where T<:Dict{Symbol,Any}
+    instance_data = merge(global_data, instance_data)
+    return instance_data
+end
+
 
 function make_node_id(id::Symbol, nodes::Dict{Symbol, Node}, count::UInt8=UInt8(1))
     existing_ids = collect(keys(nodes))
