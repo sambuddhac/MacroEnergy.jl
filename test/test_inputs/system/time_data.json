@@ -1,0 +1,19 @@
+{
+    "PeriodLength": 8760,
+    "Electricity": {
+        "HoursPerTimeStep": 1,
+        "HoursPerSubperiod": 8760
+    },
+    "Hydrogen": {
+        "HoursPerTimeStep": 1,
+        "HoursPerSubperiod": 8760
+    },
+    "NaturalGas": {
+        "HoursPerTimeStep": 1,
+        "HoursPerSubperiod": 8760
+    },
+    "CO2": {
+        "HoursPerTimeStep": 1,
+        "HoursPerSubperiod": 8760
+    }
+}

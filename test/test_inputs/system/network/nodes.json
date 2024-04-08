@@ -1,0 +1,97 @@
+{
+    "natgas": {
+        "type": "NaturalGas",
+        "global": {
+            "time_interval": "NaturalGas",
+            "price_files": "natgas_prices.csv"            
+        },
+        "instance": [
+            {
+                "id": "z1",
+                "price_header": "natgas_z1"
+            },
+            {
+                "id": "z2",
+                "price_header": "natgas_z2"
+            },
+            {
+                "id": "z3",
+                "price_header": "natgas_z3"
+            }
+        ]
+    },
+    "elec": {
+        "type": "Electricity",
+        "global": {
+            "time_interval": "Electricity",
+            "price_nsd": 50000.0,
+            "max_nsd": 1000.0,
+            "demand_file": "elec_demand.csv"
+        },
+        "instance": [
+            {
+                "id": "z1",
+                "price_nsd": 10000.0,
+                "demand_header": "MA"
+            },
+            {
+                "id": "z2",
+                "price_nsd": 20000.0,
+                "demand_header": "CT"
+            },
+            {
+                "id": "z3",
+                "price_nsd": 30000.0,
+                "demand_header": "ME"
+            }
+        ]
+    },
+    "emiss": {
+        "type": "CO2",
+        "global": {
+            "time_interval": "CO2"
+        },
+        "instance": [
+            {
+                "id": "z1",
+                "policy_rhs":
+                    {"CO2CapConstraint": 1000.0}
+            },
+            {
+                "id": "z2",
+                "policy_rhs":
+                    {"CO2CapConstraint": 2000.0}
+            },
+            {
+                "id": "z3",
+                "policy_rhs":
+                    {"CO2CapConstraint": 3000.0}
+            }
+        ]
+    },
+    "h2": {
+        "type": "Hydrogen",
+        "global": {
+            "time_interval": "Hydrogen",
+            "price_nsd": 50000.0,
+            "demand_file": "h2_demand.csv"
+        },
+        "instance": [
+            {
+                "id": "z1",
+                "price_nsd": 10000.0,
+                "demand_header": "h2_z1"
+            },
+            {
+                "id": "z2",
+                "price_nsd": 20000.0,
+                "demand_header": "h2_z2"
+            },
+            {
+                "id": "z3",
+                "price_nsd": 30000.0,
+                "demand_header": "h2_z3"
+            }
+        ]
+    }
+}
