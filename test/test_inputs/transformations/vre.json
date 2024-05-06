@@ -24,19 +24,19 @@
             {
                 "id": "solar_pv_z1",
                 "nodes": {
-                    "Electricity": "MA"
+                    "Electricity": "elec_MA"
                 }
             },
             {
                 "id": "solar_pv_z2",
                 "nodes": {
-                    "Electricity": "CT"
+                    "Electricity": "elec_CT"
                 }
             },
             {
                 "id": "solar_pv_z3",
                 "nodes": {
-                    "Electricity": "ME"
+                    "Electricity": "elec_ME"
                 }
             }
         ]

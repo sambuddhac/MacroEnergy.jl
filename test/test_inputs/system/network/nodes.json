@@ -28,15 +28,15 @@
         },
         "instance": [
             {
-                "id": "MA",
+                "id": "elec_MA",
                 "demand_header": "MA"
             },
             {
-                "id": "CT",
+                "id": "elec_CT",
                 "demand_header": "CT"
             },
             {
-                "id": "ME",
+                "id": "elec_ME",
                 "demand_header": "ME"
             }
         ]

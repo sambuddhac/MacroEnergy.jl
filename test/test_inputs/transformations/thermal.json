@@ -11,8 +11,9 @@
                 "stoichiometry_balance": true
             },
             "edge_commodities": {
-                "Electricity": {
-                    "uc": true, 
+                "elec": {
+                    "uc": true,
+                    "type": "Electricity",
                     "direction": "out",
                     "can_expand": true,
                     "can_retire": false,
@@ -39,16 +40,18 @@
                         "min_down_time": true
                     }
                 },
-                "NaturalGas": {
+                "natgas": {
                     "direction": "in",
+                    "type": "NaturalGas",
                     "has_planning_vars": false,
                     "stoichiometry_coefficients": {
                         "energy": 1,
                         "emissions": 0.2
                     }
                 },
-                "CO2": {
+                "co2": {
                     "direction": "out",
+                    "type": "CO2",
                     "has_planning_vars": false,
                     "stoichiometry_coefficients": {
                         "energy": 0,
@@ -61,7 +64,7 @@
             {
                 "id": "ngcc_z1",
                 "nodes" : {
-                    "Electricity": "MA",
+                    "Electricity": "elec_MA",
                     "NaturalGas": "z1_natgas",
                     "CO2": "z1_emiss"
                 }
@@ -69,7 +72,7 @@
             {
                 "id": "ngcc_z2",
                 "nodes": {
-                    "Electricity": "CT",
+                    "Electricity": "elec_CT",
                     "NaturalGas": "z2_natgas",
                     "CO2": "z2_emiss"
                 }
@@ -77,7 +80,7 @@
             {
                 "id": "ngcc_z3",
                 "nodes": {
-                    "Electricity": "ME",
+                    "Electricity": "elec_CT",
                     "NaturalGas": "z3_natgas",
                     "CO2": "z3_emiss"
                 }

@@ -58,19 +58,19 @@
             {
                 "id": "storage_z1",
                 "nodes": {
-                    "Electricity": "MA"
+                    "Electricity": "elec_MA"
                 }
             },
             {
                 "id": "storage_z2",
                 "nodes": {
-                    "Electricity": "CT"
+                    "Electricity": "elec_CT"
                 }
             },  
             {
                 "id": "stor_z3",
                 "nodes": {
-                    "Electricity": "ME"
+                    "Electricity": "elec_ME"
                 }
             }
         ]
