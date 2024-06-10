@@ -19,14 +19,13 @@ Base.@kwdef mutable struct Edge{T} <: AbstractEdge{T}
 end
 
 function make_edge(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, commodity::DataType, start_node::AbstractNode, end_node::AbstractNode)
-    max_line_reinforcement = get(data, :max_line_reinforcement, Inf) == "Inf" ? Inf : data[:max_line_reinforcement]
     Edge{commodity}(;
         timedata = time_data[Symbol(commodity)],
         start_node = start_node,
         end_node = end_node,
         existing_capacity = get(data, :existing_capacity, 0.0),
         unidirectional = get(data, :unidirectional, false),
-        max_line_reinforcement = max_line_reinforcement,
+        max_line_reinforcement = get(data, :max_line_reinforcement, Inf),
         line_reinforcement_cost = get(data, :line_reinforcement_cost, 0.0),
         can_expand = get(data, :can_expand, true),
         op_cost = get(data, :op_cost, 0.0),
