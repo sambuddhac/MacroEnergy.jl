@@ -172,6 +172,8 @@ function sanitize_json!(data::JSON3.Object)
             error("Missing key: $key")
         end
     end
+    # make data mutable 
+    data = copy(data)
     # For each paired key, if one is missing, add an empty Dict{Symbol,Any}
     # If both are missing, throw an error
     for (key_1, key_2) in paired_keys
