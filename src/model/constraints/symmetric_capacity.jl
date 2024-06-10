@@ -7,7 +7,7 @@ end
 
 function add_model_constraint!(
     ct::SymmetricCapacityConstraint,
-    g::AbstractTransformation,
+    g::AbstractTransform,
     model::Model,
 )
     if has_storage(g)

@@ -2,7 +2,7 @@ macro AbstractTransformationEdgeBaseAttributes()
     esc(quote
         id::Symbol
         node::AbstractNode{T}
-        transformation::AbstractTransformation
+        transformation::AbstractTransform
         timedata::TimeData{T}
         direction::Symbol = :input
         has_planning_variables::Bool = false
@@ -31,7 +31,7 @@ Base.@kwdef mutable struct TEdge{T} <: AbstractTransformationEdge{T}
     @AbstractTransformationEdgeBaseAttributes()
 end
 
-Base.@kwdef mutable struct Transformation{T} <: AbstractTransformation{T}
+Base.@kwdef mutable struct Transformation <: AbstractTransform
     id::Symbol
     timedata::TimeData
     stoichiometry_balance_names::Vector{Symbol} = Vector{Symbol}()
@@ -56,28 +56,27 @@ Base.@kwdef mutable struct Transformation{T} <: AbstractTransformation{T}
 end
 
 #### Transformation interface
-transformation_type(g::AbstractTransformation{T}) where {T} = T;
-stoichiometry_balance_names(g::AbstractTransformation) = g.stoichiometry_balance_names;
-has_storage(g::AbstractTransformation) = :storage ∈ stoichiometry_balance_names(g);
-get_id(g::AbstractTransformation) = g.id;
-time_interval(g::AbstractTransformation) = g.timedata.time_interval;
-subperiods(g::AbstractTransformation) = g.timedata.subperiods;
-subperiod_weight(g::AbstractTransformation,w::StepRange{Int64, Int64}) = g.timedata.subperiod_weights[w];
-current_subperiod(g::AbstractTransformation,t::Int64) = subperiods(g)[findfirst(t .∈ subperiods(g))];
+stoichiometry_balance_names(g::AbstractTransform) = g.stoichiometry_balance_names;
+has_storage(g::AbstractTransform) = :storage ∈ stoichiometry_balance_names(g);
+get_id(g::AbstractTransform) = g.id;
+time_interval(g::AbstractTransform) = g.timedata.time_interval;
+subperiods(g::AbstractTransform) = g.timedata.subperiods;
+subperiod_weight(g::AbstractTransform,w::StepRange{Int64, Int64}) = g.timedata.subperiod_weights[w];
+current_subperiod(g::AbstractTransform,t::Int64) = subperiods(g)[findfirst(t .∈ subperiods(g))];
 
-all_constraints(g::AbstractTransformation) = g.constraints;
-stoichiometry_balance(g::AbstractTransformation) = g.operation_expr[:stoichiometry_balance];
-stoichiometry_balance(g::AbstractTransformation,i::Symbol,t::Int64) = stoichiometry_balance(g)[i,t];
-edges(g::AbstractTransformation) = g.TEdges;
-existing_capacity_storage(g::AbstractTransformation) = g.existing_capacity_storage;
-new_capacity_storage(g::AbstractTransformation) = g.planning_vars[:new_capacity_storage];
-ret_capacity_storage(g::AbstractTransformation) = g.planning_vars[:ret_capacity_storage];
-capacity_storage(g::AbstractTransformation) = g.planning_vars[:capacity_storage];
-investment_cost_storage(g::AbstractTransformation) = g.investment_cost_storage;
-fixed_om_cost_storage(g::AbstractTransformation) = g.fixed_om_cost_storage;
-storage_level(g::AbstractTransformation) = g.operation_vars[:storage_level];
-storage_level(g::AbstractTransformation,t::Int64) = storage_level(g)[t];
-storage_loss_fraction(g::AbstractTransformation) = g.storage_loss_fraction;
+all_constraints(g::AbstractTransform) = g.constraints;
+stoichiometry_balance(g::AbstractTransform) = g.operation_expr[:stoichiometry_balance];
+stoichiometry_balance(g::AbstractTransform,i::Symbol,t::Int64) = stoichiometry_balance(g)[i,t];
+edges(g::AbstractTransform) = g.TEdges;
+existing_capacity_storage(g::AbstractTransform) = g.existing_capacity_storage;
+new_capacity_storage(g::AbstractTransform) = g.planning_vars[:new_capacity_storage];
+ret_capacity_storage(g::AbstractTransform) = g.planning_vars[:ret_capacity_storage];
+capacity_storage(g::AbstractTransform) = g.planning_vars[:capacity_storage];
+investment_cost_storage(g::AbstractTransform) = g.investment_cost_storage;
+fixed_om_cost_storage(g::AbstractTransform) = g.fixed_om_cost_storage;
+storage_level(g::AbstractTransform) = g.operation_vars[:storage_level];
+storage_level(g::AbstractTransform,t::Int64) = storage_level(g)[t];
+storage_loss_fraction(g::AbstractTransform) = g.storage_loss_fraction;
 
 #### Transformation Edge interface
 commodity_type(e::AbstractTransformationEdge{T}) where {T} = T;
@@ -120,7 +119,7 @@ get_id(e::AbstractTransformationEdge) = e.id;
 st_coeff(e::AbstractTransformationEdge) = e.st_coeff;
 
 
-function add_planning_variables!(g::AbstractTransformation,model::Model)
+function add_planning_variables!(g::AbstractTransform,model::Model)
 
     edges_vec = collect(values(edges(g)));
 
@@ -186,7 +185,7 @@ function add_planning_variables!(g::AbstractTransformation,model::Model)
 
 end
 
-function add_operation_variables!(g::AbstractTransformation,model::Model)
+function add_operation_variables!(g::AbstractTransform,model::Model)
 
     if !isempty(stoichiometry_balance_names(g))
         g.operation_expr[:stoichiometry_balance] = @expression(model, [i in stoichiometry_balance_names(g), t in time_interval(g)], 0 * model[:vREF])

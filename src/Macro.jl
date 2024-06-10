@@ -8,41 +8,45 @@ using Revise
 using JSON3
 
 # Type parameter for Macro data structures
-abstract type Commodity end
 
+## Commodity types
+abstract type Commodity end
 abstract type Electricity <: Commodity end
 abstract type Hydrogen <: Commodity end
 abstract type NaturalGas <: Commodity end
 abstract type CO2 <: Commodity end
 abstract type CO2Captured <: CO2 end
 
+## Time data types
 abstract type AbstractTimeData{T<:Commodity} end
 
+## Network types
 abstract type AbstractNode{T<:Commodity} end
+abstract type AbstractEdge{T<:Commodity} end
 abstract type AbstractTransformationEdge{T<:Commodity} end
 abstract type AbstractTransformationEdgeWithUC{T} <: AbstractTransformationEdge{T} end
 
+## Transformation types
+abstract type AbstractTransform end
+abstract type NaturalGasPower <: AbstractTransform  end
+abstract type NaturalGasPowerCCS <: NaturalGasPower  end
+abstract type NaturalGasHydrogen <: AbstractTransform  end
+abstract type NaturalGasHydrogenCCS <: NaturalGasHydrogen  end
+abstract type FuelCell <: AbstractTransform end
+abstract type ElectrolyzerTransform <: AbstractTransform  end
+abstract type DACElectric <: AbstractTransform  end
+abstract type SyntheticNG <: AbstractTransform  end
+abstract type VRE <: AbstractTransform end
+abstract type SolarPVTransform <: VRE end
+abstract type Storage <: AbstractTransform end
 abstract type AbstractEdge{T<:Commodity} end
 
+## Constraints types
 abstract type AbstractTypeConstraint end
 abstract type OperationConstraint <: AbstractTypeConstraint end
 abstract type PolicyConstraint <: OperationConstraint end
 abstract type PlanningConstraint <: AbstractTypeConstraint end
 
-abstract type TransformationType end
-
-abstract type AbstractTransformation{T<:TransformationType} end
-
-abstract type NaturalGasPower <: TransformationType  end
-abstract type NaturalGasPowerCCS <: NaturalGasPower  end
-abstract type NaturalGasHydrogen <: TransformationType  end
-abstract type NaturalGasHydrogenCCS <: NaturalGasHydrogen  end
-abstract type FuelCell <: TransformationType end
-abstract type Electrolyzer <: TransformationType  end
-abstract type DACElectric <: TransformationType  end
-abstract type SyntheticNG <: TransformationType  end
-abstract type VRE <: TransformationType end
-abstract type Storage <: TransformationType end
 # type hierarchy
 
 # globals
@@ -143,9 +147,6 @@ export Electricity,
     #apply_unit_conversion
     configure_settings,
     load_transformations_json
-
-
-
 
 end # module Macro
 
