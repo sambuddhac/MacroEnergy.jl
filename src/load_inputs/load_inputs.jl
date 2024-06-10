@@ -53,6 +53,9 @@ function load_inputs(settings::NamedTuple, input_path::AbstractString)
 
     # Read in all the nodes
     nodes = load_nodes_json(system_path, time_data)
+
+    # Read in demand data
+    load_demand_data!(nodes, system_path, commodities)
 end
 
     # Define data structures to store input data

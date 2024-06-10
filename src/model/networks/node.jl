@@ -105,3 +105,7 @@ function add_planning_variables!(n::AbstractNode,model::Model)
     end
     return nothing
 end
+
+function get_all_nodes_type(nodes::Dict{Symbol,Node},commodity::DataType)
+    return filter(((k,n),) -> commodity_type(n)==commodity, nodes)
+end
