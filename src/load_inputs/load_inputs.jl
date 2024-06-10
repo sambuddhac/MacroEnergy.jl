@@ -56,6 +56,10 @@ function load_inputs(settings::NamedTuple, input_path::AbstractString)
 
     # Read in demand data
     load_demand_data!(nodes, system_path, commodities)
+
+    # Read in fuel data
+    fuel_data, co2_emission = load_fuel_data(system_path, commodities)
+
 end
 
     # Define data structures to store input data
