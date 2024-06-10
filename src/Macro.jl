@@ -39,7 +39,9 @@ abstract type SyntheticNG <: AbstractTransform  end
 abstract type VRE <: AbstractTransform end
 abstract type SolarPVTransform <: VRE end
 abstract type Storage <: AbstractTransform end
-abstract type AbstractEdge{T<:Commodity} end
+
+## Assets types
+abstract type AbstractAsset end
 
 ## Constraints types
 abstract type AbstractTypeConstraint end
