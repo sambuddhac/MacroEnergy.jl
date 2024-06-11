@@ -151,10 +151,6 @@ st_coeff(e::AbstractTransformationEdge) = e.st_coeff;
 
 function add_planning_variables!(g::AbstractTransform,model::Model)
 
-    edges_vec = collect(values(edges(g)));
-
-    add_planning_variables!.(edges_vec,model)
-
     if has_storage(g)
     
         g.planning_vars[:new_capacity_storage] = @variable(
@@ -221,9 +217,6 @@ function add_operation_variables!(g::AbstractTransform,model::Model)
         g.operation_expr[:stoichiometry_balance] = @expression(model, [i in stoichiometry_balance_names(g), t in time_interval(g)], 0 * model[:vREF])
     end
 
-    edges_vec = collect(values(edges(g)));
-
-    add_operation_variables!.(edges_vec,model)
 
     if has_storage(g)
         g.operation_vars[:storage_level] = @variable(
@@ -238,10 +231,10 @@ function add_operation_variables!(g::AbstractTransform,model::Model)
             storage_level(g,t) - (1 - storage_loss_fraction(g)) * storage_level(g,timestepbefore(t,1,subperiods(g))),
             )
         end
-        e_discharge = g.TEdges[g.discharge_edge]
-        @constraint(model,
-        [t in time_interval(g)], 
-        st_coeff(e_discharge)[:storage]*flow(e_discharge,t)<=storage_level(g,timestepbefore(t,1,subperiods(g))))
+        # e_discharge = g.TEdges[g.discharge_edge]
+        # @constraint(model,
+        # [t in time_interval(g)], 
+        # st_coeff(e_discharge)[:storage]*flow(e_discharge,t)<=storage_level(g,timestepbefore(t,1,subperiods(g))))
 
     end
 
