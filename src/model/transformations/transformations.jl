@@ -8,7 +8,7 @@ macro AbstractTransformationEdgeBaseAttributes()
         has_planning_variables::Bool = false
         can_retire::Bool = false
         can_expand::Bool = false 
-        capacity_size :: Float64 = 1.0
+        capacity_size::Float64 = 1.0
         capacity_factor::Vector{Float64} = Float64[]
         st_coeff::Dict{Symbol,Float64} = Dict{Symbol,Float64}()
         min_capacity::Float64 = 0.0
@@ -31,11 +31,41 @@ Base.@kwdef mutable struct TEdge{T} <: AbstractTransformationEdge{T}
     @AbstractTransformationEdgeBaseAttributes()
 end
 
+function make_tedge(::Type{TEdge}, data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, transformation::AbstractTransform, node::AbstractNode)
+    commodity = commodity_type(node)
+    _t_edge = TEdge{commodity}(;
+        id = data[:id],
+        node = node,
+        transformation = transformation,
+        timedata = time_data[Symbol(commodity)],
+        direction = get(data, :direction, :input),
+        has_planning_variables = get(data, :has_planning_variables, false),
+        can_retire = get(data, :can_retire, false),
+        can_expand = get(data, :can_expand, false),
+        capacity_size = get(data, :capacity_size, 1.0),
+        capacity_factor = get(data, :capacity_factor, Float64[]),
+        st_coeff = get(data, :stoichiometry_coefficients, Dict{Symbol,Float64}()),
+        min_capacity = get(data, :min_capacity, 0.0),
+        max_capacity = get(data, :max_capacity, Inf),
+        existing_capacity = get(data, :existing_capacity, 0.0),
+        investment_cost = get(data, :investment_cost, 0.0),
+        fixed_om_cost = get(data, :fixed_om_cost, 0.0),
+        variable_om_cost = get(data, :variable_om_cost, 0.0),
+        price = get(data, :price, Float64[]),
+        ramp_up_fraction = get(data, :ramp_up_fraction, 1.0),
+        ramp_down_fraction = get(data, :ramp_down_fraction, 1.0),
+        min_flow_fraction = get(data, :min_flow_fraction, 0.0),
+    )
+    add_constraints!(_t_edge, data)
+    return _t_edge
+end
+TEdge(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, transformation::AbstractTransform, node::AbstractNode) = make_tedge(data, time_data, transformation, node)
+
 Base.@kwdef mutable struct Transformation <: AbstractTransform
     id::Symbol
     timedata::TimeData
     stoichiometry_balance_names::Vector{Symbol} = Vector{Symbol}()
-    TEdges::Dict{Symbol,AbstractTransformationEdge} = Dict{Symbol,AbstractTransformationEdge}()
+    # TEdges::Dict{Symbol,AbstractTransformationEdge} = Dict{Symbol,AbstractTransformationEdge}()
     operation_expr::Dict = Dict()
     planning_vars::Dict = Dict()
     operation_vars::Dict = Dict()
@@ -67,7 +97,7 @@ current_subperiod(g::AbstractTransform,t::Int64) = subperiods(g)[findfirst(t .âˆ
 all_constraints(g::AbstractTransform) = g.constraints;
 stoichiometry_balance(g::AbstractTransform) = g.operation_expr[:stoichiometry_balance];
 stoichiometry_balance(g::AbstractTransform,i::Symbol,t::Int64) = stoichiometry_balance(g)[i,t];
-edges(g::AbstractTransform) = g.TEdges;
+# edges(g::AbstractTransform) = g.TEdges;
 existing_capacity_storage(g::AbstractTransform) = g.existing_capacity_storage;
 new_capacity_storage(g::AbstractTransform) = g.planning_vars[:new_capacity_storage];
 ret_capacity_storage(g::AbstractTransform) = g.planning_vars[:ret_capacity_storage];
@@ -301,6 +331,42 @@ function add_operation_variables!(e::AbstractTransformationEdge, model::Model)
 
     end
 
+    return nothing
+end
 
+function make_tedge(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, transformation::AbstractTransform, node::AbstractNode)
+    validate_data!(data)
+    if get(data, :uc, false)
+        return make_tedge(TEdgeWithUC, data, time_data, transformation, node)
+    else
+        return make_tedge(TEdge, data, time_data, transformation, node)
+    end
+end
+
+function add_constraints!(target::T, data::Dict{Symbol,Any}) where T<:Union{AbstractAsset, AbstractTransform, AbstractTransformationEdge}
+    constraints = get(data, :constraints, nothing)
+    if constraints !== nothing
+        macro_constraints = constraint_types()
+        for (k,v) in constraints
+            v == true && add_constraint!(target, macro_constraints[k])
+        end
+    end
+    return nothing
+end
+
+function add_constraint!(a::AbstractAsset, c::Type{<:AbstractTypeConstraint})
+    for t in fieldnames(typeof(a))
+        add_constraint!(getfield(a,t), c())
+    end
+    return nothing
+end
+
+function add_constraint!(t::AbstractTransform, c::Type{<:AbstractTypeConstraint})
+    push!(t.constraints, c())
+    return nothing
+end
+
+function add_constraint!(e::AbstractTransformationEdge, c::Type{<:AbstractTypeConstraint})
+    push!(e.constraints, c())
     return nothing
 end

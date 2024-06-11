@@ -163,3 +163,76 @@ end
 #     @info "CSV Files Successfully Read In From $input_path"
 #     return InputData(settings, nodes, networks, resources, storages, transformations)
 # end
+
+
+function validate_id!(data::Dict{Symbol,Any})
+    if !haskey(data, :id)
+        throw(ArgumentError("TEdge data must have an id"))
+    end
+    return nothing
+end
+
+function validate_direction!(data::Dict{Symbol,Any})
+    if haskey(data, :direction) && data[:direction] ∉ [:input, :output]
+        if data[:direction] == "input"
+            data[:direction] = :input
+        elseif data[:direction] == "output"
+            data[:direction] = :output
+        else
+            throw(ArgumentError("Invalid direction: $(data[:direction]) for TEdge $(data[:id])"))
+        end        
+    end
+    return nothing
+end
+
+function validate_vector_symbol!(data::Dict{Symbol,Any}, key::Symbol)
+    if haskey(data, key) && !isa(data[key], Vector{Symbol})
+        data[key] = Symbol.(data[key])
+    end
+    return nothing
+end
+
+function validate_fuel_stoichiometry_name!(data::Dict{Symbol,Any})
+    if haskey(data, :fuel_stoichiometry_name) && isa(data[:fuel_stoichiometry_name], String)
+        data[:fuel_stoichiometry_name] = Symbol(data[:fuel_stoichiometry_name])
+    else
+        validate_vector_symbol!(data, :fuel_stoichiometry_name)
+    end
+    return nothing
+end
+
+function validate_stoichiometry_balance_names!(data::Dict{Symbol,Any})
+    validate_vector_symbol!(data, :stoichiometry_balance_names)
+    return nothing
+end
+
+function validate_data!(data::Dict{Symbol,Any})
+    validate_id!(data)
+    validate_direction!(data)
+    validate_fuel_stoichiometry_name!(data)
+    validate_stoichiometry_balance_names!(data)
+    validate_constraints_data!(data)
+    return nothing
+end
+
+function validate_constraints_data!(data::Dict{Symbol,Any})
+    if haskey(data, :constraints) 
+        constraints = Dict{Symbol,Any}()
+        for (k,v) in data[:constraints]
+            new_k = Symbol(join(push!(uppercasefirst.(split(string(k), "_")),"Constraint")))
+            constraints[new_k] = v
+        end
+        data[:constraints] = constraints
+    end
+    return nothing 
+end
+
+function get_tedge_data(data::Dict{Symbol,Any}, commodity::Symbol, immutable::Bool=false)
+    for (_, edge_data) in data[:edges]
+        if edge_data[:type] == string(commodity)
+            immutable && return edge_data
+            return copy(edge_data)
+        end
+    end
+    return nothing
+end

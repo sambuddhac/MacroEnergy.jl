@@ -11,8 +11,6 @@ function load_assets_json(data_dir::AbstractString, time_data::Dict{Symbol,TimeD
     but this way allows someone to just to the second step with their own data
     or inject other actions along the way for individual inputs or transformations.
     =============================================#
-    # Make a list of all the TransformationTypes
-    t_types = transformation_types(Macro)
     # Make a list of all the .JSON files in the data directory
     files = filter(x -> endswith(x, ".json"), readdir(data_dir))
     # Make empty Dict of transformation data
@@ -32,7 +30,7 @@ function load_assets!(
     time_data::Dict{Symbol,TimeData},
     nodes::Dict{Symbol,Node}
 )
-    for (t_name, t_data) in data
+    for (a_name, a_data) in data
         # Get the TransformationType.
         #=============================================
         The :type key is currently outside of the global and instance data
@@ -40,21 +38,22 @@ function load_assets!(
         We could change that, but it would mean different transformations
         sharing costs and / or lists of nodes, which would be odd.
         =============================================#
-        sanitize_json!(t_data)
-        a_type = asset_types()[Symbol(t_data[:type])]
+        sanitize_json!(a_data)
+        a_type = asset_types()[Symbol(a_data[:type])]
         # Check if there are multiple instance_data inputs for this transformation
-        if typeof(t_data[:instance]) == JSON3.Object
+        if typeof(a_data[:instance]) == JSON3.Object
             # If only one, get the inputs, assign an ID, and make the transformation
             existing_ids = collect(keys(asset_data))
-            instance_data, _ = assets_instance_data(t_data[:global], t_data[:instance], t_name, existing_ids, counter)
+            instance_data, _ = assets_instance_data(a_data[:global], a_data[:instance], a_name, existing_ids, counter)
             asset_data[instance_data[:id]] = make_asset(a_type, instance_data, time_data, nodes)
         else
             # Otherwise, loop over the instance_data inputs and do the same for each
             counter = UInt8(1)
-            for instance_data in t_data[:instance]
+            for instance_data in a_data[:instance]
                 # counter += UInt8(1)
                 existing_ids = collect(keys(asset_data))
-                instance_data, counter = assets_instance_data(t_data[:global], instance_data, t_name, existing_ids, counter)
+                instance_data, counter = assets_instance_data(a_data[:global], instance_data, a_name, existing_ids, counter)
+                validate_data!(instance_data)
                 asset_data[instance_data[:id]] = make_asset(a_type, instance_data, time_data, nodes)
             end
         end
@@ -110,6 +109,10 @@ function asset_types(m::Module=Macro)
     return all_subtypes(m, :AbstractAsset)
 end
 
+function constraint_types(m::Module=Macro)
+    return all_subtypes(m, :AbstractTypeConstraint)
+end
+
 function commodity_types(m::Module=Macro)
     return all_subtypes(m, :Commodity)
 end
@@ -127,8 +130,7 @@ function sanitize_json!(data::JSON3.Object)
             error("Missing key: $key")
         end
     end
-    # make data mutable 
-    data = copy(data)
+
     # For each paired key, if one is missing, add an empty Dict{Symbol,Any}
     # If both are missing, throw an error
     for (key_1, key_2) in paired_keys
@@ -145,14 +147,14 @@ function sanitize_json!(data::JSON3.Object)
     return nothing
 end
 
-function make_asset(::Type{NaturalGasPower}, data::Dict{Symbol,Any}, macro_settings::NamedTuple)
+function make_asset(::Type{NaturalGasPower}, data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, nodes::Dict{Symbol,Node})
     #=============================================
     This function makes a NaturalGasPower from the data Dict.
     It is a helper function for load_transformations!.
     =============================================#
     # Make the NaturalGasPower
-    transformation = make_natgaspower(data, macro_settings)
-    return transformation
+    natgaspower = make_natgaspower(data, time_data, nodes)
+    return natgaspower
 end
 
 function make_asset(::Type{SolarPV}, data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, nodes::Dict{Symbol,Node})

@@ -29,8 +29,8 @@ abstract type AbstractTransformationEdgeWithUC{T} <: AbstractTransformationEdge{
 ## Transformation types
 abstract type AbstractTransform end
 abstract type TransformationType end  # Note: this is only used to improved readability
-abstract type NaturalGasPower <: TransformationType  end
-abstract type NaturalGasPowerCCS <: NaturalGasPower  end
+abstract type NaturalGasPowerTransform <: TransformationType  end
+abstract type NaturalGasPowerCCS <: NaturalGasPowerTransform  end
 abstract type NaturalGasHydrogen <: TransformationType  end
 abstract type NaturalGasHydrogenCCS <: NaturalGasHydrogen  end
 abstract type FuelCell <: TransformationType end
@@ -77,7 +77,7 @@ end
 include("time_management.jl")
 include_all_in_folder("model/networks")
 include_all_in_folder("model/transformations")
-include("model/assets/solarpv.jl")
+include_all_in_folder("model/assets")
 include_all_in_folder("model/constraints")
 
 include("generate_model.jl")
@@ -151,7 +151,22 @@ export Electricity,
     #resources,
     #storage,
     #dolphyn_to_macro,
-    #apply_unit_conversion
+    #apply_unit_conversion,
+    MaxNonServedDemandPerSegmentConstraint,
+    MaxNonServedDemandConstraint,
+    PlanningConstraint,
+    MinDownTimeConstraint,
+    StoichiometryBalanceConstraint,
+    CO2CapConstraint,
+    PolicyConstraint,
+    DemandBalanceConstraint,
+    OperationConstraint,
+    RampingLimitConstraint,
+    StorageCapacityConstraint,
+    MinUpTimeConstraint,
+    SymmetricCapacityConstraint,
+    CapacityConstraint,
+    MinFlowConstraint,
     configure_settings
 
 end # module Macro
