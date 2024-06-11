@@ -103,7 +103,7 @@ include("input_translation/dolphyn_to_macro.jl")
 # include("generate_model.jl")
 # include("prepare_inputs.jl")
 # include("transformations/electrolyzer.jl")
-include("transformations/natgaspower.jl")
+# include("transformations/natgaspower.jl")
 
 # exports
 export Electricity,
