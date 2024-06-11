@@ -152,8 +152,7 @@ export Electricity,
     #storage,
     #dolphyn_to_macro,
     #apply_unit_conversion
-    configure_settings,
-    load_transformations_json
+    configure_settings
 
 end # module Macro
 
