@@ -370,3 +370,24 @@ function add_constraint!(e::AbstractTransformationEdge, c::Type{<:AbstractTypeCo
     push!(e.constraints, c())
     return nothing
 end
+
+function add_planning_variables!(a::AbstractAsset, model::Model)
+    for t in fieldnames(typeof(a))
+        add_planning_variables!(getfield(a,t), model)
+    end
+    return nothing
+end
+
+function add_operation_variables!(a::AbstractAsset, model::Model)
+    for t in fieldnames(typeof(a))
+        add_operation_variables!(getfield(a,t), model)
+    end
+    return nothing
+end
+
+function add_all_model_constraints!(a::AbstractAsset, model::Model)
+    for t in fieldnames(typeof(a))
+        add_all_model_constraints!(getfield(a,t), model)
+    end
+    return nothing
+end
