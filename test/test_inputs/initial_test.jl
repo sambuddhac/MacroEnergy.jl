@@ -1,4 +1,5 @@
 using Macro
+using Gurobi
 
 # test_case_path = joinpath("ExampleSystems", "Macro_3Zone_SmallNewEngland")
 test_case_path = joinpath(dirname(dirname(@__DIR__)), "test", "test_inputs")
@@ -15,13 +16,34 @@ commodities = Macro.load_commodities_json(system_path)
 time_data = Macro.load_time_json(system_path, commodities)
 
 # Read in all the nodes
-network_data = joinpath(system_path, "network")
-nodes = Macro.load_nodes_json(network_data, time_data)
+network_dir = joinpath(system_path, "network")
+nodes = Macro.load_nodes_json(network_dir, time_data)
+
+# Read in demand data
+Macro.load_demand_data!(nodes, system_path, commodities)
+
+# Read in fuel data
+fuel_data, co2_emission = Macro.load_fuel_data(system_path, commodities)
 
 # Create the network (aka Edges) between Nodes
+edges = Macro.load_edges_json(network_dir, time_data, nodes)
 
-# Load all the transformation data
-transformations, T = load_transformations_json(joinpath(test_case_path,"transforms"), macro_settings)
+# Load all the asset data
+asset_dir = joinpath(test_case_path, "assets")
+assets = Macro.load_assets_json(asset_dir, time_data, nodes)
+# Load the capacity factor data for the assets
+Macro.load_capacity_factor!(assets, asset_dir)
+
+system = create_system(nodes, assets)
+
+model = Macro.generate_model(system)
+
+Macro.set_optimizer(model,Gurobi.Optimizer);
+Macro.optimize!(model)
+macro_objval = Macro.objective_value(model)
+
+println("The runtime for Macro was $(Macro.solve_time(model))")
+
 
 # Create all the transformations
 
@@ -35,4 +57,4 @@ transformations, T = load_transformations_json(joinpath(test_case_path,"transfor
 # set_optimizer(model,Gurobi.Optimizer)
 # optimize!(model)
 
-# # Write the outputs
+# # Write the outputs   
