@@ -78,9 +78,9 @@
             {
                 "id": "ngcc_z3",
                 "nodes": {
-                    "Electricity": "elec_CT",
-                    "NaturalGas": "natgas_CT",
-                    "CO2": "co2_CT"
+                    "Electricity": "elec_ME",
+                    "NaturalGas": "natgas_ME",
+                    "CO2": "co2_ME"
                 }
             }
         ]

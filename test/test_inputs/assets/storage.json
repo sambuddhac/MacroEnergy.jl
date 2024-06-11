@@ -1,6 +1,6 @@
 {
     "stor": {
-        "type": "Storage",
+        "type": "Battery",
         "global": {
             "time_interval": "Electricity",
             "can_expand": true,
@@ -16,11 +16,11 @@
             "stoichiometry_balance_names": [
                 "storage"
             ],
-            "edge_commodities": {
+            "edges": {
                 "discharge": {
                     "id": "discharge",
                     "type": "Electricity",
-                    "direction": "out",
+                    "direction": "output",
                     "can_expand": true,
                     "can_retire": false,
                     "existing_capacity": 0,
@@ -33,13 +33,13 @@
                     },
                     "constraints": {
                         "capacity": true,
-                        "ramping_limits": true
+                        "ramping_limit": true
                     }
                 },
                 "charge": {
                     "id": "charge",
                     "type": "Electricity",
-                    "direction": "in",
+                    "direction": "input",
                     "can_expand": true,
                     "can_retire": false,
                     "existing_capacity": 0,
