@@ -9,6 +9,8 @@ function make_solarpv(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, 
     This function makes a SolarPV from the data Dict.
     It is a helper function for load_transformations!.
     =============================================#
+
+    ## conversion process (node)
     _solar_pv_transform = Transformation(;
         id=:SolarPV,
         timedata=time_data[:Electricity],
@@ -16,24 +18,16 @@ function make_solarpv(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, 
         # have a stoichiometry balance because the 
         # sunshine is exogenous
     )
+    add_constraints!(_solar_pv_transform, data)
 
-    time_interval_length = length(time_data[:Electricity].time_interval)
-
-    _tedge = TEdge{Electricity}(;
-        id=:E,
-        node=node_out,
-        transformation=_solar_pv_transform,
-        timedata=time_data[:Electricity],
-        direction=:output,
-        has_planning_variables=get(data, :has_planning_variables, false),
-        can_expand=get(data, :can_expand, false),
-        can_retire=get(data, :can_retire, false),
-        existing_capacity=get(data, :existing_capacity, 0.0),
-        capacity_factor=get(data, :capacity_factor, zeros(time_interval_length)),
-        investment_cost=get(data, :investment_cost, 0.0),
-        fixed_om_cost=get(data, :fixed_om_cost, 0.0),
-        constraints=[Macro.CapacityConstraint()]    # By default, the capacity constraint is added
-    )
+    ## electricity edge
+    # get electricity edge data
+    _tedge_data = get_tedge_data(data, :Electricity)
+    isnothing(_tedge_data) && error("No electricity edge data found for SolarPV")
+    # set the id
+    _tedge_data[:id] = :E
+    # make the edge
+    _tedge = make_tedge(_tedge_data, time_data, _solar_pv_transform, node_out)
 
     return SolarPV(_solar_pv_transform, _tedge)
 end

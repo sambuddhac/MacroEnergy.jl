@@ -3,15 +3,20 @@
         "type": "SolarPV",
         "global": {
             "time_interval": "Electricity",
-            "can_expand": true,
-            "can_retire": false,
-            "existing_capacity": 0,
-            "investment_cost": 1000,
-            "fixed_om_cost": 10,
-            "variable_om_cost": 0
-        },
-        "constraints": {
-            "capacity": true
+            "constraints": {
+                "capacity": true
+            },
+            "edges": {
+                "elec": {
+                    "type": "Electricity",
+                    "can_expand": true,
+                    "can_retire": false,
+                    "existing_capacity": 0,
+                    "investment_cost": 1000,
+                    "fixed_om_cost": 10,
+                    "variable_om_cost": 0
+                }
+            }
         },
         "instance": [
             {
