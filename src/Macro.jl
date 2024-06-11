@@ -79,6 +79,7 @@ include_all_in_folder("model/networks")
 include_all_in_folder("model/transformations")
 include_all_in_folder("model/assets")
 include_all_in_folder("model/constraints")
+include("model/system.jl")
 
 include("generate_model.jl")
 include("benders.jl")
