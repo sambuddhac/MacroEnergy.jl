@@ -15,7 +15,7 @@ function make_tedge(::Type{TEdgeWithUC}, data::Dict{Symbol,Any}, time_data::Dict
         transformation = transformation,
         timedata = time_data[Symbol(commodity)],
         direction = get(data, :direction, :input),
-        has_planning_variables = get(data, :has_planning_variables, false),
+        has_planning_variables = get(data, :has_planning_vars, false),
         can_retire = get(data, :can_retire, false),
         can_expand = get(data, :can_expand, false),
         capacity_size = get(data, :capacity_size, 1.0),

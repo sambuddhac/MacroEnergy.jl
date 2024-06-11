@@ -56,19 +56,19 @@
         },
         "instance": [
             {
-                "id": "storage_z1",
+                "id": "storage_MA",
                 "nodes": {
                     "Electricity": "elec_MA"
                 }
             },
             {
-                "id": "storage_z2",
+                "id": "storage_CT",
                 "nodes": {
                     "Electricity": "elec_CT"
                 }
             },  
             {
-                "id": "stor_z3",
+                "id": "stor_ME",
                 "nodes": {
                     "Electricity": "elec_ME"
                 }

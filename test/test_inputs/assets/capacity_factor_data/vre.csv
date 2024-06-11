@@ -1,4 +1,4 @@
-Time_Index,MA_solar_pv,CT_onshore_wind,CT_solar_pv,ME_onshore_wind
+Time_Index,solar_pv_MA_1,onshore_wind_CT_1,solar_pv_CT_1,onshore_wind_ME_1
 1,0,0.569944978,0,0.920104027
 2,0,0.623258889,0,0.882233679
 3,0,0.694188416,0,0.89507395

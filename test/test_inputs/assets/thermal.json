@@ -30,6 +30,10 @@
                     "start_cost": 0,
                     "start_fuel_mmbtu_per_mwh": 0,
                     "fuel_stoichiometry_name": "energy",
+                    "stoichiometry_coefficients": {
+                        "energy": 2.1775,
+                        "emissions": 0
+                    },
                     "constraints": {
                         "capacity": true,
                         "ramping_limit": true,
@@ -60,7 +64,7 @@
         },
         "instance": [
             {
-                "id": "ngcc_z1",
+                "id": "ngcc_MA",
                 "nodes" : {
                     "Electricity": "elec_MA",
                     "NaturalGas": "natgas_MA",
@@ -68,7 +72,7 @@
                 }
             },
             {
-                "id": "ngcc_z2",
+                "id": "ngcc_CT",
                 "nodes": {
                     "Electricity": "elec_CT",
                     "NaturalGas": "natgas_CT",
@@ -76,7 +80,7 @@
                 }
             },
             {
-                "id": "ngcc_z3",
+                "id": "ngcc_ME",
                 "nodes": {
                     "Electricity": "elec_ME",
                     "NaturalGas": "natgas_ME",
