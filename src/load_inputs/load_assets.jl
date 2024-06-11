@@ -168,3 +168,13 @@ function make_asset(::Type{SolarPV}, data::Dict{Symbol,Any}, time_data::Dict{Sym
     solar_pv = make_solarpv(data, time_data, node_out)
     return solar_pv
 end
+
+function make_asset(::Type{Battery}, data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, nodes::Dict{Symbol,Node})
+    #=============================================
+    This function makes a Battery from the data Dict.
+    It is a helper function for load_transformations!.
+    =============================================#
+    # Make the Battery
+    battery = make_battery(data, time_data, nodes)
+    return battery
+end
