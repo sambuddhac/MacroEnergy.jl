@@ -150,7 +150,7 @@ end
 function make_asset(::Type{NaturalGasPower}, data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, nodes::Dict{Symbol,Node})
     #=============================================
     This function makes a NaturalGasPower from the data Dict.
-    It is a helper function for load_transformations!.
+    It is a helper function for load_assets!.
     =============================================#
     # Make the NaturalGasPower
     natgaspower = make_natgaspower(data, time_data, nodes)
@@ -160,7 +160,7 @@ end
 function make_asset(::Type{SolarPV}, data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, nodes::Dict{Symbol,Node})
     #=============================================
     This function makes a SolarPV from the data Dict.
-    It is a helper function for load_transformations!.
+    It is a helper function for load_assets!.
     =============================================#
     # Make the SolarPV
     node_out_id = Symbol(data[:nodes][:Electricity])
@@ -172,9 +172,19 @@ end
 function make_asset(::Type{Battery}, data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, nodes::Dict{Symbol,Node})
     #=============================================
     This function makes a Battery from the data Dict.
-    It is a helper function for load_transformations!.
+    It is a helper function for load_assets!.
     =============================================#
     # Make the Battery
     battery = make_battery(data, time_data, nodes)
     return battery
+end
+
+function make_asset(::Type{Electrolyzer}, data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, nodes::Dict{Symbol,Node})
+    #=============================================
+    This function makes a Electrolyzer from the data Dict.
+    It is a helper function for load_assets!.
+    =============================================#
+    # Make the Electrolyzer
+    electrolyzer = make_electrolyzer(data, time_data, nodes)
+    return electrolyzer
 end
