@@ -50,11 +50,6 @@ end
 
 function edge_instance_data(global_data::AbstractDict{Symbol,Any}, instance_data::T) where T<:AbstractDict{Symbol,Any}
     instance_data = merge(global_data, instance_data)
-    return instance_data
-end
-
-function edge_instance_data(global_data::AbstractDict{Symbol,Any}, instance_data::T) where T<:Dict{Symbol,Any}
-    instance_data = merge(global_data, instance_data)
     # Convert "Inf" to Inf
     max_line_reinforcement = get(instance_data, :max_line_reinforcement, Inf)
     instance_data[:max_line_reinforcement] = max_line_reinforcement == "Inf" ? Inf : max_line_reinforcement
