@@ -28,17 +28,18 @@ abstract type AbstractTransformationEdgeWithUC{T} <: AbstractTransformationEdge{
 
 ## Transformation types
 abstract type AbstractTransform end
-abstract type NaturalGasPower <: AbstractTransform  end
+abstract type TransformationType end  # Note: this is only used to improved readability
+abstract type NaturalGasPower <: TransformationType  end
 abstract type NaturalGasPowerCCS <: NaturalGasPower  end
-abstract type NaturalGasHydrogen <: AbstractTransform  end
+abstract type NaturalGasHydrogen <: TransformationType  end
 abstract type NaturalGasHydrogenCCS <: NaturalGasHydrogen  end
-abstract type FuelCell <: AbstractTransform end
-abstract type ElectrolyzerTransform <: AbstractTransform  end
-abstract type DACElectric <: AbstractTransform  end
-abstract type SyntheticNG <: AbstractTransform  end
-abstract type VRE <: AbstractTransform end
+abstract type FuelCell <: TransformationType end
+abstract type ElectrolyzerTransform <: TransformationType  end
+abstract type DACElectric <: TransformationType  end
+abstract type SyntheticNG <: TransformationType  end
+abstract type VRE <: TransformationType end
 abstract type SolarPVTransform <: VRE end
-abstract type Storage <: AbstractTransform end
+abstract type Storage <: TransformationType end
 
 ## Assets types
 abstract type AbstractAsset end
@@ -113,10 +114,11 @@ export Electricity,
     NaturalGasHydrogen,
     NaturalGasHydrogenCCS,
     FuelCell,
-    Electrolyzer,
+    ElectrolyzerTransform,
     DACElectric,
     SyntheticNG,
     VRE,
+    SolarPVTransform,
     Storage,
     TransformationType,
     #Resource,
