@@ -5,7 +5,7 @@ Base.@kwdef mutable struct TimeData{T} <: AbstractTimeData{T}
 end
 
 @doc raw"""
-timestepbefore(t::Int, h::Int,subperiods::Vector{StepRange{Int64,Int64})
+    timestepbefore(t::Int, h::Int,subperiods::Vector{StepRange{Int64,Int64})
 
 Determines the time step that is h steps bßefore index t in
 subperiod p with circular indexing.
