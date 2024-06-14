@@ -50,15 +50,11 @@ abstract type OperationConstraint <: AbstractTypeConstraint end
 abstract type PolicyConstraint <: OperationConstraint end
 abstract type PlanningConstraint <: AbstractTypeConstraint end
 
-# type hierarchy
-
-# globals
-
-# const Containers = JuMP.Containers
-# const VariableRef = JuMP.VariableRef
+# global constants
+const H2_MWh = 33.33 # MWh per tonne of H2
+const NG_MWh = 0.29307107 # MWh per MMBTU of NG 
 const JuMPConstraint = Union{Array,Containers.DenseAxisArray,Containers.SparseAxisArray}
-# const DataFrameRow = DataFrames.DataFrameRow;
-# const DataFrame = DataFrames.DataFrame;
+
 function include_all_in_folder(folder)
     base_path = joinpath(@__DIR__, folder)
     for (root, dirs, files) in Base.Filesystem.walkdir(base_path)
@@ -69,8 +65,6 @@ function include_all_in_folder(folder)
         end
     end
 end
-
-# namedtuple(d::Dict) = (; (Symbol(k) => v for (k, v) in d)...)
 
 # include files
 

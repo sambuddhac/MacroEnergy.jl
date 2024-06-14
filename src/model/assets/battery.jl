@@ -31,3 +31,8 @@ function make_battery(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, 
 
     return Battery(_battery_transform, _discharge_tedge, _charge_tedge)
 end
+
+function add_capacity_factor!(b::Battery, capacity_factor::Vector{Float64})
+    b.discharge_tedge.capacity_factor = capacity_factor
+    b.charge_tedge.capacity_factor = capacity_factor
+end
