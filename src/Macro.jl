@@ -171,7 +171,8 @@ export Electricity,
     SymmetricCapacityConstraint,
     CapacityConstraint,
     MinFlowConstraint,
-    configure_settings
+    configure_settings,
+    load_inputs
 
 end # module Macro
 
