@@ -105,11 +105,12 @@ time_interval(g::AbstractTransform) = g.timedata.time_interval;
 subperiods(g::AbstractTransform) = g.timedata.subperiods;
 subperiod_weight(g::AbstractTransform,w::StepRange{Int64, Int64}) = g.timedata.subperiod_weights[w];
 current_subperiod(g::AbstractTransform,t::Int64) = subperiods(g)[findfirst(t .∈ subperiods(g))];
+min_duration(g::AbstractTransform) = g.min_duration;
+max_duration(g::AbstractTransform) = g.max_duration;
 
 all_constraints(g::AbstractTransform) = g.constraints;
 stoichiometry_balance(g::AbstractTransform) = g.operation_expr[:stoichiometry_balance];
 stoichiometry_balance(g::AbstractTransform,i::Symbol,t::Int64) = stoichiometry_balance(g)[i,t];
-# edges(g::AbstractTransform) = g.TEdges;
 existing_capacity_storage(g::AbstractTransform) = g.existing_capacity_storage;
 new_capacity_storage(g::AbstractTransform) = g.planning_vars[:new_capacity_storage];
 ret_capacity_storage(g::AbstractTransform) = g.planning_vars[:ret_capacity_storage];
@@ -160,7 +161,7 @@ stoichiometry_balance_names(e::AbstractTransformationEdge) = stoichiometry_balan
 get_transformation_id(e::AbstractTransformationEdge) = get_id(e.transformation);
 get_id(e::AbstractTransformationEdge) = e.id;
 st_coeff(e::AbstractTransformationEdge) = e.st_coeff;
-
+transformation(e::AbstractTransformationEdge) = e.transformation;
 
 function add_planning_variables!(g::AbstractTransform,model::Model)
 
@@ -208,18 +209,6 @@ function add_planning_variables!(g::AbstractTransform,model::Model)
             add_to_expression!(model[:eFixedCost],fixed_om_cost_storage(g), capacity_storage(g))
         end
 
-        if g.max_duration > 0
-    
-            e_discharge = g.TEdges[g.discharge_edge];
-
-            @constraint(model, capacity_storage(g) <= g.max_duration * capacity(e_discharge))
-
-            if g.min_duration > 0
-                @constraint(model, capacity_storage(g) >= g.min_duration * capacity(e_discharge))
-            end
-
-        end
-
     end
 
 end
@@ -229,7 +218,6 @@ function add_operation_variables!(g::AbstractTransform,model::Model)
     if !isempty(stoichiometry_balance_names(g))
         g.operation_expr[:stoichiometry_balance] = @expression(model, [i in stoichiometry_balance_names(g), t in time_interval(g)], 0 * model[:vREF])
     end
-
 
     if has_storage(g)
         g.operation_vars[:storage_level] = @variable(
@@ -244,11 +232,6 @@ function add_operation_variables!(g::AbstractTransform,model::Model)
             storage_level(g,t) - (1 - storage_loss_fraction(g)) * storage_level(g,timestepbefore(t,1,subperiods(g))),
             )
         end
-        # e_discharge = g.TEdges[g.discharge_edge]
-        # @constraint(model,
-        # [t in time_interval(g)], 
-        # st_coeff(e_discharge)[:storage]*flow(e_discharge,t)<=storage_level(g,timestepbefore(t,1,subperiods(g))))
-
     end
 
 end
@@ -294,6 +277,16 @@ function add_planning_variables!(e::AbstractTransformationEdge, model::Model)
         if fixed_om_cost(e)>0
             add_to_expression!(model[:eFixedCost], fixed_om_cost(e), capacity(e))
         end
+
+        g = transformation(e)
+        if get_id(e) == :discharge && max_duration(g) > 0
+
+            @constraint(model, capacity_storage(g) <= max_duration(g) * capacity(e))
+
+            if min_duration(g) > 0
+                @constraint(model, capacity_storage(g) >= min_duration(g) * capacity(e))
+            end
+        end
     end
 
     return nothing
@@ -337,6 +330,16 @@ function add_operation_variables!(e::AbstractTransformationEdge, model::Model)
 
     end
 
+    g = transformation(e)
+
+    if has_storage(g) && get_id(e) == :discharge
+
+        @constraint(model,
+        [t in time_interval(g)], 
+        st_coeff(e)[:storage]*flow(e,t) <= storage_level(g,timestepbefore(t,1,subperiods(g))))
+    
+    end
+
     return nothing
 end
 
@@ -348,23 +351,6 @@ function add_constraints!(target::T, data::Dict{Symbol,Any}) where T<:Union{Node
             v == true && add_constraint!(target, macro_constraints[k])
         end
     end
-    return nothing
-end
-
-function add_constraint!(a::AbstractAsset, c::Type{<:AbstractTypeConstraint})
-    for t in fieldnames(typeof(a))
-        add_constraint!(getfield(a,t), c())
-    end
-    return nothing
-end
-
-function add_constraint!(t::AbstractTransform, c::Type{<:AbstractTypeConstraint})
-    push!(t.constraints, c())
-    return nothing
-end
-
-function add_constraint!(e::AbstractTransformationEdge, c::Type{<:AbstractTypeConstraint})
-    push!(e.constraints, c())
     return nothing
 end
 
