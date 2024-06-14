@@ -19,7 +19,7 @@ Base.@kwdef mutable struct Edge{T} <: AbstractEdge{T}
 end
 
 function make_edge(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, commodity::DataType, start_node::AbstractNode, end_node::AbstractNode)
-    Edge{commodity}(;
+    _edge = Edge{commodity}(;
         timedata = time_data[Symbol(commodity)],
         start_node = start_node,
         end_node = end_node,
@@ -30,9 +30,10 @@ function make_edge(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, com
         can_expand = get(data, :can_expand, true),
         op_cost = get(data, :op_cost, 0.0),
         distance = get(data, :distance, 0.0),
-        line_loss_fraction = get(data, :line_loss_fraction, 0.0),
-        constraints = get(data, :constraints, Vector{AbstractTypeConstraint}())
+        line_loss_fraction = get(data, :line_loss_fraction, 0.0)
     )
+    add_constraints!(_edge, data)
+    return _edge
 end
 Edge(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, commodity::DataType, start_node::AbstractNode, end_node::AbstractNode) = make_edge(data, time_data, commodity, start_node, end_node)
 

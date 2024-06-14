@@ -18,6 +18,7 @@ macro AbstractTransformationEdgeBaseAttributes()
         fixed_om_cost::Float64 = 0.0
         variable_om_cost::Float64 = 0.0
         price::Vector{Float64} = Float64[]
+        price_header::Union{Nothing,Symbol} = nothing
         ramp_up_fraction::Float64 = 1.0
         ramp_down_fraction::Float64 = 1.0
         min_flow_fraction::Float64 = 0.0
@@ -52,6 +53,7 @@ function make_tedge(::Type{TEdge}, data::Dict{Symbol,Any}, time_data::Dict{Symbo
         fixed_om_cost = get(data, :fixed_om_cost, 0.0),
         variable_om_cost = get(data, :variable_om_cost, 0.0),
         price = get(data, :price, Float64[]),
+        price_header = get(data, :price_header, nothing),
         ramp_up_fraction = get(data, :ramp_up_fraction, 1.0),
         ramp_down_fraction = get(data, :ramp_down_fraction, 1.0),
         min_flow_fraction = get(data, :min_flow_fraction, 0.0),
@@ -60,6 +62,16 @@ function make_tedge(::Type{TEdge}, data::Dict{Symbol,Any}, time_data::Dict{Symbo
     return _t_edge
 end
 TEdge(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, transformation::AbstractTransform, node::AbstractNode) = make_tedge(data, time_data, transformation, node)
+
+
+function make_tedge(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, transformation::AbstractTransform, node::AbstractNode)
+    validate_data!(data)
+    if get(data, :uc, false)
+        return make_tedge(TEdgeWithUC, data, time_data, transformation, node)
+    else
+        return make_tedge(TEdge, data, time_data, transformation, node)
+    end
+end
 
 Base.@kwdef mutable struct Transformation <: AbstractTransform
     id::Symbol
@@ -81,8 +93,8 @@ Base.@kwdef mutable struct Transformation <: AbstractTransform
     min_duration::Float64 = 0.0
     max_duration::Float64 = 0.0
     storage_loss_fraction::Float64 = 0.0
-    discharge_edge::Symbol = Symbol(".")
-    charge_edge::Symbol = Symbol(".")
+    discharge_edge::Symbol = :discharge
+    charge_edge::Symbol = :charge
 end
 
 #### Transformation interface
@@ -126,6 +138,7 @@ fixed_om_cost(e::AbstractTransformationEdge) = e.fixed_om_cost;
 variable_om_cost(e::AbstractTransformationEdge) = e.variable_om_cost;
 price(e::AbstractTransformationEdge) = e.price;
 price(e::AbstractTransformationEdge,t::Int64) = price(e)[t];
+price_header(e::AbstractTransformationEdge) = e.price_header;
 min_capacity(e::AbstractTransformationEdge) = e.min_capacity;
 max_capacity(e::AbstractTransformationEdge) = e.max_capacity;
 can_expand(e::AbstractTransformationEdge) = e.can_expand;
@@ -327,16 +340,7 @@ function add_operation_variables!(e::AbstractTransformationEdge, model::Model)
     return nothing
 end
 
-function make_tedge(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, transformation::AbstractTransform, node::AbstractNode)
-    validate_data!(data)
-    if get(data, :uc, false)
-        return make_tedge(TEdgeWithUC, data, time_data, transformation, node)
-    else
-        return make_tedge(TEdge, data, time_data, transformation, node)
-    end
-end
-
-function add_constraints!(target::T, data::Dict{Symbol,Any}) where T<:Union{AbstractAsset, AbstractTransform, AbstractTransformationEdge}
+function add_constraints!(target::T, data::Dict{Symbol,Any}) where T<:Union{Node, Edge, AbstractAsset, AbstractTransform, AbstractTransformationEdge}
     constraints = get(data, :constraints, nothing)
     if constraints !== nothing
         macro_constraints = constraint_types()
@@ -365,22 +369,71 @@ function add_constraint!(e::AbstractTransformationEdge, c::Type{<:AbstractTypeCo
 end
 
 function add_planning_variables!(a::AbstractAsset, model::Model)
-    for t in fieldnames(typeof(a))
+    for t in fieldnames(a)
         add_planning_variables!(getfield(a,t), model)
     end
     return nothing
 end
 
 function add_operation_variables!(a::AbstractAsset, model::Model)
-    for t in fieldnames(typeof(a))
+    for t in fieldnames(a)
         add_operation_variables!(getfield(a,t), model)
     end
     return nothing
 end
 
+function add_constraint!(a::AbstractAsset, c::Type{<:AbstractTypeConstraint})
+    for t in fieldnames(a)
+        add_constraint!(getfield(a,t), c())
+    end
+    return nothing
+end
+
+function add_constraint!(t::T, c::Type{<:AbstractTypeConstraint}) where T<:Union{Node, Edge, AbstractTransform, AbstractTransformationEdge}
+    push!(t.constraints, c())
+    return nothing
+end
+
 function add_all_model_constraints!(a::AbstractAsset, model::Model)
-    for t in fieldnames(typeof(a))
+    for t in fieldnames(a)
         add_all_model_constraints!(getfield(a,t), model)
     end
     return nothing
 end
+
+function fieldnames(a::AbstractAsset)
+    ordered_fields = Symbol[]
+    fields = Base.fieldnames(typeof(a))
+    # move transformation fields to the front
+    for f in fields
+        if isa(getfield(a, f), AbstractTransform)
+            push!(ordered_fields, f)
+        end
+    end
+    # move edge fields to the back
+    for f in fields
+        if isa(getfield(a, f), AbstractTransformationEdge)
+            push!(ordered_fields, f)
+        end
+    end
+    # check if all fields are accounted for
+    if length(ordered_fields) != length(fields)
+        error("Not all fields accounted for in fieldnames(::Type{<:AbstractAsset})")
+    end
+    return ordered_fields
+end
+
+function tedges(assets::Dict{Symbol,AbstractAsset})
+    tedges = Dict{Symbol,AbstractTransformationEdge}()
+    for (k, v) in assets
+        for f in fieldnames(v)
+            if isa(getfield(v, f), AbstractTransformationEdge)
+                tedges[Symbol(string(k, "_", f))] = getfield(v, f)
+            end
+        end
+    end
+    return tedges
+end 
+
+
+    

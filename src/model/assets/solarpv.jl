@@ -31,3 +31,7 @@ function make_solarpv(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, 
 
     return SolarPV(_solar_pv_transform, _tedge)
 end
+
+function add_capacity_factor!(s::SolarPV, capacity_factor::Vector{Float64})
+    s.tedge.capacity_factor = capacity_factor
+end

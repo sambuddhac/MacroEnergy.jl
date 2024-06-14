@@ -24,7 +24,10 @@
         "global": {
             "time_interval": "Electricity",
             "unidirectional": false,
-            "can_expand": true
+            "can_expand": true,
+            "constraints": {
+                "capacity": true
+            }
         },
         "instance": [
             {

@@ -31,7 +31,7 @@ function make_natgaspower(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeDat
     ## natural gas edge
     _ng_tedge_data = get_tedge_data(data, :NaturalGas)
     isnothing(_ng_tedge_data) && error("No natural gas edge data found for NaturalGasPower")
-    _ng_tedge_data[:id] = :NaturalGas
+    _ng_tedge_data[:id] = :NG
     _ng_node_id = Symbol(data[:nodes][:NaturalGas])
     _ng_node = nodes[_ng_node_id]
     _ng_tedge = make_tedge(_ng_tedge_data, time_data, _ngcc_transform, _ng_node)
@@ -45,4 +45,8 @@ function make_natgaspower(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeDat
     _co2_tedge = make_tedge(_co2_tedge_data, time_data, _ngcc_transform, _co2_node)
 
     return NaturalGasPower(_ngcc_transform, _e_tedge, _ng_tedge, _co2_tedge)
+end
+
+function add_capacity_factor!(ng::NaturalGasPower, capacity_factor::Vector{Float64})
+    ng.e_tedge.capacity_factor = capacity_factor
 end

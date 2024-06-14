@@ -1,4 +1,4 @@
-function generate_model(system::Vector{T}) where T<:Union{Node, AbstractAsset}
+function generate_model(system::Vector{T}) where T<:Union{Node, Edge, AbstractAsset}
 
     model = Model()
 

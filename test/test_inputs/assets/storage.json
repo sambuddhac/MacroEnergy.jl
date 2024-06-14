@@ -11,14 +11,11 @@
             "storage_loss_fraction": 0.01,
             "min_duration": 1,
             "max_duration": 1,
-            "discharge_edge": "discharge",
-            "charge_edge": "charge",
             "stoichiometry_balance_names": [
                 "storage"
             ],
             "edges": {
                 "discharge": {
-                    "id": "discharge",
                     "type": "Electricity",
                     "direction": "output",
                     "can_expand": true,
@@ -37,7 +34,6 @@
                     }
                 },
                 "charge": {
-                    "id": "charge",
                     "type": "Electricity",
                     "direction": "input",
                     "can_expand": true,

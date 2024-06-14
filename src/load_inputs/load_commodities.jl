@@ -10,6 +10,7 @@ function load_commodities_json(data_dir::AbstractString)
     # make sure the commodities are valid
     @assert haskey(data, :commodities)
     commodities = Symbol.(data[:commodities])
+
     validate_commodities(commodities)
 
     # return a dictionary of commodities Dict{Symbol, DataType}

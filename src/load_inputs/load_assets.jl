@@ -5,8 +5,7 @@ using InteractiveUtils
 function load_assets_json(data_dir::AbstractString, time_data::Dict{Symbol,TimeData}, nodes::Dict{Symbol,Node})
     #=============================================
     This function does the following:
-        - Makes a Dict{Symbol, Any} entry for each instance of a transform
-        - Makes a Dict{Symbol, Transformation} entry for each transformation
+        - Makes a Dict{Symbol,AbstractAsset}() entry for each instance of an asset
     It would be more efficient to do both steps together for each entry,
     but this way allows someone to just to the second step with their own data
     or inject other actions along the way for individual inputs or transformations.
@@ -43,17 +42,16 @@ function load_assets!(
         # Check if there are multiple instance_data inputs for this transformation
         if typeof(a_data[:instance]) == JSON3.Object
             # If only one, get the inputs, assign an ID, and make the transformation
-            existing_ids = collect(keys(asset_data))
-            instance_data, _ = assets_instance_data(a_data[:global], a_data[:instance], a_name, existing_ids, counter)
+            instance_data = assets_instance_data(a_data[:global], a_data[:instance])
+            haskey(instance_data, :id) ? instance_id = Symbol(instance_data[:id]) : instance_id = a_name
+            instance_data[:id], _ = make_asset_id(instance_id, asset_data)
             asset_data[instance_data[:id]] = make_asset(a_type, instance_data, time_data, nodes)
         else
             # Otherwise, loop over the instance_data inputs and do the same for each
-            counter = UInt8(1)
-            for instance_data in a_data[:instance]
-                # counter += UInt8(1)
-                existing_ids = collect(keys(asset_data))
-                instance_data, counter = assets_instance_data(a_data[:global], instance_data, a_name, existing_ids, counter)
-                validate_data!(instance_data)
+            for (instance_idx, instance_data) in enumerate(a_data[:instance])
+                instance_data = assets_instance_data(a_data[:global], instance_data)
+                haskey(instance_data, :id) ? instance_id = Symbol(instance_data[:id]) : instance_id = default_asset_name(instance_idx, a_name)
+                instance_data[:id], _ = make_asset_id(instance_id, asset_data)
                 asset_data[instance_data[:id]] = make_asset(a_type, instance_data, time_data, nodes)
             end
         end
@@ -62,20 +60,26 @@ end
 
 function assets_instance_data(
     global_data::AbstractDict{Symbol,Any},
-    instance_data::AbstractDict{Symbol,Any},
-    default_name::Symbol,
-    existing_ids::Vector{Symbol},
-    counter::UInt8=UInt8(1)
+    instance_data::AbstractDict{Symbol,Any}
 )
     # Merge global and node data, with node data overwriting global data
     instance_data = merge(global_data, instance_data)
 
-    haskey(instance_data, :id) ? instance_id = Symbol(instance_data[:id]) : instance_id = default_name
-    instance_data[:id], counter = make_asset_id(instance_id, existing_ids, counter)
-    return instance_data, counter
+    validate_data!(instance_data)
+
+    return instance_data
 end
 
-function make_asset_id(id::Symbol, existing_ids::Vector{Symbol}, count::UInt8=UInt8(1))
+function default_asset_name(instance_name::T, a_name::T) where T<:Union{AbstractString,Symbol}
+    return Symbol(string(instance_name, "_", a_name))
+end
+
+function make_asset_id(id::Symbol, assets::Dict{Symbol,AbstractAsset}, count::UInt8=UInt8(1))
+    existing_ids = collect(keys(assets))
+
+    if !(id in existing_ids)
+        return id, count
+    end
 
     while Symbol(string(id, "_", count)) in existing_ids
         count += UInt8(1)

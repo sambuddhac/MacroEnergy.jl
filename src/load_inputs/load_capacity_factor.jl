@@ -14,7 +14,3 @@ function load_capacity_factor!(assets::Dict{Symbol,AbstractAsset}, asset_dir::Ab
     end
     return nothing
 end
-
-function add_capacity_factor!(s::SolarPV, capacity_factor::Vector{Float64})
-    s.tedge.capacity_factor = capacity_factor
-end
