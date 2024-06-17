@@ -44,17 +44,11 @@ macro_objval = Macro.objective_value(model)
 
 println("The runtime for Macro was $(Macro.solve_time(model))")
 
+using CSV, DataFrames
+df_genx_status = CSV.read("/Users/lb9239/Documents/ZERO_lab/Macro/Macro/ExampleSystems/three_zones_genx/results_fulltimeseries/Status.csv",DataFrame)
+println("The objective value for GenX was $(df_genx_status.Objval[1])")
+println("The relative error between Macro and GenX is $(abs(df_genx_status.Objval[1]-macro_objval)/df_genx_status.Objval[1])")
+println("The runtime for Macro was $(Macro.solve_time(model))")
+println("The runtime for GenX was $(df_genx_status.Solve[1])")
 
-# Create all the transformations
-
-# Store everything in the InputData struct
-# InputData(macro_settings, node_d, network_d, resource_d, storage_d, transformations), macro_settings
-
-# Generate model based on the InputData
-# model = Macro.generate_model(macro_inputs);
-
-# Solve the model
-# set_optimizer(model,Gurobi.Optimizer)
-# optimize!(model)
-
-# # Write the outputs   
+println()
