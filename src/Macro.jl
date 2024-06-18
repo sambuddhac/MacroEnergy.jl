@@ -37,8 +37,6 @@ abstract type FuelCell <: TransformationType end
 abstract type ElectrolyzerTransform <: TransformationType  end
 abstract type DACElectric <: TransformationType  end
 abstract type SyntheticNG <: TransformationType  end
-abstract type VRE <: TransformationType end
-abstract type SolarPVTransform <: VRE end
 abstract type Storage <: TransformationType end
 
 ## Assets types
