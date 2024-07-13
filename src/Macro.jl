@@ -25,14 +25,18 @@ abstract type CO2Captured <: CO2 end
 ## Time data types
 abstract type AbstractTimeData{T<:Commodity} end
 
+## Structure types
+abstract type MacroObject end
+abstract type AbstractVertex <: MacroObject end
+
 ## Network types
-abstract type AbstractNode{T<:Commodity} end
-abstract type AbstractEdge{T<:Commodity} end
+abstract type AbstractNode{T<:Commodity} <: AbstractVertex end
+abstract type AbstractEdge{T<:Commodity} <: MacroObject end
 abstract type AbstractTransformationEdge{T<:Commodity} end
 abstract type AbstractTransformationEdgeWithUC{T} <: AbstractTransformationEdge{T} end
 
 ## Transformation types
-abstract type AbstractTransform end
+abstract type AbstractTransform <: AbstractVertex end
 abstract type TransformationType end  # Note: this is only used to improved readability
 abstract type NaturalGasPowerTransform <: TransformationType  end
 abstract type NaturalGasPowerCCSTransform <: NaturalGasPowerTransform  end
@@ -45,7 +49,7 @@ abstract type SyntheticNGTransform <: TransformationType  end
 abstract type Storage <: TransformationType end
 
 ## Assets types
-abstract type AbstractAsset end
+abstract type AbstractAsset <: MacroObject end
 
 ## Constraints types
 abstract type AbstractTypeConstraint end
