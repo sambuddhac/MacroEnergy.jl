@@ -478,7 +478,7 @@ function Base.show(io::IO, g::AbstractTransform)
     
     println(io, "Planning variables: $(g.planning_vars)")
     println(io, "Operation variables: $(g.operation_vars)")
-    println(io, "Constraints: $(g.constraints)")
+    # println(io, "Constraints: $(g.constraints)")
 end
 
 function Base.show(io::IO, e::AbstractTransformationEdge)
@@ -501,7 +501,7 @@ function Base.show(io::IO, e::AbstractTransformationEdge)
     println(io, "Investment cost: $(investment_cost(e))")
     println(io, "Fixed OM cost: $(fixed_om_cost(e))")
     println(io, "Variable OM cost: $(variable_om_cost(e))")
-    println(io, "Price: $(price(e))")
+    # println(io, "Price: $(price(e))")
     println(io, "Price header: $(price_header(e))")
     println(io, "Ramp up fraction: $(ramp_up_fraction(e))")
     println(io, "Ramp down fraction: $(ramp_down_fraction(e))")
@@ -514,8 +514,8 @@ function Base.show(io::IO, e::AbstractTransformationEdge)
         println(io, "Start fuel stoichiometry name: :$(start_fuel_stoichiometry_name(e))")
     end
     println(io, "Planning variables: $(e.planning_vars)")
-    println(io, "Operation variables: $(e.operation_vars)")
-    println(io, "Constraints: $(e.constraints)")
+    # println(io, "Operation variables: $(e.operation_vars)")
+    # println(io, "Constraints: $(e.constraints)")
 end
 
 function Base.show(io::IO, a::AbstractAsset)
