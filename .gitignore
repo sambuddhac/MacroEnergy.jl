@@ -42,3 +42,5 @@ Manifest.toml
 .pre-commit-config.yaml
 output.log
 output.log
+
+**/results/
