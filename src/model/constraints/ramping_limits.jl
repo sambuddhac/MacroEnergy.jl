@@ -6,7 +6,7 @@ end
 
 function add_model_constraint!(
     ct::RampingLimitConstraint,
-    e::AbstractTransformationEdge,
+    e::Edge,
     model::Model,
     )
     
@@ -38,7 +38,7 @@ end
 
 function add_model_constraint!(
     ct::RampingLimitConstraint,
-    e::AbstractTransformationEdgeWithUC,
+    e::EdgeWithUC,
     model::Model,
     )
     
