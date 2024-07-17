@@ -30,13 +30,9 @@ abstract type MacroObject end
 abstract type AbstractVertex <: MacroObject end
 
 ## Network types
-abstract type AbstractNode{T<:Commodity} <: AbstractVertex end
 abstract type AbstractEdge{T<:Commodity} <: MacroObject end
-abstract type AbstractTransformationEdge{T<:Commodity} end
-abstract type AbstractTransformationEdgeWithUC{T} <: AbstractTransformationEdge{T} end
 
 ## Transformation types
-abstract type AbstractTransform <: AbstractVertex end
 abstract type TransformationType end  # Note: this is only used to improved readability
 abstract type NaturalGasPowerTransform <: TransformationType  end
 abstract type NaturalGasPowerCCSTransform <: NaturalGasPowerTransform  end
@@ -44,9 +40,8 @@ abstract type NaturalGasH2Transform <: TransformationType  end
 abstract type NaturalGasH2CCSTransform <: NaturalGasH2Transform  end
 abstract type FuelCellTransform <: TransformationType end
 abstract type ElectrolyzerTransform <: TransformationType  end
-abstract type DacElectricTransform <: TransformationType  end
-abstract type SyntheticNGTransform <: TransformationType  end
-abstract type Storage <: TransformationType end
+abstract type DACElectric <: TransformationType  end
+abstract type SyntheticNG <: TransformationType  end
 
 ## Assets types
 abstract type AbstractAsset <: MacroObject end
@@ -87,7 +82,7 @@ end
 
 include("time_management.jl")
 include_all_in_folder("model/networks")
-include_all_in_folder("model/transformations")
+#include_all_in_folder("model/transformations")
 include_all_in_folder("model/assets")
 include_all_in_folder("model/constraints")
 include("model/system.jl")
