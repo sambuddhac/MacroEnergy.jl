@@ -6,7 +6,7 @@ end
 
 function add_model_constraint!(
     ct::MaxNonServedDemandPerSegmentConstraint,
-    n::AbstractNode,
+    n::Node,
     model::Model,
 )
     if haskey(n.operation_vars,:non_served_demand)
