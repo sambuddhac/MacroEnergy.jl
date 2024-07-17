@@ -1,7 +1,7 @@
 Base.@kwdef mutable struct Edge{T} <: AbstractEdge{T}
     timedata::TimeData{T}
-    start_node::AbstractNode{T}
-    end_node::AbstractNode{T}
+    start_vertex::AbstractVertex
+    end_vertex::AbstractVertex
     existing_capacity::Float64
     unidirectional::Bool = false
     max_line_reinforcement::Float64 = Inf
@@ -18,11 +18,11 @@ Base.@kwdef mutable struct Edge{T} <: AbstractEdge{T}
     constraints::Vector{AbstractTypeConstraint} = Vector{AbstractTypeConstraint}()
 end
 
-function make_edge(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, commodity::DataType, start_node::AbstractNode, end_node::AbstractNode)
+function make_edge(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, commodity::DataType, start_vertex::AbstractVertex, end_vertex::AbstractVertex)
     _edge = Edge{commodity}(;
         timedata = deepcopy(time_data[Symbol(commodity)]),
-        start_node = start_node,
-        end_node = end_node,
+        start_vertex = start_vertex,
+        end_vertex = end_vertex,
         existing_capacity = get(data, :existing_capacity, 0.0),
         unidirectional = get(data, :unidirectional, false),
         max_line_reinforcement = get(data, :max_line_reinforcement, Inf),
@@ -35,13 +35,13 @@ function make_edge(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, com
     add_constraints!(_edge, data)
     return _edge
 end
-Edge(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, commodity::DataType, start_node::AbstractNode, end_node::AbstractNode) = make_edge(data, time_data, commodity, start_node, end_node)
+Edge(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, commodity::DataType, start_vertex::AbstractVertex, end_vertex::AbstractVertex) = make_edge(data, time_data, commodity, start_vertex, end_vertex)
 
-start_node(e::AbstractEdge) = e.start_node;
-end_node(e::AbstractEdge) = e.end_node;
+start_node(e::AbstractEdge) = e.start_vertex;
+end_node(e::AbstractEdge) = e.end_vertex;
 
-start_node_id(e::AbstractEdge) = get_id(e.start_node);
-end_node_id(e::AbstractEdge) = get_id(e.end_node);
+start_node_id(e::AbstractEdge) = get_id(e.start_vertex);
+end_node_id(e::AbstractEdge) = get_id(e.end_vertex);
 
 
 commodity_type(e::AbstractEdge{T}) where {T} = T;
