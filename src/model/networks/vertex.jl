@@ -19,4 +19,4 @@ time_interval(v::AbstractVertex) = v.timedata.time_interval;
 subperiods(v::AbstractVertex) = v.timedata.subperiods;
 subperiod_weight(v::AbstractVertex,w::StepRange{Int64, Int64}) = v.timedata.subperiod_weights[w];
 current_subperiod(v::AbstractVertex,t::Int64) = subperiods(v)[findfirst(t .∈ subperiods(v))];
-all_constraints(v::AbstractVertez) = v.constraints;
+all_constraints(v::AbstractVertex) = v.constraints;

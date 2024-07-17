@@ -14,7 +14,6 @@ Base.@kwdef mutable struct Storage{T} <: AbstractVertex
     min_duration::Float64 = 0.0
     max_duration::Float64 = 0.0
     storage_loss_fraction::Float64 = 0.0
-    constraints::Vector{AbstractTypeConstraint} = Vector{AbstractTypeConstraint}()
 end
 commodity_type(g::Storage{T}) where {T} = T;
 all_constraints(g::Storage) = g.constraints;

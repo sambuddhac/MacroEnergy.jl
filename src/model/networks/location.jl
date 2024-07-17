@@ -1,12 +1,12 @@
 Base.@kwdef mutable struct Location <: MacroObject
     name::String
-    nodes::Dict{Symbol, AbstractNode} = Dict{Symbol, AbstractNode}()
+    nodes::Dict{Symbol, Node} = Dict{Symbol, Node}()
     commodities::Set{Symbol} = Set{Symbol}()
     # We could change this to work on commodities, not symbols
     # My feeling is that symbols will be lighter and faster
 end
 
-function add_node!(loc::Location, node::AbstractNode{T}, replace::Bool=false) where T<:Commodity
+function add_node!(loc::Location, node::Node{T}, replace::Bool=false) where T<:Commodity
     node_commodity = Symbol(commodity_type(node))
     # If a node of the same type exists then throw an error unless replace is true
     if ((node_commodity in loc.commodities) || (node_commodity in keys(loc.nodes))) && !replace

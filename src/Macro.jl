@@ -55,17 +55,7 @@ abstract type PlanningConstraint <: AbstractTypeConstraint end
 # global constants
 const H2_MWh = 33.33 # MWh per tonne of H2
 const NG_MWh = 0.29307107 # MWh per MMBTU of NG 
-
-# const Containers = JuMP.Containers
-# const VariableRef = JuMP.VariableRef
 const JuMPConstraint = Union{Array,Containers.DenseAxisArray,Containers.SparseAxisArray}
-
-const GRB_ENV = Ref{Gurobi.Env}()
-function __init__()
-    GRB_ENV[] = Gurobi.Env()
-    return
-end
-
 
 function include_all_in_folder(folder)
     base_path = joinpath(@__DIR__, folder)
@@ -81,32 +71,40 @@ end
 # include files
 
 include("time_management.jl")
-include_all_in_folder("model/networks")
+include("model/networks/vertex.jl")
+include("model/networks/edge.jl")
+include("model/networks/node.jl")
+include("model/networks/storage.jl")
+include("model/networks/transformation.jl")
+include("model/networks/location.jl")
+
+#include_all_in_folder("model/networks")
 #include_all_in_folder("model/transformations")
-include_all_in_folder("model/assets")
+# include_all_in_folder("model/assets")
 include_all_in_folder("model/constraints")
 include("model/system.jl")
 
 include("generate_model.jl")
-include_all_in_folder("benders")
-
+include("benders.jl")
 include("input_translation/load_data_from_genx.jl")
 
-include("config/configure_settings.jl")
-include("load_inputs/load_dataframe.jl")
-include("load_inputs/load_timeseries.jl")
-include("load_inputs/load_inputs.jl")
-include("load_inputs/load_commodities.jl")
-include("load_inputs/load_time_data.jl")
-include("load_inputs/load_network.jl")
-include("load_inputs/load_assets.jl")
-include("load_inputs/load_demand.jl")
-include("load_inputs/load_fuel.jl")
-include("load_inputs/load_capacity_factor.jl")
+# include("config/configure_settings.jl")
+# include("load_inputs/load_dataframe.jl")
+# include("load_inputs/load_timeseries.jl")
+# include("load_inputs/load_inputs.jl")
+# include("load_inputs/load_commodities.jl")
+# include("load_inputs/load_time_data.jl")
+# include("load_inputs/load_network.jl")
+# include("load_inputs/load_assets.jl")
+# include("load_inputs/load_demand.jl")
+# include("load_inputs/load_fuel.jl")
+# include("load_inputs/load_capacity_factor.jl")
+
+
 # include("load_inputs/load_resources.jl")
 # include("load_inputs/load_storage.jl")
 # include("load_inputs/load_variability.jl")
-include("input_translation/dolphyn_to_macro.jl")
+# include("input_translation/dolphyn_to_macro.jl")
 # include("generate_model.jl")
 # include("prepare_inputs.jl")
 # include("transformations/ElectrolyzerTransform.jl")

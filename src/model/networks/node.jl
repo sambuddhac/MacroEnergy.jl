@@ -25,21 +25,21 @@ end
 
 Node(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, commodity::DataType) = make_node(data, time_data, commodity)
 
-commodity_type(n::AbstractNode{T}) where {T} = T;
-demand(n::AbstractNode) = n.demand;
-demand(n::AbstractNode,t::Int64) = demand(n)[t];
-demand_header(n::AbstractNode) = n.demand_header;
-non_served_demand(n::AbstractNode) = n.operation_vars[:non_served_demand];
-non_served_demand(n::AbstractNode,s::Int64,t::Int64) = non_served_demand(n)[s,t];
-max_non_served_demand(n::AbstractNode) = n.max_nsd;
-max_non_served_demand(n::AbstractNode,s::Int64) = max_non_served_demand(n)[s];
-price_non_served_demand(n::AbstractNode) = n.price_nsd;
-price_non_served_demand(n::AbstractNode,s::Int64) = price_non_served_demand(n)[s];
-segments_non_served_demand(n::AbstractNode) = 1:length(n.max_nsd);
-price_unmet_policy(n::AbstractNode) = n.price_unmet_policy;
-price_unmet_policy(n::AbstractNode,c::DataType) = price_unmet_policy(n)[c];
-rhs_policy(n::AbstractNode) = n.rhs_policy;
-rhs_policy(n::AbstractNode,c::DataType) = rhs_policy(n)[c];
+commodity_type(n::Node{T}) where {T} = T;
+demand(n::Node) = n.demand;
+demand(n::Node,t::Int64) = demand(n)[t];
+demand_header(n::Node) = n.demand_header;
+non_served_demand(n::Node) = n.operation_vars[:non_served_demand];
+non_served_demand(n::Node,s::Int64,t::Int64) = non_served_demand(n)[s,t];
+max_non_served_demand(n::Node) = n.max_nsd;
+max_non_served_demand(n::Node,s::Int64) = max_non_served_demand(n)[s];
+price_non_served_demand(n::Node) = n.price_nsd;
+price_non_served_demand(n::Node,s::Int64) = price_non_served_demand(n)[s];
+segments_non_served_demand(n::Node) = 1:length(n.max_nsd);
+price_unmet_policy(n::Node) = n.price_unmet_policy;
+price_unmet_policy(n::Node,c::DataType) = price_unmet_policy(n)[c];
+rhs_policy(n::Node) = n.rhs_policy;
+rhs_policy(n::Node,c::DataType) = rhs_policy(n)[c];
 
 function add_planning_variables!(n::Node,model::Model)
     if in(PolicyConstraint,supertype.(typeof.(n.constraints)))
