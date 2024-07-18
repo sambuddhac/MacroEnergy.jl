@@ -10,8 +10,6 @@ macro AbstractEdgeBaseAttributes()
         can_expand::Bool = false 
         capacity_size::Float64 = 1.0
         capacity_factor::Vector{Float64} = Float64[]
-        flow_coeff_start::Dict{Symbol,Float64} = Dict{Symbol,Float64}()
-        flow_coeff_end::Dict{Symbol,Float64} = Dict{Symbol,Float64}()
         min_capacity::Float64 = 0.0
         max_capacity::Float64 = Inf
         existing_capacity::Float64 = 0.0
@@ -81,12 +79,7 @@ all_constraints(e::AbstractEdge) = e.constraints;
 
 start_vertex(e::AbstractEdge) = e.start_vertex;
 end_vertex(e::AbstractEdge) = e.end_vertex;
-
-flow_coeff_start(e::AbstractEdge) = e.flow_coeff_start;
-flow_coeff_start(e::AbstractEdge,i::Symbol) = flow_coeff_start(e)[i];
-
-flow_coeff_end(e::AbstractEdge) = e.flow_coeff_end;
-flow_coeff_end(e::AbstractEdge,i::Symbol) = flow_coeff_end(e)[i];
+balance_data(e::AbstractEdge,v::AbstractVertex,i::Symbol) = isempty(balance_data(v,i)) ? 1.0 : balance_data(v,i)[get_id(e)];
 
 function add_planning_variables!(e::AbstractEdge, model::Model)
 
@@ -154,18 +147,18 @@ function add_operation_variables!(e::Edge, model::Model)
     end
 
     for i in balance_ids(start_vertex(e))
-        add_to_expression!.(get_balance(start_vertex(e),i), -flow_coeff_start(e,i)*flow(e))
+        add_to_expression!.(get_balance(start_vertex(e),i), -balance_data(e,start_vertex(e),i)*flow(e))
     end
 
     for i in balance_ids(end_vertex(e))
-        add_to_expression!.(get_balance(end_vertex(e),i), flow_coeff_end(e,i)*flow(e))
+        add_to_expression!.(get_balance(end_vertex(e),i), balance_data(e,end_vertex(e),i)*flow(e))
     end
 
     if isa(start_vertex(e),Storage)
         @constraint(
             model,
             [t in time_interval(e)], 
-            flow_coeff_start(e,:storage)*flow(e,t) <= storage_level(start_vertex(e),timestepbefore(t,1,subperiods(e))))
+            balance_data(e,start_vertex(e),:storage)*flow(e,t) <= storage_level(start_vertex(e),timestepbefore(t,1,subperiods(e))))
     end
 
     for t in time_interval(e)
@@ -245,11 +238,11 @@ function add_operation_variables!(e::EdgeWithUC, model::Model)
     )
 
     for i in balance_ids(start_vertex(e))
-        add_to_expression!.(get_balance(start_vertex(e),i), -flow_coeff_start(e,i)*flow(e))
+        add_to_expression!.(get_balance(start_vertex(e),i), -balance_data(e,start_vertex(e),i)*flow(e))
     end
 
     for i in balance_ids(end_vertex(e))
-        add_to_expression!.(get_balance(end_vertex(e),i), flow_coeff_end(e,i)*flow(e))
+        add_to_expression!.(get_balance(end_vertex(e),i),  balance_data(e,end_vertex(e),i)*flow(e))
     end
 
     if startup_fuel(e)>0
