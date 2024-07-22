@@ -38,7 +38,7 @@ function make_tedge(::Type{TEdge}, data::Dict{Symbol,Any}, time_data::Dict{Symbo
         id = data[:id],
         node = node,
         transformation = transformation,
-        timedata = time_data[Symbol(commodity)],
+        timedata = deepcopy(time_data[Symbol(commodity)]),
         direction = get(data, :direction, :input),
         has_planning_variables = get(data, :has_planning_vars, false),
         can_retire = get(data, :can_retire, false),
@@ -101,10 +101,6 @@ end
 stoichiometry_balance_names(g::AbstractTransform) = g.stoichiometry_balance_names;
 has_storage(g::AbstractTransform) = :storage ∈ stoichiometry_balance_names(g);
 get_id(g::AbstractTransform) = g.id;
-time_interval(g::AbstractTransform) = g.timedata.time_interval;
-subperiods(g::AbstractTransform) = g.timedata.subperiods;
-subperiod_weight(g::AbstractTransform,w::StepRange{Int64, Int64}) = g.timedata.subperiod_weights[w];
-current_subperiod(g::AbstractTransform,t::Int64) = subperiods(g)[findfirst(t .∈ subperiods(g))];
 min_duration(g::AbstractTransform) = g.min_duration;
 max_duration(g::AbstractTransform) = g.max_duration;
 
@@ -124,10 +120,6 @@ storage_loss_fraction(g::AbstractTransform) = g.storage_loss_fraction;
 
 #### Transformation Edge interface
 commodity_type(e::AbstractTransformationEdge{T}) where {T} = T;
-time_interval(e::AbstractTransformationEdge) = e.timedata.time_interval;
-subperiods(e::AbstractTransformationEdge) = e.timedata.subperiods;
-subperiod_weight(e::AbstractTransformationEdge,w::StepRange{Int64, Int64}) = e.timedata.subperiod_weights[w];
-current_subperiod(e::AbstractTransformationEdge,t::Int64) = subperiods(e)[findfirst(t .∈ subperiods(e))];
 
 has_planning_variables(e::AbstractTransformationEdge) = e.has_planning_variables;
 direction(e::AbstractTransformationEdge) = e.direction;

@@ -8,8 +8,8 @@ end
 function make_natgaspower(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, nodes::Dict{Symbol,Node})
     ## conversion process (node)
     _ngcc_transform = Transformation(;
-        id=:NaturalGasPower,
-        timedata=time_data[:Electricity],
+        id=get(data,:id,Symbol("")),
+        timedata=deepcopy(time_data[:Electricity]),
         stoichiometry_balance_names=get(data, :stoichiometry_balance_names, [:energy, :emissions])
     )
     add_constraints!(_ngcc_transform, data)

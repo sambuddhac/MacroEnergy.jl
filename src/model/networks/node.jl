@@ -20,7 +20,7 @@ function make_node(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, com
         id = data[:id],
         demand = get(data, :demand, Vector{Float64}()),
         demand_header = get(data, :demand_header, nothing),
-        timedata = time_data[Symbol(commodity)],
+        timedata = deepcopy(time_data[Symbol(commodity)]),
         max_nsd = get(data, :max_nsd, [0.0]),
         price_nsd = get(data, :price_nsd, [0.0]),
         price_unmet_policy = get(data, :price_unmet_policy, Dict{DataType,Float64}()),
@@ -31,11 +31,6 @@ function make_node(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, com
 end
 
 Node(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, commodity::DataType) = make_node(data, time_data, commodity)
-
-time_interval(n::AbstractNode) = n.timedata.time_interval;
-subperiods(n::AbstractNode) = n.timedata.subperiods;
-subperiod_weight(n::AbstractNode,w::StepRange{Int64, Int64}) = n.timedata.subperiod_weights[w];
-current_subperiod(n::AbstractNode,t::Int64) = subperiods(n)[findfirst(t .∈ subperiods(n))];
 
 commodity_type(n::AbstractNode{T}) where {T} = T;
 
@@ -93,15 +88,16 @@ function add_operation_variables!(n::AbstractNode, model::Model)
 end
 
 function add_planning_variables!(n::AbstractNode,model::Model)
-    if in(PolicyConstraint,supertype.(typeof.(n.constraints)))
-        ct_all = findall(PolicyConstraint.==supertype.(typeof.(n.constraints)));
+
+    if any(isa.(n.constraints,PolicyConstraint))
+        ct_all = findall(isa.(n.constraints,PolicyConstraint));
         for ct in ct_all
             
             ct_type = typeof(n.constraints[ct]);
             
             n.planning_vars[Symbol(string(ct_type)*"_Budget")] = @variable(
             model,
-            [w in subperiods(n)],
+            [w in subperiod_indices(n)],
             base_name = "v"*string(ct_type)*"_Budget_$(get_id(n))"
             )
             @constraint(model,sum(n.planning_vars[Symbol(string(ct_type)*"_Budget")]) == rhs_policy(n,ct_type))

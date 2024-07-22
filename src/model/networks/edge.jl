@@ -20,7 +20,7 @@ end
 
 function make_edge(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, commodity::DataType, start_node::AbstractNode, end_node::AbstractNode)
     _edge = Edge{commodity}(;
-        timedata = time_data[Symbol(commodity)],
+        timedata = deepcopy(time_data[Symbol(commodity)]),
         start_node = start_node,
         end_node = end_node,
         existing_capacity = get(data, :existing_capacity, 0.0),
@@ -43,10 +43,6 @@ end_node(e::AbstractEdge) = e.end_node;
 start_node_id(e::AbstractEdge) = get_id(e.start_node);
 end_node_id(e::AbstractEdge) = get_id(e.end_node);
 
-time_interval(e::AbstractEdge) = e.timedata.time_interval;
-subperiods(e::AbstractEdge) = e.timedata.subperiods;
-subperiod_weight(e::AbstractEdge,w::StepRange{Int64, Int64}) = e.timedata.subperiod_weights[w];
-current_subperiod(e::AbstractEdge,t::Int64) = subperiods(e)[findfirst(t .∈ subperiods(e))];
 
 commodity_type(e::AbstractEdge{T}) where {T} = T;
 existing_capacity(e::AbstractEdge) = e.existing_capacity;

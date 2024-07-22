@@ -4,8 +4,12 @@ using YAML
 using CSV
 using DataFrames
 using JuMP
+using Distributed
+using DistributedArrays
+using SlurmClusterManager
 using Revise
 using JSON3
+using Gurobi
 
 # Type parameter for Macro data structures
 
@@ -53,6 +57,13 @@ const H2_MWh = 33.33 # MWh per tonne of H2
 const NG_MWh = 0.29307107 # MWh per MMBTU of NG 
 const JuMPConstraint = Union{Array,Containers.DenseAxisArray,Containers.SparseAxisArray}
 
+const GRB_ENV = Ref{Gurobi.Env}()
+function __init__()
+    GRB_ENV[] = Gurobi.Env()
+    return
+end
+
+
 function include_all_in_folder(folder)
     base_path = joinpath(@__DIR__, folder)
     for (root, dirs, files) in Base.Filesystem.walkdir(base_path)
@@ -74,7 +85,8 @@ include_all_in_folder("model/constraints")
 include("model/system.jl")
 
 include("generate_model.jl")
-include("benders.jl")
+include_all_in_folder("benders")
+
 include("input_translation/load_data_from_genx.jl")
 
 include("config/configure_settings.jl")
