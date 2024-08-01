@@ -7,8 +7,8 @@ end
 function make_battery(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, nodes::Dict{Symbol,Node})
     ## conversion process (node)
     _battery_transform = Transformation(;
-        id=:Battery,
-        timedata=time_data[:Electricity],
+        id=get(data,:id,Symbol("")),
+        timedata=deepcopy(time_data[:Electricity]),
         stoichiometry_balance_names=get(data, :stoichiometry_balance_names, [:energy]),
         can_retire = get(data, :can_retire, false),
         can_expand = get(data, :can_expand, false),

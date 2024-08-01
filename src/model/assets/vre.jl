@@ -28,8 +28,8 @@ function make_vre(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, node
 
     ## conversion process (node)
     _energy_transform = Transformation(;
-        id=:EnergyTransform,
-        timedata=time_data[:Electricity],
+        id=get(data,:id,Symbol("")),
+        timedata=deepcopy(time_data[:Electricity]),
         # Note that this transformation does not 
         # have a stoichiometry balance because the 
         # sunshine is exogenous

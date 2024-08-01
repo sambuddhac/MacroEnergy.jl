@@ -7,8 +7,8 @@ end
 function make_electrolyzer(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, nodes::Dict{Symbol,Node})
     ## conversion process (node)
     _electrolyzer_transform = Transformation(;
-        id=:Electrolyzer,
-        timedata=time_data[:Hydrogen],
+        id=get(data,:id,Symbol("")),
+        timedata=deepcopy(time_data[:Hydrogen]),
         stoichiometry_balance_names=get(data, :stoichiometry_balance_names, [:energy])
     )
     add_constraints!(_electrolyzer_transform, data)

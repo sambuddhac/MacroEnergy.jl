@@ -120,6 +120,19 @@ function validate_rhs_policy!(data::Dict{Symbol,Any})
     return nothing
 end
 
+function validate_price_unmet_policy!(data::Dict{Symbol,Any})
+    if haskey(data, :price_unmet_policy)
+        price_unmet_policy = Dict{DataType,Float64}()
+        constraints = constraint_types()
+        for (k,v) in data[:price_unmet_policy]
+            new_k = constraints[Symbol(k)]
+            price_unmet_policy[new_k] = v
+        end
+        data[:price_unmet_policy] = price_unmet_policy
+    end
+    return nothing
+end
+
 function validate_data!(data::Dict{Symbol,Any})
     validate_id!(data)
     validate_direction!(data)
@@ -130,6 +143,7 @@ function validate_data!(data::Dict{Symbol,Any})
     validate_demand_header!(data)
     validate_fuel_header!(data)
     validate_rhs_policy!(data)
+    validate_price_unmet_policy!(data)
     return nothing
 end
 

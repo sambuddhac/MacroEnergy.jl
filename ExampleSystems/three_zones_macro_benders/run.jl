@@ -1,10 +1,7 @@
-using Pkg
-Pkg.activate(dirname(dirname(@__DIR__)))
 using Macro
 using Gurobi
 
-test_case_path = joinpath(dirname(dirname(@__DIR__)), "ExampleSystems", "three_zones_macro")
-genx_case_path = joinpath(dirname(dirname(@__DIR__)), "ExampleSystems", "three_zones_genx")
+test_case_path = joinpath(dirname(dirname(@__DIR__)), "ExampleSystems", "three_zones_macro_benders")
 
 macro_settings = Macro.configure_settings(joinpath(test_case_path, "settings", "macro_settings.yml"))
 
@@ -45,13 +42,5 @@ Macro.set_optimizer(model,Gurobi.Optimizer);
 Macro.optimize!(model)
 macro_objval = Macro.objective_value(model)
 
-println("The runtime for Macro was $(Macro.solve_time(model))")
-
-using CSV, DataFrames
-df_genx_status = CSV.read(joinpath(genx_case_path,"results_fulltimeseries/status.csv"),DataFrame)
-println("The objective value for GenX was $(df_genx_status.Objval[1])")
-println("The relative error between Macro and GenX is $(abs(df_genx_status.Objval[1]-macro_objval)/df_genx_status.Objval[1])")
-println("The runtime for Macro was $(Macro.solve_time(model))")
-println("The runtime for GenX was $(df_genx_status.Solve[1])")
 
 println()

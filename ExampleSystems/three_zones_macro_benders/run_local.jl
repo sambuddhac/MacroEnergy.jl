@@ -1,10 +1,20 @@
 using Pkg
-Pkg.activate(dirname(dirname(@__DIR__)))
-using Macro
-using Gurobi
 
-test_case_path = joinpath(dirname(dirname(@__DIR__)), "ExampleSystems", "three_zones_macro")
-genx_case_path = joinpath(dirname(dirname(@__DIR__)), "ExampleSystems", "three_zones_genx")
+case = dirname(@__FILE__)
+
+Pkg.activate(dirname(dirname(case)))
+
+using Distributed
+
+addprocs(5)
+
+@everywhere begin
+    import Pkg
+    Pkg.activate(dirname(dirname(dirname(@__FILE__))))
+    using Macro
+end
+
+test_case_path = joinpath(dirname(dirname(@__DIR__)), "ExampleSystems", "three_zones_macro_benders")
 
 macro_settings = Macro.configure_settings(joinpath(test_case_path, "settings", "macro_settings.yml"))
 
@@ -39,19 +49,10 @@ Macro.load_fuel_data!(system_path, assets)
 
 system = Macro.create_system(nodes, edges, assets)
 
-model = Macro.generate_model(system)
+benders_data = Macro.generate_benders_data(system,time_data);
 
-Macro.set_optimizer(model,Gurobi.Optimizer);
-Macro.optimize!(model)
-macro_objval = Macro.objective_value(model)
+_,planning_sol,LB_hist,UB_hist,cpu_time  = Macro.benders(benders_data);
 
-println("The runtime for Macro was $(Macro.solve_time(model))")
-
-using CSV, DataFrames
-df_genx_status = CSV.read(joinpath(genx_case_path,"results_fulltimeseries/status.csv"),DataFrame)
-println("The objective value for GenX was $(df_genx_status.Objval[1])")
-println("The relative error between Macro and GenX is $(abs(df_genx_status.Objval[1]-macro_objval)/df_genx_status.Objval[1])")
-println("The runtime for Macro was $(Macro.solve_time(model))")
-println("The runtime for GenX was $(df_genx_status.Solve[1])")
+monolithic_objval = 1.0305035794420805e10
 
 println()
