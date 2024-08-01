@@ -46,7 +46,7 @@ function create_time_data(time_data::JSON3.Object, commodities::Dict{Symbol,Data
             time_interval=time_interval,
             subperiods=subperiods,
             subperiod_weights=Dict(eachindex(subperiods) .=> weights_per_subperiod / hours_per_subperiod),
-            subperiod_indices = eachindex(subperiods)
+            subperiod_indices = eachindex(subperiods),
             hours_per_timestep =  time_data[:HoursPerTimeStep][sym]
         )
     end
