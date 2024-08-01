@@ -9,7 +9,7 @@ macro AbstractTransformationEdgeBaseAttributes()
         can_retire::Bool = false
         can_expand::Bool = false 
         capacity_size::Float64 = 1.0
-        capacity_factor::Vector{Float64} = Float64[]
+        capacity_factor::Union{Vector{Float64},Dict{Int64,Float64}}  = Float64[]
         st_coeff::Dict{Symbol,Float64} = Dict{Symbol,Float64}()
         min_capacity::Float64 = 0.0
         max_capacity::Float64 = Inf
@@ -17,8 +17,9 @@ macro AbstractTransformationEdgeBaseAttributes()
         investment_cost::Float64 = 0.0
         fixed_om_cost::Float64 = 0.0
         variable_om_cost::Float64 = 0.0
-        price::Vector{Float64} = Float64[]
+        price::Union{Vector{Float64},Dict{Int64,Float64}} = Float64[]
         price_header::Union{Nothing,Symbol} = nothing
+        supply_curve::Dict = Dict()
         ramp_up_fraction::Float64 = 1.0
         ramp_down_fraction::Float64 = 1.0
         min_flow_fraction::Float64 = 0.0
@@ -54,6 +55,7 @@ function make_tedge(::Type{TEdge}, data::Dict{Symbol,Any}, time_data::Dict{Symbo
         variable_om_cost = get(data, :variable_om_cost, 0.0),
         price = get(data, :price, Float64[]),
         price_header = get(data, :price_header, nothing),
+        supply_curve = get(data, :supply_curve, Dict()),
         ramp_up_fraction = get(data, :ramp_up_fraction, 1.0),
         ramp_down_fraction = get(data, :ramp_down_fraction, 1.0),
         min_flow_fraction = get(data, :min_flow_fraction, 0.0),
@@ -101,12 +103,9 @@ end
 stoichiometry_balance_names(g::AbstractTransform) = g.stoichiometry_balance_names;
 has_storage(g::AbstractTransform) = :storage ∈ stoichiometry_balance_names(g);
 get_id(g::AbstractTransform) = g.id;
-time_interval(g::AbstractTransform) = g.timedata.time_interval;
-subperiods(g::AbstractTransform) = g.timedata.subperiods;
-subperiod_weight(g::AbstractTransform,w::StepRange{Int64, Int64}) = g.timedata.subperiod_weights[w];
-current_subperiod(g::AbstractTransform,t::Int64) = subperiods(g)[findfirst(t .∈ subperiods(g))];
 min_duration(g::AbstractTransform) = g.min_duration;
 max_duration(g::AbstractTransform) = g.max_duration;
+
 
 all_constraints(g::AbstractTransform) = g.constraints;
 stoichiometry_balance(g::AbstractTransform) = g.operation_expr[:stoichiometry_balance];
@@ -124,10 +123,6 @@ storage_loss_fraction(g::AbstractTransform) = g.storage_loss_fraction;
 
 #### Transformation Edge interface
 commodity_type(e::AbstractTransformationEdge{T}) where {T} = T;
-time_interval(e::AbstractTransformationEdge) = e.timedata.time_interval;
-subperiods(e::AbstractTransformationEdge) = e.timedata.subperiods;
-subperiod_weight(e::AbstractTransformationEdge,w::StepRange{Int64, Int64}) = e.timedata.subperiod_weights[w];
-current_subperiod(e::AbstractTransformationEdge,t::Int64) = subperiods(e)[findfirst(t .∈ subperiods(e))];
 
 has_planning_variables(e::AbstractTransformationEdge) = e.has_planning_variables;
 direction(e::AbstractTransformationEdge) = e.direction;
@@ -141,6 +136,13 @@ variable_om_cost(e::AbstractTransformationEdge) = e.variable_om_cost;
 price(e::AbstractTransformationEdge) = e.price;
 price(e::AbstractTransformationEdge,t::Int64) = price(e)[t];
 price_header(e::AbstractTransformationEdge) = e.price_header;
+supply_curve(e::AbstractTransformationEdge) = e.supply_curve;
+price_segments(e::AbstractTransformationEdge) = e.supply_curve[:prices];
+price_segments(e::AbstractTransformationEdge,s::Int64) = e.supply_curve[:prices][s];
+supply_segments(e::AbstractTransformationEdge) = e.supply_curve[:segments];
+supply_segments(e::AbstractTransformationEdge,s::Int64) = e.supply_curve[:segments][s];
+flow_segments(e::AbstractTransformationEdge) = e.operation_vars[:flow_segments];
+flow_segments(e::AbstractTransformationEdge,s::Int64,t::Int64) = e.operation_vars[:flow_segments][s,t];
 min_capacity(e::AbstractTransformationEdge) = e.min_capacity;
 max_capacity(e::AbstractTransformationEdge) = e.max_capacity;
 can_expand(e::AbstractTransformationEdge) = e.can_expand;
@@ -257,7 +259,6 @@ function add_operation_variables!(g::AbstractTransform,model::Model)
             model,
             [t in time_interval(g)], 
             st_coeff(e_discharge)[:storage]*flow(e_discharge,t) <= storage_level(g,timestepbefore(t,1,subperiods(g))))
-
     end
 
 end
@@ -329,12 +330,12 @@ function add_operation_variables!(e::AbstractTransformationEdge, model::Model)
     add_to_expression!.(net_balance(e_node),directional_flow)
 
     for t in time_interval(e)
+        transform_time = ceil(Int,(hours_per_timestep(e) * t)/hours_per_timestep(e.transformation));
+        for i in stoichiometry_balance_names(e)
+            add_to_expression!(stoichiometry_balance(e,i,transform_time), e_st_coeff[i], directional_flow[t])
+        end
 
         w = current_subperiod(e,t);
-
-        for i in stoichiometry_balance_names(e)
-            add_to_expression!(stoichiometry_balance(e,i,t), e_st_coeff[i], directional_flow[t])
-        end
 
         if variable_om_cost(e)>0
             add_to_expression!(model[:eVariableCost], subperiod_weight(e,w)*variable_om_cost(e), flow(e,t))
@@ -342,6 +343,28 @@ function add_operation_variables!(e::AbstractTransformationEdge, model::Model)
 
         if !isempty(price(e))
             add_to_expression!(model[:eVariableCost], subperiod_weight(e,w)*price(e,t), flow(e,t))
+        end
+    end
+
+    if !isempty(supply_curve(e))
+
+        e.operation_vars[:flow_segments] = @variable(
+            model,
+            [s in eachindex(supply_segments(e)) ,t in time_interval(e)],
+            lower_bound = 0.0,
+            upper_bound = supply_segments(e,s),
+            base_name = "vFLOW_SGM_$(get_id(e))"
+        )
+        @constraint(
+            model,
+            [t in time_interval(e)],
+            flow(e,t) == sum(flow_segments(e,s,t) for s in eachindex(supply_segments(e)))
+            )
+        for t in time_interval(e)
+            w = current_subperiod(e,t);
+            for s in eachindex(supply_segments(e))
+                add_to_expression!(model[:eVariableCost], subperiod_weight(e,w)*price_segments(e,s), flow_segments(e,s,t))
+            end
         end
 
     end

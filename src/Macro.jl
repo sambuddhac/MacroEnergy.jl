@@ -13,6 +13,7 @@ using JSON3
 abstract type Commodity end
 abstract type Electricity <: Commodity end
 abstract type Hydrogen <: Commodity end
+abstract type Biomass <: Commodity end
 abstract type NaturalGas <: Commodity end
 abstract type CO2 <: Commodity end
 abstract type CO2Captured <: CO2 end
@@ -30,13 +31,13 @@ abstract type AbstractTransformationEdgeWithUC{T} <: AbstractTransformationEdge{
 abstract type AbstractTransform end
 abstract type TransformationType end  # Note: this is only used to improved readability
 abstract type NaturalGasPowerTransform <: TransformationType  end
-abstract type NaturalGasPowerCCS <: NaturalGasPowerTransform  end
-abstract type NaturalGasHydrogen <: TransformationType  end
-abstract type NaturalGasHydrogenCCS <: NaturalGasHydrogen  end
-abstract type FuelCell <: TransformationType end
+abstract type NaturalGasPowerCCSTransform <: NaturalGasPowerTransform  end
+abstract type NaturalGasH2Transform <: TransformationType  end
+abstract type NaturalGasH2CCSTransform <: NaturalGasH2Transform  end
+abstract type FuelCellTransform <: TransformationType end
 abstract type ElectrolyzerTransform <: TransformationType  end
-abstract type DACElectric <: TransformationType  end
-abstract type SyntheticNG <: TransformationType  end
+abstract type DacElectricTransform <: TransformationType  end
+abstract type SyntheticNGTransform <: TransformationType  end
 abstract type Storage <: TransformationType end
 
 ## Assets types
@@ -51,6 +52,9 @@ abstract type PlanningConstraint <: AbstractTypeConstraint end
 # global constants
 const H2_MWh = 33.33 # MWh per tonne of H2
 const NG_MWh = 0.29307107 # MWh per MMBTU of NG 
+
+# const Containers = JuMP.Containers
+# const VariableRef = JuMP.VariableRef
 const JuMPConstraint = Union{Array,Containers.DenseAxisArray,Containers.SparseAxisArray}
 
 function include_all_in_folder(folder)
@@ -94,23 +98,30 @@ include("load_inputs/load_capacity_factor.jl")
 include("input_translation/dolphyn_to_macro.jl")
 # include("generate_model.jl")
 # include("prepare_inputs.jl")
-# include("transformations/electrolyzer.jl")
+# include("transformations/ElectrolyzerTransform.jl")
 # include("transformations/natgaspower.jl")
-
+include_all_in_folder("write_outputs/")
 # exports
 export Electricity,
     Hydrogen,
     NaturalGas,
     CO2,
     CO2Captured,
+    Biomass,
+    BiomassToH2,
+    BiomassToPower,
     NaturalGasPower,
-    NaturalGasPowerCCS,
-    NaturalGasHydrogen,
-    NaturalGasHydrogenCCS,
+    Electrolyzer,
     FuelCell,
-    ElectrolyzerTransform,
-    DACElectric,
-    SyntheticNG,
+    NaturalGasH2,
+    H2Storage,
+    NaturalGasPowerCCS,
+    NaturalGasH2Transform,
+    NaturalGasH2CCSTransform,
+    FuelCellTransform,
+    ElectrolyzerTransformTransform,
+    DacElectricTransform,
+    SyntheticNGTransform,
     VRE,
     SolarPVTransform,
     Storage,
@@ -131,7 +142,7 @@ export Electricity,
     SolarPV,
     WindTurbine,
     Battery,
-    Electrolyzer,
+    ElectrolyzerTransform,
     #CapacityConstraint,
     #configure_settings,
     #add_planning_variables!,

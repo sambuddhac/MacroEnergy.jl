@@ -1,7 +1,7 @@
 Base.@kwdef mutable struct Node{T} <: AbstractNode{T}
     ### Fields without defaults
     id::Symbol
-    demand::Vector{Float64}
+    demand::Union{Vector{Float64},Dict{Int64,Float64}}
     demand_header::Union{Nothing,Symbol}
     timedata::TimeData{T}
     #### Fields with defaults
@@ -31,11 +31,6 @@ function make_node(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, com
 end
 
 Node(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, commodity::DataType) = make_node(data, time_data, commodity)
-
-time_interval(n::AbstractNode) = n.timedata.time_interval;
-subperiods(n::AbstractNode) = n.timedata.subperiods;
-subperiod_weight(n::AbstractNode,w::StepRange{Int64, Int64}) = n.timedata.subperiod_weights[w];
-current_subperiod(n::AbstractNode,t::Int64) = subperiods(n)[findfirst(t .∈ subperiods(n))];
 
 commodity_type(n::AbstractNode{T}) where {T} = T;
 

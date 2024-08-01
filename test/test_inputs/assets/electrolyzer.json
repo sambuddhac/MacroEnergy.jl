@@ -1,6 +1,6 @@
 {
     "stor": {
-        "type": "Electrolyzer",
+        "type": "ElectrolyzerTransform",
         "global": {
             "time_interval": "Electricity",
             "stoichiometry_balance_names": [

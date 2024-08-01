@@ -39,7 +39,7 @@ function validate_names(settings::NamedTuple)
     end
 end
 
-function configure_timesteps!(macro_settings::NamedTuple, commodities::Dict{Symbol,DataType}=commodity_types(Macro))
+function configure_time_interval!(macro_settings::NamedTuple, commodities::Dict{Symbol,DataType}=commodity_types(Macro))
     time_intervals = Dict{Any, StepRange{Int64, Int64}}()
     subperiods = Dict{Any, Vector{StepRange{Int64, Int64}}}()
     for (name, time_details) in macro_settings[:Commodities]
