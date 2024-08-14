@@ -31,25 +31,38 @@ Base.@kwdef mutable struct Edge{T} <: AbstractEdge{T}
     @AbstractEdgeBaseAttributes()
 end
 
-function make_edge(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, commodity::DataType, start_vertex::AbstractVertex, end_vertex::AbstractVertex)
+function make_edge(id::Symbol,data::Dict{Symbol,Any}, time_data::TimeData, commodity::DataType, start_vertex::AbstractVertex, end_vertex::AbstractVertex)
     _edge = Edge{commodity}(;
-        timedata = deepcopy(time_data[Symbol(commodity)]),
+        timedata = time_data[Symbol(commodity)],
         start_vertex = start_vertex,
         end_vertex = end_vertex,
-        existing_capacity = get(data, :existing_capacity, 0.0),
-        unidirectional = get(data, :unidirectional, false),
-        max_line_reinforcement = get(data, :max_line_reinforcement, Inf),
-        line_reinforcement_cost = get(data, :line_reinforcement_cost, 0.0),
-        can_expand = get(data, :can_expand, true),
-        op_cost = get(data, :op_cost, 0.0),
-        distance = get(data, :distance, 0.0),
-        line_loss_fraction = get(data, :line_loss_fraction, 0.0)
+        timedata = time_data,
+        unidirectional = get(data,:unidirectional,false),
+        has_planning_variables = get(data,:has_planning_variables,false),
+        can_retire = get(data,:can_retire,false),
+        can_expand = get(data,:can_expand,false), 
+        capacity_size = get(data,:capacity_size,1.0),
+        capacity_factor = get(data,:capacity_factor,Float64[]),
+        min_capacity = get(data,:min_capacity,0.0),
+        max_capacity = get(data,:max_capacity,Inf),
+        existing_capacity = get(data,:existing_capacity,0.0),
+        investment_cost = get(data,:investment_cost,0.0),
+        fixed_om_cost = get(data,:fixed_om_cost,0.0),
+        variable_om_cost = get(data,:variable_om_cost,0.0),
+        price = get(data,:price,Float64[]),
+        price_header = get(data,:price_header,nothing),
+        ramp_up_fraction = get(data,:ramp_up_fraction,1.0),
+        ramp_down_fraction = get(data,:ramp_down_fraction,1.0),
+        min_flow_fraction = get(data,:min_flow_fraction,0.0),
+        distance = get(data,:distance,0.0)
     )
-    add_constraints!(_edge, data)
+    # add_constraints!(_edge, data)
     return _edge
 end
-Edge(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, commodity::DataType, start_vertex::AbstractVertex, end_vertex::AbstractVertex) = make_edge(data, time_data, commodity, start_vertex, end_vertex)
+Edge(id::Symbol,data::Dict{Symbol,Any}, time_data::TimeData, commodity::DataType, start_vertex::AbstractVertex, end_vertex::AbstractVertex) = make_edge(id,data, time_data, commodity, start_vertex, end_vertex)
 
+
+#### Edge interface
 get_id(e::AbstractEdge) = e.id;
 
 has_planning_variables(e::AbstractEdge) = e.has_planning_variables;
@@ -186,6 +199,40 @@ Base.@kwdef mutable struct EdgeWithUC{T} <: AbstractEdge{T}
     startup_fuel::Float64 = 0.0
     startup_fuel_balance_id::Symbol = :none
 end
+
+function make_edge_UC(id::Symbol,data::Dict{Symbol,Any}, time_data::TimeData, commodity::DataType, start_vertex::AbstractVertex, end_vertex::AbstractVertex)
+    _edge = EdgeWithUC{commodity}(;
+        id = id,
+        start_vertex = start_vertex,
+        end_vertex = end_vertex,
+        timedata = time_data,
+        unidirectional = get(data,:unidirectional,false),
+        has_planning_variables = get(data,:has_planning_variables,false),
+        can_retire = get(data,:can_retire,false),
+        can_expand = get(data,:can_expand,false), 
+        capacity_size = get(data,:capacity_size,1.0),
+        capacity_factor = get(data,:capacity_factor,Float64[]),
+        min_capacity = get(data,:min_capacity,0.0),
+        max_capacity = get(data,:max_capacity,Inf),
+        existing_capacity = get(data,:existing_capacity,0.0),
+        investment_cost = get(data,:investment_cost,0.0),
+        fixed_om_cost = get(data,:fixed_om_cost,0.0),
+        variable_om_cost = get(data,:variable_om_cost,0.0),
+        price = get(data,:price,Float64[]),
+        price_header = get(data,:price_header,nothing),
+        ramp_up_fraction = get(data,:ramp_up_fraction,1.0),
+        ramp_down_fraction = get(data,:ramp_down_fraction,1.0),
+        min_flow_fraction = get(data,:min_flow_fraction,0.0),
+        distance = get(data,:distance,0.0),
+        min_up_time = get(data,:min_up_time,0.0),
+        min_down_time = get(data,:min_down_time,0.0),
+        startup_cost = get(data,:startup_cost,0.0),
+        startup_fuel = get(data,:startup_fuel,0.0),
+        startup_fuel_balance_id = get(data,:startup_fuel_balance_id,:none)
+    )
+    return _edge
+end
+EdgeWithUC(id::Symbol,data::Dict{Symbol,Any}, time_data::TimeData, commodity::DataType, start_vertex::AbstractVertex, end_vertex::AbstractVertex) = make_edge_UC(id,data, time_data, commodity, start_vertex, end_vertex)
 
 min_up_time(e::EdgeWithUC) = e.min_up_time;
 min_down_time(e::EdgeWithUC) = e.min_down_time;

@@ -73,6 +73,8 @@ function generate_system!(system::System, system_data::AbstractDict{Symbol, Any}
 
     load_fuel_data!(system.assets, joinpath(system.data_dirpath, "system"))
 
+    load_demand_data!(system.locations, joinpath(system.data_dirpath, "system"))
+
     return nothing
 end
 
@@ -495,19 +497,15 @@ end
 #   Commodity -> Node{Commodity}
 #   
 function make(commodity::Type{<:Commodity}, data::AbstractDict{Symbol, Any}, system::System)
+
     data = validate_data(data)
-    node = Node{commodity}(;
-        id = Symbol(data[:id]),
-        demand = get(data, :demand, Vector{Float64}()),
-        demand_header = get(data, :demand_header, nothing),
-        timedata = system.time_data[Symbol(commodity)],
-        max_nsd = get(data, :max_nsd, [0.0]),
-        price_nsd = get(data, :price_nsd, [0.0]),
-        price_unmet_policy = get(data, :price_unmet_policy, Dict{DataType,Float64}()),
-        rhs_policy = get(data, :rhs_policy, Dict{DataType,Float64}()),
-        balance_data = Dict(:demand=>Dict()),
-        constraints = [BalanceConstraint(); MaxNonServedDemandConstraint()]
-    )
+
+    node = Node(data, system.time_data[Symbol(commodity)], commodity)
+
+    node.balance_data = get(data,:balance_data,Dict(:demand=>Dict{Symbol,Float64}()))
+    
+    node.constraints = get(data,:constraints, [BalanceConstraint(); MaxNonServedDemandConstraint()])
+
     return node
 end
 
@@ -571,29 +569,15 @@ function make(::Type{Battery}, data::AbstractDict{Symbol, Any}, system::System)
     charging_edge_data = validate_data(data[:edges][:charge])
     charging_start_node = find_node(system.locations, Symbol(charging_edge_data[:start_vertex]))
     charging_end_node = battery_storage
-    battery_charging = Edge{commodity}(;
-        id = Symbol(data[:id] * "_charge"),
-        start_vertex = charging_start_node,
-        end_vertex = charging_end_node,
-        timedata = system.time_data[commodity_symbol],
-        unidirectional = get(charging_edge_data, :unidirectional, true),
-        has_planning_variables = get(charging_edge_data, :has_planning_vars, false),
-    )
+    battery_charging = Edge(Symbol(data[:id] * "_charge"),charging_edge_data, system.time_data[commodity_symbol],commodity, charging_start_node,  charging_end_node)
+    battery_charging.unidirectional = get(charging_edge_data, :unidirectional, true);
 
     discharge_edge_data = validate_data(data[:edges][:discharge])
     discharge_start_node = battery_storage
     discharge_end_node = find_node(system.locations, Symbol(discharge_edge_data[:end_vertex]))
-    battery_discharge = Edge{commodity}(;
-        id = Symbol(data[:id] * "_discharge"),
-        start_vertex = discharge_start_node,
-        end_vertex = discharge_end_node,
-        timedata = system.time_data[commodity_symbol],
-        unidirectional = get(discharge_edge_data, :unidirectional, true),
-        has_planning_variables = get(discharge_edge_data, :has_planning_vars, true),
-        can_retire = get(discharge_edge_data, :can_retire, false),
-        can_expand = get(discharge_edge_data, :can_expand, true),
-        constraints = [CapacityConstraint(), RampingLimitConstraint()]
-    )
+    battery_discharge = Edge(Symbol(data[:id] * "_discharge"),discharge_edge_data, system.time_data[commodity_symbol],commodity, discharge_start_node,  discharge_end_node);
+    battery_discharge.constraints = get(discharge_edge_data,:constraints,[CapacityConstraint(), RampingLimitConstraint()])
+    battery_discharge.unidirectional = get(discharge_edge_data, :unidirectional, true);
 
     battery_storage.discharge_edge = battery_discharge
     battery_storage.charge_edge = battery_charging
@@ -654,52 +638,23 @@ function make(::Type{NaturalGasPower}, data::AbstractDict{Symbol, Any}, system::
     elec_edge_data = validate_data(data[:edges][:elec])
     elec_start_node = natgas_transform
     elec_end_node = find_node(system.locations, Symbol(elec_edge_data[:end_vertex]))
-    elec_edge = EdgeWithUC{Electricity}(;
-        id = Symbol(elec_edge_data[:id]),
-        start_vertex = elec_start_node,
-        end_vertex = elec_end_node,
-        timedata = system.time_data[:Electricity],
-        unidirectional = get(elec_edge_data, :unidirectional, true),
-        has_planning_variables = get(elec_edge_data, :has_planning_vars, false),
-        can_retire = get(elec_edge_data, :can_retire, false),
-        can_expand = get(elec_edge_data, :can_expand, false),
-        min_up_time = get(elec_edge_data, :min_up_time, 0),
-        min_down_time = get(elec_edge_data, :min_down_time, 0),
-        startup_cost = get(elec_edge_data, :startup_cost, 0.0),
-        startup_fuel = get(elec_edge_data, :startup_fuel, 0.0),
-        startup_fuel_balance_id = get(elec_edge_data, :startup_fuel_balance_id, :energy),
-        constraints = get(elec_edge_data, :constraints, [CapacityConstraint(), RampingLimitConstraint(), MinUpTimeConstraint(), MinDownTimeConstraint()])
-    )
+    elec_edge = EdgeWithUC(Symbol(elec_edge_data[:id]),elec_edge_data, system.time_data[:Electricity],Electricity, elec_start_node,  elec_end_node );
+    elec_edge.constraints = get(elec_edge_data, :constraints, [CapacityConstraint(), RampingLimitConstraint(), MinUpTimeConstraint(), MinDownTimeConstraint()])
+    elec_edge.unidirectional = get(elec_edge_data, :unidirectional, true);
 
     ng_edge_data = validate_data(data[:edges][:natgas])
     ng_start_node = find_node(system.locations, Symbol(ng_edge_data[:start_vertex]))
     ng_end_node = natgas_transform
-    ng_edge = Edge{NaturalGas}(;
-        id = Symbol(ng_edge_data[:id]),
-        start_vertex = ng_start_node,
-        end_vertex = ng_end_node,
-        timedata = system.time_data[:NaturalGas],
-        unidirectional = get(ng_edge_data, :unidirectional, true),
-        has_planning_variables = get(ng_edge_data, :has_planning_vars, false),
-        can_retire = get(ng_edge_data, :can_retire, false),
-        can_expand = get(ng_edge_data, :can_expand, false),
-        constraints = get(ng_edge_data, :constraints, [])
-    )
+    ng_edge = Edge(Symbol(ng_edge_data[:id]),ng_edge_data, system.time_data[:NaturalGas],NaturalGas, ng_start_node,  ng_end_node);
+    ng_edge.constraints = get(ng_edge_data, :constraints,  Vector{AbstractTypeConstraint}())
+    ng_edge.unidirectional = get(ng_edge_data, :unidirectional, true);
 
     co2_edge_data = validate_data(data[:edges][:co2])
     co2_start_node = natgas_transform
     co2_end_node = find_node(system.locations, Symbol(co2_edge_data[:end_vertex]))
-    co2_edge = Edge{CO2}(;
-        id = Symbol(co2_edge_data[:id]),
-        start_vertex = co2_start_node,
-        end_vertex = co2_end_node,
-        timedata = system.time_data[:CO2],
-        unidirectional = get(co2_edge_data, :unidirectional, true),
-        has_planning_variables = get(co2_edge_data, :has_planning_vars, false),
-        can_retire = get(co2_edge_data, :can_retire, false),
-        can_expand = get(co2_edge_data, :can_expand, false),
-        constraints = get(co2_edge_data, :constraints, [])
-    )
+    co2_edge = Edge(Symbol(co2_edge_data[:id]),co2_edge_data, system.time_data[:CO2],CO2, co2_start_node,  co2_end_node);
+    co2_edge.constraints = get(co2_edge_data, :constraints,  Vector{AbstractTypeConstraint}())
+    co2_edge.unidirectional = get(co2_edge_data, :unidirectional, true);
 
     return NaturalGasPower(natgas_transform, elec_edge, ng_edge, co2_edge)
 end
@@ -732,17 +687,10 @@ function make(asset_type::Type{<:VRE}, data::AbstractDict{Symbol, Any}, system::
     elec_edge_data = validate_data(data[:edges])
     elec_start_node = vre_transform
     elec_end_node = find_node(system.locations, Symbol(elec_edge_data[:end_vertex]))
-    elec_edge = Edge{Electricity}(;
-        id = Symbol(elec_edge_data[:id]),
-        start_vertex = elec_start_node,
-        end_vertex = elec_end_node,
-        timedata = system.time_data[:Electricity],
-        unidirectional = get(elec_edge_data, :unidirectional, true),
-        has_planning_variables = get(elec_edge_data, :has_planning_vars, false),
-        can_retire = get(elec_edge_data, :can_retire, false),
-        can_expand = get(elec_edge_data, :can_expand, false),
-        constraints = get(elec_edge_data, :constraints, [CapacityConstraint()])
-    )
+
+    elec_edge = Edge(Symbol(elec_edge_data[:id]),elec_edge_data, system.time_data[:Electricity],Electricity, elec_start_node,  elec_end_node );
+    elec_edge.constraints = get(elec_edge_data, :constraints, [CapacityConstraint()])
+    elec_edge.unidirectional = get(elec_edge_data, :unidirectional, true);
 
     return asset_type(vre_transform, elec_edge)
 end

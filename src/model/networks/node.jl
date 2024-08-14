@@ -8,29 +8,13 @@ Base.@kwdef mutable struct Node{T} <: AbstractVertex
     rhs_policy::Dict{DataType,Float64} = Dict{DataType,Float64}()
 end
 
-# function make(commodity::Type{<:Commodity}, data::AbstractDict{Symbol, Any}, system::System)
-#     println("ID: $(Symbol(commodity))")
-#     # println("$(typeof(data[:rhs_policy]))")
-#     node = Node{commodity}(;
-#         id = data[:id],
-#         demand = get(data, :demand, Vector{Float64}()),
-#         demand_header = get(data, :demand_header, nothing),
-#         timedata = system.time_data[Symbol(commodity)],
-#         max_nsd = get(data, :max_nsd, [0.0]),
-#         price_nsd = get(data, :price_nsd, [0.0]),
-#         price_unmet_policy = get(data, :price_unmet_policy, Dict{DataType,Float64}()),
-#         rhs_policy = get(data, :rhs_policy, Dict{DataType,Float64}()),
-#     )
-#     add_constraints!(node, data)
-#     return node
-# end
 
-function make_node(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, commodity::DataType)
+function make_node(data::Dict{Symbol,Any}, time_data::TimeData, commodity::DataType)
     _node = Node{commodity}(;
-        id = data[:id],
+        id = Symbol(data[:id]),
         demand = get(data, :demand, Vector{Float64}()),
         demand_header = get(data, :demand_header, nothing),
-        timedata = deepcopy(time_data[Symbol(commodity)]),
+        timedata = deepcopy(time_data),
         max_nsd = get(data, :max_nsd, [0.0]),
         price_nsd = get(data, :price_nsd, [0.0]),
         price_unmet_policy = get(data, :price_unmet_policy, Dict{DataType,Float64}()),
@@ -40,7 +24,7 @@ function make_node(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, com
     return _node
 end
 
-Node(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, commodity::DataType) = make_node(data, time_data, commodity)
+Node(data::Dict{Symbol,Any}, time_data::TimeData, commodity::DataType) = make_node(data, time_data, commodity)
 
 commodity_type(n::Node{T}) where {T} = T;
 demand(n::Node) = n.demand;
@@ -109,6 +93,6 @@ function add_operation_variables!(n::Node, model::Model)
 end
 
 
-function get_nodes_sametype(nodes::Dict{Symbol,Node},commodity::DataType)
-    return filter(((k,n),) -> commodity_type(n)==commodity, nodes)
+function get_nodes_sametype(nodes::Vector{Node},commodity::DataType)
+    return filter(n -> commodity_type(n)==commodity, nodes)
 end

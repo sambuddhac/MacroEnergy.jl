@@ -1,6 +1,6 @@
 struct SolarPV <: AbstractAsset
     energy_transform::Transformation
-    tedge::Edge{Electricity}
+    edge::Edge{Electricity}
 end
 
 # function make_solarpv(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, node_out::Node)
@@ -10,7 +10,7 @@ end
 
 struct WindTurbine <: AbstractAsset
     energy_transform::Transformation
-    tedge::Edge{Electricity}
+    edge::Edge{Electricity}
 end
 
 # function make_windturbine(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, node_out::Node)
@@ -57,5 +57,5 @@ const VRE = Union{
 id(g::VRE) = g.energy_transform.id
 
 function add_capacity_factor!(s::VRE, capacity_factor::Vector{Float64})
-    s.tedge.capacity_factor = capacity_factor
+    s.edge.capacity_factor = capacity_factor
 end

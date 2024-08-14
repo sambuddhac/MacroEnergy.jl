@@ -1,7 +1,7 @@
 struct Battery <: AbstractAsset
     battery_transform::Storage{Electricity}
-    discharge_tedge::Edge{Electricity}
-    charge_tedge::Edge{Electricity}
+    discharge_edge::Edge{Electricity}
+    charge_edge::Edge{Electricity}
 end
 
 id(b::Battery) = b.battery_transform.id

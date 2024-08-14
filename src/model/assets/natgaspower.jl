@@ -1,8 +1,8 @@
 struct NaturalGasPower <: AbstractAsset
     natgaspower_transform::Transformation
-    e_tedge::Union{Edge{Electricity},EdgeWithUC{Electricity}}
-    ng_tedge::Edge{NaturalGas}
-    co2_tedge::Edge{CO2}
+    e_edge::Union{Edge{Electricity},EdgeWithUC{Electricity}}
+    ng_edge::Edge{NaturalGas}
+    co2_edge::Edge{CO2}
 end
 
 id(ng::NaturalGasPower) = ng.natgaspower_transform.id
@@ -54,5 +54,5 @@ id(ng::NaturalGasPower) = ng.natgaspower_transform.id
 # end
 
 function add_capacity_factor!(ng::NaturalGasPower, capacity_factor::Vector{Float64})
-    ng.e_tedge.capacity_factor = capacity_factor
+    ng.e_edge.capacity_factor = capacity_factor
 end

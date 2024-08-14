@@ -1,5 +1,5 @@
 # Load the demand data
-function load_demand_data!(nodes::Dict{Symbol,Node}, system_dir::AbstractString)
+function load_demand_data!(nodes::Vector{Node}, system_dir::AbstractString)
     demand_dir = joinpath(system_dir, "demand_data")
     demand_data = load_all_ts(demand_dir)
     add_demand_to_nodes!(nodes, demand_data)
@@ -26,7 +26,7 @@ function load_all_ts(data_dir::AbstractString)
     return data
 end
 
-function add_demand_to_nodes!(nodes::Dict{Symbol,Node}, demand_data::Dict{Symbol,Vector{Float64}})
+function add_demand_to_nodes!(nodes::Vector{Node}, demand_data::Dict{Symbol,Vector{Float64}})
     for dem_header in keys(demand_data)
         if dem_header ∉ demand_header.(values(nodes))
             msg = "A demand time series with header `$(dem_header)` was found in the demand data, \n" *
@@ -35,9 +35,9 @@ function add_demand_to_nodes!(nodes::Dict{Symbol,Node}, demand_data::Dict{Symbol
             @warn(msg)
             continue
         end
-        for (_, node) in nodes
-            if node.demand_header == dem_header
-                node.demand = demand_data[dem_header]
+        for n in nodes
+            if n.demand_header == dem_header
+                n.demand = demand_data[dem_header]
             end
         end
     end
@@ -62,7 +62,7 @@ function nsd_to_dict(data_raw::JSON3.Object)
     return nsd_data
 end
 
-function add_nsd_to_nodes!(nodes::Dict{Symbol,Node}, nsd_data::Dict{Symbol,Dict})
+function add_nsd_to_nodes!(nodes::Vector{Node}, nsd_data::Dict{Symbol,Dict})
     macro_commodities = commodity_types()
     # loop over commodities in nsd_data
     for (commodity, data) in nsd_data

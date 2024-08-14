@@ -145,7 +145,7 @@ function validate_data(data::AbstractDict{Symbol,Any})
     return data
 end
 
-function get_tedge_data(data::AbstractDict{Symbol,Any}, id::Symbol, immutable::Bool=false)
+function get_edge_data(data::AbstractDict{Symbol,Any}, id::Symbol, immutable::Bool=false)
     for (edge_id, edge_data) in data[:edges]
         if edge_id == id || edge_data[:type] == string(id)
             immutable && return edge_data
