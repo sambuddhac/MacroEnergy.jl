@@ -1,6 +1,4 @@
 using JSON3
-using InteractiveUtils
-
 
 function load_assets_json(data_dir::AbstractString, time_data::Dict{Symbol,TimeData}, nodes::Dict{Symbol,Node})
     #=============================================
@@ -103,24 +101,6 @@ function make_asset_id(id::Symbol, assets::Dict{Symbol,AbstractAsset}, count::UI
     return Symbol(string(id, "_", count)), count
 end
 
-function all_subtypes(m::Module, type::Symbol)::Dict{Symbol,DataType}
-    types = Dict{Symbol,DataType}()
-    for type in subtypes(getfield(m, type))
-        all_subtypes!(types, type)
-    end
-    return types
-end
-
-function all_subtypes!(types::Dict{Symbol,DataType}, type::DataType)
-    types[Symbol(type)] = type
-    if !isempty(subtypes(type))
-        for subtype in subtypes(type)
-            all_subtypes!(types, subtype)
-        end
-    end
-    return nothing
-end
-
 function transformation_types(m::Module=Macro)
     return all_subtypes(m, :AbstractTransform)
 end
@@ -133,9 +113,7 @@ function constraint_types(m::Module=Macro)
     return all_subtypes(m, :AbstractTypeConstraint)
 end
 
-function commodity_types(m::Module=Macro)
-    return all_subtypes(m, :Commodity)
-end
+
 
 function sanitize_json!(data::JSON3.Object)
     required_keys = Symbol[

@@ -8,6 +8,23 @@ Base.@kwdef mutable struct Node{T} <: AbstractVertex
     rhs_policy::Dict{DataType,Float64} = Dict{DataType,Float64}()
 end
 
+# function make(commodity::Type{<:Commodity}, data::AbstractDict{Symbol, Any}, system::System)
+#     println("ID: $(Symbol(commodity))")
+#     # println("$(typeof(data[:rhs_policy]))")
+#     node = Node{commodity}(;
+#         id = data[:id],
+#         demand = get(data, :demand, Vector{Float64}()),
+#         demand_header = get(data, :demand_header, nothing),
+#         timedata = system.time_data[Symbol(commodity)],
+#         max_nsd = get(data, :max_nsd, [0.0]),
+#         price_nsd = get(data, :price_nsd, [0.0]),
+#         price_unmet_policy = get(data, :price_unmet_policy, Dict{DataType,Float64}()),
+#         rhs_policy = get(data, :rhs_policy, Dict{DataType,Float64}()),
+#     )
+#     add_constraints!(node, data)
+#     return node
+# end
+
 function make_node(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, commodity::DataType)
     _node = Node{commodity}(;
         id = data[:id],
@@ -19,7 +36,7 @@ function make_node(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, com
         price_unmet_policy = get(data, :price_unmet_policy, Dict{DataType,Float64}()),
         rhs_policy = get(data, :rhs_policy, Dict{DataType,Float64}())
     )
-    add_constraints!(_node, data)
+    # add_constraints!(_node, data)
     return _node
 end
 
