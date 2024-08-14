@@ -122,8 +122,8 @@ include("load_inputs/load_commodities.jl")
 include("load_inputs/load_time_data.jl")
 # include("load_inputs/load_network.jl")
 # include("load_inputs/load_assets.jl")
-# include("load_inputs/load_demand.jl")
-# include("load_inputs/load_fuel.jl")
+include("load_inputs/load_demand.jl")
+include("load_inputs/load_fuel.jl")
 include("load_inputs/load_capacity_factor.jl")
 
 

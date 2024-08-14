@@ -71,6 +71,8 @@ function generate_system!(system::System, system_data::AbstractDict{Symbol, Any}
     #FIXME Need to un-hardcode this and integrate it into the system_data struct
     load_capacity_factor!(system.assets, joinpath(system.data_dirpath, "assets"))
 
+    load_fuel_data!(system.assets, joinpath(system.data_dirpath, "system"))
+
     return nothing
 end
 
