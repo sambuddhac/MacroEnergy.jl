@@ -617,7 +617,6 @@ function make(::Type{NaturalGasPower}, data::AbstractDict{Symbol, Any}, system::
     )
 
     elec_edge_data = validate_data(data[:edges][:elec])
-    println(elec_edge_data)
     elec_start_node = natgas_transform
     elec_end_node = find_node(system.locations, Symbol(elec_edge_data[:end_vertex]))
     elec_edge = EdgeWithUC{Electricity}(;
