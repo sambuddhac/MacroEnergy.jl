@@ -9,7 +9,8 @@ using DistributedArrays
 using SlurmClusterManager
 using Revise
 using JSON3
-using Gurobi
+using InteractiveUtils
+
 
 # Type parameter for Macro data structures
 
@@ -68,6 +69,24 @@ function include_all_in_folder(folder)
     end
 end
 
+function all_subtypes(m::Module, type::Symbol)::Dict{Symbol,DataType}
+    types = Dict{Symbol,DataType}()
+    for subtype in subtypes(getfield(m, type))
+        all_subtypes!(types, subtype)
+    end
+    return types
+end
+
+function all_subtypes!(types::Dict{Symbol,DataType}, type::DataType)
+    types[Symbol(type)] = type
+    if !isempty(subtypes(type))
+        for subtype in subtypes(type)
+            all_subtypes!(types, subtype)
+        end
+    end
+    return nothing
+end
+
 # include files
 
 include("time_management.jl")
@@ -78,22 +97,26 @@ include("model/networks/storage.jl")
 include("model/networks/transformation.jl")
 include("model/networks/location.jl")
 
-#include_all_in_folder("model/networks")
+# include_all_in_folder("model/networks")
 #include_all_in_folder("model/transformations")
 # include_all_in_folder("model/assets")
+include("model/assets/battery.jl")
 include_all_in_folder("model/constraints")
 include("model/system.jl")
 
-include("generate_model.jl")
-include("benders.jl")
-include("input_translation/load_data_from_genx.jl")
 
-# include("config/configure_settings.jl")
+include("generate_model.jl")
+# include("benders.jl")
+# include("input_translation/load_data_from_genx.jl")
+include("load_inputs/load_inputs.jl")
+
+# include_all_in_folder("load_inputs/load_tools")
+include("load_inputs/load_tools/loading_json.jl")
+include("config/configure_settings.jl")
 # include("load_inputs/load_dataframe.jl")
 # include("load_inputs/load_timeseries.jl")
-# include("load_inputs/load_inputs.jl")
-# include("load_inputs/load_commodities.jl")
-# include("load_inputs/load_time_data.jl")
+include("load_inputs/load_commodities.jl")
+include("load_inputs/load_time_data.jl")
 # include("load_inputs/load_network.jl")
 # include("load_inputs/load_assets.jl")
 # include("load_inputs/load_demand.jl")
@@ -176,16 +199,18 @@ export Electricity,
     StoichiometryBalanceConstraint,
     CO2CapConstraint,
     PolicyConstraint,
-    DemandBalanceConstraint,
+    BalanceConstraint,
     OperationConstraint,
     RampingLimitConstraint,
     StorageCapacityConstraint,
+    StorageSymmetricCapacityConstraint,
     MinUpTimeConstraint,
     SymmetricCapacityConstraint,
     CapacityConstraint,
     MinFlowConstraint,
     configure_settings,
-    load_inputs
+    load_inputs,
+    ExampleAsset
 
 end # module Macro
 
