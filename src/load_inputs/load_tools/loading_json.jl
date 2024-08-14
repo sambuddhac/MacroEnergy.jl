@@ -67,6 +67,10 @@ function generate_system!(system::System, system_data::AbstractDict{Symbol, Any}
     # Load the assets
     load!(system, system_data[:assets])
 
+    # Load capacity factor data
+    #FIXME Need to un-hardcode this and integrate it into the system_data struct
+    load_capacity_factor!(system.assets, joinpath(system.data_dirpath, "assets"))
+
     return nothing
 end
 
@@ -604,7 +608,36 @@ end
         - time_commodity: String
         - balance_data: Dict{Symbol, Dict{Symbol, Float64}}
         - constraints: Vector{AbstractTypeConstraint}
-
+    - edges: Dict{Symbol, Any}
+        - elec: Dict{Symbol, Any}
+            - id: String
+            - end_vertex: String
+            - unidirectional: Bool
+            - has_planning_vars: Bool
+            - can_retire: Bool
+            - can_expand: Bool
+            - min_up_time: Int
+            - min_down_time: Int
+            - startup_cost: Float64
+            - startup_fuel: Float64
+            - startup_fuel_balance_id: Symbol
+            - constraints: Vector{AbstractTypeConstraint}
+        - natgas: Dict{Symbol, Any}
+            - id: String
+            - start_vertex: String
+            - unidirectional: Bool
+            - has_planning_vars: Bool
+            - can_retire: Bool
+            - can_expand: Bool
+            - constraints: Vector{AbstractTypeConstraint}
+        - co2: Dict{Symbol, Any}
+            - id: String
+            - end_vertex: String
+            - unidirectional: Bool
+            - has_planning_vars: Bool
+            - can_retire: Bool
+            - can_expand: Bool
+            - constraints: Vector{AbstractTypeConstraint}
 """
 function make(::Type{NaturalGasPower}, data::AbstractDict{Symbol, Any}, system::System)
 
@@ -669,6 +702,24 @@ function make(::Type{NaturalGasPower}, data::AbstractDict{Symbol, Any}, system::
     return NaturalGasPower(natgas_transform, elec_edge, ng_edge, co2_edge)
 end
 
+"""
+    make(::Type{<:VRE}, data::AbstractDict{Symbol, Any}, system::System) -> VRE
+    
+    VRE is an alias for Union{SolarPV, WindTurbine}
+
+    Necessary data fields:
+     - transforms: Dict{Symbol, Any}
+        - id: String
+        - time_commodity: String
+    - edges: Dict{Symbol, Any}
+        - id: String
+        - end_vertex: String
+        - unidirectional: Bool
+        - has_planning_vars: Bool
+        - can_retire: Bool
+        - can_expand: Bool
+        - constraints: Vector{AbstractTypeConstraint}
+"""
 function make(asset_type::Type{<:VRE}, data::AbstractDict{Symbol, Any}, system::System)
     transform_data = validate_data(data[:transforms])
     vre_transform = Transformation(;
