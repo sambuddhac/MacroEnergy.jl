@@ -1,4 +1,4 @@
-function generate_model(system::Vector{T}) where T<:Union{Node, Edge, AbstractAsset}
+function generate_model(system::Vector{MacroObject})
 
     model = Model()
 
@@ -18,4 +18,19 @@ function generate_model(system::Vector{T}) where T<:Union{Node, Edge, AbstractAs
 
     return model
 
+end
+
+function generate_model(system::System)
+    # objects = [system.locations..., system.assets...]
+    objects = MacroObject[]
+    for node in system.locations
+        push!(objects, node)
+    end
+    for asset in system.assets
+        component_names = fieldnames(typeof(asset))
+        for name in component_names
+            push!(objects, getfield(asset, name))
+        end
+    end
+    return generate_model(objects)
 end
