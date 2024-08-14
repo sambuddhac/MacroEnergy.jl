@@ -101,6 +101,9 @@ include("model/networks/location.jl")
 #include_all_in_folder("model/transformations")
 # include_all_in_folder("model/assets")
 include("model/assets/battery.jl")
+include("model/assets/natgaspower.jl")
+include("model/assets/vre.jl")
+
 include_all_in_folder("model/constraints")
 include("model/system.jl")
 
