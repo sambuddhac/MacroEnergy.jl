@@ -81,17 +81,6 @@ function validate_stoichiometry_balance_names!(data::AbstractDict{Symbol,Any})
 end
 
 # FIXME: This function hides some important details about how constraints are declared
-# function validate_constraints_data!(data::AbstractDict{Symbol,Any})
-#     if haskey(data, :constraints) 
-#         constraints = Dict{Symbol,Any}()
-#         for (k,v) in data[:constraints]
-#             new_k = Symbol(join(push!(uppercasefirst.(split(string(k), "_")),"Constraint")))
-#             constraints[new_k] = v
-#         end
-#         data[:constraints] = constraints
-#     end
-#     return nothing 
-# end
 function validate_constraints_data!(data::AbstractDict{Symbol,Any})
     macro_constraints = constraint_types()
     if haskey(data, :constraints) 
@@ -138,20 +127,6 @@ function validate_rhs_policy!(data::AbstractDict{Symbol,Any})
     return nothing
 end
 
-# function validate_data!(data::Dict{Symbol,Any})
-#     validate_id!(data)
-#     validate_direction!(data)
-#     validate_fuel_stoichiometry_name!(data)
-#     validate_stoichiometry_balance_names!(data)
-#     validate_constraints_data!(data)
-#     validate_max_line_reinforcement!(data)
-#     validate_demand_header!(data)
-#     validate_fuel_header!(data)
-#     validate_rhs_policy!(data)
-#     return nothing
-# end
-
-
 function validate_data(data::AbstractDict{Symbol,Any})
     if isa(data, JSON3.Object)
         data = copy(data)
@@ -165,6 +140,8 @@ function validate_data(data::AbstractDict{Symbol,Any})
     validate_demand_header!(data)
     validate_fuel_header!(data)
     validate_rhs_policy!(data)
+
+    validate_single_symbol!(data, :startup_fuel_balance_id)
     return data
 end
 

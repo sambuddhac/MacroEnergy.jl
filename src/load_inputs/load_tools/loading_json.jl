@@ -2,7 +2,7 @@
 # Functions for the user to load a system based on JSON files
 ###### ###### ###### ###### ###### ######
 
-function load(path::AbstractString=pwd())::System
+function load_system(path::AbstractString=pwd())::System
     
     # The path should either be a a file path to a JSON file, preferably "system_data.json"
     # or a directory containing "system_data.json"
@@ -18,7 +18,8 @@ function load(path::AbstractString=pwd())::System
 
     if isfile(path)
         system = empty_system(dirname(path))
-        system_data = load_system!(system, path)
+        system_data = load_system_data(path)
+        generate_system!(system, system_data)
         return system
     else
         throw(ArgumentError("
@@ -28,14 +29,14 @@ function load(path::AbstractString=pwd())::System
     end
 end
 
-function load(system_data::AbstractDict{Symbol, Any}, dir_path::AbstractString=pwd())::System
+function load_system(system_data::AbstractDict{Symbol, Any}, dir_path::AbstractString=pwd())::System
     # The path should point to the location of the system data files
     # If path is not provided, we assume the data is in the current working directory
     if isfile(dir_path)
         dir_path = dirname(dir_path)
     end
     system = empty_system(dir_path)
-    load_system!(system, system_data)
+    generate_system!(system, system_data)
     return system
 end
 
@@ -43,10 +44,14 @@ end
 # Internal functions to handle loading the system
 ###### ###### ###### ###### ###### ######
 
-function load_system!(system::System, file_path::AbstractString; lazy_load::Bool=true)::Dict{Symbol, Any}
+function generate_system!(system::System, file_path::AbstractString; lazy_load::Bool=true)::nothing
     # Load the system data file
     system_data = load_system_data(file_path, system.data_dirpath; lazy_load=lazy_load)
+    generate_system!(system, system_data)
+    return nothing
+end
 
+function generate_system!(system::System, system_data::AbstractDict{Symbol, Any})::Nothing
     # Configure the settings
     system.settings = configure_settings(system_data[:settings], system.data_dirpath)
 
@@ -62,12 +67,17 @@ function load_system!(system::System, file_path::AbstractString; lazy_load::Bool
     # Load the assets
     load!(system, system_data[:assets])
 
-    return system_data
+    return nothing
 end
 
 ###### ###### ###### ###### ###### ######
 # Internal functions to handle loading the system_data.json file
 ###### ###### ###### ###### ###### ######
+
+function load_system_data(file_path::AbstractString; default_file_path::String=joinpath(@__DIR__, "default_system_data.json"), lazy_load::Bool=true)::Dict{Symbol, Any}
+    load_system_data(file_path, dirname(file_path), default_file_path=default_file_path, lazy_load=lazy_load)
+     return load_json(file_path; lazy_load=lazy_load)
+end
 
 function load_system_data(file_path::AbstractString, rel_path::AbstractString; default_file_path::String=joinpath(@__DIR__, "default_system_data.json"), lazy_load::Bool=true)::Dict{Symbol, Any}
     file_path = abspath(rel_or_abs_path(file_path, rel_path))
@@ -495,6 +505,41 @@ function make(commodity::Type{<:Commodity}, data::AbstractDict{Symbol, Any}, sys
     return node
 end
 
+"""
+    make(::Type{Battery}, data::AbstractDict{Symbol, Any}, system::System) -> Battery
+
+    Necessary data fields:
+     - storage: Dict{Symbol, Any}
+        - id: String
+        - commodity: String
+        - can_retire: Bool
+        - can_expand: Bool
+        - existing_capacity_storage: Float64
+        - investment_cost_storage: Float64
+        - fixed_om_cost_storage: Float64
+        - storage_loss_fraction: Float64
+        - min_duration: Float64
+        - max_duration: Float64
+        - min_storage_level: Float64
+        - min_capacity_storage: Float64
+        - max_capacity_storage: Float64
+        - balance_data: Dict{Symbol, Dict{Symbol, Float64}}
+        - constraints: Vector{AbstractTypeConstraint}
+     - edges: Dict{Symbol, Any}
+        - charge: Dict{Symbol, Any}
+            - id: String
+            - start_vertex: String
+            - unidirectional: Bool
+            - has_planning_vars: Bool
+        - discharge: Dict{Symbol, Any}
+            - id: String
+            - end_vertex: String
+            - unidirectional: Bool
+            - has_planning_vars: Bool
+            - can_retire: Bool
+            - can_expand: Bool
+            - constraints: Vector{AbstractTypeConstraint}
+"""
 function make(::Type{Battery}, data::AbstractDict{Symbol, Any}, system::System)
     storage_data = validate_data(data[:storage])
     commodity_symbol = Symbol(storage_data[:commodity])
@@ -550,21 +595,33 @@ function make(::Type{Battery}, data::AbstractDict{Symbol, Any}, system::System)
     return Battery(battery_storage, battery_discharge, battery_charging)
 end
 
+"""
+    make(::Type{NaturalGasPower}, data::AbstractDict{Symbol, Any}, system::System) -> NaturalGasPower
+
+    Necessary data fields:
+     - transforms: Dict{Symbol, Any}
+        - id: String
+        - time_commodity: String
+        - balance_data: Dict{Symbol, Dict{Symbol, Float64}}
+        - constraints: Vector{AbstractTypeConstraint}
+
+"""
 function make(::Type{NaturalGasPower}, data::AbstractDict{Symbol, Any}, system::System)
 
-    transform_data = validate_data(data[:transformation])
+    transform_data = validate_data(data[:transforms])
     natgas_transform = Transformation(;
         id = Symbol(transform_data[:id]),
-        timedata = system.time_data[Symbol(transform_data[:commodity])],
+        timedata = system.time_data[Symbol(transform_data[:time_commodity])],
         balance_data = get(transform_data, :balance_data, Dict{Symbol, Dict{Symbol, Float64}}()),
         constraints = get(transform_data, :constraints, [BalanceConstraint()])
     )
 
-    elec_edge_data = validate_data(data[:edges][:electricity])
+    elec_edge_data = validate_data(data[:edges][:elec])
+    println(elec_edge_data)
     elec_start_node = natgas_transform
-    elec_end_node = find_node(system.locations, Symbol(elec_edge_data[:start_vertex]))
+    elec_end_node = find_node(system.locations, Symbol(elec_edge_data[:end_vertex]))
     elec_edge = EdgeWithUC{Electricity}(;
-        id = Symbol(data[:id] * "_electricity"),
+        id = Symbol(elec_edge_data[:id]),
         start_vertex = elec_start_node,
         end_vertex = elec_end_node,
         timedata = system.time_data[:Electricity],
@@ -580,11 +637,11 @@ function make(::Type{NaturalGasPower}, data::AbstractDict{Symbol, Any}, system::
         constraints = get(elec_edge_data, :constraints, [CapacityConstraint(), RampingLimitConstraint(), MinUpTimeConstraint(), MinDownTimeConstraint()])
     )
 
-    ng_edge_data = validate_data(data[:edges][:natural_gas])
+    ng_edge_data = validate_data(data[:edges][:natgas])
     ng_start_node = find_node(system.locations, Symbol(ng_edge_data[:start_vertex]))
     ng_end_node = natgas_transform
     ng_edge = Edge{NaturalGas}(;
-        id = Symbol(data[:id] * "_natural_gas"),
+        id = Symbol(ng_edge_data[:id]),
         start_vertex = ng_start_node,
         end_vertex = ng_end_node,
         timedata = system.time_data[:NaturalGas],
@@ -592,14 +649,14 @@ function make(::Type{NaturalGasPower}, data::AbstractDict{Symbol, Any}, system::
         has_planning_variables = get(ng_edge_data, :has_planning_vars, false),
         can_retire = get(ng_edge_data, :can_retire, false),
         can_expand = get(ng_edge_data, :can_expand, false),
-        constraints = get(ng_edge_data, :constraints, [CapacityConstraint(), RampingLimitConstraint()])
+        constraints = get(ng_edge_data, :constraints, [])
     )
 
     co2_edge_data = validate_data(data[:edges][:co2])
     co2_start_node = natgas_transform
-    co2_end_node = find_node(system.locations, Symbol(co2_edge_data[:start_vertex]))
+    co2_end_node = find_node(system.locations, Symbol(co2_edge_data[:end_vertex]))
     co2_edge = Edge{CO2}(;
-        id = Symbol(data[:id] * "_co2"),
+        id = Symbol(co2_edge_data[:id]),
         start_vertex = co2_start_node,
         end_vertex = co2_end_node,
         timedata = system.time_data[:CO2],
@@ -607,8 +664,33 @@ function make(::Type{NaturalGasPower}, data::AbstractDict{Symbol, Any}, system::
         has_planning_variables = get(co2_edge_data, :has_planning_vars, false),
         can_retire = get(co2_edge_data, :can_retire, false),
         can_expand = get(co2_edge_data, :can_expand, false),
-        constraints = get(co2_edge_data, :constraints, [CapacityConstraint(), RampingLimitConstraint()])
+        constraints = get(co2_edge_data, :constraints, [])
     )
 
     return NaturalGasPower(natgas_transform, elec_edge, ng_edge, co2_edge)
+end
+
+function make(asset_type::Type{<:VRE}, data::AbstractDict{Symbol, Any}, system::System)
+    transform_data = validate_data(data[:transforms])
+    vre_transform = Transformation(;
+        id = Symbol(transform_data[:id]),
+        timedata = system.time_data[Symbol(transform_data[:time_commodity])],
+    )
+
+    elec_edge_data = validate_data(data[:edges])
+    elec_start_node = vre_transform
+    elec_end_node = find_node(system.locations, Symbol(elec_edge_data[:end_vertex]))
+    elec_edge = Edge{Electricity}(;
+        id = Symbol(elec_edge_data[:id]),
+        start_vertex = elec_start_node,
+        end_vertex = elec_end_node,
+        timedata = system.time_data[:Electricity],
+        unidirectional = get(elec_edge_data, :unidirectional, true),
+        has_planning_variables = get(elec_edge_data, :has_planning_vars, false),
+        can_retire = get(elec_edge_data, :can_retire, false),
+        can_expand = get(elec_edge_data, :can_expand, false),
+        constraints = get(elec_edge_data, :constraints, [CapacityConstraint()])
+    )
+
+    return asset_type(vre_transform, elec_edge)
 end
