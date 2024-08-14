@@ -1,14 +1,34 @@
 function default_settings()
-    (
+    return (
         UCommit=false,
         NetworkExpansion=false,
     )
 end
 
 namedtuple(d::Dict) = (; (Symbol(k) => v for (k, v) in d)...)
-function configure_settings(settings_path::String)
-    model_settings = namedtuple(YAML.load_file(settings_path))
 
+function configure_settings(path::AbstractString, rel_path::AbstractString)
+    path = rel_or_abs_path(path, rel_path)
+    if isdir(path)
+        path = joinpath(path, "macro_settings.yml")
+    end
+    if !isfile(path)
+        error("Settings file not found: $path")
+    end
+    model_settings = namedtuple(YAML.load_file(path))
+    return configure_settings(model_settings)
+end
+
+function configure_settings(model_settings::AbstractDict{Symbol, Any}, rel_path::AbstractString)
+    if haskey(model_settings, :path)
+        path = rel_or_abs_path(model_settings[:path], rel_path)
+        return configure_settings(path, rel_path)
+    else
+        return configure_settings(namedtuple(model_settings))
+    end
+end
+
+function configure_settings(model_settings::NamedTuple)
     validate_names(model_settings)
     settings = default_settings()
 
