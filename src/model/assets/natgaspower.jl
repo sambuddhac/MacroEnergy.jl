@@ -5,6 +5,8 @@ struct NaturalGasPower <: AbstractAsset
     co2_tedge::Edge{CO2}
 end
 
+id(ng::NaturalGasPower) = ng.natgaspower_transform.id
+
 # function make_natgaspower(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, nodes::Dict{Symbol,Node})
 #     ## conversion process (node)
 #     _ngcc_transform = Transformation(;

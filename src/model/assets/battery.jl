@@ -4,6 +4,8 @@ struct Battery <: AbstractAsset
     charge_tedge::Edge{Electricity}
 end
 
+id(b::Battery) = b.battery_transform.id
+
 # function make_battery(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, nodes::Dict{Symbol,Node})
 #     ## conversion process (node)
 #     _battery_transform = Transformation(;

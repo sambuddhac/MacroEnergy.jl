@@ -54,6 +54,8 @@ const VRE = Union{
 #     return _energy_transform, _tedge
 # end
 
+id(g::VRE) = g.energy_transform.id
+
 function add_capacity_factor!(s::VRE, capacity_factor::Vector{Float64})
     s.tedge.capacity_factor = capacity_factor
 end
