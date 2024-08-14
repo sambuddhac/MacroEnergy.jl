@@ -1,17 +1,31 @@
-function load_time_json(time_data_path::AbstractString, commodities::Dict{Symbol,DataType})
-    # Load the time data
-    file = "time_data.json"
-    isfile(joinpath(time_data_path, file)) || error("File not found: $file")
-    time_data_json = JSON3.read(joinpath(time_data_path, file))
-
-    # validate the time data
-    validate_time_data(time_data_json, commodities)
-
-    # create the time data object
-    return create_time_data(time_data_json, commodities)
+function load_time_data(path::AbstractString, commodities::Dict{Symbol,DataType}, rel_path::AbstractString)
+    path = rel_or_abs_path(path, rel_path)
+    if isdir(path)
+        path = joinpath(path, "time_data.json")
+    end
+    # read in the list of commodities from the data directory
+    isfile(path) || error("Time data not found at $(abspath(path))")
+    return load_time_data(JSON3.read(path), commodities)
 end
 
-function validate_time_data(time_data::JSON3.Object, case_commodities::Dict{Symbol,DataType})
+function load_time_data(data::AbstractDict{Symbol, Any}, commodities::Dict{Symbol,DataType}, rel_path::AbstractString)
+    if haskey(data, :path)
+        path = rel_or_abs_path(data[:path], rel_path)
+        return load_time_data(path, commodities, rel_path)
+    else
+        return load_time_data(data, commodities)
+    end
+end
+
+function load_time_data(data::AbstractDict{Symbol, Any}, commodities::Dict{Symbol,DataType})
+    # validate the time data
+    validate_time_data(data, commodities)
+
+    # create the time data object
+    return create_time_data(data, commodities)
+end
+
+function validate_time_data(time_data::AbstractDict{Symbol, Any}, case_commodities::Dict{Symbol,DataType})
     # Check that the time data has the correct fields
     @assert haskey(time_data, :PeriodLength)
     @assert haskey(time_data, :HoursPerTimeStep)
@@ -31,7 +45,7 @@ function validate_time_data(time_data::JSON3.Object, case_commodities::Dict{Symb
     validate_commodities(keys(time_data[:HoursPerSubperiod]), macro_commodities)
 end
  
-function create_time_data(time_data::JSON3.Object, commodities::Dict{Symbol,DataType})
+function create_time_data(time_data::AbstractDict{Symbol,Any}, commodities::Dict{Symbol,DataType})
     period_length = time_data[:PeriodLength]
     all_timedata = Dict{Symbol,TimeData}()
     for (sym,type) in commodities
