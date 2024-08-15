@@ -381,7 +381,7 @@ function create_transformations_from_dolphyn(
             fixed_om_cost = dfGen.Fixed_OM_Cost_per_MWyr[i],
             variable_om_cost = dfGen.Var_OM_Cost_per_MWh[i],
             ##### Ignore UC for now
-            ######start_cost = dfGen.Start_Cost_per_MW[i],
+            ######startup_cost = dfGen.Start_Cost_per_MW[i],
             ######ucommit = false,
             ramp_up_fraction = dfGen.Ramp_Up_fraction[i],
             ramp_down_fraction = dfGen.Ramp_Dn_fraction[i],
@@ -469,7 +469,7 @@ function create_transformations_from_dolphyn(
             fixed_om_cost = dfH2Gen.Fixed_OM_Cost_p_tonne_p_hr_yr[i],
             variable_om_cost = dfH2Gen.Var_OM_Cost_p_tonne[i],
             ##### Ignore UC for now
-            ######start_cost = dfGen.Start_Cost_per_MW[i],
+            ######startup_cost = dfGen.Start_Cost_per_MW[i],
             ######ucommit = false,
             ramp_up_fraction = dfH2Gen.Ramp_Up_fraction[i],
             ramp_down_fraction = dfH2Gen.Ramp_Down_fraction[i],
@@ -553,7 +553,7 @@ function create_transformations_from_dolphyn(
             fixed_om_cost = dfH2Gen.Fixed_OM_Cost_p_tonne_p_hr_yr[i],
             variable_om_cost = dfH2Gen.Var_OM_Cost_p_tonne[i],
             ##### Ignore UC for now
-            ######start_cost = dfGen.Start_Cost_per_MW[i],
+            ######startup_cost = dfGen.Start_Cost_per_MW[i],
             ######ucommit = false,
             ramp_up_fraction = dfH2Gen.Ramp_Up_fraction[i],
             ramp_down_fraction = dfH2Gen.Ramp_Down_fraction[i],
@@ -625,7 +625,7 @@ function create_transformations_from_dolphyn(
             fixed_om_cost = dfH2G2P.Fixed_OM_p_MW_yr[i],
             variable_om_cost = dfH2G2P.Var_OM_Cost_p_MWh[i],
             ##### Ignore UC for now
-            ######start_cost = dfGen.Start_Cost_per_MW[i],
+            ######startup_cost = dfGen.Start_Cost_per_MW[i],
             ######ucommit = false,
             ramp_up_fraction = dfH2G2P.Ramp_Up_fraction[i],
             ramp_down_fraction = dfH2G2P.Ramp_Down_fraction[i],

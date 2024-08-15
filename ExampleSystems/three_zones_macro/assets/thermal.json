@@ -17,7 +17,7 @@
                     "direction": "output",
                     "can_expand": true,
                     "can_retire": false,
-                    "has_planning_vars": true,
+                    "has_planning_variables": true,
                     "capacity_size": 250,
                     "existing_capacity": 0,
                     "investment_cost": 65400,
@@ -25,8 +25,8 @@
                     "ramp_down_fraction": 0.64,
                     "min_up_time": 6,
                     "min_down_time": 6,
-                    "start_cost": 91,
-                    "start_fuel": 0.58614214,
+                    "startup_cost": 91,
+                    "startup_fuel": 0.58614214,
                     "fuel_stoichiometry_name": "energy",
                     "constraints": {
                         "capacity": true,
@@ -39,7 +39,7 @@
                 "natgas": {
                     "direction": "input",
                     "type": "NaturalGas",
-                    "has_planning_vars": false,
+                    "has_planning_variables": false,
                     "stoichiometry_coefficients": {
                         "energy": 1
                     }
@@ -47,7 +47,7 @@
                 "co2": {
                     "direction": "output",
                     "type": "CO2",
-                    "has_planning_vars": false,
+                    "has_planning_variables": false,
                     "stoichiometry_coefficients": {
                         "energy": 0,
                         "emissions": 1

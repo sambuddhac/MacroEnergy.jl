@@ -9,7 +9,7 @@
                     "direction": "output",
                     "can_expand": true,
                     "can_retire": false,
-                    "has_planning_vars": true,
+                    "has_planning_variables": true,
                     "existing_capacity": 0,
                     "constraints": {
                         "capacity": true
@@ -56,7 +56,7 @@
                     "direction": "output",
                     "can_expand": true,
                     "can_retire": false,
-                    "has_planning_vars": true,
+                    "has_planning_variables": true,
                     "existing_capacity": 0,
                     "constraints": {
                         "capacity": true

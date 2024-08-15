@@ -10,11 +10,11 @@ function add_model_constraint!(ct::CO2CapConstraint,
 )
     ct_type = typeof(ct);
 
-    subperiod_net_balance = @expression(model,[w in subperiod_indices(n)],0*model[:vREF]);
+    subperiod_balance = @expression(model,[w in subperiod_indices(n)],0*model[:vREF]);
 
     for t in time_interval(n)
         w = current_subperiod(n,t);
-        add_to_expression!(subperiod_net_balance[w],subperiod_weight(n,w),net_balance(n,t));
+        add_to_expression!(subperiod_balance[w],subperiod_weight(n,w),get_balance(n,:emissions,t));
     end
 
     if haskey(price_unmet_policy(n),ct_type)
@@ -27,13 +27,13 @@ function add_model_constraint!(ct::CO2CapConstraint,
         for w in subperiod_indices(n)
             add_to_expression!(model[:eVariableCost], subperiod_weight(n,w)*price_unmet_policy(n,ct_type),n.operation_vars[Symbol(string(ct_type)*"_Slack")][w])
 
-            add_to_expression!(subperiod_net_balance[w], -n.operation_vars[Symbol(string(ct_type)*"_Slack")][w])
+            add_to_expression!(subperiod_balance[w], -n.operation_vars[Symbol(string(ct_type)*"_Slack")][w])
         end
     end
     
     ct.constraint_ref = @constraint(model, 
     [w in subperiod_indices(n)], 
-    subperiod_net_balance[w] <= n.planning_vars[Symbol(string(ct_type)*"_Budget")][w])
+    subperiod_balance[w] <= n.planning_vars[Symbol(string(ct_type)*"_Budget")][w])
 
 
 end

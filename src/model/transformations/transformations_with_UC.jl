@@ -2,9 +2,9 @@ Base.@kwdef mutable struct TEdgeWithUC{T} <: AbstractTransformationEdgeWithUC{T}
     @AbstractTransformationEdgeBaseAttributes()
     min_up_time::Int64 = 0.0
     min_down_time::Int64 = 0.0
-    start_cost::Float64 = 0.0
-    start_fuel::Float64 = 0.0
-    start_fuel_stoichiometry_name::Symbol = :none
+    startup_cost::Float64 = 0.0
+    startup_fuel::Float64 = 0.0
+    startup_fuel_stoichiometry_name::Symbol = :none
 end
 
 function make_tedge(::Type{TEdgeWithUC}, data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, transformation::AbstractTransform, node::AbstractNode)
@@ -15,7 +15,7 @@ function make_tedge(::Type{TEdgeWithUC}, data::Dict{Symbol,Any}, time_data::Dict
         transformation = transformation,
         timedata = deepcopy(time_data[Symbol(commodity)]),
         direction = get(data, :direction, :input),
-        has_planning_variables = get(data, :has_planning_vars, false),
+        has_planning_variables = get(data, :has_planning_variables, false),
         can_retire = get(data, :can_retire, false),
         can_expand = get(data, :can_expand, false),
         capacity_size = get(data, :capacity_size, 1.0),
@@ -33,9 +33,9 @@ function make_tedge(::Type{TEdgeWithUC}, data::Dict{Symbol,Any}, time_data::Dict
         min_flow_fraction = get(data, :min_flow_fraction, 0.0),
         min_up_time = get(data, :min_up_time, 0.0),
         min_down_time = get(data, :min_down_time, 0.0),
-        start_cost = get(data, :start_cost, 0.0),
-        start_fuel = get(data, :start_fuel, 0.0),
-        start_fuel_stoichiometry_name = get(data, :fuel_stoichiometry_name, :none),
+        startup_cost = get(data, :startup_cost, 0.0),
+        startup_fuel = get(data, :startup_fuel, 0.0),
+        startup_fuel_stoichiometry_name = get(data, :fuel_stoichiometry_name, :none),
     )
     add_constraints!(_t_edge, data)
     return _t_edge
@@ -44,9 +44,9 @@ TEdgeWithUC(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, transforma
 
 min_up_time(e::AbstractTransformationEdgeWithUC) = e.min_up_time;
 min_down_time(e::AbstractTransformationEdgeWithUC) = e.min_down_time;
-start_cost(e::AbstractTransformationEdgeWithUC) = e.start_cost;
-start_fuel(e::AbstractTransformationEdgeWithUC) = e.start_fuel;
-start_fuel_stoichiometry_name(e::AbstractTransformationEdgeWithUC) = e.start_fuel_stoichiometry_name;
+startup_cost(e::AbstractTransformationEdgeWithUC) = e.startup_cost;
+startup_fuel(e::AbstractTransformationEdgeWithUC) = e.startup_fuel;
+startup_fuel_stoichiometry_name(e::AbstractTransformationEdgeWithUC) = e.startup_fuel_stoichiometry_name;
 ucommit(e::AbstractTransformationEdgeWithUC) = e.operation_vars[:ucommit];
 ucommit(e::AbstractTransformationEdgeWithUC,t::Int64) = ucommit(e)[t];
 
@@ -113,12 +113,12 @@ function add_operation_variables!(e::AbstractTransformationEdgeWithUC, model::Mo
             add_to_expression!(model[:eVariableCost], subperiod_weight(e,w)*price(e,t), flow(e,t))
         end
 
-        if start_cost(e)>0
-            add_to_expression!(model[:eVariableCost], subperiod_weight(e,w)*start_cost(e)*capacity_size(e), ustart(e,t))
+        if startup_cost(e)>0
+            add_to_expression!(model[:eVariableCost], subperiod_weight(e,w)*startup_cost(e)*capacity_size(e), ustart(e,t))
         end
 
-        if start_fuel(e)>0
-            add_to_expression!(stoichiometry_balance(e,start_fuel_stoichiometry_name(e),t), start_fuel(e)*capacity_size(e)*dir_coeff,ustart(e,t))
+        if startup_fuel(e)>0
+            add_to_expression!(stoichiometry_balance(e,startup_fuel_stoichiometry_name(e),t), startup_fuel(e)*capacity_size(e)*dir_coeff,ustart(e,t))
         end
 
     end

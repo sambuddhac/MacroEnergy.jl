@@ -29,7 +29,7 @@
                     "investment_cost": 19584,
                     "fixed_om_cost": 4895,
                     "variable_om_cost": 0.15,
-                    "has_planning_vars": true,
+                    "has_planning_variables": true,
                     "stoichiometry_coefficients": {
                         "storage": 1.0869565217391304
                     },

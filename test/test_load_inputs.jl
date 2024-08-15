@@ -132,9 +132,9 @@ function test_load_inputs()
     @test e_tedge.min_flow_fraction == 20
     @test e_tedge.min_up_time == 50
     @test e_tedge.min_down_time == 50
-    @test e_tedge.start_cost == 10
-    @test e_tedge.start_fuel == 10
-    @test e_tedge.start_fuel_stoichiometry_name == :energy
+    @test e_tedge.startup_cost == 10
+    @test e_tedge.startup_fuel == 10
+    @test e_tedge.startup_fuel_stoichiometry_name == :energy
     @test typeof(e_tedge.constraints[1]) == MinFlowConstraint
     @test typeof(e_tedge.constraints[2]) == MinDownTimeConstraint
     @test typeof(e_tedge.constraints[3]) == MinUpTimeConstraint

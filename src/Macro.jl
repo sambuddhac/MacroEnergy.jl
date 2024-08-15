@@ -103,6 +103,7 @@ include("model/networks/location.jl")
 include("model/assets/battery.jl")
 include("model/assets/natgaspower.jl")
 include("model/assets/vre.jl")
+include("model/assets/powerline.jl")
 
 include_all_in_folder("model/constraints")
 include("model/system.jl")
@@ -170,14 +171,14 @@ export Electricity,
     Node,
     Edge,
     Transformation,
-    TEdge,
-    TEdgeWithUC,
+    EdgeWithUC,
     namedtuple,
     AbstractAsset,
     SolarPV,
     WindTurbine,
     Battery,
-    ElectrolyzerTransform,
+    Electrolyzer,
+    PowerLine,
     #CapacityConstraint,
     #configure_settings,
     #add_planning_variables!,
@@ -210,6 +211,7 @@ export Electricity,
     MinUpTimeConstraint,
     SymmetricCapacityConstraint,
     CapacityConstraint,
+    MaxCapacityConstraint,
     MinFlowConstraint,
     configure_settings,
     load_inputs,

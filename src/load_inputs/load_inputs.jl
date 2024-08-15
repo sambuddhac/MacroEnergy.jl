@@ -37,7 +37,7 @@ end
 
 function validate_id!(data::AbstractDict{Symbol,Any})
     if !haskey(data, :id)
-        throw(ArgumentError("TEdge data must have an id"))
+        throw(ArgumentError("Edge data must have an id"))
     end
     return nothing
 end

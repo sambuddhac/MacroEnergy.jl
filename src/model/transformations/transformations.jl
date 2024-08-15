@@ -41,7 +41,7 @@ function make_tedge(::Type{TEdge}, data::Dict{Symbol,Any}, time_data::Dict{Symbo
         transformation = transformation,
         timedata = deepcopy(time_data[Symbol(commodity)]),
         direction = get(data, :direction, :input),
-        has_planning_variables = get(data, :has_planning_vars, false),
+        has_planning_variables = get(data, :has_planning_variables, false),
         can_retire = get(data, :can_retire, false),
         can_expand = get(data, :can_expand, false),
         capacity_size = get(data, :capacity_size, 1.0),
@@ -509,9 +509,9 @@ function Base.show(io::IO, e::AbstractTransformationEdge)
     if isa(e, TEdgeWithUC)
         println(io, "Min up time: $(min_up_time(e))")
         println(io, "Min down time: $(min_down_time(e))")
-        println(io, "Start cost: $(start_cost(e))")
-        println(io, "Start fuel: $(start_fuel(e))")
-        println(io, "Start fuel stoichiometry name: :$(start_fuel_stoichiometry_name(e))")
+        println(io, "Start cost: $(startup_cost(e))")
+        println(io, "Start fuel: $(startup_fuel(e))")
+        println(io, "Start fuel stoichiometry name: :$(startup_fuel_stoichiometry_name(e))")
     end
     println(io, "Planning variables: $(e.planning_vars)")
     # println(io, "Operation variables: $(e.operation_vars)")

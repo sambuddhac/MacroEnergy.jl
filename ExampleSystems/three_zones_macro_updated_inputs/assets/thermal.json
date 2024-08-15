@@ -6,18 +6,6 @@
             "transforms": {
                 "id": "natgas_power",
                 "time_commodity": "Electricity",
-                "balance_data": {
-                    "energy": {
-                        "E": 2.1775180500999998,
-                        "NG": 1.0,
-                        "CO2": 0.0
-                    },
-                    "emissions": {
-                        "E": 0.0,
-                        "NG": 0.181048235160161,
-                        "CO2": 1.0
-                    }
-                },
                 "constraints": {
                     "balance" : true
                 }
@@ -28,16 +16,15 @@
                     "type": "Electricity",
                     "uc": true,
                     "unidirectional": true,
-                    "has_planning_vars": true,
+                    "has_planning_variables": true,
                     "can_retire": true,
                     "can_expand": true,
                     "min_up_time": 6,
                     "min_down_time": 6,
                     "ramp_up_fraction": 0.64,
                     "ramp_down_fraction": 0.64,
-                    "start_cost": 91,
-                    "start_fuel": 0.58614214,
-                    "startup_fuel_balance_id": "energy",
+                    "startup_cost": 91,
+                    "startup_fuel": 0.58614214,
                     "existing_capacity": 0,
                     "investment_cost": 65400,
                     "constraints": {
@@ -52,13 +39,13 @@
                     "id": "NG",
                     "type": "NaturalGas",
                     "unidirectional": true,
-                    "has_planning_vars": false
+                    "has_planning_variables": false
                 },
                 "co2": {
                     "id": "CO2",
                     "type": "CO2",
                     "unidirectional": true,
-                    "has_planning_vars": false
+                    "has_planning_variables": false
                 }
             },
             "storage": {}
@@ -68,13 +55,8 @@
                 "id": "ng_MA",
                 "nodes": {},
                 "transforms": {
-                    "balance_data": {
-                        "energy": {
-                            "E": 2.1775180500999998,
-                            "NG": 1.0,
-                            "CO2": 0.0
-                        }
-                    }
+                    "heat_rate":2.1775180500999998,
+                    "emission_rate":0.181048235160161
                 },
                 "edges": {
                     "elec": {
@@ -97,13 +79,8 @@
                 "id": "ng_CT",
                 "nodes": {},
                 "transforms": {
-                    "balance_data": {
-                        "energy": {
-                            "E": 2.0866660184,
-                            "NG": 1.0,
-                            "CO2": 0.0
-                        }
-                    }
+                    "heat_rate":2.0866660184,
+                    "emission_rate":0.181048235160161
                 },
                 "edges": {
                     "elec": {
@@ -126,13 +103,8 @@
                 "id": "ng_ME",
                 "nodes": {},
                 "transforms": {
-                    "balance_data": {
-                        "energy": {
-                            "E": 3.6985569033999997,
-                            "NG": 1.0,
-                            "CO2": 0.0
-                        }
-                    }
+                    "heat_rate": 3.6985569033999997,
+                    "emission_rate":0.181048235160161
                 },
                 "edges": {
                     "elec": {
