@@ -542,6 +542,7 @@ end
             - start_vertex: String
             - unidirectional: Bool
             - has_planning_variables: Bool
+            - efficiency: Float64
         - discharge: Dict{Symbol, Any}
             - id: String
             - end_vertex: String
@@ -549,6 +550,7 @@ end
             - has_planning_variables: Bool
             - can_retire: Bool
             - can_expand: Bool
+            - efficiency
             - constraints: Vector{AbstractTypeConstraint}
 """
 function make(::Type{Battery}, data::AbstractDict{Symbol, Any}, system::System)
@@ -602,7 +604,8 @@ end
      - transforms: Dict{Symbol, Any}
         - id: String
         - time_commodity: String
-        - balance_data: Dict{Symbol, Dict{Symbol, Float64}}
+        - heat_rate: Float64
+        - emission_rate: Float64
         - constraints: Vector{AbstractTypeConstraint}
     - edges: Dict{Symbol, Any}
         - elec: Dict{Symbol, Any}
