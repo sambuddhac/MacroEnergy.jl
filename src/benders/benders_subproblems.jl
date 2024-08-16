@@ -7,16 +7,23 @@ function generate_operation_subproblem(system)
 
     model[:eVariableCost] = AffExpr(0.0)
 
-    add_subproblem_planning_variables!.(system,Ref(model))
+    add_subproblem_planning_variables!(system,model)
 
-    add_operation_variables!.(system, Ref(model))
+    add_operation_variables!(system,model)
 
-    add_operation_constraints!.(system, Ref(model))
+    add_operation_constraints!(system, model)
 
     @objective(model, Min, model[:eVariableCost])
 
     return model
 
+
+end
+function add_subproblem_planning_variables!(system::System,model::Model)
+
+    add_subproblem_planning_variables!.(system.locations, Ref(model))
+
+    add_subproblem_planning_variables!.(system.assets, Ref(model))
 
 end
 
@@ -31,10 +38,10 @@ function add_subproblem_planning_variables!(e::AbstractEdge,model::Model)
     return nothing
 end
 
-function add_subproblem_planning_variables!(n::AbstractNode,model::Model)
+function add_subproblem_planning_variables!(n::Node,model::Model)
 
-    if any(isa.(n.constraints,PolicyConstraint))
-        ct_all = findall(isa.(n.constraints,PolicyConstraint));
+    if in(PolicyConstraint,supertype.(typeof.(n.constraints)))
+        ct_all = findall(PolicyConstraint.==supertype.(typeof.(n.constraints)));
         for ct in ct_all
             
             ct_type = typeof(n.constraints[ct]);
@@ -49,38 +56,27 @@ function add_subproblem_planning_variables!(n::AbstractNode,model::Model)
     return nothing
 end
 
-function add_subproblem_planning_variables!(g::AbstractTransform,model::Model)
+function add_subproblem_planning_variables!(g::Storage,model::Model)
         
-    if has_storage(g)
-        g.planning_vars[:capacity_storage] = @variable(
-            model,
-            lower_bound = 0.0,
-            base_name = "vCAPSTOR_$(g.id)"
-        )
-    end
+    g.planning_vars[:capacity_storage] = @variable(
+        model,
+        lower_bound = 0.0,
+        base_name = "vCAPSTOR_$(g.id)"
+    )
 end
 
-function add_subproblem_planning_variables!(e::AbstractTransformationEdge,model::Model)
-
-    if has_planning_variables(e)
-        e.planning_vars[:capacity] = @variable(
-            model,
-            lower_bound = 0.0,
-            base_name = "vCAP_$(get_transformation_id(e))_$(get_id(e))"
-        )
-    end
-
-end
 
 function add_subproblem_planning_variables!(a::AbstractAsset, model::Model)
-    for t in fieldnames(a)
+    for t in fieldnames(typeof(a))
         add_subproblem_planning_variables!(getfield(a,t), model)
     end
     return nothing
 end
 
+
+
 function add_operation_constraints!(
-    y::Union{AbstractEdge,AbstractNode,AbstractTransformationEdge,AbstractTransform},
+    y::Union{AbstractEdge,AbstractVertex},
     model::Model,
 )
 
@@ -93,12 +89,22 @@ function add_operation_constraints!(
     return nothing
 end
 
+
+function add_operation_constraints!(system::System,model::Model)
+
+    add_operation_constraints!.(system.locations, Ref(model))
+
+    add_operation_constraints!.(system.assets, Ref(model))
+
+end
+
 function add_operation_constraints!(a::AbstractAsset, model::Model)
-    for t in fieldnames(a)
+    for t in fieldnames(typeof(a))
         add_operation_constraints!(getfield(a,t), model)
     end
     return nothing
 end
+
 
 
 function init_subproblem(system::Vector{Union{AbstractAsset, Edge, Node}}, planning_variables::Vector{String})
@@ -107,7 +113,7 @@ function init_subproblem(system::Vector{Union{AbstractAsset, Edge, Node}}, plann
 
     set_silent(subproblem)
 
-    subproblem_optimizer = optimizer_with_attributes(()->Gurobi.Optimizer(GRB_ENV[]),"Method"=>2,"BarConvTol"=>1e-3,"Crossover"=>1)
+    subproblem_optimizer = optimizer_with_attributes(()->Main.Gurobi.Optimizer(Main.GRB_ENV),"Method"=>2,"BarConvTol"=>1e-3,"Crossover"=>1)
 
     set_optimizer(subproblem,subproblem_optimizer)
 

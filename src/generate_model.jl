@@ -37,14 +37,6 @@ function add_operation_variables!(system::System,model::Model)
     
 end
 
-function add_all_model_constraints!(system::System,model::Model)
-
-    add_all_model_constraints!.(system.locations, Ref(model))
-
-    add_all_model_constraints!.(system.assets, Ref(model))
-
-end
-
 function add_planning_variables!(a::AbstractAsset, model::Model)
     for t in fieldnames(typeof(a))
         add_planning_variables!(getfield(a,t), model)
@@ -59,12 +51,7 @@ function add_operation_variables!(a::AbstractAsset, model::Model)
     return nothing
 end
 
-function add_all_model_constraints!(a::AbstractAsset, model::Model)
-    for t in fieldnames(typeof(a))
-        add_all_model_constraints!(getfield(a,t), model)
-    end
-    return nothing
-end
+
 
 # function generate_model(system::System)
 #     # objects = [system.locations..., system.assets...]

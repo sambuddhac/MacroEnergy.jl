@@ -57,7 +57,7 @@ function make(::Type{NaturalGasHydrogen}, data::AbstractDict{Symbol, Any}, syste
     transform_data = validate_data(data[:transforms])
     natgashydrogen_transform = Transformation(;
         id = Symbol(transform_data[:id]),
-        timedata = deepcopy(system.time_data[Symbol(transform_data[:time_commodity])]),
+        timedata = system.time_data[Symbol(transform_data[:time_commodity])],
         constraints = get(transform_data, :constraints, [BalanceConstraint()])
     )
 

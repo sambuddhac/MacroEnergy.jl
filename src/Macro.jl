@@ -110,6 +110,9 @@ include("load_inputs/load_capacity_factor.jl")
 
 include("write_outputs/assets_capacity.jl")
 
+include("benders/benders_utility.jl")
+include("benders/benders_planning_problem.jl")
+
 export Electricity,
     Hydrogen,
     NaturalGas,

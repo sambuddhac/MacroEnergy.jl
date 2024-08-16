@@ -34,7 +34,7 @@ end
 function make_edge(id::Symbol,data::Dict{Symbol,Any}, time_data::TimeData, commodity::DataType, start_vertex::AbstractVertex, end_vertex::AbstractVertex)
     _edge = Edge{commodity}(;
         id = id,
-        timedata = deepcopy(time_data),
+        timedata = time_data,
         start_vertex = start_vertex,
         end_vertex = end_vertex,
         unidirectional = get(data,:unidirectional,false),

@@ -1,4 +1,4 @@
-function generate_planning_problem(system::Vector{Union{AbstractAsset, Edge, Node}},subperiod_indices::Vector{Int64})
+function generate_planning_problem(system::System,subperiod_indices::Vector{Int64})
 
     model = Model()
 
@@ -6,9 +6,9 @@ function generate_planning_problem(system::Vector{Union{AbstractAsset, Edge, Nod
 
     model[:eFixedCost] = AffExpr(0.0)
 
-    add_planning_variables!.(system,Ref(model))
+    add_planning_variables!(system, model)
 
-    add_planning_constraints!.(system, Ref(model))
+    add_planning_constraints!(system, model)
 
     @variable(model,vTHETA[w in subperiod_indices].>=0)
 
@@ -19,8 +19,9 @@ function generate_planning_problem(system::Vector{Union{AbstractAsset, Edge, Nod
 
 end
 
+
 function add_planning_constraints!(
-    y::Union{AbstractEdge,AbstractNode,AbstractTransformationEdge},
+    y::Union{AbstractEdge,AbstractVertex},
     model::Model,
 )
 
@@ -33,31 +34,29 @@ function add_planning_constraints!(
     return nothing
 end
 
-function add_planning_constraints!(y::AbstractTransform, model::Model)
 
-    for ct in all_constraints(y)
-        if isa(ct,PlanningConstraint)
-            add_model_constraint!(ct, y, model)
-        end
-    end
+function add_planning_constraints!(system::System,model::Model)
 
-    return nothing
+    add_planning_constraints!.(system.locations, Ref(model))
+
+    add_planning_constraints!.(system.assets, Ref(model))
+
 end
 
 function add_planning_constraints!(a::AbstractAsset, model::Model)
-    for t in fieldnames(a)
+    for t in fieldnames(typeof(a))
         add_planning_constraints!(getfield(a,t), model)
     end
     return nothing
 end
 
-function init_planning_problem(system::Vector{Union{AbstractAsset, Edge, Node}},subperiod_indices::Vector{Int64})
+function init_planning_problem(system::System,subperiod_indices::Vector{Int64})
 
     planning_problem = generate_planning_problem(system,subperiod_indices)
 
     planning_variables = name.(setdiff(all_variables(planning_problem),[planning_problem[:vREF];planning_problem[:vTHETA]]));
 
-    planning_optimizer = optimizer_with_attributes(()->Gurobi.Optimizer(GRB_ENV[]),"Method"=>2,"BarConvTol"=>1e-3,"Crossover"=>0,"MIPGap"=>1e-3)
+    planning_optimizer = optimizer_with_attributes(()->Main.Gurobi.Optimizer(Main.GRB_ENV),"Method"=>2,"BarConvTol"=>1e-3,"Crossover"=>0,"MIPGap"=>1e-3)
 
     set_optimizer(planning_problem,planning_optimizer)
 

@@ -38,7 +38,7 @@ function make(::Type{FuelCell}, data::AbstractDict{Symbol, Any}, system::System)
 
     fuelcell = Transformation(;
     id = Symbol(transform_data[:id]),
-    timedata = deepcopy(system.time_data[Symbol(transform_data[:time_commodity])]),
+    timedata = system.time_data[Symbol(transform_data[:time_commodity])],
     constraints = get(transform_data, :constraints, [BalanceConstraint()])
     )
 

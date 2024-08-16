@@ -14,7 +14,7 @@ function make_node(data::Dict{Symbol,Any}, time_data::TimeData, commodity::DataT
         id = Symbol(data[:id]),
         demand = get(data, :demand, Vector{Float64}()),
         demand_header = get(data, :demand_header, nothing),
-        timedata = deepcopy(time_data),
+        timedata = time_data,
         max_nsd = get(data, :max_nsd, [0.0]),
         price_nsd = get(data, :price_nsd, [0.0]),
         price_unmet_policy = get(data, :price_unmet_policy, Dict{DataType,Float64}()),

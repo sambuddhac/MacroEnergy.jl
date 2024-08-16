@@ -38,7 +38,7 @@ function make(::Type{Electrolyzer}, data::AbstractDict{Symbol, Any}, system::Sys
 
     electrolyzer = Transformation(;
     id = Symbol(transform_data[:id]),
-    timedata = deepcopy(system.time_data[Symbol(transform_data[:time_commodity])]),
+    timedata = system.time_data[Symbol(transform_data[:time_commodity])],
     constraints = get(transform_data, :constraints, [BalanceConstraint()])
     )
 
