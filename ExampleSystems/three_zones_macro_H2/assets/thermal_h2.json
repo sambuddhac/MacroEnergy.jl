@@ -1,33 +1,37 @@
 {
-    "ng": {
-        "type": "NaturalGasPower",
+    "smr": {
+        "type": "NaturalGasHydrogen",
         "global_data": {
             "nodes": {},
             "transforms": {
-                "id": "natgas_power",
-                "time_commodity": "Electricity",
+                "id": "natgas_hydrogen",
+                "time_commodity": "Hydrogen",
+                "efficiency_rate": 0.668437978290351,
+                "emission_rate":0.181048235160161,
                 "constraints": {
                     "balance" : true
                 }
             },
             "edges": {
-                "elec": {
-                    "id": "E",
-                    "type": "Electricity",
+                "h2": {
+                    "id": "H2",
+                    "type": "Hydrogen",
                     "uc": true,
                     "unidirectional": true,
                     "has_planning_variables": true,
                     "can_retire": true,
                     "can_expand": true,
-                    "min_up_time": 6,
-                    "min_down_time": 6,
-                    "ramp_up_fraction": 0.64,
-                    "ramp_down_fraction": 0.64,
-                    "startup_cost": 91,
-                    "startup_fuel": 0.58614214,
+                    "min_up_time": 3,
+                    "min_down_time": 3,
+                    "ramp_up_fraction": 0.5,
+                    "ramp_down_fraction": 0.5,
+                    "startup_cost": 0.15,
+                    "startup_fuel": 0.0,
+                    "min_flow_fraction": 0.9,
                     "existing_capacity": 0,
-                    "capacity_size": 250,
-                    "investment_cost": 65400,
+                    "capacity_size": 305.53611,
+                    "investment_cost": 90987.60864,
+                    "fixed_om_cost": 4276.417606,
                     "constraints": {
                         "capacity": true,
                         "ramping_limit": true,
@@ -53,18 +57,12 @@
         },
         "instance_data": [
             {
-                "id": "ng_MA",
+                "id": "smr_MA",
                 "nodes": {},
-                "transforms": {
-                    "heat_rate":2.1775180500999998,
-                    "emission_rate":0.181048235160161
-                },
+                "transforms": {},
                 "edges": {
-                    "elec": {
-                        "fixed_om_cost": 10287,
-                        "variable_om_cost": 3.55,
-                        "min_flow_fraction": 0.468,
-                        "end_vertex": "elec_MA"
+                    "h2": {
+                        "end_vertex": "h2_MA"
                     },
                     "natgas": {
                         "price_header": "natgas_MA",
@@ -77,18 +75,12 @@
                 "storage": {}
             },
             {
-                "id": "ng_CT",
+                "id": "smr_CT",
                 "nodes": {},
-                "transforms": {
-                    "heat_rate":2.0866660184,
-                    "emission_rate":0.181048235160161
-                },
+                "transforms": {},
                 "edges": {
-                    "elec": {
-                        "fixed_om_cost": 9698,
-                        "variable_om_cost": 3.57,
-                        "min_flow_fraction": 0.338,
-                        "end_vertex": "elec_CT"
+                    "h2": {
+                        "end_vertex": "h2_CT"
                     },
                     "natgas": {
                         "price_header": "natgas_CT",
@@ -101,18 +93,12 @@
                 "storage": {}
             },
             {
-                "id": "ng_ME",
+                "id": "smr_ME",
                 "nodes": {},
-                "transforms": {
-                    "heat_rate": 3.6985569033999997,
-                    "emission_rate":0.181048235160161
-                },
+                "transforms": {},
                 "edges": {
-                    "elec": {
-                        "fixed_om_cost": 16291,
-                        "variable_om_cost": 4.5,
-                        "min_flow_fraction": 0.474,
-                        "end_vertex": "elec_ME"
+                    "h2": {
+                        "end_vertex": "h2_ME"
                     },
                     "natgas": {
                         "price_header": "natgas_ME",

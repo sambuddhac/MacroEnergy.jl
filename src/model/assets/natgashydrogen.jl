@@ -1,56 +1,95 @@
-struct NaturalGasH2 <: AbstractAsset
-    natgash2_transform::Transformation
-    h2_tedge::Union{TEdge{Hydrogen},TEdgeWithUC{Hydrogen}}
-    ng_tedge::TEdge{NaturalGas}
-    co2_tedge::TEdge{CO2}
+struct NaturalGasHydrogen <: AbstractAsset
+    natgashydrogen_transform::Transformation
+    h2_edge::Union{Edge{Hydrogen},EdgeWithUC{Hydrogen}}
+    ng_edge::Edge{NaturalGas}
+    co2_edge::Edge{CO2}
 end
 
-function make_natgash2(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, nodes::Dict{Symbol,Node})
-    ## conversion process (node)
-    _smr_transform = Transformation(;
-        id=:NaturalGasH2,
-        timedata=time_data[:Hydrogen],
-        stoichiometry_balance_names=get(data, :stoichiometry_balance_names, [:energy, :emissions])
+id(smr::NaturalGasHydrogen) = smr.natgashydrogen_transform.id
+
+function add_capacity_factor!(smr::NaturalGasHydrogen, capacity_factor::Vector{Float64})
+    smr.h2_edge.capacity_factor = capacity_factor
+end
+
+"""
+    make(::Type{NaturalGasHydrogen}, data::AbstractDict{Symbol, Any}, system::System) -> NaturalGasHydrogen
+
+    Necessary data fields:
+     - transforms: Dict{Symbol, Any}
+        - id: String
+        - time_commodity: String
+        - efficiency_rate: Float64
+        - emission_rate: Float64
+        - constraints: Vector{AbstractTypeConstraint}
+    - edges: Dict{Symbol, Any}
+        - h2: Dict{Symbol, Any}
+            - id: String
+            - end_vertex: String
+            - unidirectional: Bool
+            - has_planning_variables: Bool
+            - can_retire: Bool
+            - can_expand: Bool
+            - min_up_time: Int
+            - min_down_time: Int
+            - startup_cost: Float64
+            - startup_fuel: Float64
+            - startup_fuel_balance_id: Symbol
+            - constraints: Vector{AbstractTypeConstraint}
+        - natgas: Dict{Symbol, Any}
+            - id: String
+            - start_vertex: String
+            - unidirectional: Bool
+            - has_planning_variables: Bool
+            - can_retire: Bool
+            - can_expand: Bool
+            - constraints: Vector{AbstractTypeConstraint}
+        - co2: Dict{Symbol, Any}
+            - id: String
+            - end_vertex: String
+            - unidirectional: Bool
+            - has_planning_variables: Bool
+            - can_retire: Bool
+            - can_expand: Bool
+            - constraints: Vector{AbstractTypeConstraint}
+"""
+function make(::Type{NaturalGasHydrogen}, data::AbstractDict{Symbol, Any}, system::System)
+
+    transform_data = validate_data(data[:transforms])
+    natgashydrogen_transform = Transformation(;
+        id = Symbol(transform_data[:id]),
+        timedata = deepcopy(system.time_data[Symbol(transform_data[:time_commodity])]),
+        constraints = get(transform_data, :constraints, [BalanceConstraint()])
     )
-    add_constraints!(_smr_transform, data)
 
-    ## tedges
-    # step 1: get the edge data
-    # step 2: set the id
-    # step 3: get the correct node
-    # step 4: make the edge
+    h2_edge_data = validate_data(data[:edges][:h2])
+    h2_start_node = natgashydrogen_transform
+    h2_end_node = find_node(system.locations, Symbol(h2_edge_data[:end_vertex]))
+    h2_edge = EdgeWithUC(Symbol(h2_edge_data[:id]),h2_edge_data, system.time_data[:Hydrogen],Hydrogen, h2_start_node,  h2_end_node );
+    h2_edge.constraints = get(h2_edge_data, :constraints, [CapacityConstraint(), RampingLimitConstraint(), MinUpTimeConstraint(), MinDownTimeConstraint()])
+    h2_edge.unidirectional = get(h2_edge_data, :unidirectional, true);
+    h2_edge.startup_fuel_balance_id = :energy;
 
-    ## hydrogen edge
-    _h2_tedge_data = get_tedge_data(data, :Hydrogen)
-    isnothing(_h2_tedge_data) && error("No hydrogen edge data found for NaturalGasH2")
-    _h2_tedge_data[:id] = :H2
-    _h2_node_id = Symbol(data[:nodes][:Hydrogen])
-    _h2_node = nodes[_h2_node_id]
-    _h2_tedge = make_tedge(_h2_tedge_data, time_data, _smr_transform, _h2_node)
+    ng_edge_data = validate_data(data[:edges][:natgas])
+    ng_start_node = find_node(system.locations, Symbol(ng_edge_data[:start_vertex]))
+    ng_end_node = natgashydrogen_transform
+    ng_edge = Edge(Symbol(ng_edge_data[:id]),ng_edge_data, system.time_data[:NaturalGas],NaturalGas, ng_start_node,  ng_end_node);
+    ng_edge.constraints = get(ng_edge_data, :constraints,  Vector{AbstractTypeConstraint}())
+    ng_edge.unidirectional = get(ng_edge_data, :unidirectional, true);
 
-    ## natural gas edge
-    _ng_tedge_data = get_tedge_data(data, :NaturalGas)
-    isnothing(_ng_tedge_data) && error("No natural gas edge data found for NaturalGasH2")
-    _ng_tedge_data[:id] = :NG
-    _ng_node_id = Symbol(data[:nodes][:NaturalGas])
-    _ng_node = nodes[_ng_node_id]
-    _ng_tedge = make_tedge(_ng_tedge_data, time_data, _smr_transform, _ng_node)
+    co2_edge_data = validate_data(data[:edges][:co2])
+    co2_start_node = natgashydrogen_transform
+    co2_end_node = find_node(system.locations, Symbol(co2_edge_data[:end_vertex]))
+    co2_edge = Edge(Symbol(co2_edge_data[:id]),co2_edge_data, system.time_data[:CO2],CO2, co2_start_node,  co2_end_node);
+    co2_edge.constraints = get(co2_edge_data, :constraints,  Vector{AbstractTypeConstraint}())
+    co2_edge.unidirectional = get(co2_edge_data, :unidirectional, true);
 
-    ## co2 edge
-    _co2_tedge_data = get_tedge_data(data, :CO2)
-    isnothing(_co2_tedge_data) && error("No CO2 edge data found for NaturalGasH2")
-    _co2_tedge_data[:id] = :CO2
-    _co2_node_id = Symbol(data[:nodes][:CO2])
-    _co2_node = nodes[_co2_node_id]
-    _co2_tedge = make_tedge(_co2_tedge_data, time_data, _smr_transform, _co2_node)
+    natgashydrogen_transform.balance_data =  Dict(:energy=>Dict(h2_edge.id=>1.0,
+                                                        ng_edge.id=>get(transform_data,:efficiency_rate,1.0),
+                                                        co2_edge.id=>0.0),
+                                          :emissions=>Dict(ng_edge.id=>get(transform_data,:emission_rate,0.0),
+                                                            co2_edge.id=>1.0,
+                                                            h2_edge.id=>0.0))
 
-    ## add reference to tedges in transformation
-    _TEdges = Dict(:H2=>_h2_tedge, :NG=>_ng_tedge, :CO2=>_co2_tedge)
-    _smr_transform.TEdges = _TEdges
 
-    return NaturalGasH2(_smr_transform, _h2_tedge, _ng_tedge, _co2_tedge)
-end
-
-function add_capacity_factor!(ng::NaturalGasH2, capacity_factor::Vector{Float64})
-    ng.h2_tedge.capacity_factor = capacity_factor
+    return NaturalGasHydrogen(natgashydrogen_transform, h2_edge, ng_edge, co2_edge)
 end

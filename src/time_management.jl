@@ -25,10 +25,10 @@ function timestepbefore(t::Int, h::Int,subperiods::Vector{StepRange{Int64,Int64}
 
 end
 
-time_interval(y::Union{AbstractNode,AbstractEdge,AbstractTransform,AbstractTransformationEdge}) = y.timedata.time_interval;
-subperiods(y::Union{AbstractNode,AbstractEdge,AbstractTransform,AbstractTransformationEdge}) = y.timedata.subperiods;
-subperiod_weight(y::Union{AbstractNode,AbstractEdge,AbstractTransform,AbstractTransformationEdge},w::Int64) = y.timedata.subperiod_weights[w];
-get_subperiod(y::Union{AbstractNode,AbstractEdge,AbstractTransform,AbstractTransformationEdge},w::Int64) = subperiods(y)[w];
-subperiod_indices(y::Union{AbstractNode,AbstractEdge,AbstractTransform,AbstractTransformationEdge}) = y.timedata.subperiod_indices;
-current_subperiod(y::Union{AbstractNode,AbstractEdge,AbstractTransform,AbstractTransformationEdge},t::Int64) = subperiod_indices(y)[findfirst(t .∈ subperiods(y))];
-hours_per_timestep(y::Union{AbstractNode,AbstractEdge,AbstractTransform,AbstractTransformationEdge}) = y.timedata.hours_per_timestep;
+time_interval(y::Union{AbstractVertex,AbstractEdge}) = y.timedata.time_interval;
+subperiods(y::Union{AbstractVertex,AbstractEdge}) = y.timedata.subperiods;
+subperiod_weight(y::Union{AbstractVertex,AbstractEdge},w::Int64) = y.timedata.subperiod_weights[w];
+get_subperiod(y::Union{AbstractVertex,AbstractEdge},w::Int64) = subperiods(y)[w];
+subperiod_indices(y::Union{AbstractVertex,AbstractEdge}) = y.timedata.subperiod_indices;
+current_subperiod(y::Union{AbstractVertex,AbstractEdge},t::Int64) = subperiod_indices(y)[findfirst(t .∈ subperiods(y))];
+hours_per_timestep(y::Union{AbstractVertex,AbstractEdge}) = y.timedata.hours_per_timestep;

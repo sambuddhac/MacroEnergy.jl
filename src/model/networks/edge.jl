@@ -33,10 +33,10 @@ end
 
 function make_edge(id::Symbol,data::Dict{Symbol,Any}, time_data::TimeData, commodity::DataType, start_vertex::AbstractVertex, end_vertex::AbstractVertex)
     _edge = Edge{commodity}(;
-        timedata = time_data[Symbol(commodity)],
+        id = id,
+        timedata = deepcopy(time_data),
         start_vertex = start_vertex,
         end_vertex = end_vertex,
-        timedata = time_data,
         unidirectional = get(data,:unidirectional,false),
         has_planning_variables = get(data,:has_planning_variables,false),
         can_retire = get(data,:can_retire,false),
@@ -159,13 +159,9 @@ function add_operation_variables!(e::Edge, model::Model)
         )
     end
 
-    for i in balance_ids(start_vertex(e))
-        add_to_expression!.(get_balance(start_vertex(e),i), -balance_data(e,start_vertex(e),i)*flow(e))
-    end
+    update_balance!(e,start_vertex(e),-1)
 
-    for i in balance_ids(end_vertex(e))
-        add_to_expression!.(get_balance(end_vertex(e),i), balance_data(e,end_vertex(e),i)*flow(e))
-    end
+    update_balance!(e,end_vertex(e),1)
 
     if isa(start_vertex(e),Storage)
         @constraint(
@@ -284,22 +280,9 @@ function add_operation_variables!(e::EdgeWithUC, model::Model)
         base_name = "vSHUT_$(get_id(e))"
     )
 
-    for i in balance_ids(start_vertex(e))
-        add_to_expression!.(get_balance(start_vertex(e),i), -balance_data(e,start_vertex(e),i)*flow(e))
-    end
+    update_balance!(e,start_vertex(e),-1)
 
-    for i in balance_ids(end_vertex(e))
-        add_to_expression!.(get_balance(end_vertex(e),i),  balance_data(e,end_vertex(e),i)*flow(e))
-    end
-
-    if startup_fuel(e)>0
-        ii = startup_fuel_balance_id(e);
-        if ii ∈ balance_ids(start_vertex(e))
-            add_to_expression!.(get_balance(start_vertex(e),ii), -startup_fuel(e)*capacity_size(e)*ustart(e))
-        elseif ii ∈ balance_ids(end_vertex(e))
-            add_to_expression!(get_balance(end_vertex(e),ii), startup_fuel(e)*capacity_size(e)*ustart(e))
-        end
-    end
+    update_balance!(e,end_vertex(e),1)
 
     for t in time_interval(e)
 
@@ -333,3 +316,63 @@ function add_operation_variables!(e::EdgeWithUC, model::Model)
     return nothing
 end
 
+
+function edges(assets::Vector{AbstractAsset})
+    edges = Vector{AbstractEdge}();
+    for a in assets
+        for f in fieldnames(typeof(a))
+            if isa(getfield(a, f), AbstractEdge)
+                push!(edges,getfield(a, f))
+            end
+        end
+    end
+    return edges
+end 
+
+function update_balance!(e::Edge, v::AbstractVertex, s::Int64)
+    for i in balance_ids(v)
+        add_to_expression!.(get_balance(v,i), s*balance_data(e,v,i)*flow(e))
+    end
+end
+
+function update_balance!(e::EdgeWithUC,v::AbstractVertex, s::Int64)
+
+    for i in balance_ids(v)
+        add_to_expression!.(get_balance(v,i), s*balance_data(e,v,i)*flow(e))
+    end
+    
+    if startup_fuel(e)>0
+        ii = startup_fuel_balance_id(e);
+        if ii ∈ balance_ids(v)
+            add_to_expression!.(get_balance(v,ii), s*startup_fuel(e)*capacity_size(e)*ustart(e))
+        end
+    end
+
+end
+
+function update_balance!(e::Edge, v::Transformation, s::Int64)
+    for t in time_interval(e)
+        transform_time = ceil(Int,(hours_per_timestep(e) * t)/hours_per_timestep(v));
+        for i in balance_ids(v)
+            add_to_expression!(get_balance(v,i,transform_time), s*balance_data(e,v,i)*flow(e,t))
+        end
+    end
+end
+
+function update_balance!(e::EdgeWithUC,v::Transformation, s::Int64)
+
+    for t in time_interval(e)
+        transform_time = ceil(Int,(hours_per_timestep(e) * t)/hours_per_timestep(v));
+        for i in balance_ids(v)
+            add_to_expression!(get_balance(v,i,transform_time), s*balance_data(e,v,i)*flow(e,t))
+        end
+        if startup_fuel(e)>0
+            ii = startup_fuel_balance_id(e);
+            if ii ∈ balance_ids(v)
+                add_to_expression!(get_balance(v,ii,transform_time), s*startup_fuel(e)*capacity_size(e)*ustart(e,t))
+            end
+        end
+    end
+    
+    
+end

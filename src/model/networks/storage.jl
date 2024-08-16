@@ -1,8 +1,8 @@
 
 Base.@kwdef mutable struct Storage{T} <: AbstractVertex
     @AbstractVertexBaseAttributes()
-    discharge_edge::Union{Nothing,Edge} = nothing
-    charge_edge::Union{Nothing,Edge} = nothing
+    discharge_edge::Union{Nothing,AbstractEdge} = nothing
+    charge_edge::Union{Nothing,AbstractEdge} = nothing
     min_capacity_storage::Float64 = 0.0
     max_capacity_storage::Float64 = Inf
     existing_capacity_storage::Float64 = 0.0
@@ -19,6 +19,7 @@ commodity_type(g::Storage{T}) where {T} = T;
 all_constraints(g::Storage) = g.constraints;
 min_duration(g::Storage) = g.min_duration;
 max_duration(g::Storage) = g.max_duration;
+min_storage_level(g::Storage) = g.min_storage_level;
 existing_capacity_storage(g::Storage) = g.existing_capacity_storage;
 new_capacity_storage(g::Storage) = g.planning_vars[:new_capacity_storage];
 ret_capacity_storage(g::Storage) = g.planning_vars[:ret_capacity_storage];
@@ -30,6 +31,7 @@ storage_level(g::Storage,t::Int64) = storage_level(g)[t];
 storage_loss_fraction(g::Storage) = g.storage_loss_fraction;
 discharge_edge(g::Storage) = g.discharge_edge;
 charge_edge(g::Storage) = g.charge_edge;
+
 
 function add_planning_variables!(g::Storage,model::Model)
     g.planning_vars[:new_capacity_storage] = @variable(

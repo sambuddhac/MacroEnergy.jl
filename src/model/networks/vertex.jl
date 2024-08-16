@@ -17,8 +17,4 @@ balance_data(v::AbstractVertex,i::Symbol) = v.balance_data[i];
 get_balance(v::AbstractVertex,i::Symbol) = v.operation_expr[i];
 get_balance(v::AbstractVertex,i::Symbol,t::Int64) = get_balance(v,i)[t];
 
-time_interval(v::AbstractVertex) = v.timedata.time_interval;
-subperiods(v::AbstractVertex) = v.timedata.subperiods;
-subperiod_weight(v::AbstractVertex,w::StepRange{Int64, Int64}) = v.timedata.subperiod_weights[w];
-current_subperiod(v::AbstractVertex,t::Int64) = subperiods(v)[findfirst(t .∈ subperiods(v))];
 all_constraints(v::AbstractVertex) = v.constraints;
