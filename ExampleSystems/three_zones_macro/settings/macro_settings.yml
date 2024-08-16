@@ -1,5 +1,6 @@
-UCommit: true
-NetworkExpansion: true
-
+{
+  "UCommit": true,
+  "NetworkExpansion": true
+}
 
 

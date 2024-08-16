@@ -3,59 +3,54 @@ struct SolarPV <: AbstractAsset
     edge::Edge{Electricity}
 end
 
-# function make_solarpv(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, node_out::Node)
-#     _energy_transform, _tedge = make_vre(data, time_data, node_out)
-#     return SolarPV(_energy_transform, _tedge)
-# end
-
 struct WindTurbine <: AbstractAsset
     energy_transform::Transformation
     edge::Edge{Electricity}
 end
 
-# function make_windturbine(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, node_out::Node)
-#     _energy_transform, _tedge = make_vre(data, time_data, node_out)
-#     return WindTurbine(_energy_transform, _tedge)
-# end
 
 const VRE = Union{
     SolarPV, WindTurbine
 }
 
-# function make_vre(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, node_out::Node)
-#     #============================================================
-#     This function makes a VRE (SolarPV or WindTurbine) from the 
-#     data Dict. It is a helper function for load_transformations!.
-#     ============================================================#
-
-#     ## conversion process (node)
-#     _energy_transform = Transformation(;
-#         id=:EnergyTransform,
-#         timedata=time_data[:Electricity],
-#         # Note that this transformation does not 
-#         # have a stoichiometry balance because the 
-#         # sunshine is exogenous
-#     )
-#     add_constraints!(_energy_transform, data)
-
-#     ## electricity edge
-#     # get electricity edge data
-#     _tedge_data = get_tedge_data(data, :Electricity)
-#     isnothing(_tedge_data) && error("No electricity edge data found for VRE")
-#     # set the id
-#     _tedge_data[:id] = :E
-#     # make the edge
-#     _tedge = make_tedge(_tedge_data, time_data, _energy_transform, node_out)
-
-#     ## add reference to tedges in transformation
-#     _TEdges = Dict(:E=>_tedge)
-#     _energy_transform.TEdges = _TEdges
-
-#     return _energy_transform, _tedge
-# end
-
 id(g::VRE) = g.energy_transform.id
 
 function add_capacity_factor!(s::VRE, capacity_factor::Vector{Float64})
     s.edge.capacity_factor = capacity_factor
+end
+
+"""
+    make(::Type{<:VRE}, data::AbstractDict{Symbol, Any}, system::System) -> VRE
+    
+    VRE is an alias for Union{SolarPV, WindTurbine}
+
+    Necessary data fields:
+     - transforms: Dict{Symbol, Any}
+        - id: String
+        - time_commodity: String
+    - edges: Dict{Symbol, Any}
+        - id: String
+        - end_vertex: String
+        - unidirectional: Bool
+        - has_planning_variables: Bool
+        - can_retire: Bool
+        - can_expand: Bool
+        - constraints: Vector{AbstractTypeConstraint}
+"""
+function make(asset_type::Type{<:VRE}, data::AbstractDict{Symbol, Any}, system::System)
+    transform_data = validate_data(data[:transforms])
+    vre_transform = Transformation(;
+        id = Symbol(transform_data[:id]),
+        timedata = system.time_data[Symbol(transform_data[:time_commodity])],
+    )
+
+    elec_edge_data = validate_data(data[:edges])
+    elec_start_node = vre_transform
+    elec_end_node = find_node(system.locations, Symbol(elec_edge_data[:end_vertex]))
+
+    elec_edge = Edge(Symbol(elec_edge_data[:id]),elec_edge_data, system.time_data[:Electricity],Electricity, elec_start_node,  elec_end_node );
+    elec_edge.constraints = get(elec_edge_data, :constraints, [CapacityConstraint()])
+    elec_edge.unidirectional = get(elec_edge_data, :unidirectional, true);
+
+    return asset_type(vre_transform, elec_edge)
 end

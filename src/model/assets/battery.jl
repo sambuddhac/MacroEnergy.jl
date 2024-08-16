@@ -6,45 +6,82 @@ end
 
 id(b::Battery) = b.battery_transform.id
 
-# function make_battery(data::Dict{Symbol,Any}, time_data::Dict{Symbol,TimeData}, nodes::Dict{Symbol,Node})
-#     ## conversion process (node)
-#     _battery_transform = Transformation(;
-#         id=:Battery,
-#         timedata=time_data[:Electricity],
-#         stoichiometry_balance_names=get(data, :stoichiometry_balance_names, [:energy]),
-#         can_retire = get(data, :can_retire, false),
-#         can_expand = get(data, :can_expand, false),
-#         existing_capacity_storage = get(data, :existing_capacity_storage, 0.0),
-#         investment_cost_storage = get(data, :investment_cost_storage, 0.0),
-#         fixed_om_cost_storage = get(data, :fixed_om_cost_storage, 0.0),
-#         storage_loss_fraction = get(data, :storage_loss_fraction, 0.0),
-#         min_duration = get(data, :min_duration, 0.0),
-#         max_duration = get(data, :max_duration, 0.0),
-#         min_storage_level = get(data, :min_storage_level, 0.0),
-#         min_capacity_storage = get(data, :min_capacity_storage, 0.0),
-#         max_capacity_storage = get(data, :max_capacity_storage, Inf),
-#     )
-#     add_constraints!(_battery_transform, data)
+"""
+    make(::Type{Battery}, data::AbstractDict{Symbol, Any}, system::System) -> Battery
 
-#     ## discharge edge
-#     _discharge_tedge_data = get_tedge_data(data, :discharge)
-#     isnothing(_discharge_tedge_data) && error("No discharge edge data found for Battery")
-#     _discharge_tedge_data[:id] = :discharge
-#     _discharge_node_id = Symbol(data[:nodes][:Electricity])
-#     _discharge_node = nodes[_discharge_node_id]
-#     _discharge_tedge = make_tedge(_discharge_tedge_data, time_data, _battery_transform, _discharge_node)
+    Necessary data fields:
+     - storage: Dict{Symbol, Any}
+        - id: String
+        - commodity: String
+        - can_retire: Bool
+        - can_expand: Bool
+        - existing_capacity_storage: Float64
+        - investment_cost_storage: Float64
+        - fixed_om_cost_storage: Float64
+        - storage_loss_fraction: Float64
+        - min_duration: Float64
+        - max_duration: Float64
+        - min_storage_level: Float64
+        - min_capacity_storage: Float64
+        - max_capacity_storage: Float64
+        - constraints: Vector{AbstractTypeConstraint}
+     - edges: Dict{Symbol, Any}
+        - charge: Dict{Symbol, Any}
+            - id: String
+            - start_vertex: String
+            - unidirectional: Bool
+            - has_planning_variables: Bool
+            - efficiency: Float64
+        - discharge: Dict{Symbol, Any}
+            - id: String
+            - end_vertex: String
+            - unidirectional: Bool
+            - has_planning_variables: Bool
+            - can_retire: Bool
+            - can_expand: Bool
+            - efficiency
+            - constraints: Vector{AbstractTypeConstraint}
+"""
+function make(::Type{Battery}, data::AbstractDict{Symbol, Any}, system::System)
+    storage_data = validate_data(data[:storage])
+    commodity_symbol = Symbol(storage_data[:commodity])
+    commodity = commodity_types()[commodity_symbol]
+    battery_storage = Storage{commodity}(;
+        id = Symbol(storage_data[:id] * "_storage"),
+        timedata = system.time_data[commodity_symbol],
+        can_retire = get(storage_data, :can_retire, false),
+        can_expand = get(storage_data, :can_expand, false),
+        existing_capacity_storage = get(storage_data, :existing_capacity_storage, 0.0),
+        investment_cost_storage = get(storage_data, :investment_cost_storage, 0.0),
+        fixed_om_cost_storage = get(storage_data, :fixed_om_cost_storage, 0.0),
+        storage_loss_fraction = get(storage_data, :storage_loss_fraction, 0.0),
+        min_duration = get(storage_data, :min_duration, 0.0),
+        max_duration = get(storage_data, :max_duration, 0.0),
+        min_storage_level = get(storage_data, :min_storage_level, 0.0),
+        min_capacity_storage = get(storage_data, :min_capacity_storage, 0.0),
+        max_capacity_storage = get(storage_data, :max_capacity_storage, Inf),
+        balance_data = get(storage_data, :balance_data, Dict(:storage=>Dict(:discharge=>1/0.9,:charge=>0.9))),
+        constraints = get(storage_data, :constraints, [BalanceConstraint(), StorageCapacityConstraint(), StorageMaxDurationConstraint(), StorageMinDurationConstraint(), StorageSymmetricCapacityConstraint()])
+    )
 
-#     ## charge edge
-#     _charge_tedge_data = get_tedge_data(data, :charge)
-#     isnothing(_charge_tedge_data) && error("No charge edge data found for Battery")
-#     _charge_tedge_data[:id] = :charge
-#     _charge_node_id = Symbol(data[:nodes][:Electricity])
-#     _charge_node = nodes[_charge_node_id]
-#     _charge_tedge = make_tedge(_charge_tedge_data, time_data, _battery_transform, _charge_node)
+    charge_edge_data = validate_data(data[:edges][:charge])
+    charge_start_node = find_node(system.locations, Symbol(charge_edge_data[:start_vertex]))
+    charge_end_node = battery_storage
+    battery_charge = Edge(Symbol(data[:id] * "_charge"),charge_edge_data, system.time_data[commodity_symbol],commodity, charge_start_node,  charge_end_node)
+    battery_charge.unidirectional = get(charge_edge_data, :unidirectional, true);
 
-#     ## add reference to tedges in transformation
-#     _TEdges = Dict(:discharge=>_discharge_tedge, :charge=>_charge_tedge)
-#     _battery_transform.TEdges = _TEdges
+    discharge_edge_data = validate_data(data[:edges][:discharge])
+    discharge_start_node = battery_storage
+    discharge_end_node = find_node(system.locations, Symbol(discharge_edge_data[:end_vertex]))
+    battery_discharge = Edge(Symbol(data[:id] * "_discharge"),discharge_edge_data, system.time_data[commodity_symbol],commodity, discharge_start_node,  discharge_end_node);
+    battery_discharge.constraints = get(discharge_edge_data,:constraints,[CapacityConstraint(), RampingLimitConstraint()])
+    battery_discharge.unidirectional = get(discharge_edge_data, :unidirectional, true);
 
-#     return Battery(_battery_transform, _discharge_tedge, _charge_tedge)
-# end
+    battery_storage.discharge_edge = battery_discharge
+    battery_storage.charge_edge = battery_charge
+    battery_storage.balance_data =  Dict(:storage=>
+                                            Dict(battery_discharge.id=>1/get(discharge_edge_data,:efficiency,0.9),
+                                                battery_charge.id=>get(charge_edge_data,:efficiency,0.9)))
+
+    return Battery(battery_storage, battery_discharge, battery_charge)
+end

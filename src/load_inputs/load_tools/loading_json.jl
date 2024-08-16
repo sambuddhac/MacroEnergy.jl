@@ -112,59 +112,6 @@ function load_system_data!(system::System, file_path::AbstractString, default_fi
     return nothing
 end
 
-function load_system_data!(system::System, data::AbstractDict{Symbol, Any})::Nothing
-
-end
-
-# function load_system_data!(system::System, data::AbstractDict{Symbol, Any})::Nothing
-#     # For now, we can simply iterate over the dict of inputs
-#     # We can add special cases as we go
-#     if !haskey(data, :settings)
-#         error("No settings found in system data")
-#     else
-#         @info("Loading settings")
-#         if isa(value, AbstractDict{Symbol, Any})
-#             system.macro_settings = configure_settings(value)
-#         else
-#             @warn("No settings found. Using default settings")
-#             system.macro_settings = configure_settings(Dict{Symbol, Any}())
-#         end
-#     end
-#     delete!(data, :settings)
-
-#     if !haskey(data, :commodities)
-#         error("No commodities found in system data")
-#     else
-#         @info("Loading commodities")
-        
-#     end
-#     delete!(data, :assets)
-
-#     if !haskey(data, :locations)
-#         error("No locations found in system data")
-#     else
-#         @info("Loading locations")
-#         # load!(system, data[:locations])
-#         println("Skipping locations")
-#     end
-#     delete!(data, :locations)
-
-#     if !haskey(data, :assets)
-#         error("No assets found in system data")
-#     else
-#         @info("Loading assets")
-#         load!(system, data[:assets])
-#     end
-#     delete!(data, :assets)
-
-    
-
-#     for (key, value) in data
-#         println("Loading $key from $path")
-#         load!(system, value)
-#     end
-#     return nothing
-# end
 
 function load_default_system_data(default_file_path::String=joinpath(@__DIR__, "default_system_data.json"))::Dict{Symbol, Any}
     if isfile(default_file_path)
@@ -458,28 +405,6 @@ function write_json(file_path::AbstractString, data::Dict{Symbol, Any})::Nothing
     return nothing
 end
 
-# function add_constraint!(a::AbstractAsset, c::Type{<:AbstractTypeConstraint})
-#     for t in fieldnames(a)
-#         add_constraint!(getfield(a,t), c())
-#     end
-#     return nothing
-# end
-
-# function add_constraint!(t::T, c::Type{<:AbstractTypeConstraint}) where T<:Union{AbstractVertex, Edge, AbstractAsset}
-#     push!(t.constraints, c())
-#     return nothing
-# end
-
-# function add_constraints!(target::T, data::Dict{Symbol,Any}) where T<:Union{AbstractVertex, Edge, AbstractAsset}
-#     constraints = get(data, :constraints, nothing)
-#     if constraints !== nothing
-#         macro_constraints = constraint_types()
-#         for (k,v) in constraints
-#             v == true && add_constraint!(target, macro_constraints[k])
-#         end
-#     end
-#     return nothing
-# end
 
 function find_node(nodes_list::Vector{Node}, id::Symbol)
     for node in nodes_list
@@ -489,6 +414,10 @@ function find_node(nodes_list::Vector{Node}, id::Symbol)
     end
     error("Vertex $id not found")
     return nothing
+end
+
+function constraint_types(m::Module=Macro)
+    return all_subtypes(m, :AbstractTypeConstraint)
 end
 
 # Function to make a node. 
@@ -517,218 +446,113 @@ function make(commodity::Type{<:Commodity}, data::AbstractDict{Symbol, Any}, sys
     return node
 end
 
-"""
-    make(::Type{Battery}, data::AbstractDict{Symbol, Any}, system::System) -> Battery
 
-    Necessary data fields:
-     - storage: Dict{Symbol, Any}
-        - id: String
-        - commodity: String
-        - can_retire: Bool
-        - can_expand: Bool
-        - existing_capacity_storage: Float64
-        - investment_cost_storage: Float64
-        - fixed_om_cost_storage: Float64
-        - storage_loss_fraction: Float64
-        - min_duration: Float64
-        - max_duration: Float64
-        - min_storage_level: Float64
-        - min_capacity_storage: Float64
-        - max_capacity_storage: Float64
-        - constraints: Vector{AbstractTypeConstraint}
-     - edges: Dict{Symbol, Any}
-        - charge: Dict{Symbol, Any}
-            - id: String
-            - start_vertex: String
-            - unidirectional: Bool
-            - has_planning_variables: Bool
-            - efficiency: Float64
-        - discharge: Dict{Symbol, Any}
-            - id: String
-            - end_vertex: String
-            - unidirectional: Bool
-            - has_planning_variables: Bool
-            - can_retire: Bool
-            - can_expand: Bool
-            - efficiency
-            - constraints: Vector{AbstractTypeConstraint}
-"""
-function make(::Type{Battery}, data::AbstractDict{Symbol, Any}, system::System)
-    storage_data = validate_data(data[:storage])
-    commodity_symbol = Symbol(storage_data[:commodity])
-    commodity = commodity_types()[commodity_symbol]
-    battery_storage = Storage{commodity}(;
-        id = Symbol(storage_data[:id] * "_storage"),
-        timedata = system.time_data[commodity_symbol],
-        can_retire = get(storage_data, :can_retire, false),
-        can_expand = get(storage_data, :can_expand, false),
-        existing_capacity_storage = get(storage_data, :existing_capacity_storage, 0.0),
-        investment_cost_storage = get(storage_data, :investment_cost_storage, 0.0),
-        fixed_om_cost_storage = get(storage_data, :fixed_om_cost_storage, 0.0),
-        storage_loss_fraction = get(storage_data, :storage_loss_fraction, 0.0),
-        min_duration = get(storage_data, :min_duration, 0.0),
-        max_duration = get(storage_data, :max_duration, 0.0),
-        min_storage_level = get(storage_data, :min_storage_level, 0.0),
-        min_capacity_storage = get(storage_data, :min_capacity_storage, 0.0),
-        max_capacity_storage = get(storage_data, :max_capacity_storage, Inf),
-        balance_data = get(storage_data, :balance_data, Dict(:storage=>Dict(:discharge=>1/0.9,:charge=>0.9))),
-        constraints = get(storage_data, :constraints, [BalanceConstraint(), StorageCapacityConstraint(), StorageMaxDurationConstraint(), StorageMinDurationConstraint(), StorageSymmetricCapacityConstraint()])
-    )
-
-    charge_edge_data = validate_data(data[:edges][:charge])
-    charge_start_node = find_node(system.locations, Symbol(charge_edge_data[:start_vertex]))
-    charge_end_node = battery_storage
-    battery_charge = Edge(Symbol(data[:id] * "_charge"),charge_edge_data, system.time_data[commodity_symbol],commodity, charge_start_node,  charge_end_node)
-    battery_charge.unidirectional = get(charge_edge_data, :unidirectional, true);
-
-    discharge_edge_data = validate_data(data[:edges][:discharge])
-    discharge_start_node = battery_storage
-    discharge_end_node = find_node(system.locations, Symbol(discharge_edge_data[:end_vertex]))
-    battery_discharge = Edge(Symbol(data[:id] * "_discharge"),discharge_edge_data, system.time_data[commodity_symbol],commodity, discharge_start_node,  discharge_end_node);
-    battery_discharge.constraints = get(discharge_edge_data,:constraints,[CapacityConstraint(), RampingLimitConstraint()])
-    battery_discharge.unidirectional = get(discharge_edge_data, :unidirectional, true);
-
-    battery_storage.discharge_edge = battery_discharge
-    battery_storage.charge_edge = battery_charge
-    battery_storage.balance_data =  Dict(:storage=>
-                                            Dict(battery_discharge.id=>1/get(discharge_edge_data,:efficiency,0.9),
-                                                battery_charge.id=>get(charge_edge_data,:efficiency,0.9)))
-
-    return Battery(battery_storage, battery_discharge, battery_charge)
+function validate_id!(data::AbstractDict{Symbol,Any})
+    if !haskey(data, :id)
+        throw(ArgumentError("Edge data must have an id"))
+    end
+    return nothing
 end
 
-"""
-    make(::Type{NaturalGasPower}, data::AbstractDict{Symbol, Any}, system::System) -> NaturalGasPower
-
-    Necessary data fields:
-     - transforms: Dict{Symbol, Any}
-        - id: String
-        - time_commodity: String
-        - heat_rate: Float64
-        - emission_rate: Float64
-        - constraints: Vector{AbstractTypeConstraint}
-    - edges: Dict{Symbol, Any}
-        - elec: Dict{Symbol, Any}
-            - id: String
-            - end_vertex: String
-            - unidirectional: Bool
-            - has_planning_variables: Bool
-            - can_retire: Bool
-            - can_expand: Bool
-            - min_up_time: Int
-            - min_down_time: Int
-            - startup_cost: Float64
-            - startup_fuel: Float64
-            - startup_fuel_balance_id: Symbol
-            - constraints: Vector{AbstractTypeConstraint}
-        - natgas: Dict{Symbol, Any}
-            - id: String
-            - start_vertex: String
-            - unidirectional: Bool
-            - has_planning_variables: Bool
-            - can_retire: Bool
-            - can_expand: Bool
-            - constraints: Vector{AbstractTypeConstraint}
-        - co2: Dict{Symbol, Any}
-            - id: String
-            - end_vertex: String
-            - unidirectional: Bool
-            - has_planning_variables: Bool
-            - can_retire: Bool
-            - can_expand: Bool
-            - constraints: Vector{AbstractTypeConstraint}
-"""
-function make(::Type{NaturalGasPower}, data::AbstractDict{Symbol, Any}, system::System)
-
-    transform_data = validate_data(data[:transforms])
-    natgas_transform = Transformation(;
-        id = Symbol(transform_data[:id]),
-        timedata = system.time_data[Symbol(transform_data[:time_commodity])],
-        constraints = get(transform_data, :constraints, [BalanceConstraint()])
-    )
-
-    elec_edge_data = validate_data(data[:edges][:elec])
-    elec_start_node = natgas_transform
-    elec_end_node = find_node(system.locations, Symbol(elec_edge_data[:end_vertex]))
-    elec_edge = EdgeWithUC(Symbol(elec_edge_data[:id]),elec_edge_data, system.time_data[:Electricity],Electricity, elec_start_node,  elec_end_node );
-    elec_edge.constraints = get(elec_edge_data, :constraints, [CapacityConstraint(), RampingLimitConstraint(), MinUpTimeConstraint(), MinDownTimeConstraint()])
-    elec_edge.unidirectional = get(elec_edge_data, :unidirectional, true);
-    elec_edge.startup_fuel_balance_id = :energy;
-
-    ng_edge_data = validate_data(data[:edges][:natgas])
-    ng_start_node = find_node(system.locations, Symbol(ng_edge_data[:start_vertex]))
-    ng_end_node = natgas_transform
-    ng_edge = Edge(Symbol(ng_edge_data[:id]),ng_edge_data, system.time_data[:NaturalGas],NaturalGas, ng_start_node,  ng_end_node);
-    ng_edge.constraints = get(ng_edge_data, :constraints,  Vector{AbstractTypeConstraint}())
-    ng_edge.unidirectional = get(ng_edge_data, :unidirectional, true);
-
-    co2_edge_data = validate_data(data[:edges][:co2])
-    co2_start_node = natgas_transform
-    co2_end_node = find_node(system.locations, Symbol(co2_edge_data[:end_vertex]))
-    co2_edge = Edge(Symbol(co2_edge_data[:id]),co2_edge_data, system.time_data[:CO2],CO2, co2_start_node,  co2_end_node);
-    co2_edge.constraints = get(co2_edge_data, :constraints,  Vector{AbstractTypeConstraint}())
-    co2_edge.unidirectional = get(co2_edge_data, :unidirectional, true);
-
-    natgas_transform.balance_data =  Dict(:energy=>Dict(elec_edge.id=>get(transform_data,:heat_rate,1.0),
-                                                        ng_edge.id=>1.0,
-                                                        co2_edge.id=>0.0),
-                                          :emissions=>Dict(ng_edge.id=>get(transform_data,:emission_rate,0.0),
-                                                            co2_edge.id=>1.0,
-                                                            elec_edge.id=>0.0))
-
-
-    return NaturalGasPower(natgas_transform, elec_edge, ng_edge, co2_edge)
+function validate_direction!(data::AbstractDict{Symbol,Any})
+    if haskey(data, :direction) && data[:direction] ∉ [:input, :output]
+        if data[:direction] == "input"
+            data[:direction] = :input
+        elseif data[:direction] == "output"
+            data[:direction] = :output
+        else
+            throw(ArgumentError("Invalid direction: $(data[:direction]) for TEdge $(data[:id])"))
+        end        
+    end
+    return nothing
 end
 
-"""
-    make(::Type{<:VRE}, data::AbstractDict{Symbol, Any}, system::System) -> VRE
-    
-    VRE is an alias for Union{SolarPV, WindTurbine}
-
-    Necessary data fields:
-     - transforms: Dict{Symbol, Any}
-        - id: String
-        - time_commodity: String
-    - edges: Dict{Symbol, Any}
-        - id: String
-        - end_vertex: String
-        - unidirectional: Bool
-        - has_planning_variables: Bool
-        - can_retire: Bool
-        - can_expand: Bool
-        - constraints: Vector{AbstractTypeConstraint}
-"""
-function make(asset_type::Type{<:VRE}, data::AbstractDict{Symbol, Any}, system::System)
-    transform_data = validate_data(data[:transforms])
-    vre_transform = Transformation(;
-        id = Symbol(transform_data[:id]),
-        timedata = system.time_data[Symbol(transform_data[:time_commodity])],
-    )
-
-    elec_edge_data = validate_data(data[:edges])
-    elec_start_node = vre_transform
-    elec_end_node = find_node(system.locations, Symbol(elec_edge_data[:end_vertex]))
-
-    elec_edge = Edge(Symbol(elec_edge_data[:id]),elec_edge_data, system.time_data[:Electricity],Electricity, elec_start_node,  elec_end_node );
-    elec_edge.constraints = get(elec_edge_data, :constraints, [CapacityConstraint()])
-    elec_edge.unidirectional = get(elec_edge_data, :unidirectional, true);
-
-    return asset_type(vre_transform, elec_edge)
+function validate_vector_symbol!(data::AbstractDict{Symbol,Any}, key::Symbol)
+    if haskey(data, key) && !isa(data[key], Vector{Symbol})
+        data[key] = Symbol.(data[key])
+    end
+    return nothing
 end
 
+function validate_single_symbol!(data::AbstractDict{Symbol,Any}, key::Symbol)
+    if haskey(data, key) && !isa(data[key], Symbol)
+        data[key] = Symbol(data[key])
+    end
+    return nothing
+end
 
+function validate_fuel_stoichiometry_name!(data::AbstractDict{Symbol,Any})
+    validate_single_symbol!(data, :fuel_stoichiometry_name)
+    validate_vector_symbol!(data, :fuel_stoichiometry_name)
+    return nothing
+end
 
-function make(asset_type::Type{<:PowerLine}, data::AbstractDict{Symbol, Any}, system::System)
+function validate_stoichiometry_balance_names!(data::AbstractDict{Symbol,Any})
+    validate_vector_symbol!(data, :stoichiometry_balance_names)
+    return nothing
+end
 
-    elec_edge_data = validate_data(data[:edges][:line])
+# FIXME: This function hides some important details about how constraints are declared
+function validate_constraints_data!(data::AbstractDict{Symbol,Any})
+    macro_constraints = constraint_types()
+    if haskey(data, :constraints) 
+        constraints = Vector{AbstractTypeConstraint}(undef, length(data[:constraints]))
+        for (counter, (k,v)) in enumerate(data[:constraints])
+            # We'll assume that they're all included if they're mentioned here
+            constraint_symbol = Symbol(join(push!(uppercasefirst.(split(string(k), "_")),"Constraint")))
+            constraints[counter] = macro_constraints[constraint_symbol]()
+        end
+        data[:constraints] = constraints
+    end
+    return nothing 
+end
 
-    elec_start_node = find_node(system.locations, Symbol(elec_edge_data[:start_vertex]))
-    elec_end_node = find_node(system.locations, Symbol(elec_edge_data[:end_vertex]))
+function validate_demand_header!(data::AbstractDict{Symbol,Any})
+    validate_single_symbol!(data, :demand_header)
+    return nothing
+end
 
-    
-    elec_edge = Edge(Symbol("E_"*elec_edge_data[:id]),elec_edge_data, system.time_data[:Electricity],Electricity, elec_start_node,  elec_end_node);
-    elec_edge.constraints = get(elec_edge_data, :constraints, [CapacityConstraint()])
+function validate_fuel_header!(data::AbstractDict{Symbol,Any})
+    validate_single_symbol!(data, :price_header)
+    return nothing
+end
 
+function validate_max_line_reinforcement!(data::AbstractDict{Symbol,Any})
+    if haskey(data, :max_line_reinforcement)
+        # Convert "Inf" to Inf
+        max_line_reinforcement = get(data, :max_line_reinforcement, Inf)
+        data[:max_line_reinforcement] = max_line_reinforcement == "Inf" ? Inf : max_line_reinforcement
+    end
+    return nothing
+end
 
-    return asset_type(elec_edge)
+function validate_rhs_policy!(data::AbstractDict{Symbol,Any})
+    if haskey(data, :rhs_policy)
+        rhs_policy = Dict{DataType,Float64}()
+        constraints = constraint_types()
+        for (k,v) in data[:rhs_policy]
+            new_k = constraints[Symbol(k)]
+            rhs_policy[new_k] = v
+        end
+        data[:rhs_policy] = rhs_policy
+    end
+    return nothing
+end
+
+function validate_data(data::AbstractDict{Symbol,Any})
+    if isa(data, JSON3.Object)
+        data = copy(data)
+    end
+    validate_id!(data)
+    validate_direction!(data)
+    validate_fuel_stoichiometry_name!(data)
+    validate_stoichiometry_balance_names!(data)
+    validate_constraints_data!(data)
+    validate_max_line_reinforcement!(data)
+    validate_demand_header!(data)
+    validate_fuel_header!(data)
+    validate_rhs_policy!(data)
+
+    validate_single_symbol!(data, :startup_fuel_balance_id)
+    return data
 end

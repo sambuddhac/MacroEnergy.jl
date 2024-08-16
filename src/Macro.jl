@@ -33,17 +33,6 @@ abstract type AbstractVertex <: MacroObject end
 ## Network types
 abstract type AbstractEdge{T<:Commodity} <: MacroObject end
 
-## Transformation types
-abstract type TransformationType end  # Note: this is only used to improved readability
-abstract type NaturalGasPowerTransform <: TransformationType  end
-abstract type NaturalGasPowerCCSTransform <: NaturalGasPowerTransform  end
-abstract type NaturalGasH2Transform <: TransformationType  end
-abstract type NaturalGasH2CCSTransform <: NaturalGasH2Transform  end
-abstract type FuelCellTransform <: TransformationType end
-abstract type ElectrolyzerTransform <: TransformationType  end
-abstract type DACElectric <: TransformationType  end
-abstract type SyntheticNG <: TransformationType  end
-
 ## Assets types
 abstract type AbstractAsset <: MacroObject end
 
@@ -90,54 +79,34 @@ end
 # include files
 
 include("time_management.jl")
+
 include("model/networks/vertex.jl")
 include("model/networks/edge.jl")
 include("model/networks/node.jl")
 include("model/networks/storage.jl")
 include("model/networks/transformation.jl")
 include("model/networks/location.jl")
+include("model/system.jl")
 
-# include_all_in_folder("model/networks")
-#include_all_in_folder("model/transformations")
-# include_all_in_folder("model/assets")
 include("model/assets/battery.jl")
 include("model/assets/natgaspower.jl")
 include("model/assets/vre.jl")
 include("model/assets/powerline.jl")
 
 include_all_in_folder("model/constraints")
-include("model/system.jl")
-
 
 include("generate_model.jl")
-# include("benders.jl")
-# include("input_translation/load_data_from_genx.jl")
-include("load_inputs/load_inputs.jl")
 
-# include_all_in_folder("load_inputs/load_tools")
 include("load_inputs/load_tools/loading_json.jl")
 include("config/configure_settings.jl")
-include("load_inputs/load_dataframe.jl")
-include("load_inputs/load_timeseries.jl")
+include("load_inputs/load_tools/load_dataframe.jl")
+include("load_inputs/load_tools/load_timeseries.jl")
 include("load_inputs/load_commodities.jl")
 include("load_inputs/load_time_data.jl")
-# include("load_inputs/load_network.jl")
-# include("load_inputs/load_assets.jl")
 include("load_inputs/load_demand.jl")
 include("load_inputs/load_fuel.jl")
 include("load_inputs/load_capacity_factor.jl")
 
-
-# include("load_inputs/load_resources.jl")
-# include("load_inputs/load_storage.jl")
-# include("load_inputs/load_variability.jl")
-# include("input_translation/dolphyn_to_macro.jl")
-# include("generate_model.jl")
-# include("prepare_inputs.jl")
-# include("transformations/ElectrolyzerTransform.jl")
-# include("transformations/natgaspower.jl")
-include_all_in_folder("write_outputs/")
-# exports
 export Electricity,
     Hydrogen,
     NaturalGas,
@@ -147,77 +116,31 @@ export Electricity,
     BiomassToH2,
     BiomassToPower,
     NaturalGasPower,
-    Electrolyzer,
-    FuelCell,
-    NaturalGasH2,
-    H2Storage,
-    NaturalGasPowerCCS,
-    NaturalGasH2Transform,
-    NaturalGasH2CCSTransform,
-    FuelCellTransform,
-    ElectrolyzerTransformTransform,
-    DacElectricTransform,
-    SyntheticNGTransform,
     VRE,
-    SolarPVTransform,
+    SolarPV,
+    WindTurbine,
     Storage,
-    TransformationType,
-    #Resource,
-    #Sink,
-    #AbstractStorage,
-    #SymmetricStorage,
-    #AsymmetricStorage,
-    #InputFilesNames,
     Node,
     Edge,
     Transformation,
     EdgeWithUC,
     namedtuple,
     AbstractAsset,
-    SolarPV,
-    WindTurbine,
     Battery,
-    Electrolyzer,
     PowerLine,
-    #CapacityConstraint,
-    #configure_settings,
-    #add_planning_variables!,
-    #add_operation_variables!,
-    #add_model_constraint!,
-    #add_all_model_constraints!,
-    #generate_model,
-    #prepare_inputs!,
-    #loadresources,
-    #makeresource,
-    #settings,
-    # nodes,
-    # networks,
-    #resources,
-    #storage,
-    #dolphyn_to_macro,
-    #apply_unit_conversion,
-    MaxNonServedDemandPerSegmentConstraint,
-    MaxNonServedDemandConstraint,
     PlanningConstraint,
-    MinDownTimeConstraint,
-    StoichiometryBalanceConstraint,
+    OperationConstraint,
+    CapacityConstraint,
     CO2CapConstraint,
     PolicyConstraint,
     BalanceConstraint,
-    OperationConstraint,
+    MaxNonServedDemandPerSegmentConstraint,
+    MaxNonServedDemandConstraint,
     RampingLimitConstraint,
     StorageCapacityConstraint,
     StorageSymmetricCapacityConstraint,
     MinUpTimeConstraint,
-    SymmetricCapacityConstraint,
-    CapacityConstraint,
+    MinDownTimeConstraint,
     MaxCapacityConstraint,
-    MinFlowConstraint,
-    configure_settings,
-    load_inputs,
-    ExampleAsset
-
+    MinFlowConstraint
 end # module Macro
-
-# using Macro 
-# q = Macro.get_transformation_types(Macro)
