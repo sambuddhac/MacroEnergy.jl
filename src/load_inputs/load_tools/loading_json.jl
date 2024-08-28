@@ -223,6 +223,7 @@ function check_and_convert_type(data::AbstractDict{Symbol, Any}, m::Module=Macro
     if !haskey(data, :type)
         throw(ArgumentError("Instance data does not have a :type field"))
     end
+    !isdefined(m, Symbol(data[:type])) && throw(ArgumentError("Type $(data[:type]) not found in module $m"))
     return getfield(m, Symbol(data[:type]))
 end
 
