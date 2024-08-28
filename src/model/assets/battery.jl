@@ -46,23 +46,8 @@ function make(::Type{Battery}, data::AbstractDict{Symbol, Any}, system::System)
     storage_data = validate_data(data[:storage])
     commodity_symbol = Symbol(storage_data[:commodity])
     commodity = commodity_types()[commodity_symbol]
-    battery_storage = Storage{commodity}(;
-        id = Symbol(storage_data[:id] * "_storage"),
-        timedata = system.time_data[commodity_symbol],
-        can_retire = get(storage_data, :can_retire, false),
-        can_expand = get(storage_data, :can_expand, false),
-        existing_capacity_storage = get(storage_data, :existing_capacity_storage, 0.0),
-        investment_cost_storage = get(storage_data, :investment_cost_storage, 0.0),
-        fixed_om_cost_storage = get(storage_data, :fixed_om_cost_storage, 0.0),
-        storage_loss_fraction = get(storage_data, :storage_loss_fraction, 0.0),
-        min_duration = get(storage_data, :min_duration, 0.0),
-        max_duration = get(storage_data, :max_duration, 0.0),
-        min_storage_level = get(storage_data, :min_storage_level, 0.0),
-        min_capacity_storage = get(storage_data, :min_capacity_storage, 0.0),
-        max_capacity_storage = get(storage_data, :max_capacity_storage, Inf),
-        balance_data = get(storage_data, :balance_data, Dict(:storage=>Dict(:discharge=>1/0.9,:charge=>0.9))),
-        constraints = get(storage_data, :constraints, [BalanceConstraint(), StorageCapacityConstraint(), StorageMaxDurationConstraint(), StorageMinDurationConstraint(), StorageSymmetricCapacityConstraint()])
-    )
+    battery_storage = Storage(Symbol(storage_data[:id]), storage_data, system.time_data[commodity_symbol], commodity)
+    battery_storage.constraints = get(storage_data, :constraints, [BalanceConstraint(), StorageCapacityConstraint(), StorageMaxDurationConstraint(), StorageMinDurationConstraint(), StorageSymmetricCapacityConstraint()])
 
     charge_edge_data = validate_data(data[:edges][:charge])
     charge_start_node = find_node(system.locations, Symbol(charge_edge_data[:start_vertex]))

@@ -12,20 +12,8 @@ id(b::H2Storage) = b.h2storage_transform.id
 function make(::Type{H2Storage}, data::AbstractDict{Symbol, Any}, system::System)
     storage_data = validate_data(data[:storage])
 
-    h2storage= Storage{Hydrogen}(;
-        id = Symbol(storage_data[:id]),
-        timedata = system.time_data[:Hydrogen],
-        can_retire = get(storage_data, :can_retire, false),
-        can_expand = get(storage_data, :can_expand, false),
-        existing_capacity_storage = get(storage_data, :existing_capacity_storage, 0.0),
-        investment_cost_storage = get(storage_data, :investment_cost_storage, 0.0),
-        fixed_om_cost_storage = get(storage_data, :fixed_om_cost_storage, 0.0),
-        storage_loss_fraction = get(storage_data, :storage_loss_fraction, 0.0),
-        min_storage_level = get(storage_data, :min_storage_level, 0.0),
-        min_capacity_storage = get(storage_data, :min_capacity_storage, 0.0),
-        max_capacity_storage = get(storage_data, :max_capacity_storage, Inf),
-        constraints = get(storage_data, :constraints, [BalanceConstraint(), StorageCapacityConstraint(), MinStorageLevelConstraint()])
-    )
+    h2storage = Storage(Symbol(storage_data[:id]), storage_data, system.time_data[:Hydrogen], Hydrogen)
+    h2storage.constraints = get(storage_data, :constraints, [BalanceConstraint(), StorageCapacityConstraint(), MinStorageLevelConstraint()])
 
     transform_data = validate_data(data[:transforms])
     compressor_transform = Transformation(;
