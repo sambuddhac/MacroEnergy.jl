@@ -7,10 +7,6 @@ end
 
 id(smr::NaturalGasHydrogen) = smr.natgashydrogen_transform.id
 
-function add_capacity_factor!(smr::NaturalGasHydrogen, capacity_factor::Vector{Float64})
-    smr.h2_edge.capacity_factor = capacity_factor
-end
-
 """
     make(::Type{NaturalGasHydrogen}, data::AbstractDict{Symbol, Any}, system::System) -> NaturalGasHydrogen
 

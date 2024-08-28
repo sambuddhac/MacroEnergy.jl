@@ -7,10 +7,6 @@ end
 
 id(ng::NaturalGasPower) = ng.natgaspower_transform.id
 
-function add_capacity_factor!(ng::NaturalGasPower, capacity_factor::Vector{Float64})
-    ng.e_edge.capacity_factor = capacity_factor
-end
-
 """
     make(::Type{NaturalGasPower}, data::AbstractDict{Symbol, Any}, system::System) -> NaturalGasPower
 

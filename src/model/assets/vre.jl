@@ -15,9 +15,6 @@ const VRE = Union{
 
 id(g::VRE) = g.energy_transform.id
 
-function add_capacity_factor!(s::VRE, capacity_factor::Vector{Float64})
-    s.edge.capacity_factor = capacity_factor
-end
 
 """
     make(::Type{<:VRE}, data::AbstractDict{Symbol, Any}, system::System) -> VRE
