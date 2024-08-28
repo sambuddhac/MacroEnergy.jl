@@ -104,10 +104,6 @@ include("load_inputs/load_tools/load_dataframe.jl")
 include("load_inputs/load_tools/load_timeseries.jl")
 include("load_inputs/load_commodities.jl")
 include("load_inputs/load_time_data.jl")
-include("load_inputs/load_demand.jl")
-include("load_inputs/load_fuel.jl")
-include("load_inputs/load_capacity_factor.jl")
-
 include("write_outputs/assets_capacity.jl")
 
 include("benders/benders_utility.jl")
