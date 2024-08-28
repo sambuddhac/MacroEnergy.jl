@@ -66,6 +66,7 @@ function make(::Type{NaturalGasPower}, data::AbstractDict{Symbol, Any}, system::
     elec_edge.startup_fuel_balance_id = :energy;
 
     ng_edge_data = validate_data(data[:edges][:natgas])
+    ng_edge_data[:price] /= NG_MWh  
     ng_start_node = find_node(system.locations, Symbol(ng_edge_data[:start_vertex]))
     ng_end_node = natgas_transform
     ng_edge = Edge(Symbol(ng_edge_data[:id]),ng_edge_data, system.time_data[:NaturalGas],NaturalGas, ng_start_node,  ng_end_node);
