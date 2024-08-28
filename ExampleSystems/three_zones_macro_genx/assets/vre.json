@@ -24,27 +24,35 @@
         "instance_data": [
             {
                 "nodes": {},
-                "transforms": {
-                    "id": "solar_pv_MA"
-                },
+                "id": "solar_pv_MA",
                 "edges": {
                     "investment_cost": 85300.0,
                     "fixed_om_cost": 18760.0,
                     "variable_om_cost": 0,
-                    "end_vertex": "elec_MA"
+                    "end_vertex": "elec_MA",
+                    "availability": {
+                        "timeseries": {
+                            "path": "assets/availability.csv",
+                            "header": "solar_pv_MA"
+                        }
+                    }
                 },
                 "storage": {}
             },
             {
                 "nodes": {},
-                "transforms": {
-                    "id": "solar_pv_CT"
-                },
+                "id": "solar_pv_CT",
                 "edges": {
                     "investment_cost": 85300.0,
                     "fixed_om_cost": 18760.0,
                     "variable_om_cost": 0,
-                    "end_vertex": "elec_CT"
+                    "end_vertex": "elec_CT",
+                    "availability": {
+                        "timeseries": {
+                            "path": "assets/availability.csv",
+                            "header": "solar_pv_CT"
+                        }
+                    }
                 },
                 "storage": {}
             }
@@ -75,27 +83,35 @@
         "instance_data": [
             {
                 "nodes": {},
-                "transforms": {
-                    "id": "onshore_wind_CT"
-                },
+                "id": "onshore_wind_CT",
                 "edges": {
                     "investment_cost": 97200.0,
                     "fixed_om_cost": 43205.0,
                     "variable_om_cost": 0.1,
-                    "end_vertex": "elec_CT"
+                    "end_vertex": "elec_CT",
+                    "availability": {
+                        "timeseries": {
+                            "path": "assets/availability.csv",
+                            "header": "onshore_wind_CT"
+                        }
+                    }
                 },
                 "storage": {}
             },
             {
                 "nodes": {},
-                "transforms": {
-                    "id": "onshore_wind_ME"
-                },
+                "id": "onshore_wind_ME",
                 "edges": {
                     "investment_cost": 97200.0,
                     "fixed_om_cost": 43205.0,
                     "variable_om_cost": 0.1,
-                    "end_vertex": "elec_ME"
+                    "end_vertex": "elec_ME",
+                    "availability": {
+                        "timeseries": {
+                            "path": "assets/availability.csv",
+                            "header": "onshore_wind_ME"
+                        }
+                    }
                 },
                 "storage": {}
             }
