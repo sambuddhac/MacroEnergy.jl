@@ -378,6 +378,29 @@ function clean_up_keys(dict::AbstractDict{Symbol, Any})
     end
     return dict
 end
+###### ###### ###### ###### ###### ######
+# CSV data handling
+###### ###### ###### ###### ###### ######
+
+function load_csv(file_path::AbstractString, sink::T=DataFrame; select::S=Symbol[], lazy_load::Bool=true) where {T,S<:Union{Symbol, Vector{Symbol}}}
+    if isa(select, Symbol)
+        select = [select]
+    end
+    csv_data = read_csv(file_path, sink, select=select)
+    return csv_data
+    #TODO check how to use lazy_load with CSV files
+end
+
+function read_csv(file_path::AbstractString, sink::T=DataFrame; select::Vector{Symbol}=Symbol[]) where T
+    if length(select) > 0
+        @info("Loading columns $select from CSV data from $file_path")
+        csv_data = CSV.read(file_path, sink, select=select)
+        isempty(csv_data) && error("Columns $select not found in $file_path")
+        return csv_data
+    end
+    @info("Loading CSV data from $file_path")
+    return CSV.read(file_path, sink)
+end
 
 ###### ###### ###### ###### ###### ######
 # Function to print the system data
