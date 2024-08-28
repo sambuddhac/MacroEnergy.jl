@@ -3,7 +3,7 @@
 ###### ###### ###### ###### ###### ######
 
 function load_system(path::AbstractString=pwd())::System
-    
+
     # The path should either be a a file path to a JSON file, preferably "system_data.json"
     # or a directory containing "system_data.json"
     # We'll check the absolute path first, then the path relative to the working directory
@@ -29,7 +29,7 @@ function load_system(path::AbstractString=pwd())::System
     end
 end
 
-function load_system(system_data::AbstractDict{Symbol, Any}, dir_path::AbstractString=pwd())::System
+function load_system(system_data::AbstractDict{Symbol,Any}, dir_path::AbstractString=pwd())::System
     # The path should point to the location of the system data files
     # If path is not provided, we assume the data is in the current working directory
     if isfile(dir_path)
@@ -51,7 +51,7 @@ function generate_system!(system::System, file_path::AbstractString; lazy_load::
     return nothing
 end
 
-function generate_system!(system::System, system_data::AbstractDict{Symbol, Any})::Nothing
+function generate_system!(system::System, system_data::AbstractDict{Symbol,Any})::Nothing
     # Configure the settings
     system.settings = configure_settings(system_data[:settings], system.data_dirpath)
 
@@ -74,25 +74,25 @@ end
 # Internal functions to handle loading the system_data.json file
 ###### ###### ###### ###### ###### ######
 
-function load_system_data(file_path::AbstractString; default_file_path::String=joinpath(@__DIR__, "default_system_data.json"), lazy_load::Bool=true)::Dict{Symbol, Any}
+function load_system_data(file_path::AbstractString; default_file_path::String=joinpath(@__DIR__, "default_system_data.json"), lazy_load::Bool=true)::Dict{Symbol,Any}
     load_system_data(file_path, dirname(file_path), default_file_path=default_file_path, lazy_load=lazy_load)
-     return load_json(file_path; lazy_load=lazy_load)
+    return load_json(file_path; lazy_load=lazy_load)
 end
 
-function load_system_data(file_path::AbstractString, rel_path::AbstractString; default_file_path::String=joinpath(@__DIR__, "default_system_data.json"), lazy_load::Bool=true)::Dict{Symbol, Any}
+function load_system_data(file_path::AbstractString, rel_path::AbstractString; default_file_path::String=joinpath(@__DIR__, "default_system_data.json"), lazy_load::Bool=true)::Dict{Symbol,Any}
     file_path = abspath(rel_or_abs_path(file_path, rel_path))
 
     prep_system_data(file_path, default_file_path)
 
-     # Load the system data from the JSON file(s)
-     return load_json(file_path; lazy_load=lazy_load)
+    # Load the system data from the JSON file(s)
+    return load_json(file_path; lazy_load=lazy_load)
 end
 
 function load_system_data!(system::System, file_path::AbstractString, default_file_path::String=joinpath(@__DIR__, "default_system_data.json"))::Nothing
     # Load the provided system data
     # We're assuming the file_path is a JSON file, not a directory
     file_path = abspath(rel_or_abs_path(file_path, system.data_dirpath))
-    
+
     # Make sure the default arguments are included
     prep_system_data(file_path, default_file_path)
 
@@ -105,7 +105,7 @@ function load_system_data!(system::System, file_path::AbstractString, default_fi
 end
 
 
-function load_default_system_data(default_file_path::String=joinpath(@__DIR__, "default_system_data.json"))::Dict{Symbol, Any}
+function load_default_system_data(default_file_path::String=joinpath(@__DIR__, "default_system_data.json"))::Dict{Symbol,Any}
     if isfile(default_file_path)
         default_system_data = read_json(default_file_path)
     else
@@ -159,7 +159,7 @@ function load!(system::System, file_path::AbstractString)::Nothing
 end
 
 # Load a single instance of an asset, location, etc. into a System
-function load!(system::System, data::AbstractDict{Symbol, Any})::Nothing
+function load!(system::System, data::AbstractDict{Symbol,Any})::Nothing
     if data_is_system_data(data)
         # println("Loading system data")
         load_system_data!(system, data)
@@ -190,7 +190,7 @@ function load!(system::System, data::AbstractDict{Symbol, Any})::Nothing
 end
 
 # Load a vector of instances of assets, locations, etc. into a System
-function load!(system::System, data::AbstractVector{<:AbstractDict{Symbol, Any}})::Nothing
+function load!(system::System, data::AbstractVector{<:AbstractDict{Symbol,Any}})::Nothing
     for instance in data
         load!(system, instance)
     end
@@ -201,8 +201,8 @@ recursive_merge(x::AbstractDict...) = merge(recursive_merge, x...)
 recursive_merge(x::AbstractVector...) = cat(x...; dims=1)
 recursive_merge(x...) = x[end]
 
-function expand_instances(data::AbstractDict{Symbol, Any})
-    instances = Vector{Dict{Symbol, Any}}()
+function expand_instances(data::AbstractDict{Symbol,Any})
+    instances = Vector{Dict{Symbol,Any}}()
     type = data[:type]
     global_data = data[:global_data]
     for (instance_idx, instance_data) in enumerate(data[:instance_data])
@@ -210,7 +210,7 @@ function expand_instances(data::AbstractDict{Symbol, Any})
         # haskey(instance_data, :id) ? instance_id = Symbol(instance_data[:id]) : instance_id = default_asset_name(instance_idx, a_name)
         # instance_data[:id], _ = make_asset_id(instance_id, asset_data)
         # asset_data[instance_data[:id]] = make_asset(a_type, instance_data, time_data, nodes)
-        push!(instances, Dict{Symbol, Any}(:type => type, :instance_data => instance_data))
+        push!(instances, Dict{Symbol,Any}(:type => type, :instance_data => instance_data))
     end
     return instances
 end
@@ -219,7 +219,7 @@ end
 # Checks on the kind of data
 ###### ###### ###### ###### ###### ######
 
-function check_and_convert_type(data::AbstractDict{Symbol, Any}, m::Module=Macro)::DataType
+function check_and_convert_type(data::AbstractDict{Symbol,Any}, m::Module=Macro)::DataType
     if !haskey(data, :type)
         throw(ArgumentError("Instance data does not have a :type field"))
     end
@@ -227,7 +227,7 @@ function check_and_convert_type(data::AbstractDict{Symbol, Any}, m::Module=Macro
     return getfield(m, Symbol(data[:type]))
 end
 
-function data_is_single_instance(data::AbstractDict{Symbol, Any})::Bool
+function data_is_single_instance(data::AbstractDict{Symbol,Any})::Bool
     # Check that data has only :type and :instance_data fields
     # We could also check the types of the fields
     entries = collect(keys(data))
@@ -238,7 +238,7 @@ function data_is_single_instance(data::AbstractDict{Symbol, Any})::Bool
     end
 end
 
-function data_has_global_data(data::AbstractDict{Symbol, Any})::Bool
+function data_has_global_data(data::AbstractDict{Symbol,Any})::Bool
     # Check that data has only :type, :instance_data, :global_data fields
     entries = collect(keys(data))
     if length(entries) == 3 && issetequal(entries, [:type, :instance_data, :global_data])
@@ -248,7 +248,7 @@ function data_has_global_data(data::AbstractDict{Symbol, Any})::Bool
     end
 end
 
-function data_is_filepath(data::AbstractDict{Symbol, Any})::Bool
+function data_is_filepath(data::AbstractDict{Symbol,Any})::Bool
     entries = collect(keys(data))
     if length(entries) == 1 && issetequal(entries, [:path])
         return true
@@ -257,7 +257,7 @@ function data_is_filepath(data::AbstractDict{Symbol, Any})::Bool
     end
 end
 
-function data_is_system_data(data::AbstractDict{Symbol, Any})::Bool
+function data_is_system_data(data::AbstractDict{Symbol,Any})::Bool
     # Check if it contains any special fields
     entries = collect(keys(data))
     special_keys = [
@@ -283,7 +283,7 @@ end
 # path relative to rel_dir
 ###### ###### ###### ###### ###### ######
 
-function rel_or_abs_path(path::T, rel_dir::T=pwd())::T where T<:AbstractString
+function rel_or_abs_path(path::T, rel_dir::T=pwd())::T where {T<:AbstractString}
     if ispath(path)
         return path
     elseif ispath(joinpath(rel_dir, path))
@@ -298,7 +298,7 @@ end
 # JSON data handling
 ###### ###### ###### ###### ###### ######
 
-function load_json(file_path::AbstractString; lazy_load::Bool=true)::Dict{Symbol, Any}
+function load_json(file_path::AbstractString; lazy_load::Bool=true)::Dict{Symbol,Any}
     @info("Loading JSON data from $file_path")
     json_data = read_json(file_path)
     if !lazy_load
@@ -309,16 +309,16 @@ function load_json(file_path::AbstractString; lazy_load::Bool=true)::Dict{Symbol
     return json_data
 end
 
-function load_paths(dict::AbstractDict{Symbol, Any}, path_key::Symbol, root_path::AbstractString, lazy_load::Bool=true)
+function load_paths(dict::AbstractDict{Symbol,Any}, path_key::Symbol, root_path::AbstractString, lazy_load::Bool=true)
     if isa(dict, JSON3.Object)
         dict = copy(dict)
     end
     for (key, value) in dict
         if key == path_key
             dict = fetch_data(value, root_path, lazy_load)
-        elseif isa(value, AbstractDict{Symbol, Any})
+        elseif isa(value, AbstractDict{Symbol,Any})
             dict[key] = load_paths(value, path_key, root_path, lazy_load)
-        elseif isa(value, AbstractVector{<:AbstractDict{Symbol, Any}})
+        elseif isa(value, AbstractVector{<:AbstractDict{Symbol,Any}})
             for idx in eachindex(value)
                 if isa(value[idx], JSON3.Object)
                     value[idx] = copy(value[idx])
@@ -335,7 +335,7 @@ function fetch_data(path::AbstractString, root_path::AbstractString, lazy_load::
     # Load data from a JSON file and merge it into the existing data dict
     # overwriting any existing keys
     path = rel_or_abs_path(path, root_path)
-    if isfile(path) 
+    if isfile(path)
         if endswith(path, ".json")
             return load_json(path; lazy_load=lazy_load)
         else
@@ -356,14 +356,14 @@ function fetch_data(path::AbstractString, root_path::AbstractString, lazy_load::
     end
 end
 
-function clean_up_keys(dict::AbstractDict{Symbol, Any})
+function clean_up_keys(dict::AbstractDict{Symbol,Any})
     # If a key and value match, then copy the value to the key
     for (key, value) in dict
-        if isa(value, AbstractDict{Symbol, Any}) && length(value) == 1 && first(collect(keys(value))) == key
+        if isa(value, AbstractDict{Symbol,Any}) && length(value) == 1 && first(collect(keys(value))) == key
             dict[key] = value[key]
-        elseif isa(value, AbstractVector{<:AbstractDict{Symbol, Any}})
+        elseif isa(value, AbstractVector{<:AbstractDict{Symbol,Any}})
             for idx in eachindex(value)
-                if isa(value[idx], AbstractDict{Symbol, Any})
+                if isa(value[idx], AbstractDict{Symbol,Any})
                     value[idx] = clean_up_keys(value[idx])
                 end
             end
@@ -526,7 +526,7 @@ end
 # Function to print the system data
 ###### ###### ###### ###### ###### ######
 
-function print_to_json(system_data::AbstractDict{Symbol, Any}, file_path::AbstractString="")::Nothing
+function print_to_json(system_data::AbstractDict{Symbol,Any}, file_path::AbstractString="")::Nothing
     if file_path == ""
         file_path = joinpath(pwd(), "printed_system_data.json")
     end
@@ -541,13 +541,12 @@ function read_json(file_path::AbstractString)
     return json_data
 end
 
-function write_json(file_path::AbstractString, data::Dict{Symbol, Any})::Nothing
+function write_json(file_path::AbstractString, data::Dict{Symbol,Any})::Nothing
     io = open(file_path, "w")
     JSON3.pretty(io, data)
     close(io)
     return nothing
 end
-
 
 function find_node(nodes_list::Vector{Node}, id::Symbol)
     for node in nodes_list
@@ -568,44 +567,29 @@ end
 # We can do:
 #   Commodity -> Node{Commodity}
 #   
-function make(commodity::Type{<:Commodity}, data::AbstractDict{Symbol, Any}, system::System)
+function make(commodity::Type{<:Commodity}, data::AbstractDict{Symbol,Any}, system::System)
 
     data = validate_data(data)
 
     node = Node(data, system.time_data[Symbol(commodity)], commodity)
-    
-    #### Note that not all nodes have a balance constraint, e.g., a NG source node does not have one. So the default should be empty.
-    node.constraints = get(data,:constraints,  Vector{AbstractTypeConstraint}())
 
-    
-    if any(isa.(node.constraints,BalanceConstraint))
-        node.balance_data = get(data,:balance_data,Dict(:demand=>Dict{Symbol,Float64}()))
-    elseif  any(isa.(node.constraints,CO2CapConstraint))
-        node.balance_data = get(data,:balance_data,Dict(:emissions=>Dict{Symbol,Float64}()))
+    #### Note that not all nodes have a balance constraint, e.g., a NG source node does not have one. So the default should be empty.
+    node.constraints = get(data, :constraints, Vector{AbstractTypeConstraint}())
+
+    if any(isa.(node.constraints, BalanceConstraint))
+        node.balance_data = get(data, :balance_data, Dict(:demand => Dict{Symbol,Float64}()))
+    elseif any(isa.(node.constraints, CO2CapConstraint))
+        node.balance_data = get(data, :balance_data, Dict(:emissions => Dict{Symbol,Float64}()))
     else
-        node.balance_data = get(data,:balance_data,Dict(:exogenous=>Dict{Symbol,Float64}()))
+        node.balance_data = get(data, :balance_data, Dict(:exogenous => Dict{Symbol,Float64}()))
     end
 
     return node
 end
 
-
 function validate_id!(data::AbstractDict{Symbol,Any})
     if !haskey(data, :id)
         throw(ArgumentError("Edge data must have an id"))
-    end
-    return nothing
-end
-
-function validate_direction!(data::AbstractDict{Symbol,Any})
-    if haskey(data, :direction) && data[:direction] ∉ [:input, :output]
-        if data[:direction] == "input"
-            data[:direction] = :input
-        elseif data[:direction] == "output"
-            data[:direction] = :output
-        else
-            throw(ArgumentError("Invalid direction: $(data[:direction]) for TEdge $(data[:id])"))
-        end        
     end
     return nothing
 end
@@ -624,30 +608,19 @@ function validate_single_symbol!(data::AbstractDict{Symbol,Any}, key::Symbol)
     return nothing
 end
 
-function validate_fuel_stoichiometry_name!(data::AbstractDict{Symbol,Any})
-    validate_single_symbol!(data, :fuel_stoichiometry_name)
-    validate_vector_symbol!(data, :fuel_stoichiometry_name)
-    return nothing
-end
-
-function validate_stoichiometry_balance_names!(data::AbstractDict{Symbol,Any})
-    validate_vector_symbol!(data, :stoichiometry_balance_names)
-    return nothing
-end
-
 # FIXME: This function hides some important details about how constraints are declared
 function validate_constraints_data!(data::AbstractDict{Symbol,Any})
     macro_constraints = constraint_types()
-    if haskey(data, :constraints) 
+    if haskey(data, :constraints)
         constraints = Vector{AbstractTypeConstraint}(undef, length(data[:constraints]))
-        for (counter, (k,v)) in enumerate(data[:constraints])
+        for (counter, (k, v)) in enumerate(data[:constraints])
             # We'll assume that they're all included if they're mentioned here
-            constraint_symbol = Symbol(join(push!(uppercasefirst.(split(string(k), "_")),"Constraint")))
+            constraint_symbol = Symbol(join(push!(uppercasefirst.(split(string(k), "_")), "Constraint")))
             constraints[counter] = macro_constraints[constraint_symbol]()
         end
         data[:constraints] = constraints
     end
-    return nothing 
+    return nothing
 end
 
 function validate_demand_header!(data::AbstractDict{Symbol,Any})
@@ -673,7 +646,7 @@ function validate_rhs_policy!(data::AbstractDict{Symbol,Any})
     if haskey(data, :rhs_policy)
         rhs_policy = Dict{DataType,Float64}()
         constraints = constraint_types()
-        for (k,v) in data[:rhs_policy]
+        for (k, v) in data[:rhs_policy]
             new_k = constraints[Symbol(k)]
             rhs_policy[new_k] = v
         end
@@ -687,9 +660,6 @@ function validate_data(data::AbstractDict{Symbol,Any})
         data = copy(data)
     end
     validate_id!(data)
-    validate_direction!(data)
-    validate_fuel_stoichiometry_name!(data)
-    validate_stoichiometry_balance_names!(data)
     validate_constraints_data!(data)
     validate_max_line_reinforcement!(data)
     validate_demand_header!(data)
