@@ -472,7 +472,7 @@ function set_value(dict::AbstractDict, keys::Vector{Symbol}, new_value)
 end
 
 function update_data!(data::AbstractDict{Symbol,Any}, keys::Vector{Symbol}, new_value)
-    set_value(data, keys[1:end-1], new_value)
+    set_value(data, keys, new_value)
 end
 
 ###### ###### ###### ###### ###### ######
@@ -511,7 +511,7 @@ function load_time_series_data!(system::System, data::AbstractDict{Symbol,Any})
     for (value, keys) in time_series_paths
         file_path = rel_or_abs_path(value[:path], system.data_dirpath)
         time_series = load_time_series_data(file_path, value[:header])
-        update_data!(data, keys, time_series)
+        update_data!(data, keys[1:end-1], time_series) # end-1 to exclude the :timeseries key itself and replace it with the actual data
     end
 
     return nothing
