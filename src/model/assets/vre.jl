@@ -35,13 +35,13 @@ id(g::VRE) = g.energy_transform.id
         - constraints: Vector{AbstractTypeConstraint}
 """
 function make(asset_type::Type{<:VRE}, data::AbstractDict{Symbol, Any}, system::System)
-    transform_data = validate_data(data[:transforms])
+    transform_data = process_data!(data[:transforms])
     vre_transform = Transformation(;
         id = Symbol(transform_data[:id]),
         timedata = system.time_data[Symbol(transform_data[:time_commodity])],
     )
 
-    elec_edge_data = validate_data(data[:edges])
+    elec_edge_data = process_data!(data[:edges])
     elec_start_node = vre_transform
     elec_end_node = find_node(system.locations, Symbol(elec_edge_data[:end_vertex]))
 

@@ -50,14 +50,14 @@ id(ng::NaturalGasPower) = ng.natgaspower_transform.id
 """
 function make(::Type{NaturalGasPower}, data::AbstractDict{Symbol, Any}, system::System)
 
-    transform_data = validate_data(data[:transforms])
+    transform_data = process_data!(data[:transforms])
     natgas_transform = Transformation(;
         id = Symbol(transform_data[:id]),
         timedata = system.time_data[Symbol(transform_data[:time_commodity])],
         constraints = get(transform_data, :constraints, [BalanceConstraint()])
     )
 
-    elec_edge_data = validate_data(data[:edges][:elec])
+    elec_edge_data = process_data!(data[:edges][:elec])
     elec_start_node = natgas_transform
     elec_end_node = find_node(system.locations, Symbol(elec_edge_data[:end_vertex]))
     elec_edge = EdgeWithUC(Symbol(elec_edge_data[:id]),elec_edge_data, system.time_data[:Electricity],Electricity, elec_start_node,  elec_end_node );
@@ -65,7 +65,7 @@ function make(::Type{NaturalGasPower}, data::AbstractDict{Symbol, Any}, system::
     elec_edge.unidirectional = get(elec_edge_data, :unidirectional, true);
     elec_edge.startup_fuel_balance_id = :energy;
 
-    ng_edge_data = validate_data(data[:edges][:natgas])
+    ng_edge_data = process_data!(data[:edges][:natgas])
     ng_edge_data[:price] /= NG_MWh  
     ng_start_node = find_node(system.locations, Symbol(ng_edge_data[:start_vertex]))
     ng_end_node = natgas_transform
@@ -73,7 +73,7 @@ function make(::Type{NaturalGasPower}, data::AbstractDict{Symbol, Any}, system::
     ng_edge.constraints = get(ng_edge_data, :constraints,  Vector{AbstractTypeConstraint}())
     ng_edge.unidirectional = get(ng_edge_data, :unidirectional, true);
 
-    co2_edge_data = validate_data(data[:edges][:co2])
+    co2_edge_data = process_data!(data[:edges][:co2])
     co2_start_node = natgas_transform
     co2_end_node = find_node(system.locations, Symbol(co2_edge_data[:end_vertex]))
     co2_edge = Edge(Symbol(co2_edge_data[:id]),co2_edge_data, system.time_data[:CO2],CO2, co2_start_node,  co2_end_node);

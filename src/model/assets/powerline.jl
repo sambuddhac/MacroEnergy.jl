@@ -5,7 +5,7 @@ id(b::PowerLine) = b.elec_edge.id
 
 function make(asset_type::Type{<:PowerLine}, data::AbstractDict{Symbol, Any}, system::System)
 
-    elec_edge_data = validate_data(data[:edges][:line])
+    elec_edge_data = process_data!(data[:edges][:line])
 
     elec_start_node = find_node(system.locations, Symbol(elec_edge_data[:start_vertex]))
     elec_end_node = find_node(system.locations, Symbol(elec_edge_data[:end_vertex]))

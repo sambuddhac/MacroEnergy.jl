@@ -223,8 +223,9 @@ function check_and_convert_type(data::AbstractDict{Symbol,Any}, m::Module=Macro)
     if !haskey(data, :type)
         throw(ArgumentError("Instance data does not have a :type field"))
     end
-    !isdefined(m, Symbol(data[:type])) && throw(ArgumentError("Type $(data[:type]) not found in module $m"))
-    return getfield(m, Symbol(data[:type]))
+    type = Symbol(data[:type])
+    validate_type_attribute(type, m)
+    return getfield(m, type)
 end
 
 function data_is_single_instance(data::AbstractDict{Symbol,Any})::Bool
@@ -479,7 +480,7 @@ end
 # CSV data handling
 ###### ###### ###### ###### ###### ######
 
-function load_csv(file_path::AbstractString, sink::T=DataFrame; select::S=Symbol[], lazy_load::Bool=true) where {T,S<:Union{Symbol, Vector{Symbol}}}
+function load_csv(file_path::AbstractString, sink::T=DataFrame; select::S=Symbol[], lazy_load::Bool=true) where {T,S<:Union{Symbol,Vector{Symbol}}}
     if isa(select, Symbol)
         select = [select]
     end
@@ -488,7 +489,7 @@ function load_csv(file_path::AbstractString, sink::T=DataFrame; select::S=Symbol
     #TODO check how to use lazy_load with CSV files
 end
 
-function read_csv(file_path::AbstractString, sink::T=DataFrame; select::Vector{Symbol}=Symbol[]) where T
+function read_csv(file_path::AbstractString, sink::T=DataFrame; select::Vector{Symbol}=Symbol[]) where {T}
     if length(select) > 0
         @info("Loading columns $select from CSV data from $file_path")
         csv_data = CSV.read(file_path, sink, select=select)
@@ -506,7 +507,7 @@ end
 function load_time_series_data!(system::System, data::AbstractDict{Symbol,Any})
     # get list of paths to time series data
     time_series_paths = get_value_and_keys(data, :timeseries)
-    
+
     # load each time series data and update the data dictionary
     for (value, keys) in time_series_paths
         file_path = rel_or_abs_path(value[:path], system.data_dirpath)
@@ -517,7 +518,7 @@ function load_time_series_data!(system::System, data::AbstractDict{Symbol,Any})
     return nothing
 end
 
-function load_time_series_data(file_path::AbstractString, header::T)::Vector{Float64} where T <: Union{Symbol, String}
+function load_time_series_data(file_path::AbstractString, header::T)::Vector{Float64} where {T<:Union{Symbol,String}}
     time_series = load_csv(file_path, select=Symbol(header))
     return time_series[!, header]
 end
@@ -569,7 +570,7 @@ end
 #   
 function make(commodity::Type{<:Commodity}, data::AbstractDict{Symbol,Any}, system::System)
 
-    data = validate_data(data)
+    process_data!(data)
 
     node = Node(data, system.time_data[Symbol(commodity)], commodity)
 
@@ -589,83 +590,78 @@ end
 
 function validate_id!(data::AbstractDict{Symbol,Any})
     if !haskey(data, :id)
-        throw(ArgumentError("Edge data must have an id"))
+        throw(ArgumentError("Assets/nodes have an id."))
     end
     return nothing
 end
 
-function validate_vector_symbol!(data::AbstractDict{Symbol,Any}, key::Symbol)
-    if haskey(data, key) && !isa(data[key], Vector{Symbol})
-        data[key] = Symbol.(data[key])
-    end
-    return nothing
-end
-
-function validate_single_symbol!(data::AbstractDict{Symbol,Any}, key::Symbol)
-    if haskey(data, key) && !isa(data[key], Symbol)
-        data[key] = Symbol(data[key])
-    end
-    return nothing
-end
-
-# FIXME: This function hides some important details about how constraints are declared
 function validate_constraints_data!(data::AbstractDict{Symbol,Any})
-    macro_constraints = constraint_types()
-    if haskey(data, :constraints)
-        constraints = Vector{AbstractTypeConstraint}(undef, length(data[:constraints]))
-        for (counter, (k, v)) in enumerate(data[:constraints])
-            # We'll assume that they're all included if they're mentioned here
-            constraint_symbol = Symbol(join(push!(uppercasefirst.(split(string(k), "_")), "Constraint")))
-            constraints[counter] = macro_constraints[constraint_symbol]()
-        end
-        data[:constraints] = constraints
+    valid_constraints = keys(constraint_types())
+    constraints = get(data, :constraints, Dict{Symbol,Bool}())
+
+    invalid_constraints = setdiff(keys(constraints), valid_constraints)
+    if !isempty(invalid_constraints)
+        throw(ArgumentError("Invalid constraint(s) found: $(join(invalid_constraints, ", "))"))
     end
     return nothing
 end
 
-function validate_demand_header!(data::AbstractDict{Symbol,Any})
-    validate_single_symbol!(data, :demand_header)
-    return nothing
-end
-
-function validate_fuel_header!(data::AbstractDict{Symbol,Any})
-    validate_single_symbol!(data, :price_header)
-    return nothing
-end
-
-function validate_max_line_reinforcement!(data::AbstractDict{Symbol,Any})
-    if haskey(data, :max_line_reinforcement)
-        # Convert "Inf" to Inf
-        max_line_reinforcement = get(data, :max_line_reinforcement, Inf)
-        data[:max_line_reinforcement] = max_line_reinforcement == "Inf" ? Inf : max_line_reinforcement
-    end
-    return nothing
-end
-
-function validate_rhs_policy!(data::AbstractDict{Symbol,Any})
-    if haskey(data, :rhs_policy)
-        rhs_policy = Dict{DataType,Float64}()
-        constraints = constraint_types()
-        for (k, v) in data[:rhs_policy]
-            new_k = constraints[Symbol(k)]
-            rhs_policy[new_k] = v
-        end
-        data[:rhs_policy] = rhs_policy
+function validate_type_attribute(asset_type::Symbol, m::Module=Macro)
+    if !isdefined(m, asset_type)
+        throw(ArgumentError("Type $(asset_type) not found in module $m"))
     end
     return nothing
 end
 
 function validate_data(data::AbstractDict{Symbol,Any})
-    if isa(data, JSON3.Object)
-        data = copy(data)
-    end
     validate_id!(data)
     validate_constraints_data!(data)
-    validate_max_line_reinforcement!(data)
-    validate_demand_header!(data)
-    validate_fuel_header!(data)
-    validate_rhs_policy!(data)
+    return nothing
+end
 
-    validate_single_symbol!(data, :startup_fuel_balance_id)
+function convert_inf_string_to_value(data::AbstractDict{Symbol,Any}, key::Symbol)
+    data[key] = get(data, key, "Inf")
+    if data[key] == "Inf"
+        data[key] = Inf
+    end
+    return nothing
+end
+
+function check_and_convert_max_line_reinforcement!(data::AbstractDict{Symbol,Any})
+    convert_inf_string_to_value(data, :max_line_reinforcement)
+    return nothing
+end
+
+function check_and_convert_constraints!(data::AbstractDict{Symbol,Any})
+    contraint_library = constraint_types()
+    constraints = Vector{AbstractTypeConstraint}()
+    for (name, flag) in data[:constraints]
+        if flag == true
+            push!(constraints, contraint_library[name]()) # Note: This is a constructor call, not a type (e.g., BalanceConstraint())
+        end
+    end
+    data[:constraints] = constraints
+    return nothing
+end
+
+function check_and_convert_rhs_policy!(data::AbstractDict{Symbol,Any})
+    rhs_policy = Dict{DataType,Float64}()
+    constraints = constraint_types()
+    for (k, v) in data[:rhs_policy]
+        new_k = constraints[Symbol(k)]
+        rhs_policy[new_k] = v
+    end
+    data[:rhs_policy] = rhs_policy
+    return nothing
+end
+
+function process_data!(data::AbstractDict{Symbol,Any})
+    if isa(data, JSON3.Object)
+        data = copy(data) # this makes sure that data is a mutable object
+    end
+    validate_data(data)
+    check_and_convert_max_line_reinforcement!(data)
+    haskey(data, :constraints) && check_and_convert_constraints!(data)
+    haskey(data, :rhs_policy) && check_and_convert_rhs_policy!(data)
     return data
 end
