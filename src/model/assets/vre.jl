@@ -1,9 +1,11 @@
 struct SolarPV <: AbstractAsset
+    id::AssetId
     energy_transform::Transformation
     edge::Edge{Electricity}
 end
 
 struct WindTurbine <: AbstractAsset
+    id::AssetId
     energy_transform::Transformation
     edge::Edge{Electricity}
 end
@@ -13,7 +15,7 @@ const VRE = Union{
     SolarPV, WindTurbine
 }
 
-id(g::VRE) = g.energy_transform.id
+id(g::VRE) = g.id
 
 
 """
@@ -35,6 +37,8 @@ id(g::VRE) = g.energy_transform.id
         - constraints: Vector{AbstractTypeConstraint}
 """
 function make(asset_type::Type{<:VRE}, data::AbstractDict{Symbol, Any}, system::System)
+    id = AssetId(data[:id])
+
     transform_data = process_data!(data[:transforms])
     vre_transform = Transformation(;
         id = Symbol(transform_data[:id]),
@@ -49,5 +53,5 @@ function make(asset_type::Type{<:VRE}, data::AbstractDict{Symbol, Any}, system::
     elec_edge.constraints = get(elec_edge_data, :constraints, [CapacityConstraint()])
     elec_edge.unidirectional = get(elec_edge_data, :unidirectional, true);
 
-    return asset_type(vre_transform, elec_edge)
+    return asset_type(id, vre_transform, elec_edge)
 end

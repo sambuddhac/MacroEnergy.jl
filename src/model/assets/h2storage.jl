@@ -1,4 +1,5 @@
 struct H2Storage <: AbstractAsset
+    id::AssetId
     h2storage_transform::Storage{Hydrogen}
     compressor_transform::Transformation
     discharge_edge::Edge{Hydrogen}
@@ -7,9 +8,11 @@ struct H2Storage <: AbstractAsset
     compressor_h2_edge::Edge{Hydrogen}
 end
 
-id(b::H2Storage) = b.h2storage_transform.id
+id(b::H2Storage) = b.id
 
-function make(::Type{H2Storage}, data::AbstractDict{Symbol, Any}, system::System)
+function make(::Type{H2Storage}, data::AbstractDict{Symbol,Any}, system::System)
+    id = AssetId(data[:id])
+
     storage_data = process_data!(data[:storage])
 
     h2storage = Storage(Symbol(storage_data[:id]), storage_data, system.time_data[:Hydrogen], Hydrogen)
@@ -62,5 +65,5 @@ function make(::Type{H2Storage}, data::AbstractDict{Symbol, Any}, system::System
                                                             compressor_elec_edge.id=>0.0),
                                         )
 
-    return H2Storage(h2storage,compressor_transform,h2storage_discharge,h2storage_charge,compressor_elec_edge,compressor_h2_edge)
+    return H2Storage(id, h2storage, compressor_transform, h2storage_discharge, h2storage_charge, compressor_elec_edge, compressor_h2_edge)
 end

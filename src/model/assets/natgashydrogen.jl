@@ -1,11 +1,12 @@
 struct NaturalGasHydrogen <: AbstractAsset
+    id::AssetId
     natgashydrogen_transform::Transformation
     h2_edge::Union{Edge{Hydrogen},EdgeWithUC{Hydrogen}}
     ng_edge::Edge{NaturalGas}
     co2_edge::Edge{CO2}
 end
 
-id(smr::NaturalGasHydrogen) = smr.natgashydrogen_transform.id
+id(smr::NaturalGasHydrogen) = smr.id
 
 """
     make(::Type{NaturalGasHydrogen}, data::AbstractDict{Symbol, Any}, system::System) -> NaturalGasHydrogen
@@ -49,6 +50,7 @@ id(smr::NaturalGasHydrogen) = smr.natgashydrogen_transform.id
             - constraints: Vector{AbstractTypeConstraint}
 """
 function make(::Type{NaturalGasHydrogen}, data::AbstractDict{Symbol, Any}, system::System)
+    id = AssetId(data[:id])
 
     transform_data = process_data!(data[:transforms])
     natgashydrogen_transform = Transformation(;
@@ -87,5 +89,5 @@ function make(::Type{NaturalGasHydrogen}, data::AbstractDict{Symbol, Any}, syste
                                                             h2_edge.id=>0.0))
 
 
-    return NaturalGasHydrogen(natgashydrogen_transform, h2_edge, ng_edge, co2_edge)
+    return NaturalGasHydrogen(id, natgashydrogen_transform, h2_edge, ng_edge, co2_edge)
 end

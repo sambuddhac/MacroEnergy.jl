@@ -43,6 +43,7 @@ abstract type PlanningConstraint <: AbstractTypeConstraint end
 # global constants
 const H2_MWh = 33.33 # MWh per tonne of H2
 const NG_MWh = 0.29307107 # MWh per MMBTU of NG 
+const AssetId = Symbol
 const JuMPConstraint = Union{Array,Containers.DenseAxisArray,Containers.SparseAxisArray,ConstraintRef}
 
 function include_all_in_folder(folder)
@@ -72,6 +73,10 @@ function all_subtypes!(types::Dict{Symbol,DataType}, type::DataType)
         end
     end
     return nothing
+end
+
+function fieldnames(type::T) where T <: Type{<:AbstractAsset}
+    return filter(x -> x != :id, Base.fieldnames(type))
 end
 
 # include files

@@ -1,10 +1,11 @@
 struct Battery <: AbstractAsset
+    id::AssetId
     battery_transform::Storage{Electricity}
     discharge_edge::Edge{Electricity}
     charge_edge::Edge{Electricity}
 end
 
-id(b::Battery) = b.battery_transform.id
+id(b::Battery) = b.id
 
 """
     make(::Type{Battery}, data::AbstractDict{Symbol, Any}, system::System) -> Battery
@@ -43,6 +44,8 @@ id(b::Battery) = b.battery_transform.id
             - constraints: Vector{AbstractTypeConstraint}
 """
 function make(::Type{Battery}, data::AbstractDict{Symbol,Any}, system::System)
+    id = AssetId(data[:id])
+
     storage_data = process_data!(data[:storage])
     commodity_symbol = Symbol(storage_data[:commodity])
     commodity = commodity_types()[commodity_symbol]
@@ -67,5 +70,5 @@ function make(::Type{Battery}, data::AbstractDict{Symbol,Any}, system::System)
     battery_storage.balance_data = Dict(:storage => Dict(battery_discharge.id => 1 / get(discharge_edge_data, :efficiency, 0.9),
         battery_charge.id => get(charge_edge_data, :efficiency, 0.9)))
 
-    return Battery(battery_storage, battery_discharge, battery_charge)
+    return Battery(id, battery_storage, battery_discharge, battery_charge)
 end

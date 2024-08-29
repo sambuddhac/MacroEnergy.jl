@@ -1,11 +1,12 @@
 struct NaturalGasPower <: AbstractAsset
+    id::AssetId
     natgaspower_transform::Transformation
     e_edge::Union{Edge{Electricity},EdgeWithUC{Electricity}}
     ng_edge::Edge{NaturalGas}
     co2_edge::Edge{CO2}
 end
 
-id(ng::NaturalGasPower) = ng.natgaspower_transform.id
+id(ng::NaturalGasPower) = ng.id
 
 """
     make(::Type{NaturalGasPower}, data::AbstractDict{Symbol, Any}, system::System) -> NaturalGasPower
@@ -49,6 +50,7 @@ id(ng::NaturalGasPower) = ng.natgaspower_transform.id
             - constraints: Vector{AbstractTypeConstraint}
 """
 function make(::Type{NaturalGasPower}, data::AbstractDict{Symbol, Any}, system::System)
+    id = AssetId(data[:id])
 
     transform_data = process_data!(data[:transforms])
     natgas_transform = Transformation(;
@@ -88,5 +90,5 @@ function make(::Type{NaturalGasPower}, data::AbstractDict{Symbol, Any}, system::
                                                             elec_edge.id=>0.0))
 
 
-    return NaturalGasPower(natgas_transform, elec_edge, ng_edge, co2_edge)
+    return NaturalGasPower(id, natgas_transform, elec_edge, ng_edge, co2_edge)
 end

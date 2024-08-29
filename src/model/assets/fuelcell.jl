@@ -1,10 +1,11 @@
 struct FuelCell <: AbstractAsset
+    id::AssetId
     fuelcell_transform::Transformation
     h2_edge::Edge{Hydrogen}
     e_edge::Edge{Electricity}
 end
 
-id(b::FuelCell) = b.fuelcell_transform.id
+id(b::FuelCell) = b.id
 
 """
     make(::Type{FuelCell}, data::AbstractDict{Symbol, Any}, system::System) -> FuelCell
@@ -34,6 +35,8 @@ id(b::FuelCell) = b.fuelcell_transform.id
             - constraints: Vector{AbstractTypeConstraint}
 """
 function make(::Type{FuelCell}, data::AbstractDict{Symbol,Any}, system::System)
+    id = AssetId(data[:id])
+
     transform_data = process_data!(data[:transforms])
 
     fuelcell = Transformation(;
@@ -58,5 +61,5 @@ function make(::Type{FuelCell}, data::AbstractDict{Symbol,Any}, system::System)
     fuelcell.balance_data = Dict(:energy => Dict(h2_edge.id => get(transform_data, :efficiency_rate, 1.0),
         elec_edge.id => 1.0))
 
-    return FuelCell(fuelcell, h2_edge, elec_edge)
+    return FuelCell(id, fuelcell, h2_edge, elec_edge)
 end

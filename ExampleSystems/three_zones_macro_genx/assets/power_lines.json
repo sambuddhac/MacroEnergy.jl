@@ -4,7 +4,6 @@
         "global_data": {
             "edges": {
                 "line": {
-                    "id": "line",
                     "type": "Electricity",
                     "has_planning_variables": true,
                     "unidirectional": false,

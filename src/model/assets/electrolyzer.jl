@@ -1,10 +1,11 @@
 struct Electrolyzer <: AbstractAsset
+    id::AssetId
     electrolyzer_transform::Transformation
     h2_edge::Edge{Hydrogen}
     e_edge::Edge{Electricity}
 end
 
-id(b::Electrolyzer) = b.electrolyzer_transform.id
+id(b::Electrolyzer) = b.id
 
 """
     make(::Type{Electrolyzer}, data::AbstractDict{Symbol, Any}, system::System) -> Electrolyzer
@@ -34,6 +35,8 @@ id(b::Electrolyzer) = b.electrolyzer_transform.id
             - constraints: Vector{AbstractTypeConstraint}
 """
 function make(::Type{Electrolyzer}, data::AbstractDict{Symbol,Any}, system::System)
+    id = AssetId(data[:id])
+
     transform_data = process_data!(data[:transforms])
 
     electrolyzer = Transformation(;
@@ -58,5 +61,5 @@ function make(::Type{Electrolyzer}, data::AbstractDict{Symbol,Any}, system::Syst
     electrolyzer.balance_data = Dict(:energy => Dict(h2_edge.id => 1.0,
         elec_edge.id => get(transform_data, :efficiency_rate, 1.0)))
 
-    return Electrolyzer(electrolyzer, h2_edge, elec_edge)
+    return Electrolyzer(id, electrolyzer, h2_edge, elec_edge)
 end
