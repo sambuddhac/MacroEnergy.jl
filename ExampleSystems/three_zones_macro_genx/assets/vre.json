@@ -16,7 +16,7 @@
                 "has_planning_variables": true,
                 "existing_capacity": 0,
                 "constraints": {
-                    "capacity": true
+                    "CapacityConstraint": true
                 }
             },
             "storage": {}
@@ -75,7 +75,7 @@
                 "has_planning_variables": true,
                 "existing_capacity": 0,
                 "constraints": {
-                    "capacity": true
+                    "CapacityConstraint": true
                 }
             },
             "storage": {}

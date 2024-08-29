@@ -11,8 +11,8 @@
                     "can_expand": true,
                     "can_retire": false,
                     "constraints": {
-                        "capacity": true,
-                        "max_capacity": true
+                        "CapacityConstraint": true,
+                        "MaxCapacityConstraint": true
                     }
                 }
             }

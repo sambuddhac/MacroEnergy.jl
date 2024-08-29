@@ -7,7 +7,7 @@
                 "id": "natgas_power",
                 "time_commodity": "Electricity",
                 "constraints": {
-                    "balance" : true
+                    "BalanceConstraint" : true
                 }
             },
             "edges": {
@@ -29,11 +29,11 @@
                     "capacity_size": 250,
                     "investment_cost": 65400,
                     "constraints": {
-                        "capacity": true,
-                        "ramping_limit": true,
-                        "min_flow": true,
-                        "min_up_time": true,
-                        "min_down_time": true
+                        "CapacityConstraint": true,
+                        "RampingLimitConstraint": true,
+                        "MinFlowConstraint": true,
+                        "MinUpTimeConstraint": true,
+                        "MinDownTimeConstraint": true
                     }
                 },
                 "natgas": {
