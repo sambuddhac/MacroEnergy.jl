@@ -26,7 +26,7 @@ id(g::VRE) = g.id
     Necessary data fields:
      - transforms: Dict{Symbol, Any}
         - id: String
-        - time_commodity: String
+        - timedata: String
     - edges: Dict{Symbol, Any}
         - id: String
         - end_vertex: String
@@ -42,7 +42,7 @@ function make(asset_type::Type{<:VRE}, data::AbstractDict{Symbol, Any}, system::
     transform_data = process_data!(data[:transforms])
     vre_transform = Transformation(;
         id = Symbol(transform_data[:id]),
-        timedata = system.time_data[Symbol(transform_data[:time_commodity])],
+        timedata = system.time_data[Symbol(transform_data[:timedata])],
     )
 
     elec_edge_data = process_data!(data[:edges])

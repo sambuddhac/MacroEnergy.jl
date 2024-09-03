@@ -14,7 +14,7 @@ id(smr::NaturalGasHydrogen) = smr.id
     Necessary data fields:
      - transforms: Dict{Symbol, Any}
         - id: String
-        - time_commodity: String
+        - timedata: String
         - efficiency_rate: Float64
         - emission_rate: Float64
         - constraints: Vector{AbstractTypeConstraint}
@@ -55,7 +55,7 @@ function make(::Type{NaturalGasHydrogen}, data::AbstractDict{Symbol, Any}, syste
     transform_data = process_data!(data[:transforms])
     natgashydrogen_transform = Transformation(;
         id = Symbol(transform_data[:id]),
-        timedata = system.time_data[Symbol(transform_data[:time_commodity])],
+        timedata = system.time_data[Symbol(transform_data[:timedata])],
         constraints = get(transform_data, :constraints, [BalanceConstraint()])
     )
 

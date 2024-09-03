@@ -13,7 +13,7 @@ id(b::Electrolyzer) = b.id
     Necessary data fields:
      - transforms: Dict{Symbol, Any}
         - id: String
-        - time_commodity: String
+        - timedata: String
         - efficiency_rate: Float64
         - constraints: Vector{AbstractTypeConstraint}
     - edges: Dict{Symbol, Any}
@@ -41,7 +41,7 @@ function make(::Type{Electrolyzer}, data::AbstractDict{Symbol,Any}, system::Syst
 
     electrolyzer = Transformation(;
         id=Symbol(transform_data[:id]),
-        timedata=system.time_data[Symbol(transform_data[:time_commodity])],
+        timedata=system.time_data[Symbol(transform_data[:timedata])],
         constraints=get(transform_data, :constraints, [BalanceConstraint()])
     )
 

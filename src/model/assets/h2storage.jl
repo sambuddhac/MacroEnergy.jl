@@ -21,7 +21,7 @@ function make(::Type{H2Storage}, data::AbstractDict{Symbol,Any}, system::System)
     transform_data = process_data!(data[:transforms])
     compressor_transform = Transformation(;
         id=Symbol(transform_data[:id]),
-        timedata=system.time_data[Symbol(transform_data[:time_commodity])],
+        timedata=system.time_data[Symbol(transform_data[:timedata])],
         constraints=get(transform_data, :constraints, [BalanceConstraint()])
     )
 
