@@ -5,7 +5,7 @@ end
 id(b::PowerLine) = b.id
 
 function make(::Type{<:PowerLine}, data::AbstractDict{Symbol, Any}, system::System)
-    elec_edge_data = process_data!(data[:edges][:line])
+    elec_edge_data = process_data(data[:edges][:elec_edge])
 
     id = AssetId(elec_edge_data[:id])   # TODO: check if this should be in data instead
 

@@ -37,7 +37,7 @@ id(b::FuelCell) = b.id
 function make(::Type{FuelCell}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 
-    transform_data = process_data!(data[:transforms])
+    transform_data = process_data(data[:transforms])
 
     fuelcell = Transformation(;
         id=Symbol(transform_data[:id]),
@@ -45,14 +45,14 @@ function make(::Type{FuelCell}, data::AbstractDict{Symbol,Any}, system::System)
         constraints=get(transform_data, :constraints, [BalanceConstraint()])
     )
 
-    elec_edge_data = process_data!(data[:edges][:elec])
+    elec_edge_data = process_data(data[:edges][:e_edge])
     elec_start_node = fuelcell
     elec_end_node = find_node(system.locations, Symbol(elec_edge_data[:end_vertex]))
     elec_edge = Edge(Symbol(elec_edge_data[:id]), elec_edge_data, system.time_data[:Electricity], Electricity, elec_start_node, elec_end_node)
     elec_edge.constraints = get(elec_edge_data, :constraints, [CapacityConstraint()])
     elec_edge.unidirectional = get(elec_edge_data, :unidirectional, true)
 
-    h2_edge_data = process_data!(data[:edges][:h2])
+    h2_edge_data = process_data(data[:edges][:h2_edge])
     h2_start_node = find_node(system.locations, Symbol(h2_edge_data[:start_vertex]))
     h2_end_node = fuelcell
     h2_edge = Edge(Symbol(h2_edge_data[:id]), h2_edge_data, system.time_data[:Hydrogen], Hydrogen, h2_start_node, h2_end_node)

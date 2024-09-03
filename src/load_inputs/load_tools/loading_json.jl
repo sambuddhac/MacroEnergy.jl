@@ -712,7 +712,7 @@ end
 #   
 function make(commodity::Type{<:Commodity}, data::AbstractDict{Symbol,Any}, system::System)
 
-    process_data!(data)
+    data = process_data(data)
 
     node = Node(data, system.time_data[Symbol(commodity)], commodity)
 
@@ -732,7 +732,7 @@ end
 
 function validate_id!(data::AbstractDict{Symbol,Any})
     if !haskey(data, :id)
-        throw(ArgumentError("Assets/nodes have an id."))
+        throw(ArgumentError("Assets/nodes must have an id."))
     end
     return nothing
 end
@@ -769,9 +769,15 @@ function convert_inf_string_to_value(data::AbstractDict{Symbol,Any}, key::Symbol
     return nothing
 end
 
-function check_and_convert_max_line_reinforcement!(data::AbstractDict{Symbol,Any})
+function check_and_convert_inf!(data::AbstractDict{Symbol,Any})
     convert_inf_string_to_value(data, :max_line_reinforcement)
+    convert_inf_string_to_value(data, :max_capacity)
+    convert_inf_string_to_value(data, :max_capacity_storage)
     return nothing
+end
+
+function check_and_convert_demand!(data::AbstractDict{Symbol,Any})
+    data[:demand] = Float64.(data[:demand])
 end
 
 function check_and_convert_constraints!(data::AbstractDict{Symbol,Any})
@@ -797,12 +803,21 @@ function check_and_convert_rhs_policy!(data::AbstractDict{Symbol,Any})
     return nothing
 end
 
-function process_data!(data::AbstractDict{Symbol,Any})
+function check_and_convert_symbol!(data::AbstractDict{Symbol,Any}, key::Symbol)
+    if haskey(data, key) && isa(data[key], AbstractString)
+        data[key] = Symbol(data[key])
+    end
+    return nothing
+end
+
+function process_data(data::AbstractDict{Symbol,Any})
     if isa(data, JSON3.Object)
         data = copy(data) # this makes sure that data is a mutable object
     end
     validate_data(data)
-    check_and_convert_max_line_reinforcement!(data)
+    check_and_convert_inf!(data)
+    check_and_convert_symbol!(data, :startup_fuel_balance_id)
+    haskey(data, :demand) && check_and_convert_demand!(data)
     haskey(data, :constraints) && check_and_convert_constraints!(data)
     haskey(data, :rhs_policy) && check_and_convert_rhs_policy!(data)
     return data

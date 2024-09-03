@@ -46,19 +46,19 @@ id(b::Battery) = b.id
 function make(::Type{Battery}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 
-    storage_data = process_data!(data[:storage])
+    storage_data = process_data(data[:storage])
     commodity_symbol = Symbol(storage_data[:commodity])
     commodity = commodity_types()[commodity_symbol]
     battery_storage = Storage(Symbol(storage_data[:id]), storage_data, system.time_data[commodity_symbol], commodity)
     battery_storage.constraints = get(storage_data, :constraints, [BalanceConstraint(), StorageCapacityConstraint(), StorageMaxDurationConstraint(), StorageMinDurationConstraint(), StorageSymmetricCapacityConstraint()])
 
-    charge_edge_data = process_data!(data[:edges][:charge])
+    charge_edge_data = process_data(data[:edges][:charge_edge])
     charge_start_node = find_node(system.locations, Symbol(charge_edge_data[:start_vertex]))
     charge_end_node = battery_storage
     battery_charge = Edge(Symbol(charge_edge_data[:id]), charge_edge_data, system.time_data[commodity_symbol], commodity, charge_start_node, charge_end_node)
     battery_charge.unidirectional = get(charge_edge_data, :unidirectional, true)
 
-    discharge_edge_data = process_data!(data[:edges][:discharge])
+    discharge_edge_data = process_data(data[:edges][:discharge_edge])
     discharge_start_node = battery_storage
     discharge_end_node = find_node(system.locations, Symbol(discharge_edge_data[:end_vertex]))
     battery_discharge = Edge(Symbol(discharge_edge_data[:id]), discharge_edge_data, system.time_data[commodity_symbol], commodity, discharge_start_node, discharge_end_node)
