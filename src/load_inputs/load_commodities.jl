@@ -28,10 +28,13 @@ end
 
 function load_commodities(data::AbstractDict{Symbol, Any})
     # make sure the commodities are valid
-    @assert haskey(data, :commodities)
-    commodities = Symbol.(data[:commodities])
-    return load_commodities(commodities)
+    if haskey(data, :commodities)
+        return load_commodities(data[:commodities])
+    end
+    return load_commodities(data[:commodities])
 end
+
+load_commodities(commodities::AbstractVector{<:AbstractString}) = load_commodities(Symbol.(commodities))
 
 function load_commodities(commodities::Vector{Symbol})
     # get the list of all commodities available
