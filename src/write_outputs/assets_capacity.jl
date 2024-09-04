@@ -1,20 +1,29 @@
 function get_optimal_asset_capacity(system::System)
-    capacity_results = Dict{Int64,Float64}();
+    num_assets = length(system.assets)
+    asset_ids = Vector{Symbol}(undef, num_assets)
+    asset_type = Vector{Symbol}(undef, num_assets)
+    asset_vcap = Vector{Float64}(undef, num_assets)
     for i in eachindex(system.assets)
-        a=system.assets[i];
-        for f in fieldnames(typeof(a))
-            y = getproperty(a,f);
-            if isa(y,AbstractEdge) 
-                if has_planning_variables(y)
-                    vcap = value(capacity(y));
-                    if vcap!=0
-                        #### TODO - Here it should use the edge ID instead of the index, but we have some problems when loading the ids from the json file
-                        capacity_results[i] = vcap;
-                    end
-                end
+        a = system.assets[i]
+        for y in getfield.(Ref(a), fieldnames(typeof(a)))
+            if isa(y, AbstractEdge) && has_planning_variables(y)
+                asset_ids[i] = id(a)
+                asset_type[i] = Symbol(typeof(a))
+                asset_vcap[i] = value(capacity(y))
             end
         end
     end
-    return capacity_results
-
+    return DataFrame(asset=asset_ids, type=asset_type, capacity=asset_vcap)
 end
+
+# 27% increase in performance
+# function get_optimal_asset_capacity(system::System)
+#     # vector of tuples (id, type, capacity)
+#     asset_capacity = [(id(a), Symbol(typeof(a)), value(capacity(y)))
+#                       for a in system.assets
+#                       for y in getfield.(Ref(a), fieldnames(typeof(a)))
+#                       if isa(y, AbstractEdge) && has_planning_variables(y)]
+
+#     # create DataFrame from vector of tuples
+#     DataFrame((; id, type, cap) for (id, type, cap) in asset_capacity)
+# end
