@@ -17,9 +17,6 @@ macro_objval = Macro.objective_value(model)
 
 println("The runtime for Macro was $(Macro.solve_time(model))")
 
-capacity_results = Macro.get_optimal_asset_capacity(system);
-
-println("Built technology types are:")
-println([typeof(system.assets[i]) for i in keys(capacity_results)])
-
+capacity_results = Macro.get_optimal_asset_capacity(system)
+write_csv(joinpath(case_path, "capacity.csv"), capacity_results)
 println()
