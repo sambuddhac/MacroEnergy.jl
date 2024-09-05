@@ -42,5 +42,7 @@ Manifest.toml
 output.log
 output.log
 
-**/results/
+**/results*/
+**/tdr_results*/
+
 *.log
