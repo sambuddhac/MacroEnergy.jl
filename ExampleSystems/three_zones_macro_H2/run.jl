@@ -18,5 +18,8 @@ macro_objval = Macro.objective_value(model)
 println("The runtime for Macro was $(Macro.solve_time(model))")
 
 capacity_results = Macro.get_optimal_asset_capacity(system)
-write_csv(joinpath(case_path, "capacity.csv"), capacity_results)
+
+results_dir = joinpath(case_path, "results")
+mkpath(results_dir)
+Macro.write_csv(joinpath(results_dir, "capacity.csv"), capacity_results)
 println()
