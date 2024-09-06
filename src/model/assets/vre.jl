@@ -49,7 +49,7 @@ function make(asset_type::Type{<:VRE}, data::AbstractDict{Symbol, Any}, system::
     elec_start_node = vre_transform
     elec_end_node = find_node(system.locations, Symbol(elec_edge_data[:end_vertex]))
 
-    elec_edge = Edge(Symbol(elec_edge_data[:id]),elec_edge_data, system.time_data[:Electricity],Electricity, elec_start_node,  elec_end_node );
+    elec_edge = Edge(Symbol(String(id)*"_"*elec_edge_data[:id]),elec_edge_data, system.time_data[:Electricity],Electricity, elec_start_node,  elec_end_node );
     elec_edge.constraints = get(elec_edge_data, :constraints, [CapacityConstraint()])
     elec_edge.unidirectional = get(elec_edge_data, :unidirectional, true);
 

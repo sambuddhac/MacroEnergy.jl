@@ -62,7 +62,7 @@ function make(::Type{NaturalGasPower}, data::AbstractDict{Symbol, Any}, system::
     elec_edge_data = process_data(data[:edges][:e_edge])
     elec_start_node = natgas_transform
     elec_end_node = find_node(system.locations, Symbol(elec_edge_data[:end_vertex]))
-    elec_edge = EdgeWithUC(Symbol(elec_edge_data[:id]),elec_edge_data, system.time_data[:Electricity],Electricity, elec_start_node,  elec_end_node );
+    elec_edge = EdgeWithUC(Symbol(String(id)*"_"*elec_edge_data[:id]),elec_edge_data, system.time_data[:Electricity],Electricity, elec_start_node,  elec_end_node );
     elec_edge.constraints = get(elec_edge_data, :constraints, [CapacityConstraint(), RampingLimitConstraint(), MinUpTimeConstraint(), MinDownTimeConstraint()])
     elec_edge.unidirectional = get(elec_edge_data, :unidirectional, true);
     elec_edge.startup_fuel_balance_id = :energy;
@@ -70,14 +70,14 @@ function make(::Type{NaturalGasPower}, data::AbstractDict{Symbol, Any}, system::
     ng_edge_data = process_data(data[:edges][:ng_edge])
     ng_start_node = find_node(system.locations, Symbol(ng_edge_data[:start_vertex]))
     ng_end_node = natgas_transform
-    ng_edge = Edge(Symbol(ng_edge_data[:id]),ng_edge_data, system.time_data[:NaturalGas],NaturalGas, ng_start_node,  ng_end_node);
+    ng_edge = Edge(Symbol(String(id)*"_"*ng_edge_data[:id]),ng_edge_data, system.time_data[:NaturalGas],NaturalGas, ng_start_node,  ng_end_node);
     ng_edge.constraints = get(ng_edge_data, :constraints,  Vector{AbstractTypeConstraint}())
     ng_edge.unidirectional = get(ng_edge_data, :unidirectional, true);
 
     co2_edge_data = process_data(data[:edges][:co2_edge])
     co2_start_node = natgas_transform
     co2_end_node = find_node(system.locations, Symbol(co2_edge_data[:end_vertex]))
-    co2_edge = Edge(Symbol(co2_edge_data[:id]),co2_edge_data, system.time_data[:CO2],CO2, co2_start_node,  co2_end_node);
+    co2_edge = Edge(Symbol(String(id)*"_"*co2_edge_data[:id]),co2_edge_data, system.time_data[:CO2],CO2, co2_start_node,  co2_end_node);
     co2_edge.constraints = get(co2_edge_data, :constraints,  Vector{AbstractTypeConstraint}())
     co2_edge.unidirectional = get(co2_edge_data, :unidirectional, true);
 
