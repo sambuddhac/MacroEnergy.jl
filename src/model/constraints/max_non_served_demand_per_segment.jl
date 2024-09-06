@@ -9,7 +9,7 @@ function add_model_constraint!(
     n::Node,
     model::Model,
 )
-    if isempty(non_served_demand(n))
+    if !isempty(non_served_demand(n))
         ct.constraint_ref = @constraint(
             model,
             [s in segments_non_served_demand(n), t in time_interval(n)],
