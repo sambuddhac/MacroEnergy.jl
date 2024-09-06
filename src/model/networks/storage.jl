@@ -1,6 +1,10 @@
 
 Base.@kwdef mutable struct Storage{T} <: AbstractVertex
     @AbstractVertexBaseAttributes()
+    capacity_storage::Union{VariableRef,Float64} = 0.0
+    new_capacity_storage::Union{VariableRef,Float64} = 0.0
+    ret_capacity_storage::Union{VariableRef,Float64} = 0.0
+    storage_level::Vector{Union{VariableRef,Float64}} = Vector{VariableRef}()
     discharge_edge::Union{Nothing,AbstractEdge} = nothing
     charge_edge::Union{Nothing,AbstractEdge} = nothing
     min_capacity_storage::Float64 = 0.0
@@ -21,12 +25,12 @@ min_duration(g::Storage) = g.min_duration;
 max_duration(g::Storage) = g.max_duration;
 min_storage_level(g::Storage) = g.min_storage_level;
 existing_capacity_storage(g::Storage) = g.existing_capacity_storage;
-new_capacity_storage(g::Storage) = g.planning_vars[:new_capacity_storage];
-ret_capacity_storage(g::Storage) = g.planning_vars[:ret_capacity_storage];
-capacity_storage(g::Storage) = g.planning_vars[:capacity_storage];
+new_capacity_storage(g::Storage) = g.new_capacity_storage;
+ret_capacity_storage(g::Storage) = g.ret_capacity_storage;
+capacity_storage(g::Storage) = g.capacity_storage;
 investment_cost_storage(g::Storage) = g.investment_cost_storage;
 fixed_om_cost_storage(g::Storage) = g.fixed_om_cost_storage;
-storage_level(g::Storage) = g.operation_vars[:storage_level];
+storage_level(g::Storage) = g.storage_level;
 storage_level(g::Storage,t::Int64) = storage_level(g)[t];
 storage_loss_fraction(g::Storage) = g.storage_loss_fraction;
 discharge_edge(g::Storage) = g.discharge_edge;
@@ -53,19 +57,19 @@ end
 Storage(id::Symbol, data::Dict{Symbol,Any}, time_data::TimeData, commodity::DataType) = make_storage(id, data, time_data, commodity)
 
 function add_planning_variables!(g::Storage,model::Model)
-    g.planning_vars[:new_capacity_storage] = @variable(
+    g.new_capacity_storage = @variable(
         model,
         lower_bound = 0.0,
         base_name = "vNEWCAPSTOR_$(g.id)"
     )
 
-    g.planning_vars[:ret_capacity_storage] = @variable(
+    g.ret_capacity_storage = @variable(
         model,
         lower_bound = 0.0,
         base_name = "vRETCAPSTOR_$(g.id)"
     )
 
-    g.planning_vars[:capacity_storage] = @variable(
+    g.capacity_storage = @variable(
         model,
         lower_bound = 0.0,
         base_name = "vCAPSTOR_$(g.id)"
@@ -99,7 +103,7 @@ end
 
 function add_operation_variables!(g::Storage,model::Model)
 
-    g.operation_vars[:storage_level] = @variable(
+    g.storage_level = @variable(
         model,
         [t in time_interval(g)],
         lower_bound = 0.0,

@@ -22,8 +22,10 @@ macro AbstractEdgeBaseAttributes()
         ramp_down_fraction::Float64 = 1.0
         min_flow_fraction::Float64 = 0.0
         distance::Float64 = 0.0
-        planning_vars::Dict = Dict()
-        operation_vars::Dict = Dict()
+        capacity::Union{VariableRef,Float64} = 0.0
+        new_capacity::Union{VariableRef,Float64} = 0.0
+        ret_capacity::Union{VariableRef,Float64} = 0.0
+        flow::Vector{Union{VariableRef,Float64}} = Vector{VariableRef}()
         constraints::Vector{AbstractTypeConstraint} = Vector{AbstractTypeConstraint}()
     end)
 end
@@ -80,13 +82,13 @@ min_capacity(e::AbstractEdge) = e.min_capacity;
 max_capacity(e::AbstractEdge) = e.max_capacity;
 can_expand(e::AbstractEdge) = e.can_expand;
 can_retire(e::AbstractEdge) = e.can_retire;
-new_capacity(e::AbstractEdge) = e.planning_vars[:new_capacity];
-ret_capacity(e::AbstractEdge) = e.planning_vars[:ret_capacity];
+new_capacity(e::AbstractEdge) = e.new_capacity;
+ret_capacity(e::AbstractEdge) = e.ret_capacity;
 ramp_up_fraction(e::AbstractEdge) = e.ramp_up_fraction;
 ramp_down_fraction(e::AbstractEdge) = e.ramp_down_fraction;
 min_flow_fraction(e::AbstractEdge) = e.min_flow_fraction;
-capacity(e::AbstractEdge) = e.planning_vars[:capacity];
-flow(e::AbstractEdge) = e.operation_vars[:flow];
+capacity(e::AbstractEdge) = e.capacity;
+flow(e::AbstractEdge) = e.flow;
 flow(e::AbstractEdge,t::Int64) = flow(e)[t];
 all_constraints(e::AbstractEdge) = e.constraints;
 
@@ -98,19 +100,19 @@ function add_planning_variables!(e::AbstractEdge, model::Model)
 
     if has_planning_variables(e)
 
-        e.planning_vars[:new_capacity] = @variable(
+        e.new_capacity= @variable(
             model,
             lower_bound = 0.0,
             base_name = "vNEWCAP_$(get_id(e))"
         )
 
-        e.planning_vars[:ret_capacity] = @variable(
+        e.ret_capacity = @variable(
             model,
             lower_bound = 0.0,
             base_name = "vRETCAP_$(get_id(e))"
         )
 
-        e.planning_vars[:capacity] = @variable(
+        e.capacity = @variable(
             model,
             lower_bound = 0.0,
             base_name = "vCAP_$(get_id(e))"
@@ -145,14 +147,14 @@ end
 function add_operation_variables!(e::Edge, model::Model)
 
     if e.unidirectional
-        e.operation_vars[:flow] = @variable(
+        e.flow= @variable(
             model,
             [t in time_interval(e)],
             lower_bound = 0.0,
             base_name = "vFLOW_$(get_id(e))"
         )
     else
-        e.operation_vars[:flow] = @variable(
+        e.flow = @variable(
             model,
             [t in time_interval(e)],
             base_name = "vFLOW_$(get_id(e))"
@@ -194,6 +196,9 @@ Base.@kwdef mutable struct EdgeWithUC{T} <: AbstractEdge{T}
     startup_cost::Float64 = 0.0
     startup_fuel::Float64 = 0.0
     startup_fuel_balance_id::Symbol = :none
+    ucommit::Vector{Union{VariableRef,Float64}} = Vector{VariableRef}()
+    ustart::Vector{Union{VariableRef,Float64}} = Vector{VariableRef}()
+    ushut::Vector{Union{VariableRef,Float64}} = Vector{VariableRef}()
 end
 
 function make_edge_UC(id::Symbol,data::Dict{Symbol,Any}, time_data::TimeData, commodity::DataType, start_vertex::AbstractVertex, end_vertex::AbstractVertex)
@@ -235,13 +240,13 @@ min_down_time(e::EdgeWithUC) = e.min_down_time;
 startup_cost(e::EdgeWithUC) = e.startup_cost;
 startup_fuel(e::EdgeWithUC) = e.startup_fuel;
 startup_fuel_balance_id(e::EdgeWithUC) = e.startup_fuel_balance_id;
-ucommit(e::EdgeWithUC) = e.operation_vars[:ucommit];
+ucommit(e::EdgeWithUC) = e.ucommit;
 ucommit(e::EdgeWithUC,t::Int64) = ucommit(e)[t];
 
-ustart(e::EdgeWithUC) = e.operation_vars[:ustart];
+ustart(e::EdgeWithUC) = e.ustart;
 ustart(e::EdgeWithUC,t::Int64) = ustart(e)[t];
 
-ushut(e::EdgeWithUC) = e.operation_vars[:ushut];
+ushut(e::EdgeWithUC) = e.ushut;
 ushut(e::EdgeWithUC,t::Int64) = ushut(e)[t];
 
 
@@ -252,28 +257,28 @@ function add_operation_variables!(e::EdgeWithUC, model::Model)
        return nothing
     end
     
-    e.operation_vars[:flow] = @variable(
+    e.flow = @variable(
             model,
             [t in time_interval(e)],
             lower_bound = 0.0,
             base_name = "vFLOW_$(get_id(e))"
         )
     
-    e.operation_vars[:ucommit] = @variable(
+    e.ucommit = @variable(
         model,
         [t in time_interval(e)],
         lower_bound = 0.0,
         base_name = "vCOMMIT_$(get_id(e))"
     )
 
-    e.operation_vars[:ustart] = @variable(
+    e.ustart = @variable(
         model,
         [t in time_interval(e)],
         lower_bound = 0.0,
         base_name = "vSTART_$(get_id(e))"
     )
 
-    e.operation_vars[:ushut] = @variable(
+    e.ushut = @variable(
         model,
         [t in time_interval(e)],
         lower_bound = 0.0,

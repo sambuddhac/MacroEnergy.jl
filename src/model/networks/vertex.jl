@@ -4,8 +4,6 @@ macro AbstractVertexBaseAttributes()
         timedata::TimeData
         balance_data::Dict{Symbol, Dict{Symbol, Float64}} = Dict{Symbol, Dict{Symbol, Float64}}()
         operation_expr::Dict = Dict()
-        operation_vars::Dict = Dict()
-        planning_vars::Dict = Dict()
         constraints::Vector{AbstractTypeConstraint} = Vector{AbstractTypeConstraint}()
     end)
 end

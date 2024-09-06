@@ -4,8 +4,11 @@ Base.@kwdef mutable struct Node{T} <: AbstractVertex
     demand_header::Union{Nothing,Symbol} = nothing
     max_nsd::Vector{Float64} = [0.0]
     price_nsd::Vector{Float64} = [0.0]
+    non_served_demand::Matrix{Union{VariableRef,Float64}} = Matrix{VariableRef}(undef,0,0)
     price_unmet_policy::Dict{DataType,Float64} = Dict{DataType,Float64}()
     rhs_policy::Dict{DataType,Float64} = Dict{DataType,Float64}()
+    policy_budgeting_vars::Dict = Dict()
+    policy_slack_vars::Dict = Dict()
 end
 
 
@@ -30,7 +33,7 @@ commodity_type(n::Node{T}) where {T} = T;
 demand(n::Node) = n.demand;
 demand(n::Node,t::Int64) = demand(n)[t];
 demand_header(n::Node) = n.demand_header;
-non_served_demand(n::Node) = n.operation_vars[:non_served_demand];
+non_served_demand(n::Node) = n.non_served_demand;
 non_served_demand(n::Node,s::Int64,t::Int64) = non_served_demand(n)[s,t];
 max_non_served_demand(n::Node) = n.max_nsd;
 max_non_served_demand(n::Node,s::Int64) = max_non_served_demand(n)[s];
@@ -41,6 +44,8 @@ price_unmet_policy(n::Node) = n.price_unmet_policy;
 price_unmet_policy(n::Node,c::DataType) = price_unmet_policy(n)[c];
 rhs_policy(n::Node) = n.rhs_policy;
 rhs_policy(n::Node,c::DataType) = rhs_policy(n)[c];
+policy_budgeting_vars(n::Node) = n.policy_budgeting_vars;
+policy_slack_vars(n::Node) = n.policy_slack_vars;
 
 function add_planning_variables!(n::Node,model::Model)
     if in(PolicyConstraint,supertype.(typeof.(n.constraints)))
@@ -49,12 +54,12 @@ function add_planning_variables!(n::Node,model::Model)
             
             ct_type = typeof(n.constraints[ct]);
             
-            n.planning_vars[Symbol(string(ct_type)*"_Budget")] = @variable(
+            n.policy_budgeting_vars[Symbol(string(ct_type)*"_Budget")] = @variable(
             model,
             [w in subperiod_indices(n)],
             base_name = "v"*string(ct_type)*"_Budget_$(get_id(n))"
             )
-            @constraint(model,sum(n.planning_vars[Symbol(string(ct_type)*"_Budget")]) == rhs_policy(n,ct_type))
+            @constraint(model,sum(n.policy_budgeting_vars[Symbol(string(ct_type)*"_Budget")]) == rhs_policy(n,ct_type))
         end
     end
     return nothing
@@ -73,7 +78,7 @@ function add_operation_variables!(n::Node, model::Model)
     end
 
     if !all(max_non_served_demand(n).==0)
-        n.operation_vars[:non_served_demand] = @variable(
+        n.non_served_demand = @variable(
             model,
             [s in segments_non_served_demand(n) ,t in time_interval(n)],
             lower_bound = 0.0,

@@ -18,22 +18,22 @@ function add_model_constraint!(ct::CO2CapConstraint,
     end
 
     if haskey(price_unmet_policy(n),ct_type)
-        n.operation_vars[Symbol(string(ct_type)*"_Slack")] = @variable(
+        n.policy_slack_vars[Symbol(string(ct_type)*"_Slack")] = @variable(
             model,
             [w in subperiod_indices(n)],
             lower_bound = 0.0,
             base_name = "v"*string(ct_type)*"_Slack_$(get_id(n))"
         )
         for w in subperiod_indices(n)
-            add_to_expression!(model[:eVariableCost], subperiod_weight(n,w)*price_unmet_policy(n,ct_type),n.operation_vars[Symbol(string(ct_type)*"_Slack")][w])
+            add_to_expression!(model[:eVariableCost], subperiod_weight(n,w)*price_unmet_policy(n,ct_type),n.policy_slack_vars[Symbol(string(ct_type)*"_Slack")][w])
 
-            add_to_expression!(subperiod_balance[w], -n.operation_vars[Symbol(string(ct_type)*"_Slack")][w])
+            add_to_expression!(subperiod_balance[w], -n.policy_slack_vars[Symbol(string(ct_type)*"_Slack")][w])
         end
     end
     
     ct.constraint_ref = @constraint(model, 
     [w in subperiod_indices(n)], 
-    subperiod_balance[w] <= n.planning_vars[Symbol(string(ct_type)*"_Budget")][w])
+    subperiod_balance[w] <= n.policy_budgeting_vars[Symbol(string(ct_type)*"_Budget")][w])
 
 
 end
