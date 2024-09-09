@@ -1,10 +1,10 @@
 
 Base.@kwdef mutable struct Storage{T} <: AbstractVertex
     @AbstractVertexBaseAttributes()
-    capacity_storage::Union{VariableRef,Float64} = 0.0
-    new_capacity_storage::Union{VariableRef,Float64} = 0.0
-    ret_capacity_storage::Union{VariableRef,Float64} = 0.0
-    storage_level::Vector{Union{VariableRef,Float64}} = Vector{VariableRef}()
+    capacity_storage::Union{JuMPVariable,Float64} = 0.0
+    new_capacity_storage::Union{JuMPVariable,Float64} = 0.0
+    ret_capacity_storage::Union{JuMPVariable,Float64} = 0.0
+    storage_level::Union{JuMPVariable,Vector{Float64}} = Vector{VariableRef}()
     discharge_edge::Union{Nothing,AbstractEdge} = nothing
     charge_edge::Union{Nothing,AbstractEdge} = nothing
     min_capacity_storage::Float64 = 0.0

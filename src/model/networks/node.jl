@@ -4,7 +4,7 @@ Base.@kwdef mutable struct Node{T} <: AbstractVertex
     demand_header::Union{Nothing,Symbol} = nothing
     max_nsd::Vector{Float64} = [0.0]
     price_nsd::Vector{Float64} = [0.0]
-    non_served_demand::Matrix{Union{VariableRef,Float64}} = Matrix{VariableRef}(undef,0,0)
+    non_served_demand::Union{JuMPVariable,Matrix{Float64}} = Matrix{VariableRef}(undef,0,0)
     price_unmet_policy::Dict{DataType,Float64} = Dict{DataType,Float64}()
     rhs_policy::Dict{DataType,Float64} = Dict{DataType,Float64}()
     policy_budgeting_vars::Dict = Dict()
@@ -97,7 +97,6 @@ function operation_model!(n::Node, model::Model)
             lower_bound = 0.0,
             base_name = "vNSD_$(get_id(n))"
         )
-
         for t in time_interval(n)
             w = current_subperiod(n,t);
             for s in segments_non_served_demand(n)

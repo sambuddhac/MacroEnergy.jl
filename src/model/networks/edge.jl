@@ -22,10 +22,10 @@ macro AbstractEdgeBaseAttributes()
         ramp_down_fraction::Float64 = 1.0
         min_flow_fraction::Float64 = 0.0
         distance::Float64 = 0.0
-        capacity::Union{VariableRef,Float64} = 0.0
-        new_capacity::Union{VariableRef,Float64} = 0.0
-        ret_capacity::Union{VariableRef,Float64} = 0.0
-        flow::Vector{Union{VariableRef,Float64}} = Vector{VariableRef}()
+        capacity::Union{JuMPVariable,Float64} = 0.0
+        new_capacity::Union{JuMPVariable,Float64} = 0.0
+        ret_capacity::Union{JuMPVariable,Float64} = 0.0
+        flow::Union{JuMPVariable,Vector{Float64}} = Vector{VariableRef}()
         constraints::Vector{AbstractTypeConstraint} = Vector{AbstractTypeConstraint}()
     end)
 end
@@ -205,9 +205,9 @@ Base.@kwdef mutable struct EdgeWithUC{T} <: AbstractEdge{T}
     startup_cost::Float64 = 0.0
     startup_fuel::Float64 = 0.0
     startup_fuel_balance_id::Symbol = :none
-    ucommit::Vector{Union{VariableRef,Float64}} = Vector{VariableRef}()
-    ustart::Vector{Union{VariableRef,Float64}} = Vector{VariableRef}()
-    ushut::Vector{Union{VariableRef,Float64}} = Vector{VariableRef}()
+    ucommit::Union{JuMPVariable,Vector{Float64}} = Vector{VariableRef}()
+    ustart::Union{JuMPVariable,Vector{Float64}} = Vector{VariableRef}()
+    ushut::Union{JuMPVariable,Vector{Float64}}= Vector{VariableRef}()
 end
 
 function make_edge_UC(id::Symbol,data::Dict{Symbol,Any}, time_data::TimeData, commodity::DataType, start_vertex::AbstractVertex, end_vertex::AbstractVertex)

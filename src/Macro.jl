@@ -45,6 +45,7 @@ const H2_MWh = 33.33 # MWh per tonne of H2
 const NG_MWh = 0.29307107 # MWh per MMBTU of NG 
 const AssetId = Symbol
 const JuMPConstraint = Union{Array,Containers.DenseAxisArray,Containers.SparseAxisArray,ConstraintRef}
+const JuMPVariable = Union{Array,Containers.DenseAxisArray,Containers.SparseAxisArray,VariableRef}
 
 function include_all_in_folder(folder)
     base_path = joinpath(@__DIR__, folder)
@@ -102,6 +103,7 @@ include("model/assets/h2storage.jl")
 include_all_in_folder("model/constraints")
 
 include("generate_model.jl")
+include("benders_utilities.jl")
 
 include("load_inputs/load_tools/loading_json.jl")
 include("config/configure_settings.jl")
@@ -112,8 +114,9 @@ include("load_inputs/load_time_data.jl")
 include("write_outputs/assets_capacity.jl")
 include("write_outputs/utilities.jl")
 
-include("benders/benders_utility.jl")
-include("benders/benders_planning_problem.jl")
+# include("benders/benders_utility.jl")
+# include("benders/benders_planning.jl")
+# include("benders/benders_subproblems.jl")
 
 export Electricity,
     Hydrogen,
