@@ -96,7 +96,19 @@ start_vertex(e::AbstractEdge) = e.start_vertex;
 end_vertex(e::AbstractEdge) = e.end_vertex;
 balance_data(e::AbstractEdge,v::AbstractVertex,i::Symbol) = isempty(balance_data(v,i)) ? 1.0 : balance_data(v,i)[get_id(e)];
 
-function add_planning_variables!(e::AbstractEdge, model::Model)
+function add_linking_variables!(e::AbstractEdge, model::Model)
+
+    if has_planning_variables(e)
+        e.capacity = @variable(
+            model,
+            lower_bound = 0.0,
+            base_name = "vCAP_$(get_id(e))"
+        )
+    end
+
+end
+
+function planning_model!(e::AbstractEdge, model::Model)
 
     if has_planning_variables(e)
 
@@ -110,18 +122,6 @@ function add_planning_variables!(e::AbstractEdge, model::Model)
             model,
             lower_bound = 0.0,
             base_name = "vRETCAP_$(get_id(e))"
-        )
-
-        e.capacity = @variable(
-            model,
-            lower_bound = 0.0,
-            base_name = "vCAP_$(get_id(e))"
-        )
-
-        ### This constraint is just to set the auxiliary capacity variable. Capacity variable could be an expression if we don't want to have this constraint.
-        @constraint(
-            model,
-            capacity(e) == capacity_size(e)*(new_capacity(e) - ret_capacity(e)) + existing_capacity(e)
         )
 
         if !can_expand(e)
@@ -140,11 +140,18 @@ function add_planning_variables!(e::AbstractEdge, model::Model)
 
     end
 
+    ### DEFAULT CONSTRAINTS ###
+    
+    @constraint(
+    model,
+    capacity(e) == capacity_size(e)*(new_capacity(e) - ret_capacity(e)) + existing_capacity(e)
+    )
+
     return nothing
 
 end
 
-function add_operation_variables!(e::Edge, model::Model)
+function operation_model!(e::Edge, model::Model)
 
     if e.unidirectional
         e.flow= @variable(
@@ -165,13 +172,6 @@ function add_operation_variables!(e::Edge, model::Model)
 
     update_balance!(e,end_vertex(e),1)
 
-    if isa(start_vertex(e),Storage)
-        @constraint(
-            model,
-            [t in time_interval(e)], 
-            balance_data(e,start_vertex(e),:storage)*flow(e,t) <= storage_level(start_vertex(e),timestepbefore(t,1,subperiods(e))))
-    end
-
     for t in time_interval(e)
 
         w = current_subperiod(e,t);
@@ -184,6 +184,15 @@ function add_operation_variables!(e::Edge, model::Model)
             add_to_expression!(model[:eVariableCost], subperiod_weight(e,w)*price(e,t), flow(e,t))
         end
 
+    end
+
+    ### DEFAULT CONSTRAINTS ###
+    
+    if isa(start_vertex(e),Storage)
+        @constraint(
+            model,
+            [t in time_interval(e)], 
+            balance_data(e,start_vertex(e),:storage)*flow(e,t) <= storage_level(start_vertex(e),timestepbefore(t,1,subperiods(e))))
     end
 
     return nothing
@@ -250,7 +259,7 @@ ushut(e::EdgeWithUC) = e.ushut;
 ushut(e::EdgeWithUC,t::Int64) = ushut(e)[t];
 
 
-function add_operation_variables!(e::EdgeWithUC, model::Model)
+function operation_model!(e::EdgeWithUC, model::Model)
 
     if !e.unidirectional
        error("UC is available only for unidirectional edges, set edge $(get_id(e)) to be unidirectional")
@@ -306,6 +315,8 @@ function add_operation_variables!(e::EdgeWithUC, model::Model)
         end
 
     end
+
+    ### DEFAULT CONSTRAINTS ###
 
     @constraints(model, begin
     [t in time_interval(e)], ucommit(e,t) <= capacity(e)/capacity_size(e)    

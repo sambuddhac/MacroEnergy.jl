@@ -47,25 +47,38 @@ rhs_policy(n::Node,c::DataType) = rhs_policy(n)[c];
 policy_budgeting_vars(n::Node) = n.policy_budgeting_vars;
 policy_slack_vars(n::Node) = n.policy_slack_vars;
 
-function add_planning_variables!(n::Node,model::Model)
-    if in(PolicyConstraint,supertype.(typeof.(n.constraints)))
-        ct_all = findall(PolicyConstraint.==supertype.(typeof.(n.constraints)));
-        for ct in ct_all
+function add_linking_variables!(n::Node, model::Model)
+    
+    if any(isa.(n.constraints,PolicyConstraint))
+        ct_all = findall(isa.(n.constraints,PolicyConstraint));
+        for ct in ct_all   
             
-            ct_type = typeof(n.constraints[ct]);
-            
+            ct_type = typeof(n.constraints[ct]);   
             n.policy_budgeting_vars[Symbol(string(ct_type)*"_Budget")] = @variable(
             model,
             [w in subperiod_indices(n)],
             base_name = "v"*string(ct_type)*"_Budget_$(get_id(n))"
             )
+        end
+    end
+
+end
+
+function planning_model!(n::Node,model::Model)
+
+    ### DEFAULT CONSTRAINTS ###
+
+    if any(isa.(n.constraints,PolicyConstraint))
+        ct_all = findall(isa.(n.constraints,PolicyConstraint));
+        for ct in ct_all              
+            ct_type = typeof(n.constraints[ct]);   
             @constraint(model,sum(n.policy_budgeting_vars[Symbol(string(ct_type)*"_Budget")]) == rhs_policy(n,ct_type))
         end
     end
     return nothing
 end
 
-function add_operation_variables!(n::Node, model::Model)
+function operation_model!(n::Node, model::Model)
 
     if !isempty(balance_ids(n))
         for i in balance_ids(n)

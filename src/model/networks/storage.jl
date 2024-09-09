@@ -56,7 +56,18 @@ function make_storage(id::Symbol, data::Dict{Symbol,Any}, time_data::TimeData, c
 end
 Storage(id::Symbol, data::Dict{Symbol,Any}, time_data::TimeData, commodity::DataType) = make_storage(id, data, time_data, commodity)
 
-function add_planning_variables!(g::Storage,model::Model)
+function add_linking_variables!(g::Storage, model::Model)
+
+    g.capacity_storage = @variable(
+        model,
+        lower_bound = 0.0,
+        base_name = "vCAPSTOR_$(g.id)"
+    )
+    
+end
+
+function planning_model!(g::Storage,model::Model)
+
     g.new_capacity_storage = @variable(
         model,
         lower_bound = 0.0,
@@ -68,21 +79,6 @@ function add_planning_variables!(g::Storage,model::Model)
         lower_bound = 0.0,
         base_name = "vRETCAPSTOR_$(g.id)"
     )
-
-    g.capacity_storage = @variable(
-        model,
-        lower_bound = 0.0,
-        base_name = "vCAPSTOR_$(g.id)"
-    )
-   
-    @constraint(
-        model,
-        capacity_storage(g) ==
-        new_capacity_storage(g) - ret_capacity_storage(g) + existing_capacity_storage(g)
-    )
- 
-    @constraint(model, ret_capacity_storage(g) <= existing_capacity_storage(g))
-
 
     if !g.can_expand
         fix(new_capacity_storage(g), 0.0; force = true)
@@ -99,9 +95,19 @@ function add_planning_variables!(g::Storage,model::Model)
         add_to_expression!(model[:eFixedCost],fixed_om_cost_storage(g), capacity_storage(g))
     end
 
+    ### DEFAULT CONSTRAINTS ###
+
+    @constraint(
+        model,
+        capacity_storage(g) ==
+        new_capacity_storage(g) - ret_capacity_storage(g) + existing_capacity_storage(g)
+    )
+ 
+    @constraint(model, ret_capacity_storage(g) <= existing_capacity_storage(g))
+
 end
 
-function add_operation_variables!(g::Storage,model::Model)
+function operation_model!(g::Storage,model::Model)
 
     g.storage_level = @variable(
         model,

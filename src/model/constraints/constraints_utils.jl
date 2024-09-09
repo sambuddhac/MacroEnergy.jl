@@ -5,32 +5,24 @@ constraint_dual(c::AbstractTypeConstraint) = c.constraint_dict[:constraint_dual]
 constraint_ref(c::AbstractTypeConstraint) = c.contraint_dict[:constraint_ref];
 
 
-
-function add_all_model_constraints!(
-    y::Union{AbstractEdge,AbstractVertex},
-    model::Model,
-)
-
-    for ct in all_constraints(y)
-        add_model_constraint!(ct, y, model)
+function add_constraints_by_type!(system::System, model::Model,constraint_type::DataType)
+    
+    for n in system.locations
+        add_constraints_by_type!(n, model, constraint_type)
     end
-    ##### This does not work because can't broadcast when passing g : add_model_constraints!.(all_constraints(g),g,model);
 
-    return nothing
+    for a in system.assets
+        for t in fieldnames(typeof(a))
+            add_constraints_by_type!(getfield(a,t), model,constraint_type)
+        end
+    end
+    
 end
 
-
-function add_all_model_constraints!(system::System,model::Model)
-
-    add_all_model_constraints!.(system.locations, Ref(model))
-
-    add_all_model_constraints!.(system.assets, Ref(model))
-
-end
-
-function add_all_model_constraints!(a::AbstractAsset, model::Model)
-    for t in fieldnames(typeof(a))
-        add_all_model_constraints!(getfield(a,t), model)
+function add_constraints_by_type!(y::Union{AbstractEdge,AbstractVertex}, model::Model,constraint_type::DataType)
+    for c in all_constraints(y)
+        if isa(c,constraint_type) 
+            add_model_constraint!(c, y, model)
+        end
     end
-    return nothing
 end
