@@ -803,6 +803,17 @@ function check_and_convert_rhs_policy!(data::AbstractDict{Symbol,Any})
     return nothing
 end
 
+function check_and_convert_price_unmet_policy!(data::AbstractDict{Symbol,Any})
+    price_unmet_policy = Dict{DataType,Float64}()
+    constraints = constraint_types()
+    for (k, v) in data[:price_unmet_policy]
+        new_k = constraints[Symbol(k)]
+        price_unmet_policy[new_k] = v
+    end
+    data[:price_unmet_policy] = price_unmet_policy
+    return nothing
+end
+
 function check_and_convert_symbol!(data::AbstractDict{Symbol,Any}, key::Symbol)
     if haskey(data, key) && isa(data[key], AbstractString)
         data[key] = Symbol(data[key])
@@ -820,5 +831,6 @@ function process_data(data::AbstractDict{Symbol,Any})
     haskey(data, :demand) && check_and_convert_demand!(data)
     haskey(data, :constraints) && check_and_convert_constraints!(data)
     haskey(data, :rhs_policy) && check_and_convert_rhs_policy!(data)
+    haskey(data, :price_unmet_policy) && check_and_convert_price_unmet_policy!(data)
     return data
 end
