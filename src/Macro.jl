@@ -112,7 +112,8 @@ include("load_inputs/load_time_data.jl")
 include("write_outputs/assets_capacity.jl")
 include("write_outputs/utilities.jl")
 
-export Electricity,
+export Commodity,
+    Electricity,
     Hydrogen,
     NaturalGas,
     CO2,
