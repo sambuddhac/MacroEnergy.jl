@@ -1,4 +1,4 @@
-Base.@kwdef mutable struct System
+mutable struct System
     data_dirpath::String
     settings::NamedTuple
     commodities::Dict{Symbol, DataType}
