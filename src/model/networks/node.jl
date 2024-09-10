@@ -1,7 +1,6 @@
 Base.@kwdef mutable struct Node{T} <: AbstractVertex
     @AbstractVertexBaseAttributes()
     demand::Union{Vector{Float64},Dict{Int64,Float64}} = Vector{Float64}()
-    demand_header::Union{Nothing,Symbol} = nothing
     max_nsd::Vector{Float64} = [0.0]
     price_nsd::Vector{Float64} = [0.0]
     non_served_demand::Union{JuMPVariable,Matrix{Float64}} = Matrix{VariableRef}(undef,0,0)
@@ -16,7 +15,6 @@ function make_node(data::AbstractDict{Symbol,Any}, time_data::TimeData, commodit
     _node = Node{commodity}(;
         id = Symbol(data[:id]),
         demand = get(data, :demand, Vector{Float64}()),
-        demand_header = get(data, :demand_header, nothing),
         timedata = time_data,
         max_nsd = get(data, :max_nsd, [0.0]),
         price_nsd = get(data, :price_nsd, [0.0]),
@@ -32,7 +30,6 @@ Node(data::AbstractDict{Symbol,Any}, time_data::TimeData, commodity::DataType) =
 commodity_type(n::Node{T}) where {T} = T;
 demand(n::Node) = n.demand;
 demand(n::Node,t::Int64) = demand(n)[t];
-demand_header(n::Node) = n.demand_header;
 non_served_demand(n::Node) = n.non_served_demand;
 non_served_demand(n::Node,s::Int64,t::Int64) = non_served_demand(n)[s,t];
 max_non_served_demand(n::Node) = n.max_nsd;

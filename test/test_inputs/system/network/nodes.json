@@ -28,16 +28,13 @@
         },
         "instance": [
             {
-                "id": "elec_MA",
-                "demand_header": "MA"
+                "id": "elec_MA"
             },
             {
-                "id": "elec_CT",
-                "demand_header": "CT"
+                "id": "elec_CT"
             },
             {
-                "id": "elec_ME",
-                "demand_header": "ME"
+                "id": "elec_ME"
             }
         ]
     },
@@ -71,16 +68,13 @@
         },
         "instance": [
             {
-                "id": "h2_MA",
-                "demand_header": "h2_MA"
+                "id": "h2_MA"
             },
             {
-                "id": "h2_CT",
-                "demand_header": "h2_CT"
+                "id": "h2_CT"
             },
             {
-                "id": "h2_ME",
-                "demand_header": "h2_ME"
+                "id": "h2_ME"
             }
         ]
     }

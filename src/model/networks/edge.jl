@@ -17,7 +17,6 @@ macro AbstractEdgeBaseAttributes()
         fixed_om_cost::Float64 = 0.0
         variable_om_cost::Float64 = 0.0
         price::Vector{Float64} = Float64[]
-        price_header::Union{Nothing,Symbol} = nothing
         ramp_up_fraction::Float64 = 1.0
         ramp_down_fraction::Float64 = 1.0
         min_flow_fraction::Float64 = 0.0
@@ -52,7 +51,6 @@ function make_edge(id::Symbol,data::AbstractDict{Symbol,Any}, time_data::TimeDat
         fixed_om_cost = get(data,:fixed_om_cost,0.0),
         variable_om_cost = get(data,:variable_om_cost,0.0),
         price = get(data,:price,Float64[]),
-        price_header = get(data,:price_header,nothing),
         ramp_up_fraction = get(data,:ramp_up_fraction,1.0),
         ramp_down_fraction = get(data,:ramp_down_fraction,1.0),
         min_flow_fraction = get(data,:min_flow_fraction,0.0),
@@ -77,7 +75,6 @@ fixed_om_cost(e::AbstractEdge) = e.fixed_om_cost;
 variable_om_cost(e::AbstractEdge) = e.variable_om_cost;
 price(e::AbstractEdge) = e.price;
 price(e::AbstractEdge,t::Int64) = price(e)[t];
-price_header(e::AbstractEdge) = e.price_header;
 min_capacity(e::AbstractEdge) = e.min_capacity;
 max_capacity(e::AbstractEdge) = e.max_capacity;
 can_expand(e::AbstractEdge) = e.can_expand;
@@ -229,7 +226,6 @@ function make_edge_UC(id::Symbol,data::Dict{Symbol,Any}, time_data::TimeData, co
         fixed_om_cost = get(data,:fixed_om_cost,0.0),
         variable_om_cost = get(data,:variable_om_cost,0.0),
         price = get(data,:price,Float64[]),
-        price_header = get(data,:price_header,nothing),
         ramp_up_fraction = get(data,:ramp_up_fraction,1.0),
         ramp_down_fraction = get(data,:ramp_down_fraction,1.0),
         min_flow_fraction = get(data,:min_flow_fraction,0.0),

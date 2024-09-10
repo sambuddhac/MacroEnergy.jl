@@ -44,7 +44,6 @@ function test_load_inputs()
     @test typeof(elec_node) == Node{Electricity}
     @test elec_node.id == :elec_MA
     @test elec_node.demand == demand_true.MA
-    @test elec_node.demand_header == :MA
     @test elec_node.timedata == time_data[:Electricity]
     @test elec_node.max_nsd == [1.0, 0.04, 0.024, 0.003]
     @test elec_node.price_nsd == [1.0, 0.9, 0.55, 0.2]
@@ -166,7 +165,6 @@ function test_load_inputs()
     
     # test the fuel data
     @test ng_tedge.price == fuel_data_true.natgas_MA
-    @test ng_tedge.price_header == :natgas_MA
     @test ng_tedge.st_coeff[:emissions] == 0.05306
 
     # test the system

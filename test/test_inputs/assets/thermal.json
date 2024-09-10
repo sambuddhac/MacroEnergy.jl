@@ -69,8 +69,7 @@
                     "Electricity": "elec_MA",
                     "NaturalGas": "natgas_MA",
                     "CO2": "co2_MA"
-                },
-                "price_header": "natgas_MA"
+                }
             },
             {
                 "id": "ng_CT",
@@ -78,8 +77,7 @@
                     "Electricity": "elec_CT",
                     "NaturalGas": "natgas_CT",
                     "CO2": "co2_CT"
-                },
-                "price_header": "natgas_CT"
+                }
             },
             {
                 "id": "ng_ME",
@@ -87,8 +85,7 @@
                     "Electricity": "elec_ME",
                     "NaturalGas": "natgas_ME",
                     "CO2": "co2_ME"
-                },
-                "price_header": "natgas_ME"
+                }
             }
         ]
     },
@@ -180,8 +177,7 @@
                         "stoichiometry_coefficients": {
                             "energy": 1,
                             "emissions": 0.2
-                        },
-                        "price_header": "natgas_MA"
+                        }
                     },
                     "co2": {
                         "direction": "output",

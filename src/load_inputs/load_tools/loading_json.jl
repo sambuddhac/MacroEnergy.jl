@@ -598,7 +598,7 @@ end
 
 # This function prepares Node objects for being printed to a JSON file
 function prepare_to_json(node::Node)
-    fields_to_exclude = [:operation_expr, :operation_vars, :planning_vars]
+    fields_to_exclude = [:policy_budgeting_vars, :policy_slack_vars]
     return Dict{Symbol,Any}(
         :type => Symbol(commodity_type(node)),
         :instance_data => prepare_to_json(node, fields_to_exclude)
@@ -632,22 +632,16 @@ end
 
 # This function prepares AbstactVertex objects (e.g., transformations) for 
 function prepare_to_json(vertex::AbstractVertex)
-    fields_to_exclude = [:operation_expr, :operation_vars, :planning_vars]
+    fields_to_exclude = [:operation_expr]
     return prepare_to_json(vertex, fields_to_exclude)
 end
 
 # We override the default prepare_to_json function for storage objects to exclude discharge_edge and charge_edge
 function prepare_to_json(storage::Storage)
-    fields_to_exclude = [:operation_expr, :operation_vars, :planning_vars, :discharge_edge, :charge_edge]
+    fields_to_exclude = [:operation_expr, :discharge_edge, :charge_edge]
     storage_data = prepare_to_json(storage, fields_to_exclude)
     storage_data[:commodity] = commodity_type(storage)
     return storage_data
-end
-
-# This function prepares Edge objects for being printed to a JSON file
-function prepare_to_json(edge::AbstractEdge)
-    fields_to_exclude = [:operation_vars, :planning_vars]
-    return prepare_to_json(edge, fields_to_exclude)
 end
 
 # This function prepares MacroObject objects (e.g., Storage, Transformation, Nodes, Edges). Note: edges have their own function
@@ -656,7 +650,7 @@ function prepare_to_json(object::MacroObject, fields_to_exclude::Vector{Symbol}=
     for field in filter(x -> !in(x, fields_to_exclude), Base.fieldnames(typeof(object)))
         data = getfield(object, field)
         # Skip empty fields
-        if isa(data, AbstractDict) || isa(data, AbstractVector) && isempty(data)
+        if (isa(data, AbstractDict) || isa(data, AbstractVector)) && isempty(data)
             continue
         end
         # If the field is a node or vertex, we need to write the id not the object
