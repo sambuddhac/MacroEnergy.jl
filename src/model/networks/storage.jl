@@ -20,7 +20,12 @@ Base.@kwdef mutable struct Storage{T} <: AbstractVertex
     storage_loss_fraction::Float64 = 0.0
 end
 
-function make_storage(id::Symbol, data::Dict{Symbol,Any}, time_data::TimeData, commodity::DataType)
+function make_storage(
+    id::Symbol,
+    data::Dict{Symbol,Any},
+    time_data::TimeData,
+    commodity::DataType,
+)
     _storage = Storage{commodity}(;
         id = id,
         timedata = time_data,
@@ -34,11 +39,12 @@ function make_storage(id::Symbol, data::Dict{Symbol,Any}, time_data::TimeData, c
         max_duration = get(data, :max_duration, 0.0),
         min_storage_level = get(data, :min_storage_level, 0.0),
         min_capacity_storage = get(data, :min_capacity_storage, 0.0),
-        max_capacity_storage = get(data, :max_capacity_storage, Inf)
+        max_capacity_storage = get(data, :max_capacity_storage, Inf),
     )
     return _storage
 end
-Storage(id::Symbol, data::Dict{Symbol,Any}, time_data::TimeData, commodity::DataType) = make_storage(id, data, time_data, commodity)
+Storage(id::Symbol, data::Dict{Symbol,Any}, time_data::TimeData, commodity::DataType) =
+    make_storage(id, data, time_data, commodity)
 
 
 ######### Storage interface #########
@@ -56,39 +62,33 @@ min_storage_level(g::Storage) = g.min_storage_level;
 new_capacity_storage(g::Storage) = g.new_capacity_storage;
 ret_capacity_storage(g::Storage) = g.ret_capacity_storage;
 storage_level(g::Storage) = g.storage_level;
-storage_level(g::Storage,t::Int64) = storage_level(g)[t];
+storage_level(g::Storage, t::Int64) = storage_level(g)[t];
 storage_loss_fraction(g::Storage) = g.storage_loss_fraction;
 ######### Storage interface #########
 
 
 function add_linking_variables!(g::Storage, model::Model)
 
-    g.capacity_storage = @variable(
-        model,
-        lower_bound = 0.0,
-        base_name = "vCAPSTOR_$(g.id)"
-    )
-    
+    g.capacity_storage = @variable(model, lower_bound = 0.0, base_name = "vCAPSTOR_$(g.id)")
+
 end
 
-function planning_model!(g::Storage,model::Model)
+function planning_model!(g::Storage, model::Model)
 
-    g.new_capacity_storage = @variable(
-        model,
-        lower_bound = 0.0,
-        base_name = "vNEWCAPSTOR_$(g.id)"
-    )
+    g.new_capacity_storage =
+        @variable(model, lower_bound = 0.0, base_name = "vNEWCAPSTOR_$(g.id)")
 
-    g.ret_capacity_storage = @variable(
-        model,
-        lower_bound = 0.0,
-        base_name = "vRETCAPSTOR_$(g.id)"
-    )
+    g.ret_capacity_storage =
+        @variable(model, lower_bound = 0.0, base_name = "vRETCAPSTOR_$(g.id)")
 
     if !g.can_expand
         fix(new_capacity_storage(g), 0.0; force = true)
     else
-        add_to_expression!(model[:eFixedCost],investment_cost_storage(g), new_capacity_storage(g)) 
+        add_to_expression!(
+            model[:eFixedCost],
+            investment_cost_storage(g),
+            new_capacity_storage(g),
+        )
     end
 
     if !g.can_retire
@@ -96,8 +96,12 @@ function planning_model!(g::Storage,model::Model)
     end
 
 
-    if fixed_om_cost_storage(g)>0
-        add_to_expression!(model[:eFixedCost],fixed_om_cost_storage(g), capacity_storage(g))
+    if fixed_om_cost_storage(g) > 0
+        add_to_expression!(
+            model[:eFixedCost],
+            fixed_om_cost_storage(g),
+            capacity_storage(g),
+        )
     end
 
     ### DEFAULT CONSTRAINTS ###
@@ -107,12 +111,12 @@ function planning_model!(g::Storage,model::Model)
         capacity_storage(g) ==
         new_capacity_storage(g) - ret_capacity_storage(g) + existing_capacity_storage(g)
     )
- 
+
     @constraint(model, ret_capacity_storage(g) <= existing_capacity_storage(g))
 
 end
 
-function operation_model!(g::Storage,model::Model)
+function operation_model!(g::Storage, model::Model)
 
     g.storage_level = @variable(
         model,
@@ -122,11 +126,15 @@ function operation_model!(g::Storage,model::Model)
     )
 
     if :storage ∈ balance_ids(g)
-        
-        g.operation_expr[:storage] = @expression(model, 
-                                        [t in time_interval(g)], 
-                                        -storage_level(g,t) + (1 - storage_loss_fraction(g)) * storage_level(g,timestepbefore(t,1,subperiods(g))))
-    
+
+        g.operation_expr[:storage] = @expression(
+            model,
+            [t in time_interval(g)],
+            -storage_level(g, t) +
+            (1 - storage_loss_fraction(g)) *
+            storage_level(g, timestepbefore(t, 1, subperiods(g)))
+        )
+
     else
         error("A storage vertex requires to have a balance named :storage")
     end

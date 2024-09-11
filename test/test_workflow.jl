@@ -3,7 +3,26 @@ module TestWorkflow
 using Test
 using Gurobi, HiGHS
 using CSV, DataFrames, JSON3
-import Macro: System, AbstractEdge, Edge, EdgeWithUC, Node, Transformation, Storage, TimeData, Commodity, AbstractAsset, AbstractTypeConstraint, load_system, generate_model, set_optimizer, optimize!, objective_value, commodity_type, AssetId, VariableRef
+import Macro:
+    System,
+    AbstractEdge,
+    Edge,
+    EdgeWithUC,
+    Node,
+    Transformation,
+    Storage,
+    TimeData,
+    Commodity,
+    AbstractAsset,
+    AbstractTypeConstraint,
+    load_system,
+    generate_model,
+    set_optimizer,
+    optimize!,
+    objective_value,
+    commodity_type,
+    AssetId,
+    VariableRef
 
 
 include("utilities.jl")
@@ -18,7 +37,10 @@ function test_configure_settings(data::NamedTuple, data_true::T) where {T<:JSON3
     return nothing
 end
 
-function test_load_commodities(commodities::Dict{Symbol,DataType}, commodities_true::T) where {T<:JSON3.Array}
+function test_load_commodities(
+    commodities::Dict{Symbol,DataType},
+    commodities_true::T,
+) where {T<:JSON3.Array}
     commodities_true = Symbol.(commodities_true)
     @test length(commodities) == length(commodities_true)
     for (k, v) in commodities
@@ -42,13 +64,16 @@ end
 
 function test_load(obj_in::Vector, data_true::JSON3.Array)
     @test length(obj_in) == length(data_true)
-    for i in 1:length(obj_in)
+    for i = 1:length(obj_in)
         test_load(obj_in[i], data_true[i])
     end
     return nothing
 end
 
-function test_load(obj_in::Vector{AbstractTypeConstraint}, data_true::T) where {T<:JSON3.Object}
+function test_load(
+    obj_in::Vector{AbstractTypeConstraint},
+    data_true::T,
+) where {T<:JSON3.Object}
     @test length(obj_in) == length(data_true)
     for c in obj_in
         name = Symbol(typeof(c))
@@ -69,7 +94,8 @@ function test_load(e_in::AbstractEdge{T}, e_true::S) where {T<:Commodity,S<:JSON
     @test e_in.capacity_size == get(e_true, :capacity_size, 1.0)
     @test e_in.availability == get(e_true, :availability, Float64[])
     @test e_in.min_capacity == get(e_true, :min_capacity, 0.0)
-    e_true_max_capacity = get(e_true, :max_capacity, "Inf") == "Inf" ? Inf : get(e_true, :max_capacity, Inf)
+    e_true_max_capacity =
+        get(e_true, :max_capacity, "Inf") == "Inf" ? Inf : get(e_true, :max_capacity, Inf)
     @test e_in.max_capacity == e_true_max_capacity
     @test e_in.existing_capacity == get(e_true, :existing_capacity, 0.0)
     @test e_in.investment_cost == get(e_true, :investment_cost, 0.0)
@@ -94,7 +120,8 @@ function test_load(e_in::EdgeWithUC{T}, e_true::S) where {T<:Commodity,S<:JSON3.
     @test e_in.min_down_time == get(e_true, :min_down_time, 0)
     @test e_in.startup_cost == get(e_true, :startup_cost, 0.0)
     @test e_in.startup_fuel == get(e_true, :startup_fuel, 0.0)
-    @test e_in.startup_fuel_balance_id == Symbol(get(e_true, :startup_fuel_balance_id, "node"))
+    @test e_in.startup_fuel_balance_id ==
+          Symbol(get(e_true, :startup_fuel_balance_id, "node"))
     @test e_in.ucommit == get(e_true, :ucommit, Vector{VariableRef}())
     @test e_in.ustart == get(e_true, :ustart, Vector{VariableRef}())
     @test e_in.ushut == get(e_true, :ushut, Vector{VariableRef}())
@@ -109,10 +136,20 @@ function test_load(n_in::Node{T}, n_true::S) where {T<:Commodity,S<:JSON3.Object
     @test n_in.demand == get(n_true_instance_data, :demand, Vector{Float64}())
     @test n_in.max_nsd == get(n_true_instance_data, :max_nsd, [0.0])
     @test n_in.price_nsd == get(n_true_instance_data, :price_nsd, [0.0])
-    @test n_in.price_unmet_policy == get(n_true_instance_data, :price_unmet_policy, Dict{DataType,Float64}())
-    test_load(n_in.price_unmet_policy, get(n_true_instance_data, :price_unmet_policy, Dict{DataType,Float64}()))
-    test_load(n_in.rhs_policy, get(n_true_instance_data, :rhs_policy, Dict{DataType,Float64}()))
-    test_load(n_in.constraints, get(n_true_instance_data, :constraints, Vector{AbstractTypeConstraint}()))
+    @test n_in.price_unmet_policy ==
+          get(n_true_instance_data, :price_unmet_policy, Dict{DataType,Float64}())
+    test_load(
+        n_in.price_unmet_policy,
+        get(n_true_instance_data, :price_unmet_policy, Dict{DataType,Float64}()),
+    )
+    test_load(
+        n_in.rhs_policy,
+        get(n_true_instance_data, :rhs_policy, Dict{DataType,Float64}()),
+    )
+    test_load(
+        n_in.constraints,
+        get(n_true_instance_data, :constraints, Vector{AbstractTypeConstraint}()),
+    )
     return nothing
 end
 
@@ -131,7 +168,9 @@ function test_load(s_in::Storage{T}, s_true::S) where {T<:Commodity,S<:JSON3.Obj
     @test s_in.ret_capacity_storage == get(s_true, :ret_capacity_storage, 0.0)
     @test s_in.storage_level == get(s_true, :storage_level, Vector{VariableRef}())
     @test s_in.min_capacity_storage == get(s_true, :min_capacity_storage, 0.0)
-    s_true_max_capacity = get(s_true, :max_capacity_storage, "Inf") == "Inf" ? Inf : get(s_true, :max_capacity_storage, Inf)
+    s_true_max_capacity =
+        get(s_true, :max_capacity_storage, "Inf") == "Inf" ? Inf :
+        get(s_true, :max_capacity_storage, Inf)
     @test s_in.max_capacity_storage == s_true_max_capacity
     @test s_in.existing_capacity_storage == get(s_true, :existing_capacity_storage, 0.0)
     @test s_in.can_expand == get(s_true, :can_expand, false)
@@ -202,6 +241,6 @@ function test_workflow()
     return nothing
 end
 
-test_workflow();
+test_workflow()
 
 end # module TestWorkflow

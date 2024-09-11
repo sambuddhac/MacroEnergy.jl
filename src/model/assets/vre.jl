@@ -11,9 +11,7 @@ struct WindTurbine <: AbstractAsset
 end
 
 
-const VRE = Union{
-    SolarPV, WindTurbine
-}
+const VRE = Union{SolarPV,WindTurbine}
 
 id(g::VRE) = g.id
 
@@ -37,7 +35,7 @@ id(g::VRE) = g.id
             - can_expand: Bool
             - constraints: Vector{AbstractTypeConstraint}
 """
-function make(asset_type::Type{<:VRE}, data::AbstractDict{Symbol, Any}, system::System)
+function make(asset_type::Type{<:VRE}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 
     transform_data = process_data(data[:transforms])
@@ -50,9 +48,16 @@ function make(asset_type::Type{<:VRE}, data::AbstractDict{Symbol, Any}, system::
     elec_start_node = vre_transform
     elec_end_node = find_node(system.locations, Symbol(elec_edge_data[:end_vertex]))
 
-    elec_edge = Edge(Symbol(String(id)*"_"*elec_edge_data[:id]),elec_edge_data, system.time_data[:Electricity],Electricity, elec_start_node,  elec_end_node );
+    elec_edge = Edge(
+        Symbol(String(id) * "_" * elec_edge_data[:id]),
+        elec_edge_data,
+        system.time_data[:Electricity],
+        Electricity,
+        elec_start_node,
+        elec_end_node,
+    )
     elec_edge.constraints = get(elec_edge_data, :constraints, [CapacityConstraint()])
-    elec_edge.unidirectional = get(elec_edge_data, :unidirectional, true);
+    elec_edge.unidirectional = get(elec_edge_data, :unidirectional, true)
 
     return asset_type(id, vre_transform, elec_edge)
 end

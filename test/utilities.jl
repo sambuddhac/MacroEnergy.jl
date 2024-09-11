@@ -16,7 +16,7 @@ end
 
 function is_gurobi_available()
     try
-        @warn_error_logger Gurobi.Env();
+        @warn_error_logger Gurobi.Env()
         return true
     catch e
         if isa(e, Gurobi.GurobiError)

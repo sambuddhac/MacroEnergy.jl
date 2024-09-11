@@ -2,7 +2,7 @@
 # Functions for the user to load a system based on JSON files
 ###### ###### ###### ###### ###### ######
 
-function load_system(path::AbstractString=pwd())::System
+function load_system(path::AbstractString = pwd())::System
 
     # The path should either be a a file path to a JSON file, preferably "system_data.json"
     # or a directory containing "system_data.json"
@@ -22,14 +22,21 @@ function load_system(path::AbstractString=pwd())::System
         generate_system!(system, system_data)
         return system
     else
-        throw(ArgumentError("
-            No system data found in $path
-            Either provide a path to a .JSON file or a directory containing a system_data.json file
-        "))
+        throw(
+            ArgumentError(
+                "
+    No system data found in $path
+    Either provide a path to a .JSON file or a directory containing a system_data.json file
+",
+            ),
+        )
     end
 end
 
-function load_system(system_data::AbstractDict{Symbol,Any}, dir_path::AbstractString=pwd())::System
+function load_system(
+    system_data::AbstractDict{Symbol,Any},
+    dir_path::AbstractString = pwd(),
+)::System
     # The path should point to the location of the system data files
     # If path is not provided, we assume the data is in the current working directory
     if isfile(dir_path)
@@ -44,9 +51,13 @@ end
 # Internal functions to handle loading the system
 ###### ###### ###### ###### ###### ######
 
-function generate_system!(system::System, file_path::AbstractString; lazy_load::Bool=true)::nothing
+function generate_system!(
+    system::System,
+    file_path::AbstractString;
+    lazy_load::Bool = true,
+)::nothing
     # Load the system data file
-    system_data = load_system_data(file_path, system.data_dirpath; lazy_load=lazy_load)
+    system_data = load_system_data(file_path, system.data_dirpath; lazy_load = lazy_load)
     generate_system!(system, system_data)
     return nothing
 end
@@ -59,7 +70,8 @@ function generate_system!(system::System, system_data::AbstractDict{Symbol,Any})
     system.commodities = load_commodities(system_data[:commodities], system.data_dirpath)
 
     # Load the time data
-    system.time_data = load_time_data(system_data[:time_data], system.commodities, system.data_dirpath)
+    system.time_data =
+        load_time_data(system_data[:time_data], system.commodities, system.data_dirpath)
 
     # Load the nodes
     load!(system, system_data[:nodes])
@@ -74,21 +86,39 @@ end
 # Internal functions to handle loading the system_data.json file
 ###### ###### ###### ###### ###### ######
 
-function load_system_data(file_path::AbstractString; default_file_path::String=joinpath(@__DIR__, "default_system_data.json"), lazy_load::Bool=true)::Dict{Symbol,Any}
-    load_system_data(file_path, dirname(file_path), default_file_path=default_file_path, lazy_load=lazy_load)
-    return load_json(file_path; lazy_load=lazy_load)
+function load_system_data(
+    file_path::AbstractString;
+    default_file_path::String = joinpath(@__DIR__, "default_system_data.json"),
+    lazy_load::Bool = true,
+)::Dict{Symbol,Any}
+    load_system_data(
+        file_path,
+        dirname(file_path),
+        default_file_path = default_file_path,
+        lazy_load = lazy_load,
+    )
+    return load_json(file_path; lazy_load = lazy_load)
 end
 
-function load_system_data(file_path::AbstractString, rel_path::AbstractString; default_file_path::String=joinpath(@__DIR__, "default_system_data.json"), lazy_load::Bool=true)::Dict{Symbol,Any}
+function load_system_data(
+    file_path::AbstractString,
+    rel_path::AbstractString;
+    default_file_path::String = joinpath(@__DIR__, "default_system_data.json"),
+    lazy_load::Bool = true,
+)::Dict{Symbol,Any}
     file_path = abspath(rel_or_abs_path(file_path, rel_path))
 
     prep_system_data(file_path, default_file_path)
 
     # Load the system data from the JSON file(s)
-    return load_json(file_path; lazy_load=lazy_load)
+    return load_json(file_path; lazy_load = lazy_load)
 end
 
-function load_system_data!(system::System, file_path::AbstractString, default_file_path::String=joinpath(@__DIR__, "default_system_data.json"))::Nothing
+function load_system_data!(
+    system::System,
+    file_path::AbstractString,
+    default_file_path::String = joinpath(@__DIR__, "default_system_data.json"),
+)::Nothing
     # Load the provided system data
     # We're assuming the file_path is a JSON file, not a directory
     file_path = abspath(rel_or_abs_path(file_path, system.data_dirpath))
@@ -105,7 +135,9 @@ function load_system_data!(system::System, file_path::AbstractString, default_fi
 end
 
 
-function load_default_system_data(default_file_path::String=joinpath(@__DIR__, "default_system_data.json"))::Dict{Symbol,Any}
+function load_default_system_data(
+    default_file_path::String = joinpath(@__DIR__, "default_system_data.json"),
+)::Dict{Symbol,Any}
     if isfile(default_file_path)
         default_system_data = read_json(default_file_path)
     else
@@ -114,7 +146,10 @@ function load_default_system_data(default_file_path::String=joinpath(@__DIR__, "
     return default_system_data
 end
 
-function add_default_system_data!(system_data::AbstractDict{Symbol,Any}, default_file_path::String=joinpath(@__DIR__, "default_system_data.json"))::Nothing
+function add_default_system_data!(
+    system_data::AbstractDict{Symbol,Any},
+    default_file_path::String = joinpath(@__DIR__, "default_system_data.json"),
+)::Nothing
     # Load a hard-coded set of default locations for the system data
     # This could be moved to the settings defaults later
     default_system_data = load_default_system_data(default_file_path)
@@ -122,7 +157,10 @@ function add_default_system_data!(system_data::AbstractDict{Symbol,Any}, default
     return nothing
 end
 
-function prep_system_data(file_path::AbstractString, default_file_path::String=joinpath(@__DIR__, "default_system_data.json"))::Nothing
+function prep_system_data(
+    file_path::AbstractString,
+    default_file_path::String = joinpath(@__DIR__, "default_system_data.json"),
+)::Nothing
     if isfile(file_path)
         system_data = read_json(file_path)
     else
@@ -164,7 +202,7 @@ function load!(system::System, data::AbstractDict{Symbol,Any})::Nothing
         # println("Loading system data")
         load_system_data!(system, data)
 
-    # Check that data has only :type and :instance_data fields
+        # Check that data has only :type and :instance_data fields
     elseif data_is_single_instance(data)
         data_type = check_and_convert_type(data)
         load_time_series_data!(system, data) # substritute ts file paths with actual vectors of data
@@ -198,7 +236,7 @@ function load!(system::System, data::AbstractVector{<:AbstractDict{Symbol,Any}})
 end
 
 recursive_merge(x::AbstractDict...) = merge(recursive_merge, x...)
-recursive_merge(x::AbstractVector...) = cat(x...; dims=1)
+recursive_merge(x::AbstractVector...) = cat(x...; dims = 1)
 recursive_merge(x...) = x[end]
 
 function expand_instances(data::AbstractDict{Symbol,Any})
@@ -219,7 +257,7 @@ end
 # Checks on the kind of data
 ###### ###### ###### ###### ###### ######
 
-function check_and_convert_type(data::AbstractDict{Symbol,Any}, m::Module=Macro)::DataType
+function check_and_convert_type(data::AbstractDict{Symbol,Any}, m::Module = Macro)::DataType
     if !haskey(data, :type)
         throw(ArgumentError("Instance data does not have a :type field"))
     end
@@ -261,9 +299,7 @@ end
 function data_is_system_data(data::AbstractDict{Symbol,Any})::Bool
     # Check if it contains any special fields
     entries = collect(keys(data))
-    special_keys = [
-        :settings
-    ]
+    special_keys = [:settings]
     for key in special_keys
         if key in entries
             return true
@@ -284,7 +320,7 @@ end
 # path relative to rel_dir
 ###### ###### ###### ###### ###### ######
 
-function rel_or_abs_path(path::T, rel_dir::T=pwd())::T where {T<:AbstractString}
+function rel_or_abs_path(path::T, rel_dir::T = pwd())::T where {T<:AbstractString}
     if ispath(path)
         return path
     elseif ispath(joinpath(rel_dir, path))
@@ -299,7 +335,7 @@ end
 # JSON data handling
 ###### ###### ###### ###### ###### ######
 
-function load_json(file_path::AbstractString; lazy_load::Bool=true)::Dict{Symbol,Any}
+function load_json(file_path::AbstractString; lazy_load::Bool = true)::Dict{Symbol,Any}
     @info("Loading JSON data from $file_path")
     json_data = read_json(file_path)
     if !lazy_load
@@ -310,7 +346,12 @@ function load_json(file_path::AbstractString; lazy_load::Bool=true)::Dict{Symbol
     return json_data
 end
 
-function load_paths(dict::AbstractDict{Symbol,Any}, path_key::Symbol, root_path::AbstractString, lazy_load::Bool=true)
+function load_paths(
+    dict::AbstractDict{Symbol,Any},
+    path_key::Symbol,
+    root_path::AbstractString,
+    lazy_load::Bool = true,
+)
     if isa(dict, JSON3.Object)
         dict = copy(dict)
     end
@@ -332,13 +373,13 @@ function load_paths(dict::AbstractDict{Symbol,Any}, path_key::Symbol, root_path:
     return dict
 end
 
-function fetch_data(path::AbstractString, root_path::AbstractString, lazy_load::Bool=true)
+function fetch_data(path::AbstractString, root_path::AbstractString, lazy_load::Bool = true)
     # Load data from a JSON file and merge it into the existing data dict
     # overwriting any existing keys
     path = rel_or_abs_path(path, root_path)
     if isfile(path)
         if endswith(path, ".json")
-            return load_json(path; lazy_load=lazy_load)
+            return load_json(path; lazy_load = lazy_load)
         else
             return path
         end
@@ -346,7 +387,7 @@ function fetch_data(path::AbstractString, root_path::AbstractString, lazy_load::
         json_files = filter(x -> endswith(x, ".json"), readdir(path))
         if length(json_files) > 1
             for file in json_files
-                return load_json(joinpath(path, file); lazy_load=lazy_load)
+                return load_json(joinpath(path, file); lazy_load = lazy_load)
             end
         else
             return path
@@ -360,7 +401,9 @@ end
 function clean_up_keys(dict::AbstractDict{Symbol,Any})
     # If a key and value match, then copy the value to the key
     for (key, value) in dict
-        if isa(value, AbstractDict{Symbol,Any}) && length(value) == 1 && first(collect(keys(value))) == key
+        if isa(value, AbstractDict{Symbol,Any}) &&
+           length(value) == 1 &&
+           first(collect(keys(value))) == key
             dict[key] = value[key]
         elseif isa(value, AbstractVector{<:AbstractDict{Symbol,Any}})
             for idx in eachindex(value)
@@ -401,7 +444,7 @@ get_value_and_keys(dict, :b) # returns [(1, [:a, :b]), (2, [:a, :c, :b])]
 Where the first element of the tuple is the value of the key :b and the second 
 element is the list of keys to reach that value.
 """
-function get_value_and_keys(dict::AbstractDict, target_key::Symbol, keys=Symbol[])
+function get_value_and_keys(dict::AbstractDict, target_key::Symbol, keys = Symbol[])
     value_keys = []
 
     if haskey(dict, target_key)
@@ -480,19 +523,28 @@ end
 # CSV data handling
 ###### ###### ###### ###### ###### ######
 
-function load_csv(file_path::AbstractString, sink::T=DataFrame; select::S=Symbol[], lazy_load::Bool=true) where {T,S<:Union{Symbol,Vector{Symbol}}}
+function load_csv(
+    file_path::AbstractString,
+    sink::T = DataFrame;
+    select::S = Symbol[],
+    lazy_load::Bool = true,
+) where {T,S<:Union{Symbol,Vector{Symbol}}}
     if isa(select, Symbol)
         select = [select]
     end
-    csv_data = read_csv(file_path, sink, select=select)
+    csv_data = read_csv(file_path, sink, select = select)
     return csv_data
     #TODO check how to use lazy_load with CSV files
 end
 
-function read_csv(file_path::AbstractString, sink::T=DataFrame; select::Vector{Symbol}=Symbol[]) where {T}
+function read_csv(
+    file_path::AbstractString,
+    sink::T = DataFrame;
+    select::Vector{Symbol} = Symbol[],
+) where {T}
     if length(select) > 0
         @info("Loading columns $select from CSV data from $file_path")
-        csv_data = CSV.read(file_path, sink, select=select)
+        csv_data = CSV.read(file_path, sink, select = select)
         isempty(csv_data) && error("Columns $select not found in $file_path")
         return csv_data
     end
@@ -518,8 +570,11 @@ function load_time_series_data!(system::System, data::AbstractDict{Symbol,Any})
     return nothing
 end
 
-function load_time_series_data(file_path::AbstractString, header::T)::Vector{Float64} where {T<:Union{Symbol,String}}
-    time_series = load_csv(file_path, select=Symbol(header))
+function load_time_series_data(
+    file_path::AbstractString,
+    header::T,
+)::Vector{Float64} where {T<:Union{Symbol,String}}
+    time_series = load_csv(file_path, select = Symbol(header))
     return time_series[!, header]
 end
 
@@ -536,7 +591,10 @@ end
 #     return nothing
 # end
 
-function print_to_json(system_data::AbstractDict{Symbol,Any}, file_path::AbstractString="")::Nothing
+function print_to_json(
+    system_data::AbstractDict{Symbol,Any},
+    file_path::AbstractString = "",
+)::Nothing
     if file_path == ""
         file_path = joinpath(pwd(), "printed_system_data.json")
     end
@@ -568,7 +626,7 @@ function find_node(nodes_list::Vector{Node}, id::Symbol)
     return nothing
 end
 
-function constraint_types(m::Module=Macro)
+function constraint_types(m::Module = Macro)
     return all_subtypes(m, :AbstractTypeConstraint)
 end
 
@@ -604,7 +662,7 @@ function prepare_to_json(node::Node)
     fields_to_exclude = [:policy_budgeting_vars, :policy_slack_vars]
     return Dict{Symbol,Any}(
         :type => Symbol(commodity_type(node)),
-        :instance_data => prepare_to_json(node, fields_to_exclude)
+        :instance_data => prepare_to_json(node, fields_to_exclude),
     )
 end
 
@@ -614,8 +672,8 @@ function prepare_to_json(asset::AbstractAsset)
         :instance_data => Dict{Symbol,Any}(
             :edges => Dict{Symbol,Any}(),
             :transforms => Dict{Symbol,Any}(),
-            :storage => Dict{Symbol,Any}()
-        )
+            :storage => Dict{Symbol,Any}(),
+        ),
     )
 
     for f in Base.fieldnames(typeof(asset))
@@ -648,7 +706,7 @@ function prepare_to_json(storage::Storage)
 end
 
 # This function prepares MacroObject objects (e.g., Storage, Transformation, Nodes, Edges). Note: edges have their own function
-function prepare_to_json(object::MacroObject, fields_to_exclude::Vector{Symbol}=Symbol[])
+function prepare_to_json(object::MacroObject, fields_to_exclude::Vector{Symbol} = Symbol[])
     object_data = Dict{Symbol,Any}()
     for field in filter(x -> !in(x, fields_to_exclude), Base.fieldnames(typeof(object)))
         data = getfield(object, field)
@@ -685,7 +743,7 @@ function prepare_to_json(data::Dict{Symbol,TimeData})
     time_data = Dict(
         :PeriodLength => 0,
         :HoursPerTimeStep => Dict{Symbol,Int}(),
-        :HoursPerSubperiod => Dict{Symbol,Int}()
+        :HoursPerSubperiod => Dict{Symbol,Int}(),
     )
     for (k, v) in data
         time_data[:PeriodLength] = v.time_interval[end]
@@ -717,11 +775,14 @@ function make(commodity::Type{<:Commodity}, data::AbstractDict{Symbol,Any}, syst
     node.constraints = get(data, :constraints, Vector{AbstractTypeConstraint}())
 
     if any(isa.(node.constraints, BalanceConstraint))
-        node.balance_data = get(data, :balance_data, Dict(:demand => Dict{Symbol,Float64}()))
+        node.balance_data =
+            get(data, :balance_data, Dict(:demand => Dict{Symbol,Float64}()))
     elseif any(isa.(node.constraints, CO2CapConstraint))
-        node.balance_data = get(data, :balance_data, Dict(:emissions => Dict{Symbol,Float64}()))
+        node.balance_data =
+            get(data, :balance_data, Dict(:emissions => Dict{Symbol,Float64}()))
     else
-        node.balance_data = get(data, :balance_data, Dict(:exogenous => Dict{Symbol,Float64}()))
+        node.balance_data =
+            get(data, :balance_data, Dict(:exogenous => Dict{Symbol,Float64}()))
     end
 
     return node
@@ -740,12 +801,16 @@ function validate_constraints_data!(data::AbstractDict{Symbol,Any})
 
     invalid_constraints = setdiff(keys(constraints), valid_constraints)
     if !isempty(invalid_constraints)
-        throw(ArgumentError("Invalid constraint(s) found: $(join(invalid_constraints, ", "))"))
+        throw(
+            ArgumentError(
+                "Invalid constraint(s) found: $(join(invalid_constraints, ", "))",
+            ),
+        )
     end
     return nothing
 end
 
-function validate_type_attribute(asset_type::Symbol, m::Module=Macro)
+function validate_type_attribute(asset_type::Symbol, m::Module = Macro)
     if !isdefined(m, asset_type)
         throw(ArgumentError("Type $(asset_type) not found in module $m"))
     end
