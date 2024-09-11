@@ -27,13 +27,13 @@ id(b::Battery) = b.id
         - max_capacity_storage: Float64
         - constraints: Vector{AbstractTypeConstraint}
      - edges: Dict{Symbol, Any}
-        - charge: Dict{Symbol, Any}
+        - charge_edge: Dict{Symbol, Any}
             - id: String
             - start_vertex: String
             - unidirectional: Bool
             - has_planning_variables: Bool
             - efficiency: Float64
-        - discharge: Dict{Symbol, Any}
+        - discharge_edge: Dict{Symbol, Any}
             - id: String
             - end_vertex: String
             - unidirectional: Bool

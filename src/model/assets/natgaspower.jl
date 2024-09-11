@@ -19,7 +19,7 @@ id(ng::NaturalGasPower) = ng.id
         - emission_rate: Float64
         - constraints: Vector{AbstractTypeConstraint}
     - edges: Dict{Symbol, Any}
-        - elec: Dict{Symbol, Any}
+        - e_edge: Dict{Symbol, Any}
             - id: String
             - end_vertex: String
             - unidirectional: Bool
@@ -32,7 +32,7 @@ id(ng::NaturalGasPower) = ng.id
             - startup_fuel: Float64
             - startup_fuel_balance_id: Symbol
             - constraints: Vector{AbstractTypeConstraint}
-        - natgas: Dict{Symbol, Any}
+        - ng_edge: Dict{Symbol, Any}
             - id: String
             - start_vertex: String
             - unidirectional: Bool
@@ -40,7 +40,7 @@ id(ng::NaturalGasPower) = ng.id
             - can_retire: Bool
             - can_expand: Bool
             - constraints: Vector{AbstractTypeConstraint}
-        - co2: Dict{Symbol, Any}
+        - co2_edge: Dict{Symbol, Any}
             - id: String
             - end_vertex: String
             - unidirectional: Bool

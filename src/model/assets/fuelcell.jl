@@ -17,7 +17,7 @@ id(b::FuelCell) = b.id
         - efficiency_rate: Float64
         - constraints: Vector{AbstractTypeConstraint}
     - edges: Dict{Symbol, Any}
-        - h2: Dict{Symbol, Any}
+        - h2_edge: Dict{Symbol, Any}
             - id: String
             - end_vertex: String
             - unidirectional: Bool
@@ -25,7 +25,7 @@ id(b::FuelCell) = b.id
             - can_retire: Bool
             - can_expand: Bool
             - constraints: Vector{AbstractTypeConstraint}
-        - elec: Dict{Symbol, Any}
+        - e_edge: Dict{Symbol, Any}
             - id: String
             - start_vertex: String
             - unidirectional: Bool

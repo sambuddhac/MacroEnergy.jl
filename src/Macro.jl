@@ -79,9 +79,7 @@ function fieldnames(type::T) where T <: Type{<:AbstractAsset}
 end
 
 # include files
-
-include("time_management.jl")
-
+include("model/time_management.jl")
 include("model/networks/vertex.jl")
 include("model/networks/node.jl")
 include("model/networks/storage.jl")
@@ -90,68 +88,68 @@ include("model/networks/location.jl")
 include("model/networks/edge.jl")
 include("model/system.jl")
 include("model/assets/battery.jl")
-include("model/assets/natgaspower.jl")
-include("model/assets/vre.jl")
-include("model/assets/powerline.jl")
-include("model/assets/natgashydrogen.jl")
 include("model/assets/electrolyzer.jl")
 include("model/assets/fuelcell.jl")
 include("model/assets/h2storage.jl")
+include("model/assets/natgashydrogen.jl")
+include("model/assets/natgaspower.jl")
+include("model/assets/powerline.jl")
+include("model/assets/vre.jl")
 
 include_all_in_folder("model/constraints")
 
-include("generate_model.jl")
-include("benders_utilities.jl")
-
-include("load_inputs/load_tools/loading_json.jl")
 include("config/configure_settings.jl")
-include("load_inputs/load_tools/load_dataframe.jl")
-include("load_inputs/load_tools/load_timeseries.jl")
 include("load_inputs/load_commodities.jl")
 include("load_inputs/load_time_data.jl")
+include("load_inputs/load_tools/loading_json.jl")
+include("load_inputs/load_tools/load_dataframe.jl")
+
+include("generate_model.jl")
+
+include("benders_utilities.jl")
+
 include("write_outputs/assets_capacity.jl")
 include("write_outputs/utilities.jl")
 
-export Commodity,
-    Electricity,
-    Hydrogen,
-    NaturalGas,
-    CO2,
-    CO2Captured,
+export AbstractAsset,
+    AbstractTypeConstraint,
+    BalanceConstraint,
     Battery,
-    H2Storage,
-    PowerLine,
-    NaturalGasPower,
-    NaturalGasHydrogen,
+    CO2,
+    CO2CapConstraint,
+    CO2Captured,
+    CapacityConstraint,
+    Commodity,
+    Edge,
+    EdgeWithUC,
+    Electricity,
     Electrolyzer,
     FuelCell,
-    VRE,
-    SolarPV,
-    WindTurbine,
-    Storage,
-    Node,
-    Edge,
-    Transformation,
-    EdgeWithUC,
-    namedtuple,
-    AbstractAsset,
-    AbstractTypeConstraint,
-    PlanningConstraint,
-    OperationConstraint,
-    CapacityConstraint,
-    CO2CapConstraint,
-    StorageMinDurationConstraint,
-    StorageMaxDurationConstraint,
-    PolicyConstraint,
-    BalanceConstraint,
-    MaxNonServedDemandPerSegmentConstraint,
-    MaxNonServedDemandConstraint,
-    RampingLimitConstraint,
-    StorageCapacityConstraint,
-    StorageSymmetricCapacityConstraint,
-    MinUpTimeConstraint,
-    MinDownTimeConstraint,
+    H2Storage,
+    Hydrogen,
     MaxCapacityConstraint,
+    MaxNonServedDemandConstraint,
+    MaxNonServedDemandPerSegmentConstraint,
+    MinDownTimeConstraint,
     MinFlowConstraint,
-    MinStorageLevelConstraint
+    MinStorageLevelConstraint,
+    MinUpTimeConstraint,
+    NaturalGas,
+    NaturalGasHydrogen,
+    NaturalGasPower,
+    Node,
+    OperationConstraint,
+    PlanningConstraint,
+    PolicyConstraint,
+    PowerLine,
+    RampingLimitConstraint,
+    SolarPV,
+    Storage,
+    StorageCapacityConstraint,
+    StorageMaxDurationConstraint,
+    StorageMinDurationConstraint,
+    StorageSymmetricCapacityConstraint,
+    Transformation,
+    VRE,
+    WindTurbine
 end # module Macro

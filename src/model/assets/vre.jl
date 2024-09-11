@@ -28,13 +28,14 @@ id(g::VRE) = g.id
         - id: String
         - timedata: String
     - edges: Dict{Symbol, Any}
-        - id: String
-        - end_vertex: String
-        - unidirectional: Bool
-        - has_planning_variables: Bool
-        - can_retire: Bool
-        - can_expand: Bool
-        - constraints: Vector{AbstractTypeConstraint}
+        - edge: Dict{Symbol, Any}
+            - id: String
+            - end_vertex: String
+            - unidirectional: Bool
+            - has_planning_variables: Bool
+            - can_retire: Bool
+            - can_expand: Bool
+            - constraints: Vector{AbstractTypeConstraint}
 """
 function make(asset_type::Type{<:VRE}, data::AbstractDict{Symbol, Any}, system::System)
     id = AssetId(data[:id])

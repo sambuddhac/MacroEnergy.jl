@@ -526,12 +526,15 @@ end
 ###### ###### ###### ###### ###### ######
 # Function to print the system data
 ###### ###### ###### ###### ###### ######
-function print_to_json(system::System, file_path::AbstractString="")::Nothing
-    # Note: right now System does not have a node field, so we're using locations
-    system_data = prepare_to_json(system)
-    print_to_json(system_data, file_path)
-    return nothing
-end
+# TODO: For now, I commented out the function that prints the system data to a JSON file
+#       because we first need to fix the issue with in-place modification of the edge ids.
+#       We can uncomment it once we have a solution for that.
+# function print_to_json(system::System, file_path::AbstractString="")::Nothing
+#     # Note: right now System does not have a node field, so we're using locations
+#     system_data = prepare_to_json(system)
+#     print_to_json(system_data, file_path)
+#     return nothing
+# end
 
 function print_to_json(system_data::AbstractDict{Symbol,Any}, file_path::AbstractString="")::Nothing
     if file_path == ""
@@ -655,7 +658,7 @@ function prepare_to_json(object::MacroObject, fields_to_exclude::Vector{Symbol}=
         end
         # If the field is a node or vertex, we need to write the id not the object
         if isa(data, AbstractVertex)
-            object_data[field] = get_id(data)
+            object_data[field] = id(data)
         else
             object_data[field] = prepare_to_json(data)
         end

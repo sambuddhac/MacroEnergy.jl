@@ -2,13 +2,14 @@ macro AbstractVertexBaseAttributes()
     esc(quote
         id::Symbol
         timedata::TimeData
+        
         balance_data::Dict{Symbol, Dict{Symbol, Float64}} = Dict{Symbol, Dict{Symbol, Float64}}()
-        operation_expr::Dict = Dict()
         constraints::Vector{AbstractTypeConstraint} = Vector{AbstractTypeConstraint}()
+        operation_expr::Dict = Dict()
     end)
 end
 
-get_id(v::AbstractVertex) = v.id;
+id(v::AbstractVertex) = v.id;
 balance_ids(v::AbstractVertex) = collect(keys(v.balance_data));
 balance_data(v::AbstractVertex,i::Symbol) = v.balance_data[i];
 

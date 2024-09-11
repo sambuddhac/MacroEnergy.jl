@@ -39,15 +39,8 @@ function configure_settings(model_settings::NamedTuple)
 end
 
 function validate_settings(settings::NamedTuple)
-    nothing
-    # # Check that input/output paths are valid
-    # @assert isa(settings[:InputDataPath], String) && isdir(settings[:InputDataPath])
-    # @assert isa(settings[:OutputDataPath], String)
-    # @assert settings[:PrintModel] ∈ (0, 1)
-    # @assert settings[:NetworkExpansion] ∈ (0, 1)
-    # @assert settings[:TimeDomainReduction] ∈ (0, 1)
-    # @assert isa(settings[:TimeDomainReductionFolder], String)
-    # @assert settings[:MultiStage] ∈ (0, 1)
+    @assert settings[:NetworkExpansion] ∈ (0, 1)
+    @assert settings[:UCommit] ∈ (0, 1)
 end
 
 function validate_names(settings::NamedTuple)
