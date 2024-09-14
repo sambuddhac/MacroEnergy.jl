@@ -16,6 +16,7 @@ import Macro:
     AbstractAsset,
     AbstractTypeConstraint,
     load_system,
+    read_file,
     generate_model,
     set_optimizer,
     optimize!,
@@ -214,7 +215,7 @@ end
 
 function test_load_inputs()
     system = load_system(test_path)
-    system_true = JSON3.read(joinpath(test_path, "system_data_true.json"))
+    system_true = read_file(joinpath(test_path, "system_data_true.json.gz"))
     test_load(system, system_true)
     return system
 end
