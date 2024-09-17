@@ -50,18 +50,20 @@ end
 function make(::Type{NaturalGasPower}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 
-    transform_data = process_data(data[:transforms])
+    natgas_key = :transforms
+    transform_data = process_data(data[natgas_key])
     natgas_transform = Transformation(;
-        id = Symbol(transform_data[:id]),
+        id = Symbol(id, "_", natgas_key),
         timedata = system.time_data[Symbol(transform_data[:timedata])],
         constraints = get(transform_data, :constraints, [BalanceConstraint()]),
     )
 
-    elec_edge_data = process_data(data[:edges][:e_edge])
+    elec_edge_key = :e_edge
+    elec_edge_data = process_data(data[:edges][elec_edge_key])
     elec_start_node = natgas_transform
     elec_end_node = find_node(system.locations, Symbol(elec_edge_data[:end_vertex]))
     elec_edge = EdgeWithUC(
-        Symbol(String(id) * "_" * elec_edge_data[:id]),
+        Symbol(id, "_", elec_edge_key),
         elec_edge_data,
         system.time_data[:Electricity],
         Electricity,
@@ -81,11 +83,12 @@ function make(::Type{NaturalGasPower}, data::AbstractDict{Symbol,Any}, system::S
     elec_edge.unidirectional = get(elec_edge_data, :unidirectional, true)
     elec_edge.startup_fuel_balance_id = :energy
 
-    ng_edge_data = process_data(data[:edges][:ng_edge])
+    ng_edge_key = :ng_edge
+    ng_edge_data = process_data(data[:edges][ng_edge_key])
     ng_start_node = find_node(system.locations, Symbol(ng_edge_data[:start_vertex]))
     ng_end_node = natgas_transform
     ng_edge = Edge(
-        Symbol(String(id) * "_" * ng_edge_data[:id]),
+        Symbol(id, "_", ng_edge_key),
         ng_edge_data,
         system.time_data[:NaturalGas],
         NaturalGas,
@@ -95,11 +98,12 @@ function make(::Type{NaturalGasPower}, data::AbstractDict{Symbol,Any}, system::S
     ng_edge.constraints = get(ng_edge_data, :constraints, Vector{AbstractTypeConstraint}())
     ng_edge.unidirectional = get(ng_edge_data, :unidirectional, true)
 
-    co2_edge_data = process_data(data[:edges][:co2_edge])
+    co2_edge_key = :co2_edge
+    co2_edge_data = process_data(data[:edges][co2_edge_key])
     co2_start_node = natgas_transform
     co2_end_node = find_node(system.locations, Symbol(co2_edge_data[:end_vertex]))
     co2_edge = Edge(
-        Symbol(String(id) * "_" * co2_edge_data[:id]),
+        Symbol(id, "_", co2_edge_key),
         co2_edge_data,
         system.time_data[:CO2],
         CO2,

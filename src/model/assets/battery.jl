@@ -5,6 +5,47 @@ struct Battery <: AbstractAsset
     charge_edge::Edge{Electricity}
 end
 
+function default_parameters(::Type{Battery})
+    return Dict(
+        # :id => "battery",
+        :battery_transform => Dict(
+            :id => "battery_storage",
+            :commodity => "electricity",
+            :can_retire => true,
+            :can_expand => true,
+            :existing_capacity_storage => 0.0,
+            :investment_cost_storage => 0.0,
+            :fixed_om_cost_storage => 0.0,
+            :storage_loss_fraction => 0.0,
+            :min_duration => 0.0,
+            :max_duration => 0.0,
+            :min_storage_level => 0.0,
+            :min_capacity_storage => 0.0,
+            :max_capacity_storage => 0.0,
+            :constraints => [],
+        ),
+        :edges => Dict(
+            :charge_edge => Dict(
+                :id => "battery_charge_edge",
+                :start_vertex => "node",
+                :unidirectional => true,
+                :has_planning_variables => false,
+                :efficiency => 0.9,
+            ),
+            :discharge_edge => Dict(
+                :id => "battery_discharge_edge",
+                :end_vertex => "node",
+                :unidirectional => true,
+                :has_planning_variables => false,
+                :can_retire => true,
+                :can_expand => true,
+                :efficiency => 0.9,
+                :constraints => [],
+            ),
+        ),
+    )
+end
+
 """
     make(::Type{Battery}, data::AbstractDict{Symbol, Any}, system::System) -> Battery
 
@@ -44,11 +85,17 @@ end
 function make(::Type{Battery}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 
-    storage_data = process_data(data[:storage])
+    storage_key = :storage
+    storage_data = process_data(data[storage_key])
     commodity_symbol = Symbol(storage_data[:commodity])
     commodity = commodity_types()[commodity_symbol]
     battery_storage =
-        Storage(id, storage_data, system.time_data[commodity_symbol], commodity)
+        Storage(
+            Symbol(id, "_", storage_key), 
+            storage_data, 
+            system.time_data[commodity_symbol], 
+            commodity
+        )
     battery_storage.constraints = get(
         storage_data,
         :constraints,
@@ -61,11 +108,12 @@ function make(::Type{Battery}, data::AbstractDict{Symbol,Any}, system::System)
         ],
     )
 
-    charge_edge_data = process_data(data[:edges][:charge_edge])
+    charge_edge_key = :charge_edge
+    charge_edge_data = process_data(data[:edges][charge_edge_key])
     charge_start_node = find_node(system.locations, Symbol(charge_edge_data[:start_vertex]))
     charge_end_node = battery_storage
     battery_charge = Edge(
-        Symbol(String(id) * "_" * charge_edge_data[:id]),
+        Symbol(id, "_", charge_edge_key),
         charge_edge_data,
         system.time_data[commodity_symbol],
         commodity,
@@ -74,12 +122,13 @@ function make(::Type{Battery}, data::AbstractDict{Symbol,Any}, system::System)
     )
     battery_charge.unidirectional = get(charge_edge_data, :unidirectional, true)
 
-    discharge_edge_data = process_data(data[:edges][:discharge_edge])
+    discharge_edge_key = :discharge_edge
+    discharge_edge_data = process_data(data[:edges][discharge_edge_key])
     discharge_start_node = battery_storage
     discharge_end_node =
         find_node(system.locations, Symbol(discharge_edge_data[:end_vertex]))
     battery_discharge = Edge(
-        Symbol(String(id) * "_" * discharge_edge_data[:id]),
+        Symbol(id, "_", discharge_edge_key),
         discharge_edge_data,
         system.time_data[commodity_symbol],
         commodity,

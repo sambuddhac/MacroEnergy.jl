@@ -818,7 +818,7 @@ function validate_type_attribute(asset_type::Symbol, m::Module = Macro)
 end
 
 function validate_data(data::AbstractDict{Symbol,Any})
-    validate_id!(data)
+    # validate_id!(data)
     validate_constraints_data!(data)
     return nothing
 end

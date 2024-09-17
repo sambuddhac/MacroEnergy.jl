@@ -11,10 +11,10 @@ end
 function make(::Type{H2Storage}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 
-    storage_data = process_data(data[:storage])
-
+    h2storage_key = :storage
+    storage_data = process_data(data[h2storage_key])
     h2storage = Storage(
-        Symbol(storage_data[:id]),
+        Symbol(id, "_", h2storage_key),
         storage_data,
         system.time_data[:Hydrogen],
         Hydrogen,
@@ -25,19 +25,21 @@ function make(::Type{H2Storage}, data::AbstractDict{Symbol,Any}, system::System)
         [BalanceConstraint(), StorageCapacityConstraint(), MinStorageLevelConstraint()],
     )
 
-    transform_data = process_data(data[:transforms])
+    compressor_key = :transforms
+    transform_data = process_data(data[compressor_key])
     compressor_transform = Transformation(;
-        id = Symbol(transform_data[:id]),
+        id = Symbol(id, "_", compressor_key),
         timedata = system.time_data[Symbol(transform_data[:timedata])],
         constraints = get(transform_data, :constraints, [BalanceConstraint()]),
     )
 
-    compressor_elec_edge_data = process_data(data[:edges][:compressor_elec_edge])
+    compressor_elec_edge_key = :compressor_elec_edge
+    compressor_elec_edge_data = process_data(data[:edges][compressor_elec_edge_key])
     elec_start_node =
         find_node(system.locations, Symbol(compressor_elec_edge_data[:start_vertex]))
     elec_end_node = compressor_transform
     compressor_elec_edge = Edge(
-        Symbol(String(id) * "_" * compressor_elec_edge_data[:id]),
+        Symbol(id, "_", compressor_elec_edge_key),
         compressor_elec_edge_data,
         system.time_data[:Electricity],
         Electricity,
@@ -47,12 +49,13 @@ function make(::Type{H2Storage}, data::AbstractDict{Symbol,Any}, system::System)
     compressor_elec_edge.unidirectional =
         get(compressor_elec_edge_data, :unidirectional, true)
 
-    compressor_h2_edge_data = process_data(data[:edges][:compressor_h2_edge])
+    compressor_h2_edge_key = :compressor_h2_edge
+    compressor_h2_edge_data = process_data(data[:edges][compressor_h2_edge_key])
     h2_start_node =
         find_node(system.locations, Symbol(compressor_h2_edge_data[:start_vertex]))
     h2_end_node = compressor_transform
     compressor_h2_edge = Edge(
-        Symbol(String(id) * "_" * compressor_h2_edge_data[:id]),
+        Symbol(id, "_", compressor_h2_edge_key),
         compressor_h2_edge_data,
         system.time_data[:Hydrogen],
         Hydrogen,
@@ -61,11 +64,12 @@ function make(::Type{H2Storage}, data::AbstractDict{Symbol,Any}, system::System)
     )
     compressor_h2_edge.unidirectional = get(compressor_h2_edge_data, :unidirectional, true)
 
-    charge_edge_data = process_data(data[:edges][:charge_edge])
+    charge_edge_key = :charge_edge
+    charge_edge_data = process_data(data[:edges][charge_edge_key])
     charge_start_node = compressor_transform
     charge_end_node = h2storage
     h2storage_charge = Edge(
-        Symbol(String(id) * "_charge"),
+        Symbol(id, "_", charge_edge_key),
         charge_edge_data,
         system.time_data[:Hydrogen],
         Hydrogen,
@@ -76,12 +80,13 @@ function make(::Type{H2Storage}, data::AbstractDict{Symbol,Any}, system::System)
     h2storage_charge.constraints =
         get(charge_edge_data, :constraints, [CapacityConstraint()])
 
-    discharge_edge_data = process_data(data[:edges][:discharge_edge])
+    discharge_edge_key = :discharge_edge
+    discharge_edge_data = process_data(data[:edges][discharge_edge_key])
     discharge_start_node = h2storage
     discharge_end_node =
         find_node(system.locations, Symbol(discharge_edge_data[:end_vertex]))
     h2storage_discharge = Edge(
-        Symbol(String(id) * "_discharge"),
+        Symbol(id, "_", discharge_edge_key),
         discharge_edge_data,
         system.time_data[:Hydrogen],
         Hydrogen,
