@@ -16,3 +16,10 @@ function read_csv(
     @info("Loading CSV data from $file_path")
     return CSV.read(file_path, sink)
 end
+
+function csv_header(path::AbstractString)
+    f = open(path, "r")
+    header = readline(f)
+    close(f)
+    header
+end

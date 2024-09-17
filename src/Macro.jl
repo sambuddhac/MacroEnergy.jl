@@ -88,7 +88,6 @@ include_all_in_folder("model/constraints")
 include("config/configure_settings.jl")
 
 include_all_in_folder("load_inputs")
-include_all_in_folder("load_inputs/load_tools")
 
 include("generate_model.jl")
 
