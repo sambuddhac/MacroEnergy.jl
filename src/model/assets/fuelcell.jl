@@ -5,8 +5,6 @@ struct FuelCell <: AbstractAsset
     e_edge::Edge{Electricity}
 end
 
-id(b::FuelCell) = b.id
-
 """
     make(::Type{FuelCell}, data::AbstractDict{Symbol, Any}, system::System) -> FuelCell
 

@@ -13,9 +13,6 @@ end
 
 const VRE = Union{SolarPV,WindTurbine}
 
-id(g::VRE) = g.id
-
-
 """
     make(::Type{<:VRE}, data::AbstractDict{Symbol, Any}, system::System) -> VRE
     

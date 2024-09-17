@@ -5,8 +5,6 @@ struct Battery <: AbstractAsset
     charge_edge::Edge{Electricity}
 end
 
-id(b::Battery) = b.id
-
 """
     make(::Type{Battery}, data::AbstractDict{Symbol, Any}, system::System) -> Battery
 

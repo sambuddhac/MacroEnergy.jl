@@ -70,7 +70,10 @@ include("model/networks/storage.jl")
 include("model/networks/transformation.jl")
 include("model/networks/location.jl")
 include("model/networks/edge.jl")
+include("model/networks/asset.jl")
+
 include("model/system.jl")
+
 include("model/assets/battery.jl")
 include("model/assets/electrolyzer.jl")
 include("model/assets/fuelcell.jl")

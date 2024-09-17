@@ -6,8 +6,6 @@ struct NaturalGasHydrogen <: AbstractAsset
     co2_edge::Edge{CO2}
 end
 
-id(smr::NaturalGasHydrogen) = smr.id
-
 """
     make(::Type{NaturalGasHydrogen}, data::AbstractDict{Symbol, Any}, system::System) -> NaturalGasHydrogen
 

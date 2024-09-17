@@ -5,8 +5,6 @@ struct Electrolyzer <: AbstractAsset
     e_edge::Edge{Electricity}
 end
 
-id(b::Electrolyzer) = b.id
-
 """
     make(::Type{Electrolyzer}, data::AbstractDict{Symbol, Any}, system::System) -> Electrolyzer
 

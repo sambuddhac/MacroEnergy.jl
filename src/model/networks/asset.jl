@@ -1,0 +1,1 @@
+id(asset::AbstractAsset) = asset.id

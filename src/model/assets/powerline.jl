@@ -2,7 +2,6 @@ struct PowerLine <: AbstractAsset
     id::AssetId
     elec_edge::Edge{Electricity}
 end
-id(b::PowerLine) = b.id
 
 function make(::Type{<:PowerLine}, data::AbstractDict{Symbol,Any}, system::System)
     elec_edge_data = process_data(data[:edges][:elec_edge])

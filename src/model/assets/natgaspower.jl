@@ -6,8 +6,6 @@ struct NaturalGasPower <: AbstractAsset
     co2_edge::Edge{CO2}
 end
 
-id(ng::NaturalGasPower) = ng.id
-
 """
     make(::Type{NaturalGasPower}, data::AbstractDict{Symbol, Any}, system::System) -> NaturalGasPower
 

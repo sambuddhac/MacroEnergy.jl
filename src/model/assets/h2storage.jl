@@ -8,8 +8,6 @@ struct H2Storage <: AbstractAsset
     compressor_h2_edge::Edge{Hydrogen}
 end
 
-id(b::H2Storage) = b.id
-
 function make(::Type{H2Storage}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 
