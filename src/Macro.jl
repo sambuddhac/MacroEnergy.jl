@@ -7,6 +7,7 @@ using JuMP
 using Revise
 using JSON3
 using InteractiveUtils
+using Printf: @printf
 
 
 # Type parameter for Macro data structures
@@ -47,8 +48,8 @@ const JuMPConstraint =
 const JuMPVariable =
     Union{Array,Containers.DenseAxisArray,Containers.SparseAxisArray,VariableRef}
 
-function include_all_in_folder(folder)
-    base_path = joinpath(@__DIR__, folder)
+function include_all_in_folder(folder::AbstractString, root_path::AbstractString=@__DIR__)
+    base_path = joinpath(root_path, folder)
     for (root, dirs, files) in Base.Filesystem.walkdir(base_path)
         for file in files
             if endswith(file, ".jl")
@@ -56,29 +57,10 @@ function include_all_in_folder(folder)
             end
         end
     end
-end
-
-function all_subtypes(m::Module, type::Symbol)::Dict{Symbol,DataType}
-    types = Dict{Symbol,DataType}()
-    for subtype in subtypes(getfield(m, type))
-        all_subtypes!(types, subtype)
-    end
-    return types
-end
-
-function all_subtypes!(types::Dict{Symbol,DataType}, type::DataType)
-    types[Symbol(type)] = type
-    if !isempty(subtypes(type))
-        for subtype in subtypes(type)
-            all_subtypes!(types, subtype)
-        end
-    end
     return nothing
 end
 
-function fieldnames(type::T) where {T<:Type{<:AbstractAsset}}
-    return filter(x -> x != :id, Base.fieldnames(type))
-end
+include_all_in_folder("utilities")
 
 # include files
 include("model/time_management.jl")
