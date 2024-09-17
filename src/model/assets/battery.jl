@@ -5,47 +5,6 @@ struct Battery <: AbstractAsset
     charge_edge::Edge{Electricity}
 end
 
-function default_parameters(::Type{Battery})
-    return Dict(
-        # :id => "battery",
-        :battery_transform => Dict(
-            :id => "battery_storage",
-            :commodity => "electricity",
-            :can_retire => true,
-            :can_expand => true,
-            :existing_capacity_storage => 0.0,
-            :investment_cost_storage => 0.0,
-            :fixed_om_cost_storage => 0.0,
-            :storage_loss_fraction => 0.0,
-            :min_duration => 0.0,
-            :max_duration => 0.0,
-            :min_storage_level => 0.0,
-            :min_capacity_storage => 0.0,
-            :max_capacity_storage => 0.0,
-            :constraints => [],
-        ),
-        :edges => Dict(
-            :charge_edge => Dict(
-                :id => "battery_charge_edge",
-                :start_vertex => "node",
-                :unidirectional => true,
-                :has_planning_variables => false,
-                :efficiency => 0.9,
-            ),
-            :discharge_edge => Dict(
-                :id => "battery_discharge_edge",
-                :end_vertex => "node",
-                :unidirectional => true,
-                :has_planning_variables => false,
-                :can_retire => true,
-                :can_expand => true,
-                :efficiency => 0.9,
-                :constraints => [],
-            ),
-        ),
-    )
-end
-
 """
     make(::Type{Battery}, data::AbstractDict{Symbol, Any}, system::System) -> Battery
 
