@@ -86,10 +86,9 @@ include("model/assets/vre.jl")
 include_all_in_folder("model/constraints")
 
 include("config/configure_settings.jl")
-include("load_inputs/load_commodities.jl")
-include("load_inputs/load_time_data.jl")
-include("load_inputs/load_tools/loading_json.jl")
-include("load_inputs/load_tools/load_dataframe.jl")
+
+include_all_in_folder("load_inputs")
+include_all_in_folder("load_inputs/load_tools")
 
 include("generate_model.jl")
 
@@ -97,6 +96,7 @@ include("benders_utilities.jl")
 
 include("write_outputs/assets_capacity.jl")
 include("write_outputs/utilities.jl")
+include("write_outputs/write_system_data.jl")
 
 export AbstractAsset,
     AbstractTypeConstraint,

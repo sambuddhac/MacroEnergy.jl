@@ -127,3 +127,31 @@ end
 function get_nodes_sametype(nodes::Vector{Node}, commodity::DataType)
     return filter(n -> commodity_type(n) == commodity, nodes)
 end
+
+# Function to make a node. 
+# This is called when the "Type" of the object is a commodity
+# We can do:
+#   Commodity -> Node{Commodity}
+#   
+function make(commodity::Type{<:Commodity}, data::AbstractDict{Symbol,Any}, system)
+
+    data = process_data(data)
+
+    node = Node(data, system.time_data[Symbol(commodity)], commodity)
+
+    #### Note that not all nodes have a balance constraint, e.g., a NG source node does not have one. So the default should be empty.
+    node.constraints = get(data, :constraints, Vector{AbstractTypeConstraint}())
+
+    if any(isa.(node.constraints, BalanceConstraint))
+        node.balance_data =
+            get(data, :balance_data, Dict(:demand => Dict{Symbol,Float64}()))
+    elseif any(isa.(node.constraints, CO2CapConstraint))
+        node.balance_data =
+            get(data, :balance_data, Dict(:emissions => Dict{Symbol,Float64}()))
+    else
+        node.balance_data =
+            get(data, :balance_data, Dict(:exogenous => Dict{Symbol,Float64}()))
+    end
+
+    return node
+end

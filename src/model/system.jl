@@ -29,3 +29,22 @@ function empty_system(data_dirpath::String)
         [],
     )
 end
+
+function get_asset_by_id(system::System, id::Symbol)
+    for asset in system.assets
+        if asset.id == id
+            return asset
+        end
+    end
+    return nothing
+end
+
+function find_node(nodes_list::Vector{Node}, id::Symbol)
+    for node in nodes_list
+        if node.id == id
+            return node
+        end
+    end
+    error("Vertex $id not found")
+    return nothing
+end

@@ -30,3 +30,7 @@ function add_constraints_by_type!(
         end
     end
 end
+
+function constraint_types(m::Module = Macro)
+    return all_subtypes(m, :AbstractTypeConstraint)
+end
