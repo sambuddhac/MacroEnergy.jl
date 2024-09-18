@@ -15,7 +15,7 @@ function generate_model(system::System)
     @info("Generating planning model")
     planning_model!(system, model)
 
-    @info("Generating operation model")
+    @info("Generating operational model")
     operation_model!(system, model)
 
     @objective(model, Min, model[:eFixedCost] + model[:eVariableCost])
