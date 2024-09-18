@@ -227,7 +227,7 @@ function test_model_generation_and_optimization()
     optimize!(model)
     macro_objval = objective_value(model)
 
-    @test macro_objval == 2.1059615254166523e10
+    @test macro_objval ≈ 2.1059615254166523e10
 
     return nothing
 end
