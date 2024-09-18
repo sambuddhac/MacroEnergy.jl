@@ -1,57 +1,54 @@
 module Macro
 
-using YAML
-using CSV
+using CSV, JSON3, GZip
+using DuckDB
 using DataFrames
 using JuMP
+using Revise
+using InteractiveUtils
+using Printf: @printf
+
 
 # Type parameter for Macro data structures
-abstract type Commodity end
 
+## Commodity types
+abstract type Commodity end
 abstract type Electricity <: Commodity end
 abstract type Hydrogen <: Commodity end
 abstract type NaturalGas <: Commodity end
 abstract type CO2 <: Commodity end
 abstract type CO2Captured <: CO2 end
 
+## Time data types
 abstract type AbstractTimeData{T<:Commodity} end
 
-abstract type AbstractNode{T<:Commodity} end
-abstract type AbstractTransformationEdge{T<:Commodity} end
-abstract type AbstractTransformationEdgeWithUC{T} <: AbstractTransformationEdge{T} end
+## Structure types
+abstract type MacroObject end
+abstract type AbstractVertex <: MacroObject end
 
-abstract type AbstractEdge{T<:Commodity} end
+## Network types
+abstract type AbstractEdge{T<:Commodity} <: MacroObject end
 
+## Assets types
+abstract type AbstractAsset <: MacroObject end
+
+## Constraints types
 abstract type AbstractTypeConstraint end
 abstract type OperationConstraint <: AbstractTypeConstraint end
 abstract type PolicyConstraint <: OperationConstraint end
 abstract type PlanningConstraint <: AbstractTypeConstraint end
 
-abstract type TransformationType end
+# global constants
+const H2_MWh = 33.33 # MWh per tonne of H2
+const NG_MWh = 0.29307107 # MWh per MMBTU of NG 
+const AssetId = Symbol
+const JuMPConstraint =
+    Union{Array,Containers.DenseAxisArray,Containers.SparseAxisArray,ConstraintRef}
+const JuMPVariable =
+    Union{Array,Containers.DenseAxisArray,Containers.SparseAxisArray,VariableRef}
 
-abstract type AbstractTransformation{T<:TransformationType} end
-
-abstract type NaturalGasPower <: TransformationType  end
-abstract type NaturalGasPowerCCS <: NaturalGasPower  end
-abstract type NaturalGasHydrogen <: TransformationType  end
-abstract type NaturalGasHydrogenCCS <: NaturalGasHydrogen  end
-abstract type FuelCell <: TransformationType end
-abstract type Electrolyzer <: TransformationType  end
-abstract type DACElectric <: TransformationType  end
-abstract type SyntheticNG <: TransformationType  end
-abstract type VRE <: TransformationType end
-abstract type Storage <: TransformationType end
-# type hierarchy
-
-# globals
-
-# const Containers = JuMP.Containers
-# const VariableRef = JuMP.VariableRef
-const JuMPConstraint = Union{Array,Containers.DenseAxisArray,Containers.SparseAxisArray}
-# const DataFrameRow = DataFrames.DataFrameRow;
-# const DataFrame = DataFrames.DataFrame;
-function include_all_in_folder(folder)
-    base_path = joinpath(@__DIR__, folder)
+function include_all_in_folder(folder::AbstractString, root_path::AbstractString=@__DIR__)
+    base_path = joinpath(root_path, folder)
     for (root, dirs, files) in Base.Filesystem.walkdir(base_path)
         for file in files
             if endswith(file, ".jl")
@@ -59,53 +56,85 @@ function include_all_in_folder(folder)
             end
         end
     end
+    return nothing
 end
 
-namedtuple(d::Dict) = (; (Symbol(k) => v for (k, v) in d)...)
+include_all_in_folder("utilities")
 
 # include files
+include("model/time_management.jl")
+include("model/networks/vertex.jl")
+include("model/networks/node.jl")
+include("model/networks/storage.jl")
+include("model/networks/transformation.jl")
+include("model/networks/location.jl")
+include("model/networks/edge.jl")
+include("model/networks/asset.jl")
 
-include("time_management.jl")
-include_all_in_folder("model/networks")
-include_all_in_folder("model/transformations")
+include("model/system.jl")
+
+include("model/assets/battery.jl")
+include("model/assets/electrolyzer.jl")
+include("model/assets/fuelcell.jl")
+include("model/assets/h2storage.jl")
+include("model/assets/natgashydrogen.jl")
+include("model/assets/natgaspower.jl")
+include("model/assets/powerline.jl")
+include("model/assets/vre.jl")
+
 include_all_in_folder("model/constraints")
+
+include("config/configure_settings.jl")
+
+include_all_in_folder("load_inputs")
+
 include("generate_model.jl")
-include("benders.jl")
-include("input_translation/load_data_from_genx.jl")
 
-# include("config/configure_settings.jl")
-# include("load_inputs/load_dataframe.jl")
-# include("load_inputs/load_timeseries.jl")
-# include("load_inputs/load_inputs.jl")
-# include("load_inputs/load_network.jl")
-# include("load_inputs/load_transformations.jl")
-# include("load_inputs/load_resources.jl")
-# include("load_inputs/load_storage.jl")
-# include("load_inputs/load_variability.jl")
-# include("input_translation/dolphyn_to_macro.jl")
-# include("generate_model.jl")
-# include("prepare_inputs.jl")
+include("benders_utilities.jl")
 
-# exports
-export Electricity,
-    Hydrogen,
-    NaturalGas,
+include("write_outputs/assets_capacity.jl")
+include("write_outputs/utilities.jl")
+include("write_outputs/write_system_data.jl")
+
+export AbstractAsset,
+    AbstractTypeConstraint,
+    BalanceConstraint,
+    Battery,
     CO2,
+    CO2CapConstraint,
     CO2Captured,
-    NaturalGasPower,
-    NaturalGasPowerCCS,
-    NaturalGasHydrogen,
-    NaturalGasHydrogenCCS,
-    FuelCell,
-    Electrolyzer,
-    DACElectric,
-    SyntheticNG,
-    VRE,
-    Storage,
-    Node,
+    CapacityConstraint,
+    Commodity,
     Edge,
+    EdgeWithUC,
+    Electricity,
+    Electrolyzer,
+    FuelCell,
+    H2Storage,
+    Hydrogen,
+    MaxCapacityConstraint,
+    MaxNonServedDemandConstraint,
+    MaxNonServedDemandPerSegmentConstraint,
+    MinDownTimeConstraint,
+    MinFlowConstraint,
+    MinStorageLevelConstraint,
+    MinUpTimeConstraint,
+    NaturalGas,
+    NaturalGasHydrogen,
+    NaturalGasPower,
+    Node,
+    OperationConstraint,
+    PlanningConstraint,
+    PolicyConstraint,
+    PowerLine,
+    RampingLimitConstraint,
+    SolarPV,
+    Storage,
+    StorageCapacityConstraint,
+    StorageMaxDurationConstraint,
+    StorageMinDurationConstraint,
+    StorageSymmetricCapacityConstraint,
     Transformation,
-    TEdge,
-    TEdgeWithUC,
-    namedtuple
+    VRE,
+    WindTurbine
 end # module Macro
