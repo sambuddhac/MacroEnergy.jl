@@ -133,6 +133,19 @@ function collect_results(system::System)
 
     convert_to_dataframe(reduce(vcat, [ecap, eflow, storlevel]))
 end
+
+function write_results(file_path::AbstractString, system::System)
+    @info "Writing results to $file_path"
+    output = collect_results(system)
+    if all(ismissing.(output.model))
+        output.model .= basename(system.data_dirpath)
+    end
+    if all(ismissing.(output.scenario))
+        output.scenario .= :default
+    end
+    CSV.write(file_path, output, compress=true)
+end
+
 function write_csv(file_path::AbstractString, data::AbstractDataFrame)
     CSV.write(file_path, data)
 end
