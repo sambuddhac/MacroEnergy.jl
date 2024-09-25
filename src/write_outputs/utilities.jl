@@ -1,3 +1,6 @@
+# Results are stored as a table with the following columns:
+# | model | scenario | region | variable | unit | time | value | 
+# Internally, each row is represented as an OutputRow object:
 struct OutputRow
     model::Union{Symbol,Missing}
     scenario::Union{Symbol,Missing}
@@ -11,6 +14,13 @@ struct OutputRow
     OutputRow(region::Symbol, variable::Symbol, unit::Symbol, time::Int, value::Float64) =
         new(missing, missing, region, variable, unit, time, value)
 end
+
+#### Helper functions to extract optimal values of fields from MacroObjects ####
+# The following functions are used to extract the optimal values of given fields
+# or a list of fields from:
+# - System: e.g.: get_optimal_vars(system, capacity, :MW)
+# - Vector of MacroObjects (e.g., edges, nodes, transformations, storage)
+#   e.g.: get_optimal_vars(edges, (capacity, new_capacity, ret_capacity), :MW)
 get_optimal_vars(syst::System, field::Function, unit::Symbol) =
     get_optimal_vars(syst, (field,), unit)
 get_optimal_vars(objs::Vector, field::Function, unit::Symbol) =
@@ -27,10 +37,21 @@ function get_optimal_vars(objs::Vector, field_list::Tuple, unit::Symbol)
 end
 
 get_region_name(v::AbstractVertex) = id(v)
+
+# The default region name for an edge is the concatenation of the ids of its nodes:
+# e.g., "elec_1_elec_2" for an edge connecting nodes "elec_1" and "elec_2" or 
+# "elec_1" if connecting a node to storage/transformation
 get_region_name(e::AbstractEdge) =
     Symbol(join((id(n) for n in (e.start_vertex, e.end_vertex) if isa(n, Node)), "_"))
+
+# The default "variable" name for an edge is: field_name|commodity_type|edge_id
+# e.g., "capacity|Electricity|ng_1_e_edge"
 get_header_variable_name(obj::T, f::Function) where {T<:Union{AbstractEdge,Node,Storage}} =
     Symbol("$(f)|$(commodity_type(obj))|$(id(obj))")
+
+# This function is used to extract the optimal values of given fields from a 
+# list of MacroObjects at different time intervals.
+# e.g., get_optimal_vars_timeseries(edges, flow, :my_unit)
 function get_optimal_vars_timeseries(
     objs::Vector{T},
     field_list::Tuple,
@@ -73,6 +94,9 @@ function get_optimal_vars_timeseries(
     end
     out
 end
+################################################################################
+
+#### Helper functions to extract MacroObjects from System ####
 get_edges(asset::AbstractAsset) = get_macro_objs(asset, AbstractEdge)
 get_edges(assets::Vector{<:AbstractAsset}) =
     reduce(vcat, [get_edges(asset) for asset in assets])
@@ -107,11 +131,17 @@ edges_with_planning_variables(asset::AbstractAsset) =
     AbstractEdge[edge for edge in get_edges(asset) if has_planning_variables(edge)]
 edges_with_planning_variables(edges::Vector{<:AbstractEdge}) =
     AbstractEdge[edge for edge in edges if has_planning_variables(edge)]
+################################################################################
+
+# Function to convert a vector of OutputRow objects to a DataFrame for 
+# visualization purposes and writing to CSV
 convert_to_dataframe(data::Vector{OutputRow}) = DataFrame(data, copycols = false)
 function convert_to_dataframe(data::Vector{Tuple}, header::Vector)
     @assert length(data[1]) == length(header)
     DataFrame(data, header)
 end
+
+# Function to collect all the outputs from a system and return them as a DataFrame
 function collect_results(system::System)
     edges = get_edges(system)
 
