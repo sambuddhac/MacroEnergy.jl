@@ -73,6 +73,66 @@ function get_optimal_vars_timeseries(
     end
     out
 end
+get_edges(asset::AbstractAsset) = get_macro_objs(asset, AbstractEdge)
+get_edges(assets::Vector{<:AbstractAsset}) =
+    reduce(vcat, [get_edges(asset) for asset in assets])
+get_edges(system::System) = get_edges(system.assets)
+
+get_nodes(system::System) = system.locations
+
+get_transformations(asset::AbstractAsset) = get_macro_objs(asset, Transformation)
+get_transformations(assets::Vector{<:AbstractAsset}) =
+    reduce(vcat, [get_transformations(asset) for asset in assets])
+get_transformations(system::System) = get_transformations(system.assets)
+
+get_storage(system::System) = get_storage(system.assets)
+get_storage(assets::Vector{<:AbstractAsset}) =
+    reduce(vcat, [get_storage(asset) for asset in assets])
+get_storage(asset::AbstractAsset) = get_macro_objs(asset, Storage)
+
+function get_macro_objs(asset::AbstractAsset, T::Type{<:MacroObject})
+    objs = Vector{T}()
+    for y in getfield.(Ref(asset), propertynames(asset))
+        if isa(y, T)
+            push!(objs, y)
+        end
+    end
+    return objs
+end
+
+edges_with_planning_variables(system::System) = edges_with_planning_variables(system.assets)
+edges_with_planning_variables(assets::Vector{<:AbstractAsset}) =
+    reduce(vcat, [edges_with_planning_variables(asset) for asset in assets])
+edges_with_planning_variables(asset::AbstractAsset) =
+    AbstractEdge[edge for edge in get_edges(asset) if has_planning_variables(edge)]
+edges_with_planning_variables(edges::Vector{<:AbstractEdge}) =
+    AbstractEdge[edge for edge in edges if has_planning_variables(edge)]
+convert_to_dataframe(data::Vector{OutputRow}) = DataFrame(data, copycols = false)
+function convert_to_dataframe(data::Vector{Tuple}, header::Vector)
+    @assert length(data[1]) == length(header)
+    DataFrame(data, header)
+end
+function collect_results(system::System)
+    edges = get_edges(system)
+
+    # capacity variables 
+    field_list = (capacity, new_capacity, ret_capacity)
+    e_with_vars = edges_with_planning_variables(edges)
+    ecap = get_optimal_vars(e_with_vars, field_list, :MW)
+
+    ## time series
+    # edge flow
+    eflow = get_optimal_vars_timeseries(edges, flow, :unknown)
+
+    # # non_served_demand
+    # nsd = get_optimal_vars_timeseries(system.locations, (non_served_demand, policy_slack_vars), :MW) # TODO: add segments
+
+    # # storage storage_level
+    storages = get_storage(system)
+    storlevel = get_optimal_vars_timeseries(storages, storage_level, :MWh)
+
+    convert_to_dataframe(reduce(vcat, [ecap, eflow, storlevel]))
+end
 function write_csv(file_path::AbstractString, data::AbstractDataFrame)
     CSV.write(file_path, data)
 end
