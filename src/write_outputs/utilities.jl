@@ -31,6 +31,48 @@ get_region_name(e::AbstractEdge) =
     Symbol(join((id(n) for n in (e.start_vertex, e.end_vertex) if isa(n, Node)), "_"))
 get_header_variable_name(obj::T, f::Function) where {T<:Union{AbstractEdge,Node,Storage}} =
     Symbol("$(f)|$(commodity_type(obj))|$(id(obj))")
+function get_optimal_vars_timeseries(
+    objs::Vector{T},
+    field_list::Tuple,
+    unit::Symbol,
+) where {T<:MacroObject}
+    reduce(vcat, [get_optimal_vars_timeseries(e, field_list, unit) for e in objs])
+end
+
+function get_optimal_vars_timeseries(
+    objs::Vector{T},
+    f::Function,
+    unit::Symbol,
+) where {T<:MacroObject}
+    reduce(vcat, [get_optimal_vars_timeseries(e, f, unit) for e in objs])
+end
+
+function get_optimal_vars_timeseries(
+    obj::T,
+    field_list::Tuple,
+    unit::Symbol,
+) where {T<:MacroObject}
+    reduce(vcat, [get_optimal_vars_timeseries(obj, f, unit) for f in field_list])
+end
+
+function get_optimal_vars_timeseries(
+    obj::T,
+    f::Function,
+    unit::Symbol,
+) where {T<:MacroObject}
+    time_axis = time_interval(obj)
+    out = Vector{OutputRow}(undef, length(time_axis))
+    for (i, t) in enumerate(time_axis)
+        out[i] = OutputRow(
+            get_region_name(obj),
+            get_header_variable_name(obj, f),
+            unit,
+            t,
+            value(f(obj, t)),
+        )
+    end
+    out
+end
 function write_csv(file_path::AbstractString, data::AbstractDataFrame)
     CSV.write(file_path, data)
 end
