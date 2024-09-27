@@ -69,6 +69,7 @@ end
 include_all_in_folder("utilities")
 
 # include files
+include("model/units.jl")
 include("model/time_management.jl")
 include("model/networks/vertex.jl")
 include("model/networks/node.jl")
