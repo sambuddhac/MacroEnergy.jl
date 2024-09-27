@@ -24,7 +24,11 @@ import Macro:
     objective_value,
     commodity_type,
     AssetId,
-    VariableRef
+    VariableRef,
+    collect_results, 
+    get_optimal_capacity,
+    get_optimal_new_capacity,
+    get_optimal_ret_capacity
 
 
 include("utilities.jl")
@@ -229,16 +233,27 @@ function test_model_generation_and_optimization()
 
     @test macro_objval ≈ 2.1059615254166523e10
 
+    test_writing_outputs(system)
+
     return nothing
 end
 
+function test_writing_outputs(system)
+    @test_nowarn collect_results(system)
+    @test_nowarn get_optimal_capacity(system)
+    @test_nowarn get_optimal_new_capacity(system)
+    @test_nowarn get_optimal_ret_capacity(system)
+    return nothing
+end 
+
 function test_workflow()
-    # @testset "Test Struct Creation" begin
-    #     test_load_inputs()
-    # end
-    # @testset "Test Model Generation and Optimization" begin
-    #     @warn_error_logger test_model_generation_and_optimization()
-    # end
+    @testset "Test Struct Creation" begin
+        test_load_inputs()
+    end
+    @testset "Test Model Generation and Optimization" begin
+        @warn_error_logger test_model_generation_and_optimization()
+    end
+
     return nothing
 end
 
