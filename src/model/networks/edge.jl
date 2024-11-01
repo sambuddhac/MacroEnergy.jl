@@ -81,8 +81,6 @@ all_constraints(e::AbstractEdge) = e.constraints;
 availability(e::AbstractEdge) = e.availability;
 availability(e::AbstractEdge, t::Int64) =
     (isempty(availability(e)) == true) ? 1.0 : availability(e)[t];
-balance_data(e::AbstractEdge, v::AbstractVertex, i::Symbol) =
-    isempty(balance_data(v, i)) ? 1.0 : balance_data(v, i)[id(e)];
 can_expand(e::AbstractEdge) = e.can_expand;
 can_retire(e::AbstractEdge) = e.can_retire;
 capacity(e::AbstractEdge) = e.capacity;
@@ -395,6 +393,18 @@ function edges(assets::Vector{AbstractAsset})
         end
     end
     return edges
+end
+
+function balance_data(e::AbstractEdge, v::AbstractVertex, i::Symbol)   
+
+    if isempty(balance_data(v,i))
+        return 1.0
+    elseif id(e) ∈ keys(balance_data(v,i))
+        return balance_data(v,i)[id(e)]
+    else
+        return 0.0
+    end
+
 end
 
 function update_balance!(e::Edge, v::AbstractVertex, s::Int64)
