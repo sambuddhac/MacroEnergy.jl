@@ -8,6 +8,7 @@ using Revise
 using InteractiveUtils
 using Printf: @printf
 
+import Base: /
 
 # Type parameter for Macro data structures
 
@@ -91,6 +92,8 @@ include_all_in_folder("load_inputs")
 include("generate_model.jl")
 
 include("benders_utilities.jl")
+
+include("model/scaling.jl")
 
 include("write_outputs/assets_capacity.jl")
 include("write_outputs/utilities.jl")
