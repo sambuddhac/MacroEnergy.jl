@@ -165,6 +165,5 @@ export AbstractAsset,
     ThermalPowerCCS,
     Transformation,
     Uranium,
-    VRE,
-    WindTurbine
+    VRE
 end # module Macro
