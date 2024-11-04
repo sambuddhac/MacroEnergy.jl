@@ -1,5 +1,15 @@
+const COMMODITY_TYPES = Dict{Symbol,DataType}()
+
+function register_commodity_types!(m::Module = Macro)
+    empty!(COMMODITY_TYPES)
+    for (commodity_name, commodity_type) in all_subtypes(m, :Commodity)
+        COMMODITY_TYPES[commodity_name] = commodity_type
+    end
+end
+
 function commodity_types(m::Module = Macro)
-    return all_subtypes(m, :Commodity)
+    isempty(COMMODITY_TYPES) && register_commodity_types!(m)
+    return COMMODITY_TYPES
 end
 
 function load_commodities(path::AbstractString, rel_path::AbstractString)
