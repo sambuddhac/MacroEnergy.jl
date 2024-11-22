@@ -55,10 +55,7 @@ function make(::Type{HydroRes}, data::AbstractDict{Symbol,Any}, system::System)
     inflow_edge.can_expand = discharge_edge.can_expand;
     inflow_edge.existing_capacity = discharge_edge.existing_capacity;
     inflow_edge.capacity_size = discharge_edge.capacity_size;
-    inflow_edge.constraints = get(discharge_edge_data, :constraints,[SameChargeDischargeCapacityConstraint();MustRunConstraint()]); 
-
-    hydrostor.discharge_edge = discharge_edge
-    hydrostor.charge_edge = inflow_edge
+    inflow_edge.constraints = get(discharge_edge_data, :constraints,[StorageChargeDischargeRatioConstraint();MustRunConstraint()]); 
 
     spill_edge_key = :spill_edge
     spill_edge_data = process_data(data[:edges][spill_edge_key])
@@ -75,6 +72,10 @@ function make(::Type{HydroRes}, data::AbstractDict{Symbol,Any}, system::System)
     spill_edge.unidirectional = true;
     spill_edge.has_capacity = false;
     spill_edge.constraints = get(spill_edge_data, :constraints,Vector{AbstractTypeConstraint}());
+
+    hydrostor.discharge_edge = discharge_edge
+    hydrostor.charge_edge = inflow_edge
+    hydrostor.spillage_edge = spill_edge
 
     hydrostor.balance_data = Dict(
         :storage => Dict(
