@@ -128,7 +128,6 @@ function define_available_capacity!(e::AbstractEdge,model::Model)
             model,
             capacity_size(e) * (new_capacity(e) - ret_capacity(e)) + existing_capacity(e)
         )
-        model[:eAvailableCapacity][id(e)] = e.capacity
     end
 
     return nothing

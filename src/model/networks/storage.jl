@@ -98,7 +98,6 @@ function define_available_capacity!(g::Storage, model::Model)
         new_capacity_storage(g) - ret_capacity_storage(g) + existing_capacity_storage(g)
     )
 
-    model[:eAvailableCapacity][g.id] = g.capacity_storage;
 
 end
 
