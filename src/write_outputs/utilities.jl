@@ -171,13 +171,13 @@ get_transformations(system::System; return_ids_map::Bool=false) = get_macro_objs
 get_storage(system::System; return_ids_map::Bool=false) = get_macro_objs(system, Storage, return_ids_map)
 get_nodes(system::System) = system.locations
 
-edges_with_planning_variables(system::System) = edges_with_planning_variables(system.assets)
-edges_with_planning_variables(assets::Vector{<:AbstractAsset}) =
-    reduce(vcat, [edges_with_planning_variables(asset) for asset in assets])
-edges_with_planning_variables(asset::AbstractAsset) =
-    AbstractEdge[edge for edge in get_edges(asset) if has_planning_variables(edge)]
-edges_with_planning_variables(edges::Vector{<:AbstractEdge}) =
-    AbstractEdge[edge for edge in edges if has_planning_variables(edge)]
+edges_with_capacity_variables(system::System) = edges_with_capacity_variables(system.assets)
+edges_with_capacity_variables(assets::Vector{<:AbstractAsset}) =
+    reduce(vcat, [edges_with_capacity_variables(asset) for asset in assets])
+edges_with_capacity_variables(asset::AbstractAsset) =
+    AbstractEdge[edge for edge in get_edges(asset) if has_capacity(edge)]
+edges_with_capacity_variables(edges::Vector{<:AbstractEdge}) =
+    AbstractEdge[edge for edge in edges if has_capacity(edge)]
 ################################################################################
 
 # Function to convert a vector of OutputRow objects to a DataFrame for 
@@ -194,7 +194,7 @@ function collect_results(system::System)
 
     # capacity variables 
     field_list = (capacity, new_capacity, ret_capacity)
-    e_with_vars = edges_with_planning_variables(edges)
+    e_with_vars = edges_with_capacity_variables(edges)
     evars_asset_map = filter(edge -> edge[1] in id.(e_with_vars), edge_asset_map)
     ecap = get_optimal_vars(e_with_vars, field_list, :MW, evars_asset_map)
 
