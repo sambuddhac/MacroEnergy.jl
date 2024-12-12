@@ -213,7 +213,7 @@ function test_writing_output()
         flow=[7.0, 8.0, 9.0]
     )
 
-    asset1 = NaturalGasPower(:asset1, transformation, edge_to_transformation, edge_from_transformation1, edge_from_transformation2)
+    asset1 = ThermalPower(:asset1, transformation, edge_to_transformation, edge_from_transformation1, edge_from_transformation2)
     asset_ref = Ref(asset1)
 
     @testset "Helper Functions Tests" begin
@@ -242,7 +242,7 @@ function test_writing_output()
         @test get_header_variable_name(storage, capacity) == Symbol("capacity|Electricity|storage1")
 
         # Test get_type
-        @test get_type(asset_ref) == :NaturalGasPower
+        @test get_type(asset_ref) == Symbol("ThermalPower{NaturalGas}")
 
         # Test get_unit
         @test get_unit(edge_between_nodes) == :MWh
@@ -272,39 +272,39 @@ function test_writing_output()
         @test length(result) == 6
         @test result[1].region == :node1_node2
         @test result[1].variable == Symbol("capacity|Electricity|edge1")
-        @test result[1].type == :NaturalGasPower
+        @test result[1].type == Symbol("ThermalPower{NaturalGas}")
         @test result[1].unit == :MW
         @test result[1].value == 100.0
         @test result[2].region == :node1
         @test result[2].variable == Symbol("capacity|Electricity|edge2")
-        @test result[2].type == :NaturalGasPower
+        @test result[2].type == Symbol("ThermalPower{NaturalGas}")
         @test result[2].unit == :MW
         @test result[2].value == 101.0
         @test result[3].region == :node1
         @test result[3].variable == Symbol("capacity|Electricity|edge3")
-        @test result[3].type == :NaturalGasPower
+        @test result[3].type == Symbol("ThermalPower{NaturalGas}")
         @test result[3].unit == :MW
         @test result[3].value == 102.0
         @test result[4].region == :node2
         @test result[4].variable == Symbol("capacity|Electricity|edge4")
-        @test result[4].type == :NaturalGasPower
+        @test result[4].type == Symbol("ThermalPower{NaturalGas}")
         @test result[4].unit == :MW
         @test result[4].value == 103.0
         @test result[5].region == :node2
         @test result[5].variable == Symbol("capacity|Electricity|edge5")
-        @test result[5].type == :NaturalGasPower
+        @test result[5].type == Symbol("ThermalPower{NaturalGas}")
         @test result[5].unit == :MW
         @test result[5].value == 104.0
         @test result[6].region == :internal
         @test result[6].variable == Symbol("capacity|Electricity|edge6")
-        @test result[6].type == :NaturalGasPower
+        @test result[6].type == Symbol("ThermalPower{NaturalGas}")
         @test result[6].unit == :MW
         @test result[6].value == 105.0
         result = get_optimal_vars(Storage[storage], new_capacity_storage, :MW, Dict{Symbol, Base.RefValue{<: AbstractAsset}}(:storage1 => asset_ref))
         @test length(result) == 1
         @test result[1].region == :storage1
         @test result[1].variable == Symbol("new_capacity_storage|Electricity|storage1")
-        @test result[1].type == :NaturalGasPower
+        @test result[1].type == Symbol("ThermalPower{NaturalGas}")
         @test result[1].unit == :MW
         @test result[1].value == 100.0
     end
@@ -320,12 +320,12 @@ function test_writing_output()
 
     @testset "get_optimal_vars_timeseries Tests" begin
         expected_values = [
-            (:node1_node2, Symbol("flow|Electricity|edge1"), :NaturalGasPower, :MWh, [1, 2, 3], [1.0, 2.0, 3.0]),
-            (:node1, Symbol("flow|Electricity|edge2"), :NaturalGasPower, :MWh, [1, 2, 3], [4.0, 5.0, 6.0]),
-            (:node1, Symbol("flow|Electricity|edge3"), :NaturalGasPower, :MWh, [1, 2, 3], [7.0, 8.0, 9.0]),
-            (:node2, Symbol("flow|Electricity|edge4"), :NaturalGasPower, :MWh, [1, 2, 3], [10.0, 11.0, 12.0]),
-            (:node2, Symbol("flow|Electricity|edge5"), :NaturalGasPower, :MWh, [1, 2, 3], [13.0, 14.0, 15.0]),
-            (:internal, Symbol("flow|Electricity|edge6"), :NaturalGasPower, :MWh, [1, 2, 3], [16.0, 17.0, 18.0])
+            (:node1_node2, Symbol("flow|Electricity|edge1"), Symbol("ThermalPower{NaturalGas}"), :MWh, [1, 2, 3], [1.0, 2.0, 3.0]),
+            (:node1, Symbol("flow|Electricity|edge2"), Symbol("ThermalPower{NaturalGas}"), :MWh, [1, 2, 3], [4.0, 5.0, 6.0]),
+            (:node1, Symbol("flow|Electricity|edge3"), Symbol("ThermalPower{NaturalGas}"), :MWh, [1, 2, 3], [7.0, 8.0, 9.0]),
+            (:node2, Symbol("flow|Electricity|edge4"), Symbol("ThermalPower{NaturalGas}"), :MWh, [1, 2, 3], [10.0, 11.0, 12.0]),
+            (:node2, Symbol("flow|Electricity|edge5"), Symbol("ThermalPower{NaturalGas}"), :MWh, [1, 2, 3], [13.0, 14.0, 15.0]),
+            (:internal, Symbol("flow|Electricity|edge6"), Symbol("ThermalPower{NaturalGas}"), :MWh, [1, 2, 3], [16.0, 17.0, 18.0])
         ]
         result = get_optimal_vars_timeseries(mock_edges, flow, obj_asset_map)
         @test length(result) == 18
@@ -339,7 +339,7 @@ function test_writing_output()
         result = get_optimal_vars_timeseries(storage, storage_level, Dict{Symbol, Base.RefValue{<: AbstractAsset}}(:storage1 => asset_ref))
         @test length(result) == 3
         for i = 1:3
-            check_output_row(result[i], :storage1, Symbol("storage_level|Electricity|storage1"), :NaturalGasPower, :MWh, i, i)
+            check_output_row(result[i], :storage1, Symbol("storage_level|Electricity|storage1"), Symbol("ThermalPower{NaturalGas}"), :MWh, i, i)
         end
         result = get_optimal_vars_timeseries([node1, node2], max_non_served_demand)
         @test length(result) == 6
