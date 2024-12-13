@@ -1,7 +1,7 @@
 struct MustRun <: AbstractAsset
     id::AssetId
     energy_transform::Transformation
-    edge::Edge{Electricity}
+    elec_edge::Edge{Electricity}
 end
 function make(asset_type::Type{MustRun}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])

@@ -2,7 +2,7 @@ struct Electrolyzer <: AbstractAsset
     id::AssetId
     electrolyzer_transform::Transformation
     h2_edge::Edge{Hydrogen}
-    e_edge::Edge{Electricity}
+    elec_edge::Edge{Electricity}
 end
 
 """
