@@ -65,7 +65,7 @@
                             "efficiency": 1.0,
                             "availability": {
                                 "timeseries": {
-                                    "path": "assets/availability.csv",
+                                    "path": "system/availability.csv",
                                     "header": "MIDAT_conventional_hydroelectric_1"
                                 }
                             }
@@ -92,7 +92,7 @@
                             "efficiency": 1.0,
                             "availability": {
                                 "timeseries": {
-                                    "path": "assets/availability.csv",
+                                    "path": "system/availability.csv",
                                     "header": "NE_conventional_hydroelectric_1"
                                 }
                             }
@@ -119,7 +119,7 @@
                             "efficiency": 1.0,
                             "availability": {
                                 "timeseries": {
-                                    "path": "assets/availability.csv",
+                                    "path": "system/availability.csv",
                                     "header": "SE_conventional_hydroelectric_1"
                                 }
                             }
