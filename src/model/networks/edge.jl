@@ -443,18 +443,10 @@ function update_balance_start!(e::AbstractEdge, model::Model)
         effective_flow = @expression(model, [t in time_interval(e)], flow_pos[t] - (1 - loss_fraction(e)) * flow_neg[t])
     end
 
-    if hours_per_timestep(e) == hours_per_timestep(v)
-        for i in balance_ids(v)
-            add_to_expression!.(get_balance(v, i),  -1 * balance_data(e, v, i) * effective_flow)
-        end
-    else
-        for t in time_interval(e)
-            transform_time = time_interval(v)[ceil(Int, (hours_per_timestep(e) * t) / hours_per_timestep(v))]
-            for i in balance_ids(v)
-                add_to_expression!(get_balance(v, i, transform_time), -1 * balance_data(e, v, i) * effective_flow[t])
-            end
-        end
+    for i in balance_ids(v)
+        add_to_expression!.(get_balance(v, i),  -1 * balance_data(e, v, i) * effective_flow)
     end
+    
 
 end
 
@@ -481,19 +473,10 @@ function update_balance_end!(e::AbstractEdge, model::Model)
 
     end
 
-    if hours_per_timestep(e) == hours_per_timestep(v)
-        for i in balance_ids(v)
-            add_to_expression!.(get_balance(v, i),  balance_data(e, v, i) * effective_flow)
-        end
-    else
-        for t in time_interval(e)
-            transform_time = time_interval(v)[ceil(Int, (hours_per_timestep(e) * t) / hours_per_timestep(v))]
-            for i in balance_ids(v)
-                add_to_expression!(get_balance(v, i, transform_time), balance_data(e, v, i) * effective_flow[t])
-            end
-        end
+    for i in balance_ids(v)
+        add_to_expression!.(get_balance(v, i),  balance_data(e, v, i) * effective_flow)
     end
-
+    
 end
 
 function update_startup_fuel_balance_start!(e::EdgeWithUC)
@@ -503,19 +486,7 @@ function update_startup_fuel_balance_start!(e::EdgeWithUC)
     i = startup_fuel_balance_id(e)
 
     if i ∈ balance_ids(v)
-        if hours_per_timestep(e) == hours_per_timestep(v)
-        
-            add_to_expression!.(get_balance(v, i), -1 * startup_fuel(e) * capacity_size(e) * ustart(e))
-        
-        else
-            for t in time_interval(e)
-            
-                transform_time = time_interval(v)[ceil(Int, (hours_per_timestep(e) * t) / hours_per_timestep(v))]
-                
-                add_to_expression!(get_balance(v, i,transform_time), -1 * startup_fuel(e) * capacity_size(e) * ustart(e,t))
-            
-            end
-        end
+        add_to_expression!.(get_balance(v, i), -1 * startup_fuel(e) * capacity_size(e) * ustart(e))
     end
 
     return nothing
@@ -530,19 +501,7 @@ function update_startup_fuel_balance_end!(e::EdgeWithUC)
     i = startup_fuel_balance_id(e)
 
     if i ∈ balance_ids(v)
-        if hours_per_timestep(e) == hours_per_timestep(v)
-        
-            add_to_expression!.(get_balance(v, i), startup_fuel(e) * capacity_size(e) * ustart(e))
-        
-        else
-            for t in time_interval(e)
-            
-                transform_time = time_interval(v)[ceil(Int, (hours_per_timestep(e) * t) / hours_per_timestep(v))]
-                
-                add_to_expression!(get_balance(v, i,transform_time), startup_fuel(e) * capacity_size(e) * ustart(e,t))
-            
-            end
-        end
+        add_to_expression!.(get_balance(v, i), startup_fuel(e) * capacity_size(e) * ustart(e))
     end
 
     return nothing
