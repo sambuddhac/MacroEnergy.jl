@@ -8,16 +8,20 @@ using Revise
 using InteractiveUtils
 using Printf: @printf
 
+import Base: /
 
 # Type parameter for Macro data structures
 
 ## Commodity types
 abstract type Commodity end
-abstract type Electricity <: Commodity end
-abstract type Hydrogen <: Commodity end
-abstract type NaturalGas <: Commodity end
-abstract type CO2 <: Commodity end
-abstract type CO2Captured <: CO2 end
+abstract type Electricity <: Commodity end ## MWh
+abstract type Hydrogen <: Commodity end ## MWh
+abstract type NaturalGas <: Commodity end ## MWh
+abstract type CO2 <: Commodity end ## tonnes
+abstract type CO2Captured <: CO2 end ## tonnes
+abstract type Coal <: Commodity end ## MWh
+abstract type Biomass <: Commodity end ## tonnes
+abstract type Uranium <: Commodity end ## MWh
 
 ## Time data types
 abstract type AbstractTimeData{T<:Commodity} end
@@ -39,6 +43,7 @@ abstract type PolicyConstraint <: OperationConstraint end
 abstract type PlanningConstraint <: AbstractTypeConstraint end
 
 # global constants
+const ScalingFactor = 1e3;     # When equal to 1e3: MWh--> GWh, tons --> ktons, $/MWh --> M$/GWh, $/ton --> M$/kton
 const H2_MWh = 33.33 # MWh per tonne of H2
 const NG_MWh = 0.29307107 # MWh per MMBTU of NG 
 const AssetId = Symbol
@@ -76,11 +81,23 @@ include("model/system.jl")
 include("model/assets/battery.jl")
 include("model/assets/electrolyzer.jl")
 include("model/assets/fuelcell.jl")
-include("model/assets/h2storage.jl")
-include("model/assets/natgashydrogen.jl")
-include("model/assets/natgaspower.jl")
+include("model/assets/gasstorage.jl")
+include("model/assets/thermalhydrogen.jl")
+include("model/assets/thermalpower.jl")
 include("model/assets/powerline.jl")
 include("model/assets/vre.jl")
+
+include("model/assets/hydrogenline.jl")
+include("model/assets/thermalhydrogenccs.jl")
+include("model/assets/thermalpowerccs.jl")
+
+include("model/assets/natgasdac.jl")
+include("model/assets/electricdac.jl")
+include("model/assets/beccselectricity.jl")
+include("model/assets/beccshydrogen.jl")
+include("model/assets/hydrores.jl")
+include("model/assets/mustrun.jl")
+
 
 include_all_in_folder("model/constraints")
 
@@ -92,6 +109,8 @@ include("generate_model.jl")
 
 include("benders_utilities.jl")
 
+include("model/scaling.jl")
+
 include("write_outputs/assets_capacity.jl")
 include("write_outputs/utilities.jl")
 include("write_outputs/write_system_data.jl")
@@ -100,6 +119,10 @@ export AbstractAsset,
     AbstractTypeConstraint,
     BalanceConstraint,
     Battery,
+    Biomass,
+    Coal,
+    BECCSElectricity,
+    BECCSHydrogen,
     CO2,
     CO2CapConstraint,
     CO2Captured,
@@ -109,32 +132,44 @@ export AbstractAsset,
     EdgeWithUC,
     Electricity,
     Electrolyzer,
+    ElectricDAC,
     FuelCell,
-    H2Storage,
+    GasStorage,
+    HydroRes,
     Hydrogen,
+    HydrogenLine,
     MaxCapacityConstraint,
     MaxNonServedDemandConstraint,
     MaxNonServedDemandPerSegmentConstraint,
+    MaxStorageLevelConstraint,
+    MinCapacityConstraint,
     MinDownTimeConstraint,
     MinFlowConstraint,
+    MinStorageOutflowConstraint,
     MinStorageLevelConstraint,
     MinUpTimeConstraint,
+    MustRun,
+    MustRunConstraint,
     NaturalGas,
-    NaturalGasHydrogen,
-    NaturalGasPower,
+    NaturalGasDAC,
     Node,
     OperationConstraint,
     PlanningConstraint,
     PolicyConstraint,
     PowerLine,
     RampingLimitConstraint,
-    SolarPV,
     Storage,
     StorageCapacityConstraint,
+    StorageChargeDischargeRatioConstraint,
     StorageMaxDurationConstraint,
     StorageMinDurationConstraint,
     StorageSymmetricCapacityConstraint,
+    StorageDischargeLimitConstraint,
+    ThermalHydrogen,
+    ThermalPower,
+    ThermalHydrogenCCS,
+    ThermalPowerCCS,
     Transformation,
-    VRE,
-    WindTurbine
+    Uranium,
+    VRE
 end # module Macro

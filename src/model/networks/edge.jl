@@ -8,7 +8,7 @@ macro AbstractEdgeBaseAttributes()
         availability::Vector{Float64} = Float64[]
         can_expand::Bool = false
         can_retire::Bool = false
-        capacity::Union{JuMPVariable,Float64} = 0.0
+        capacity::Union{AffExpr,Float64} = 0.0
         capacity_size::Float64 = 1.0
         constraints::Vector{AbstractTypeConstraint} = Vector{AbstractTypeConstraint}()
         distance::Float64 = 0.0
@@ -16,12 +16,13 @@ macro AbstractEdgeBaseAttributes()
         fixed_om_cost::Float64 = 0.0
         flow::Union{JuMPVariable,Vector{Float64}} = Vector{VariableRef}()
         has_capacity::Bool = false
+        integer_decisions::Bool = false
         investment_cost::Float64 = 0.0
+        loss_fraction::Float64 = 0.0
         max_capacity::Float64 = Inf
         min_capacity::Float64 = 0.0
         min_flow_fraction::Float64 = 0.0
         new_capacity::Union{JuMPVariable,Float64} = 0.0
-        price::Vector{Float64} = Float64[]
         ramp_down_fraction::Float64 = 1.0
         ramp_up_fraction::Float64 = 1.0
         ret_capacity::Union{JuMPVariable,Float64} = 0.0
@@ -54,11 +55,12 @@ function make_edge(
         existing_capacity = get(data, :existing_capacity, 0.0),
         fixed_om_cost = get(data, :fixed_om_cost, 0.0),
         has_capacity = get(data, :has_capacity, false),
+        integer_decisions = get(data, :integer_decisions, false),
         investment_cost = get(data, :investment_cost, 0.0),
+        loss_fraction = get(data,:loss_fraction,0.0),
         max_capacity = get(data, :max_capacity, Inf),
         min_capacity = get(data, :min_capacity, 0.0),
         min_flow_fraction = get(data, :min_flow_fraction, 0.0),
-        price = get(data, :price, Float64[]),
         ramp_down_fraction = get(data, :ramp_down_fraction, 1.0),
         ramp_up_fraction = get(data, :ramp_up_fraction, 1.0),
         unidirectional = get(data, :unidirectional, false),
@@ -81,20 +83,20 @@ all_constraints(e::AbstractEdge) = e.constraints;
 availability(e::AbstractEdge) = e.availability;
 availability(e::AbstractEdge, t::Int64) =
     (isempty(availability(e)) == true) ? 1.0 : availability(e)[t];
-balance_data(e::AbstractEdge, v::AbstractVertex, i::Symbol) =
-    isempty(balance_data(v, i)) ? 1.0 : balance_data(v, i)[id(e)];
 can_expand(e::AbstractEdge) = e.can_expand;
 can_retire(e::AbstractEdge) = e.can_retire;
 capacity(e::AbstractEdge) = e.capacity;
 capacity_size(e::AbstractEdge) = e.capacity_size;
-end_vertex(e::AbstractEdge) = e.end_vertex;
+end_vertex(e::AbstractEdge)::AbstractVertex = e.end_vertex;
 existing_capacity(e::AbstractEdge) = e.existing_capacity;
 fixed_om_cost(e::AbstractEdge) = e.fixed_om_cost;
 flow(e::AbstractEdge) = e.flow;
 flow(e::AbstractEdge, t::Int64) = flow(e)[t];
 has_capacity(e::AbstractEdge) = e.has_capacity;
 id(e::AbstractEdge) = e.id;
+integer_decisions(e::AbstractEdge) = e.integer_decisions;
 investment_cost(e::AbstractEdge) = e.investment_cost;
+loss_fraction(e::AbstractEdge) = e.loss_fraction;
 max_capacity(e::AbstractEdge) = e.max_capacity;
 min_capacity(e::AbstractEdge) = e.min_capacity;
 min_flow_fraction(e::AbstractEdge) = e.min_flow_fraction;
@@ -102,9 +104,7 @@ new_capacity(e::AbstractEdge) = e.new_capacity;
 ramp_down_fraction(e::AbstractEdge) = e.ramp_down_fraction;
 ramp_up_fraction(e::AbstractEdge) = e.ramp_up_fraction;
 ret_capacity(e::AbstractEdge) = e.ret_capacity;
-price(e::AbstractEdge) = e.price;
-price(e::AbstractEdge, t::Int64) = price(e)[t];
-start_vertex(e::AbstractEdge) = e.start_vertex;
+start_vertex(e::AbstractEdge)::AbstractVertex = e.start_vertex;
 variable_om_cost(e::AbstractEdge) = e.variable_om_cost;
 ##### End of Edge interface #####
 
@@ -112,8 +112,25 @@ variable_om_cost(e::AbstractEdge) = e.variable_om_cost;
 function add_linking_variables!(e::AbstractEdge, model::Model)
 
     if has_capacity(e)
-        e.capacity = @variable(model, lower_bound = 0.0, base_name = "vCAP_$(id(e))")
+        e.new_capacity = @variable(model, lower_bound = 0.0, base_name = "vNEWCAP_$(id(e))")
+
+        e.ret_capacity = @variable(model, lower_bound = 0.0, base_name = "vRETCAP_$(id(e))")
     end
+
+    return nothing
+
+end
+
+function define_available_capacity!(e::AbstractEdge,model::Model)
+
+    if has_capacity(e)
+        e.capacity = @expression(
+            model,
+            capacity_size(e) * (new_capacity(e) - ret_capacity(e)) + existing_capacity(e)
+        )
+    end
+
+    return nothing
 
 end
 
@@ -121,13 +138,12 @@ function planning_model!(e::AbstractEdge, model::Model)
 
     if has_capacity(e)
 
-        e.new_capacity = @variable(model, lower_bound = 0.0, base_name = "vNEWCAP_$(id(e))")
-
-        e.ret_capacity = @variable(model, lower_bound = 0.0, base_name = "vRETCAP_$(id(e))")
-
         if !can_expand(e)
             fix(new_capacity(e), 0.0; force = true)
         else
+            if integer_decisions(e)
+                set_integer(new_capacity(e))
+            end
             add_to_expression!(
                 model[:eFixedCost],
                 investment_cost(e) * capacity_size(e),
@@ -137,19 +153,18 @@ function planning_model!(e::AbstractEdge, model::Model)
 
         if !can_retire(e)
             fix(ret_capacity(e), 0.0; force = true)
+        else
+            if integer_decisions(e)
+                set_integer(ret_capacity(e))
+            end
         end
 
         if fixed_om_cost(e) > 0
             add_to_expression!(model[:eFixedCost], fixed_om_cost(e), capacity(e))
         end
 
-        ### DEFAULT CONSTRAINTS ###
+        @constraint(model, capacity_size(e) * ret_capacity(e) <= existing_capacity(e))
 
-        @constraint(
-            model,
-            capacity(e) ==
-            capacity_size(e) * (new_capacity(e) - ret_capacity(e)) + existing_capacity(e)
-        )
     end
 
 
@@ -170,9 +185,7 @@ function operation_model!(e::Edge, model::Model)
         e.flow = @variable(model, [t in time_interval(e)], base_name = "vFLOW_$(id(e))")
     end
 
-    update_balance!(e, start_vertex(e), -1)
-
-    update_balance!(e, end_vertex(e), 1)
+    update_balances!(e, model)
 
     for t in time_interval(e)
 
@@ -185,26 +198,16 @@ function operation_model!(e::Edge, model::Model)
                 flow(e, t),
             )
         end
-
-        if !isempty(price(e))
-            add_to_expression!(
-                model[:eVariableCost],
-                subperiod_weight(e, w) * price(e, t),
-                flow(e, t),
-            )
+        if isa(start_vertex(e),Node)
+            if !isempty(price(start_vertex(e)))
+                add_to_expression!(
+                    model[:eVariableCost],
+                    subperiod_weight(e, w) * price(start_vertex(e), t),
+                    flow(e, t),
+                )
+            end
         end
 
-    end
-
-    ### DEFAULT CONSTRAINTS ###
-
-    if isa(start_vertex(e), Storage)
-        @constraint(
-            model,
-            [t in time_interval(e)],
-            balance_data(e, start_vertex(e), :storage) * flow(e, t) <=
-            storage_level(start_vertex(e), timestepbefore(t, 1, subperiods(e)))
-        )
     end
 
     return nothing
@@ -247,7 +250,6 @@ function make_edge_UC(
         max_capacity = get(data, :max_capacity, Inf),
         min_capacity = get(data, :min_capacity, 0.0),
         min_flow_fraction = get(data, :min_flow_fraction, 0.0),
-        price = get(data, :price, Float64[]),
         ramp_down_fraction = get(data, :ramp_down_fraction, 1.0),
         ramp_up_fraction = get(data, :ramp_up_fraction, 1.0),
         unidirectional = get(data, :unidirectional, false),
@@ -320,9 +322,9 @@ function operation_model!(e::EdgeWithUC, model::Model)
         base_name = "vSHUT_$(id(e))"
     )
 
-    update_balance!(e, start_vertex(e), -1)
+    update_balances!(e, model)
 
-    update_balance!(e, end_vertex(e), 1)
+    update_startup_fuel_balances!(e)
 
     for t in time_interval(e)
 
@@ -336,12 +338,14 @@ function operation_model!(e::EdgeWithUC, model::Model)
             )
         end
 
-        if !isempty(price(e))
-            add_to_expression!(
-                model[:eVariableCost],
-                subperiod_weight(e, w) * price(e, t),
-                flow(e, t),
-            )
+        if isa(start_vertex(e),Node)
+            if !isempty(price(start_vertex(e)))
+                add_to_expression!(
+                    model[:eVariableCost],
+                    subperiod_weight(e, w) * price(start_vertex(e), t),
+                    flow(e, t),
+                )
+            end
         end
 
         if startup_cost(e) > 0
@@ -388,62 +392,118 @@ function edges(assets::Vector{AbstractAsset})
     return edges
 end
 
-function update_balance!(e::Edge, v::AbstractVertex, s::Int64)
+function balance_data(e::AbstractEdge, v::AbstractVertex, i::Symbol)   
+
+    if isempty(balance_data(v,i))
+        return 1.0
+    elseif id(e) ∈ keys(balance_data(v,i))
+        return balance_data(v,i)[id(e)]
+    else
+        return 0.0
+    end
+
+end
+
+function update_balances!(e::AbstractEdge, model::Model)
+
+    update_balance_start!(e, model)
+
+    update_balance_end!(e, model)
+
+end
+
+function update_startup_fuel_balances!(e::EdgeWithUC)
+
+    update_startup_fuel_balance_start!(e)
+
+    update_startup_fuel_balance_end!(e)
+
+end
+
+function update_balance_start!(e::AbstractEdge, model::Model)
+
+    v = start_vertex(e);
+
+    if loss_fraction(e) == 0 || e.unidirectional == true
+
+        effective_flow = @expression(model,[t in time_interval(e)], flow(e,t))
+        
+    else
+        flow_pos = @variable(model, [t in time_interval(e)], lower_bound = 0.0, base_name = "vFLOWPOS_$(id(e))")
+        flow_neg = @variable(model, [t in time_interval(e)], lower_bound = 0.0, base_name = "vFLOWNEG_$(id(e))")
+
+        @constraint(model, [t in time_interval(e)], flow_pos[t] - flow_neg[t] == flow(e, t))
+
+        if isa(e,EdgeWithUC)
+            @constraint(model, [t in time_interval(e)], flow_pos[t] + flow_neg[t] <= availability(e, t) * capacity_size(e) * ucommit(e, t))
+        else
+            @constraint(model, [t in time_interval(e)], flow_pos[t] + flow_neg[t] <= availability(e, t) * capacity(e))
+        end
+
+        effective_flow = @expression(model, [t in time_interval(e)], flow_pos[t] - (1 - loss_fraction(e)) * flow_neg[t])
+    end
+
     for i in balance_ids(v)
-        add_to_expression!.(get_balance(v, i), s * balance_data(e, v, i) * flow(e))
+        add_to_expression!.(get_balance(v, i),  -1 * balance_data(e, v, i) * effective_flow)
     end
+    
+
 end
 
-function update_balance!(e::EdgeWithUC, v::AbstractVertex, s::Int64)
+function update_balance_end!(e::AbstractEdge, model::Model)
+    
+    v = end_vertex(e);
+
+    if loss_fraction(e) == 0 || e.unidirectional == true
+        effective_flow = @expression(model, [t in time_interval(e)], flow(e,t))
+    else
+    
+        flow_pos = @variable(model, [t in time_interval(e)], lower_bound = 0.0, base_name = "vFLOWPOS_$(id(e))")
+        flow_neg = @variable(model, [t in time_interval(e)], lower_bound = 0.0, base_name = "vFLOWNEG_$(id(e))")
+
+        @constraint(model, [t in time_interval(e)], flow_pos[t] - flow_neg[t] == flow(e, t))
+
+        if isa(e,EdgeWithUC)
+            @constraint(model, [t in time_interval(e)], flow_pos[t] + flow_neg[t] <= availability(e, t) * capacity_size(e) * ucommit(e, t))
+        else
+            @constraint(model, [t in time_interval(e)], flow_pos[t] + flow_neg[t] <= availability(e, t) * capacity(e))
+        end
+
+        effective_flow = @expression(model, [t in time_interval(e)], (1 - loss_fraction(e)) * flow_pos[t] - flow_neg[t])
+
+    end
 
     for i in balance_ids(v)
-        add_to_expression!.(get_balance(v, i), s * balance_data(e, v, i) * flow(e))
+        add_to_expression!.(get_balance(v, i),  balance_data(e, v, i) * effective_flow)
+    end
+    
+end
+
+function update_startup_fuel_balance_start!(e::EdgeWithUC)
+
+    v = start_vertex(e);
+
+    i = startup_fuel_balance_id(e)
+
+    if i ∈ balance_ids(v)
+        add_to_expression!.(get_balance(v, i), -1 * startup_fuel(e) * capacity_size(e) * ustart(e))
     end
 
-    if startup_fuel(e) > 0
-        ii = startup_fuel_balance_id(e)
-        if ii ∈ balance_ids(v)
-            add_to_expression!.(
-                get_balance(v, ii),
-                s * startup_fuel(e) * capacity_size(e) * ustart(e),
-            )
-        end
-    end
+    return nothing
 
 end
 
-function update_balance!(e::Edge, v::Transformation, s::Int64)
-    for t in time_interval(e)
-        transform_time = ceil(Int, (hours_per_timestep(e) * t) / hours_per_timestep(v))
-        for i in balance_ids(v)
-            add_to_expression!(
-                get_balance(v, i, transform_time),
-                s * balance_data(e, v, i) * flow(e, t),
-            )
-        end
-    end
-end
 
-function update_balance!(e::EdgeWithUC, v::Transformation, s::Int64)
+function update_startup_fuel_balance_end!(e::EdgeWithUC)
+    
+    v = end_vertex(e);
 
-    for t in time_interval(e)
-        transform_time = ceil(Int, (hours_per_timestep(e) * t) / hours_per_timestep(v))
-        for i in balance_ids(v)
-            add_to_expression!(
-                get_balance(v, i, transform_time),
-                s * balance_data(e, v, i) * flow(e, t),
-            )
-        end
-        if startup_fuel(e) > 0
-            ii = startup_fuel_balance_id(e)
-            if ii ∈ balance_ids(v)
-                add_to_expression!(
-                    get_balance(v, ii, transform_time),
-                    s * startup_fuel(e) * capacity_size(e) * ustart(e, t),
-                )
-            end
-        end
+    i = startup_fuel_balance_id(e)
+
+    if i ∈ balance_ids(v)
+        add_to_expression!.(get_balance(v, i), startup_fuel(e) * capacity_size(e) * ustart(e))
     end
 
+    return nothing
 
 end
