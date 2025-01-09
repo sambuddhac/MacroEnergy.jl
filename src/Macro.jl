@@ -1,6 +1,6 @@
 module Macro
 
-using CSV, JSON3, GZip
+using CSV, JSON3, GZip, Parquet2
 using DuckDB
 using DataFrames
 using JuMP

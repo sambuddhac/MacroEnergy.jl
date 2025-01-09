@@ -369,12 +369,13 @@ function write_results(file_path::AbstractString, system::System)
     if all(ismissing.(output.model))
         output.model .= basename(system.data_dirpath)
     end
-    if all(ismissing.(output.scenario))
-        output.scenario .= :default
+function write_parquet(filepath::String, data::DataFrame)
+    # Parquet2 does not support Symbol columns
+    # Convert Symbol columns to String in place
+    for col in names(data)
+        if eltype(data[!, col]) <: Symbol
+            transform!(data, col => ByRow(string) => col)
+        end
     end
-    CSV.write(file_path, output, compress=true)
-end
-
-function write_csv(file_path::AbstractString, data::AbstractDataFrame)
-    CSV.write(file_path, data)
+    Parquet2.writefile(filepath, data)
 end
