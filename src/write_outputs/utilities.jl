@@ -340,35 +340,68 @@ edges_with_capacity_variables(edges::Vector{<:AbstractEdge}) =
 ################################################################################
 
 # Function to collect all the outputs from a system and return them as a DataFrame
-function collect_results(system::System)
+function collect_results(system::System, model::Model)
     edges, edge_asset_map = get_edges(system, return_ids_map=true)
 
     # capacity variables 
     field_list = (capacity, new_capacity, ret_capacity)
-    e_with_vars = edges_with_capacity_variables(edges)
-    evars_asset_map = filter(edge -> edge[1] in id.(e_with_vars), edge_asset_map)
-    ecap = get_optimal_vars(e_with_vars, field_list, :MW, evars_asset_map)
+    edges_with_capacity = edges_with_capacity_variables(edges)
+    edges_with_capacity_asset_map = filter(edge -> edge[1] in id.(edges_with_capacity), edge_asset_map)
+    ecap = get_optimal_vars(edges_with_capacity, field_list, edges_with_capacity_asset_map)
 
     ## time series
     # edge flow
     eflow = get_optimal_vars_timeseries(edges, flow, edge_asset_map)
 
-    # # non_served_demand
-    # nsd = get_optimal_vars_timeseries(system.locations, (non_served_demand, policy_slack_vars), :MW) # TODO: add segments
+    # non_served_demand
+    nsd = get_optimal_vars_timeseries(system.locations, non_served_demand, edge_asset_map)
 
-    # # storage storage_level
+    # storage storage_level
     storages, storage_asset_map = get_storage(system, return_ids_map=true)
     storlevel = get_optimal_vars_timeseries(storages, storage_level, storage_asset_map)
 
-    convert_to_dataframe(reduce(vcat, [ecap, eflow, storlevel]))
+    # costs
+    costs = prepare_costs(model)
+
+    convert_to_dataframe(reduce(vcat, [ecap, eflow, nsd, storlevel, costs]))
 end
 
-function write_results(file_path::AbstractString, system::System)
+# Function to convert a vector of OutputRow objects to a DataFrame for 
+# visualization purposes
+convert_to_dataframe(data::Vector{OutputRow}) = DataFrame(data, copycols=false)
+function convert_to_dataframe(data::Vector{Tuple}, header::Vector)
+    @assert length(data[1]) == length(header)
+    DataFrame(data, header)
+end
+
+# Function to collect the results from a system and write them to a CSV file
+function write_results(file_path::AbstractString, system::System, model::Model)
     @info "Writing results to $file_path"
-    output = collect_results(system)
-    if all(ismissing.(output.model))
-        output.model .= basename(system.data_dirpath)
+    output = collect_results(system, model)
+    if all(ismissing.(output.case_name))
+        output.case_name .= basename(system.data_dirpath)
     end
+    if all(ismissing.(output.year))
+        output.year .= 2025
+    end
+
+    is_csv = occursin(".csv", file_path)
+    is_parquet = occursin(".parquet", file_path)
+    if is_csv
+        compress = occursin(".gz", file_path)
+        write_csv(file_path, output, compress)
+    elseif is_parquet
+        write_parquet(file_path, output)
+    else
+        throw(ArgumentError("Unsupported file extension: $file_path"))
+    end
+end
+
+# Function to write a DataFrame to a CSV file
+function write_csv(file_path::AbstractString, data::AbstractDataFrame, compress::Bool=false)
+    CSV.write(file_path, data, compress=compress)
+end
+
 function write_parquet(filepath::String, data::DataFrame)
     # Parquet2 does not support Symbol columns
     # Convert Symbol columns to String in place

@@ -116,7 +116,9 @@ include("benders_utilities.jl")
 include("model/scaling.jl")
 
 include("write_outputs/assets_capacity.jl")
+include("write_outputs/flow.jl")
 include("write_outputs/utilities.jl")
+include("write_outputs/costs.jl")
 include("write_outputs/write_system_data.jl")
 
 export AbstractAsset,
@@ -141,6 +143,8 @@ export AbstractAsset,
     FuelCell,
     GasStorage,
     get_optimal_capacity, 
+    get_optimal_costs,
+    get_optimal_flow,
     get_optimal_new_capacity,
     get_optimal_ret_capacity,
     HydroRes,

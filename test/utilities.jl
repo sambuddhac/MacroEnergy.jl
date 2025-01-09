@@ -43,4 +43,3 @@ end
 function check_if_package_installed(optimizer_name::AbstractString)
     return Base.find_package(optimizer_name) !== nothing
 end
-
