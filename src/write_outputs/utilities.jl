@@ -196,6 +196,56 @@ get_type(obj::T) where {T<:Union{AbstractEdge,Node,Storage}} = Symbol(commodity_
 get_unit(obj::AbstractEdge) = unit(commodity_type(obj.timedata))    #TODO: check if this is correct
 get_unit(obj::T) where {T<:Union{Node,Storage}} = unit(commodity_type(obj))
 
+# Get the costs from the model
+function prepare_costs(model::Model)
+    fixed_cost = value(model[:eFixedCost])
+    variable_cost = value(model[:eVariableCost])
+    total_cost = fixed_cost + variable_cost
+    OutputRow[
+        OutputRow(
+            :all,
+            :cost,
+            :all,
+            :all,
+            :all,
+            :Cost,
+            :FixedCost,
+            missing,
+            missing,
+            missing,
+            fixed_cost,
+            :USD,
+        ),
+        OutputRow(
+            :all,
+            :cost,
+            :all,
+            :all,
+            :all,
+            :Cost,
+            :VariableCost,
+            missing,
+            missing,
+            missing,
+            variable_cost,
+            :USD,
+        ),
+        OutputRow(  
+            :all,
+            :cost,
+            :all,
+            :all,
+            :all,
+            :Cost,
+            :TotalCost,
+            missing,
+            missing,
+            missing,
+            total_cost,
+            :USD,
+        )
+    ]
+end
 
 ################################################################################
 #### Helper functions to extract MacroObjects from System ####
