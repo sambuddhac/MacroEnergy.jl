@@ -21,59 +21,49 @@ struct OutputRow
 end
 
 #### Helper functions to extract optimal values of fields from MacroObjects ####
-# The following functions are used to extract the optimal values of given fields
-# or a list of fields from:
-# - System: e.g.: get_optimal_vars(system, capacity, :MW)
-# - Vector of MacroObjects (e.g., edges, nodes, transformations, storage)
+# The following functions are used to extract the values after the model has been solved
+# from a list of MacroObjects (e.g., edges, and storage) and a list of fields (e.g., capacity, new_capacity, ret_capacity)
 #   e.g.: get_optimal_vars(edges, (capacity, new_capacity, ret_capacity), :MW)
-get_optimal_vars(objs::Vector{T}, field::Function, unit::Symbol, obj_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}=()) where {T<:Union{AbstractEdge,Storage}} =
-    get_optimal_vars(objs, (field,), unit, obj_asset_map)
-function get_optimal_vars(objs::Vector{T}, field_list::Tuple, unit::Symbol, obj_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}=()) where {T<:Union{AbstractEdge,Storage}}
+get_optimal_vars(objs::Vector{T}, field::Function, obj_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}=()) where {T<:Union{AbstractEdge,Storage}} =
+    get_optimal_vars(objs, (field,), obj_asset_map)
+function get_optimal_vars(objs::Vector{T}, field_list::Tuple, obj_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}=()) where {T<:Union{AbstractEdge,Storage}}
+    # the obj_asset_map is used to map the asset component (e.g., natgas_1_ng_edge, natgas_2_ng_edge, natgas_1_elec_edge) to the actual asset id (e.g., natgas_1)
     if isempty(obj_asset_map)
         return OutputRow[
             OutputRow(
-                get_region_name(obj),
-                get_header_variable_name(obj, f),
+                get_commodity_name(obj),
+                get_commodity_subtype(f),
+                get_zone_name(obj),
+                get_component_id(obj),  # if obj_asset_map is empty, the component id is the same as the resource id
+                get_component_id(obj),
                 get_type(obj),
-                unit,
+                Symbol(f),
+                missing,
+                missing,
+                missing,
                 Float64(value(f(obj))),
+                get_unit(obj),
             ) for obj in objs for f in field_list
         ]
     else
         return OutputRow[
             OutputRow(
-                get_region_name(obj),
-                get_header_variable_name(obj, f),
+                get_commodity_name(obj),
+                get_commodity_subtype(f),
+                get_zone_name(obj),
+                get_resource_id(obj, obj_asset_map),
+                get_component_id(obj),
                 get_type(obj_asset_map[id(obj)]),
-                unit,
+                Symbol(f),
+                missing,
+                missing,
+                missing,
                 Float64(value(f(obj))),
+                get_unit(obj),
             ) for obj in objs for f in field_list
         ]
     end
 end
-
-get_region_name(v::AbstractVertex) = id(v)
-
-# The default region name for an edge is the concatenation of the ids of its nodes:
-# e.g., "elec_1_elec_2" for an edge connecting nodes "elec_1" and "elec_2" or 
-# "elec_1" if connecting a node to storage/transformation
-function get_region_name(e::AbstractEdge)
-    region_name = join((id(n) for n in (e.start_vertex, e.end_vertex) if isa(n, Node)), "_")
-    if isempty(region_name)
-        region_name = :internal # TODO: fix this
-    end
-    Symbol(region_name)
-end
-# The default "variable" name for an edge is: field_name|commodity_type|edge_id
-# e.g., "capacity|Electricity|ng_1_e_edge"
-get_header_variable_name(obj::T, f::Function) where {T<:Union{AbstractEdge,Node,Storage}} =
-    Symbol("$(f)|$(commodity_type(obj))|$(id(obj))")
-
-get_type(asset::Base.RefValue{<:AbstractAsset}) = Symbol(typeof(asset).parameters[1])
-get_type(obj::Node) = Symbol(commodity_type(obj))
-
-get_unit(obj::AbstractEdge) = unit(commodity_type(obj.timedata))    #TODO: check if this is correct
-get_unit(obj::T) where {T<:Union{Node,Storage}} = unit(commodity_type(obj))
 
 # This function is used to extract the optimal values of given fields from a 
 # list of MacroObjects at different time intervals.
@@ -108,89 +98,196 @@ function get_optimal_vars_timeseries(
     obj_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}=Dict{Symbol,Base.RefValue{<:AbstractAsset}}()
 ) where {T<:Union{AbstractEdge,Storage,Node}}
     time_axis = time_interval(obj)
-    out = Vector{OutputRow}(undef, length(time_axis))
+    # check if the time series is piecewise linear approximation with segments
+    has_segments = ndims(getproperty(obj, Symbol(f))) > 1 # a matrix (segments, time)
+    num_segments = has_segments ? size(getproperty(obj, Symbol(f)), 1) : 1
+    out = Vector{OutputRow}(undef, num_segments * length(time_axis))
     if isempty(obj_asset_map)
-        for (i, t) in enumerate(time_axis)
-            out[i] = OutputRow(
-                get_region_name(obj),
-                get_header_variable_name(obj, f),
-                get_type(obj),
-                get_unit(obj),
-                t,
-                value(f(obj, t)),
-            )
+        for s in 1:num_segments
+            for (j, t) in enumerate(time_axis)
+                out[s+(j-1)*num_segments] = OutputRow(
+                    get_commodity_name(obj),
+                    get_commodity_subtype(f),
+                    get_zone_name(obj),
+                    get_component_id(obj),
+                    get_component_id(obj),
+                    get_type(obj),
+                    Symbol(f),
+                    missing,
+                    s,
+                    t,
+                    has_segments ? value(f(obj, s, t)) : value(f(obj, t)),
+                    get_unit(obj),
+                )
+            end
         end
     else
-        for (i, t) in enumerate(time_axis)
-            out[i] = OutputRow(
-                get_region_name(obj),
-                get_header_variable_name(obj, f),
-                get_type(obj_asset_map[id(obj)]),
-                get_unit(obj),
-                t,
-                value(f(obj, t)),
-            )
+        for s in 1:num_segments
+            for (j, t) in enumerate(time_axis)
+                out[s+(j-1)*num_segments] = OutputRow(
+                    get_commodity_name(obj),
+                    get_commodity_subtype(f),
+                    get_zone_name(obj),
+                    isa(obj, Node) ? get_resource_id(obj) : get_resource_id(obj, obj_asset_map),
+                    get_component_id(obj),
+                    isa(obj, Node) ? get_type(obj) : get_type(obj_asset_map[id(obj)]),
+                    Symbol(f),
+                    missing,
+                    s,
+                    t,
+                    has_segments ? value(f(obj, s, t)) : value(f(obj, t)),
+                    get_unit(obj),
+                )
+            end
         end
     end
     out
 end
 
-################################################################################
+# Get the commodity name of a MacroObject
+get_commodity_name(obj::AbstractEdge) = Symbol(commodity_type(obj))
+get_commodity_name(obj::Node) = Symbol(commodity_type(obj))
+get_commodity_name(obj::Storage) = Symbol(commodity_type(obj))
 
-#### Helper functions to extract MacroObjects from System ####
-function get_macro_objs(asset::AbstractAsset, T::Type{<:MacroObject}, return_map::Bool=false)
-    objs = Vector{T}()
-    for y in getfield.(Ref(asset), propertynames(asset))
-        if isa(y, T)
-            push!(objs, y)
-        end
-    end
-    if return_map
-        return objs, Dict{Symbol,Base.RefValue{<:AbstractAsset}}((obj.id, Ref(asset)) for obj in objs)
-    end
-    return objs
-end
-
-function get_macro_objs(assets::Vector{<:AbstractAsset}, T::Type{<:MacroObject}, return_map::Bool=false)
-    if return_map
-        objs = Vector{Vector{T}}(undef, length(assets))
-        asset_obj_map = Dict{Symbol,Base.RefValue{<:AbstractAsset}}()
-        for i in eachindex(assets)
-            asset = assets[i]
-            asset_objs, asset_obj_asset_map = get_macro_objs(asset, T, return_map)
-            objs[i] = asset_objs
-            merge!(asset_obj_map, asset_obj_asset_map)
-        end
-        return reduce(vcat, objs), asset_obj_map
+# The commodity subtype is an identifier for the field names
+# e.g., "capacity" for capacity variables, "flow" for flow variables, etc.
+function get_commodity_subtype(f::Function)
+    field_name = Symbol(f)
+    if any(field_name .== (:capacity, :new_capacity, :ret_capacity))
+        return :capacity
+    elseif any(field_name .== (:flow, :storage_level, :non_served_demand, :policy_slack_vars))
+        return field_name
+        # elseif f == various cost # TODO: implement this
+        #     return :cost
     else
-        return reduce(vcat, [get_macro_objs(asset, T) for asset in assets])
+        return missing
     end
 end
 
-get_macro_objs(system::System, T::Type{<:MacroObject}, return_map::Bool=false) =
-    get_macro_objs(system.assets, T, return_map)
+# The resource id is the id of the asset that the object belongs to
+function get_resource_id(obj::T, asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}) where {T<:Union{AbstractEdge,Storage}}
+    asset = asset_map[id(obj)]
+    asset[].id
+end
+get_resource_id(obj::Node) = id(obj)
 
-get_edges(system::System; return_ids_map::Bool=false) = get_macro_objs(system, AbstractEdge, return_ids_map)
-get_transformations(system::System; return_ids_map::Bool=false) = get_macro_objs(system, Transformation, return_ids_map)
-get_storage(system::System; return_ids_map::Bool=false) = get_macro_objs(system, Storage, return_ids_map)
+# The component id is the id of the object itself
+get_component_id(obj::T) where {T<:Union{AbstractEdge,Node,Storage}} = Symbol("$(id(obj))")
+
+# Get the zone name/location of a vertex
+get_zone_name(v::AbstractVertex) = id(v)
+# The default zone name for an edge is the concatenation of the ids of its nodes:
+# e.g., "elec_1_elec_2" for an edge connecting nodes "elec_1" and "elec_2" or 
+# "elec_1" if connecting a node to storage/transformation
+function get_zone_name(e::AbstractEdge)
+    region_name = join((id(n) for n in (e.start_vertex, e.end_vertex) if isa(n, Node)), "_")
+    if isempty(region_name)
+        region_name = :internal # TODO: fix this
+    end
+    Symbol(region_name)
+end
+
+# Get the type of an asset
+get_type(asset::Base.RefValue{<:AbstractAsset}) = Symbol(typeof(asset).parameters[1])
+# Get the type of a MacroObject
+get_type(obj::T) where {T<:Union{AbstractEdge,Node,Storage}} = Symbol(commodity_type(obj))
+
+# Get the unit of a MacroObject
+get_unit(obj::AbstractEdge) = unit(commodity_type(obj.timedata))    #TODO: check if this is correct
+get_unit(obj::T) where {T<:Union{Node,Storage}} = unit(commodity_type(obj))
+
+
+################################################################################
+#### Helper functions to extract MacroObjects from System ####
+# E.g., get_macro_objs(system, AbstractEdge)
+# E.g., get_macro_objs(asset, AbstractEdge, return_ids_map=true)
+# The return_ids_map is used to return a map of the MacroObjects to the asset they belong to
+get_macro_objs(system::System, T::Type{<:MacroObject}, return_ids_map::Bool=false) =
+    get_macro_objs(system.assets, T, return_ids_map)
+get_macro_objs(assets::Vector{<:AbstractAsset}, T::Type{<:MacroObject}) =
+    reduce(vcat, [get_macro_objs(asset, T) for asset in assets])
+function get_macro_objs(asset::AbstractAsset, T::Type{<:MacroObject})
+    objects = Vector{T}()
+    for field_name in propertynames(asset)
+        field_value = getproperty(asset, field_name)
+        if isa(field_value, T)
+            push!(objects, field_value)
+        end
+    end
+    return objects
+end
+get_macro_objs_with_map(system::System, T::Type{<:MacroObject}) = get_macro_objs_with_map(system.assets, T)
+function get_macro_objs_with_map(assets::Vector{<:AbstractAsset}, T::Type{<:MacroObject})
+    all_objects = Vector{Vector{T}}(undef, length(assets))
+    asset_obj_map = Dict{Symbol,Base.RefValue{<:AbstractAsset}}()
+
+    for i in eachindex(assets)
+        asset = assets[i]
+        objects, object_map = get_macro_objs_with_map(asset, T)
+        all_objects[i] = objects
+        merge!(asset_obj_map, object_map)
+    end
+
+    return reduce(vcat, all_objects), asset_obj_map
+end
+function get_macro_objs_with_map(asset::AbstractAsset, T::Type{<:MacroObject})
+    objects = get_macro_objs(asset, T)
+    object_map = Dict{Symbol,Base.RefValue{<:AbstractAsset}}(
+        obj.id => Ref(asset) for obj in objects
+    )
+    return objects, object_map
+end
+
+# The following functions are used to extract the edges, transformations, and storage from a system
+get_edges(system::System; return_ids_map::Bool=false) = return_ids_map ? get_macro_objs_with_map(system, AbstractEdge) : get_macro_objs(system, AbstractEdge)
+get_transformations(system::System; return_ids_map::Bool=false) = return_ids_map ? get_macro_objs_with_map(system, Transformation) : get_macro_objs(system, Transformation)
+get_storage(system::System; return_ids_map::Bool=false) = return_ids_map ? get_macro_objs_with_map(system, Storage) : get_macro_objs(system, Storage)
 get_nodes(system::System) = system.locations
 
-edges_with_capacity_variables(system::System) = edges_with_capacity_variables(system.assets)
-edges_with_capacity_variables(assets::Vector{<:AbstractAsset}) =
-    reduce(vcat, [edges_with_capacity_variables(asset) for asset in assets])
-edges_with_capacity_variables(asset::AbstractAsset) =
-    AbstractEdge[edge for edge in get_edges(asset) if has_capacity(edge)]
+# The following functions are used to extract the edges from an Asset or a Vector of Assets
+get_edges(asset::AbstractAsset; return_ids_map::Bool=false) = return_ids_map ? get_macro_objs_with_map(asset, AbstractEdge) : get_macro_objs(asset, AbstractEdge)
+get_edges(assets::Vector{<:AbstractAsset}; return_ids_map::Bool=false) = return_ids_map ? get_macro_objs_with_map(assets, AbstractEdge) : get_macro_objs(assets, AbstractEdge)
+
+# The following functions are used to extract the edges with capacity variables from a system, Vector of Assets, or a single Asset
+# It can also be used to filter edges with capacity variables from a Vector of edges
+function edges_with_capacity_variables(system::System; return_ids_map::Bool=false)
+    if return_ids_map
+        edges, edge_asset_map = get_edges(system, return_ids_map=true)
+        edges_with_capacity = edges_with_capacity_variables(edges)
+        edges_with_capacity_asset_map = filter(edge -> edge[1] in id.(edges_with_capacity), edge_asset_map)
+        return edges_with_capacity, edges_with_capacity_asset_map
+    else
+        return edges_with_capacity_variables(system.assets)
+    end
+end
+function edges_with_capacity_variables(assets::Vector{<:AbstractAsset}; return_ids_map::Bool=false)
+    if return_ids_map
+        all_edges = Vector{Vector{AbstractEdge}}(undef, length(assets))
+        all_edge_asset_map = Dict{Symbol,Base.RefValue{<:AbstractAsset}}()
+        for i in eachindex(assets)
+            asset = assets[i]
+            edges, edge_asset_map = edges_with_capacity_variables(asset, return_ids_map=true)
+            all_edges[i] = edges
+            merge!(all_edge_asset_map, edge_asset_map)
+        end
+        return reduce(vcat, all_edges), all_edge_asset_map
+    else
+        return reduce(vcat, [edges_with_capacity_variables(asset) for asset in assets])
+    end
+end
+function edges_with_capacity_variables(asset::AbstractAsset; return_ids_map::Bool=false)
+    if return_ids_map
+        edges, edge_asset_map = get_edges(asset, return_ids_map=true)
+        edges_with_capacity = edges_with_capacity_variables(edges)
+        edges_with_capacity_asset_map = filter(edge -> edge[1] in id.(edges_with_capacity), edge_asset_map)
+        return edges_with_capacity, edges_with_capacity_asset_map
+    else
+        return AbstractEdge[edge for edge in get_edges(asset) if has_capacity(edge)]
+    end
+end
 edges_with_capacity_variables(edges::Vector{<:AbstractEdge}) =
     AbstractEdge[edge for edge in edges if has_capacity(edge)]
 ################################################################################
-
-# Function to convert a vector of OutputRow objects to a DataFrame for 
-# visualization purposes and writing to CSV
-convert_to_dataframe(data::Vector{OutputRow}) = DataFrame(data, copycols=false)
-function convert_to_dataframe(data::Vector{Tuple}, header::Vector)
-    @assert length(data[1]) == length(header)
-    DataFrame(data, header)
-end
 
 # Function to collect all the outputs from a system and return them as a DataFrame
 function collect_results(system::System)
