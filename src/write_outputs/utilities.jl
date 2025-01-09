@@ -1,19 +1,23 @@
 # Results are stored as a table with the following columns:
-# | model | scenario | region | variable | unit | time | value | 
+# | case_name | commodity | commodity_subtype | zone | year | time | resource_id | type | variable | value | unit | 
 # Internally, each row is represented as an OutputRow object:
 struct OutputRow
-    model::Union{Symbol,Missing}
-    scenario::Union{Symbol,Missing}
-    region::Symbol
-    variable::Symbol
+    case_name::Union{Symbol,Missing}
+    commodity::Symbol
+    commodity_subtype::Union{Symbol,Missing}
+    zone::Symbol
+    resource_id::Symbol
+    component_id::Symbol
     type::Symbol
-    unit::Symbol
+    variable::Symbol
+    year::Union{Int,Missing}
+    segment::Union{Int,Missing}
     time::Union{Int,Missing}
     value::Float64
-    OutputRow(region::Symbol, variable::Symbol, type::Symbol, unit::Symbol, value::Float64) =
-        new(missing, missing, region, variable, type, unit, missing, value)
-    OutputRow(region::Symbol, variable::Symbol, type::Symbol, unit::Symbol, time::Int, value::Float64) =
-        new(missing, missing, region, variable, type, unit, time, value)
+    unit::Symbol
+    OutputRow(commodity::Symbol, commodity_subtype::Union{Symbol,Missing}, zone::Symbol, resource_id::Symbol,
+        component_id::Symbol, type::Symbol, variable::Symbol, year::Union{Int,Missing}, segment::Union{Int,Missing}, time::Union{Int,Missing}, value::Float64, unit::Symbol) =
+        new(missing, commodity, commodity_subtype, zone, resource_id, component_id, type, variable, year, segment, time, value, unit)
 end
 
 #### Helper functions to extract optimal values of fields from MacroObjects ####
