@@ -15,10 +15,11 @@ struct OutputRow
     time::Union{Int,Missing}
     value::Float64
     unit::Symbol
-    OutputRow(commodity::Symbol, commodity_subtype::Union{Symbol,Missing}, zone::Symbol, resource_id::Symbol,
-        component_id::Symbol, type::Symbol, variable::Symbol, year::Union{Int,Missing}, segment::Union{Int,Missing}, time::Union{Int,Missing}, value::Float64, unit::Symbol) =
-        new(missing, commodity, commodity_subtype, zone, resource_id, component_id, type, variable, year, segment, time, value, unit)
 end
+
+# Ctor if the case_name is missing
+OutputRow(commodity::Symbol, commodity_subtype::Union{Symbol,Missing}, zone::Symbol, resource_id::Symbol, component_id::Symbol, type::Symbol, variable::Symbol, year::Union{Int,Missing}, segment::Union{Int,Missing}, time::Union{Int,Missing}, value::Float64, unit::Symbol) =
+    OutputRow(missing, commodity, commodity_subtype, zone, resource_id, component_id, type, variable, year, segment, time, value, unit)
 
 #### Helper functions to extract optimal values of fields from MacroObjects ####
 # The following functions are used to extract the values after the model has been solved
