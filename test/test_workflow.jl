@@ -28,7 +28,10 @@ import Macro:
     collect_results, 
     get_optimal_capacity,
     get_optimal_new_capacity,
-    get_optimal_ret_capacity
+    get_optimal_ret_capacity,
+    get_optimal_flow,
+    get_optimal_costs,
+    write_results
 
 
 include("utilities.jl")
@@ -233,16 +236,23 @@ function test_model_generation_and_optimization()
 
     @test macro_objval ≈ obj_true
 
-    test_writing_outputs(system)
+    test_writing_outputs(system, model)
 
     return nothing
 end
 
-function test_writing_outputs(system)
-    @test_nowarn collect_results(system)
+function test_writing_outputs(system, model)
+    @test_nowarn collect_results(system, model)
     @test_nowarn get_optimal_capacity(system)
     @test_nowarn get_optimal_new_capacity(system)
     @test_nowarn get_optimal_ret_capacity(system)
+    @test_nowarn get_optimal_capacity(system.assets[1])
+    @test_nowarn get_optimal_new_capacity(system.assets[1])
+    @test_nowarn get_optimal_ret_capacity(system.assets[1])
+    @test_nowarn get_optimal_flow(system)
+    @test_nowarn get_optimal_flow(system.assets[1])
+    @test_nowarn get_optimal_flow(system.assets[1].elec_edge)
+    @test_nowarn get_optimal_costs(model)
     return nothing
 end 
 
