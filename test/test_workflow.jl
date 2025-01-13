@@ -253,6 +253,11 @@ function test_writing_outputs(system, model)
     @test_nowarn get_optimal_flow(system.assets[1])
     @test_nowarn get_optimal_flow(system.assets[1].elec_edge)
     @test_nowarn get_optimal_costs(model)
+    @test_nowarn write_results(joinpath(@__DIR__, "test_outputs.csv.gz"), system, model)
+    @test_nowarn write_results(joinpath(@__DIR__, "test_outputs.parquet"), system, model)
+    @test_throws ArgumentError write_results("test.zip", system, model)
+    rm(joinpath(@__DIR__, "test_outputs.csv.gz"))   # clean up
+    rm(joinpath(@__DIR__, "test_outputs.parquet"))  # clean up
     return nothing
 end 
 
