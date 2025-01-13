@@ -25,9 +25,9 @@ OutputRow(commodity::Symbol, commodity_subtype::Union{Symbol,Missing}, zone::Sym
 # The following functions are used to extract the values after the model has been solved
 # from a list of MacroObjects (e.g., edges, and storage) and a list of fields (e.g., capacity, new_capacity, ret_capacity)
 #   e.g.: get_optimal_vars(edges, (capacity, new_capacity, ret_capacity), :MW)
-get_optimal_vars(objs::Vector{T}, field::Function, obj_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}=()) where {T<:Union{AbstractEdge,Storage}} =
+get_optimal_vars(objs::Vector{T}, field::Function, obj_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}=Dict{Symbol,Base.RefValue{<:AbstractAsset}}()) where {T<:Union{AbstractEdge,Storage}} =
     get_optimal_vars(objs, (field,), obj_asset_map)
-function get_optimal_vars(objs::Vector{T}, field_list::Tuple, obj_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}=()) where {T<:Union{AbstractEdge,Storage}}
+function get_optimal_vars(objs::Vector{T}, field_list::Tuple, obj_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}=Dict{Symbol,Base.RefValue{<:AbstractAsset}}()) where {T<:Union{AbstractEdge,Storage}}
     # the obj_asset_map is used to map the asset component (e.g., natgas_1_ng_edge, natgas_2_ng_edge, natgas_1_elec_edge) to the actual asset id (e.g., natgas_1)
     if isempty(obj_asset_map)
         return OutputRow[
@@ -100,8 +100,8 @@ function get_optimal_vars_timeseries(
 ) where {T<:Union{AbstractEdge,Storage,Node}}
     time_axis = time_interval(obj)
     # check if the time series is piecewise linear approximation with segments
-    has_segments = ndims(getproperty(obj, Symbol(f))) > 1 # a matrix (segments, time)
-    num_segments = has_segments ? size(getproperty(obj, Symbol(f)), 1) : 1
+    has_segments = ndims(f(obj)) > 1 # a matrix (segments, time)
+    num_segments = has_segments ? size(f(obj), 1) : 1
     out = Vector{OutputRow}(undef, num_segments * length(time_axis))
     if isempty(obj_asset_map)
         for s in 1:num_segments
@@ -156,12 +156,10 @@ function get_commodity_subtype(f::Function)
     field_name = Symbol(f)
     if any(field_name .== (:capacity, :new_capacity, :ret_capacity))
         return :capacity
-    elseif any(field_name .== (:flow, :storage_level, :non_served_demand, :policy_slack_vars))
-        return field_name
-        # elseif f == various cost # TODO: implement this
-        #     return :cost
+    # elseif f == various cost # TODO: implement this
+    #     return :cost
     else
-        return missing
+        return field_name
     end
 end
 
@@ -191,7 +189,7 @@ end
 # Get the type of an asset
 get_type(asset::Base.RefValue{<:AbstractAsset}) = Symbol(typeof(asset).parameters[1])
 # Get the type of a MacroObject
-get_type(obj::T) where {T<:Union{AbstractEdge,Node,Storage}} = Symbol(commodity_type(obj))
+get_type(obj::T) where {T<:Union{AbstractEdge,Node,Storage}} = Symbol(typeof(obj))
 
 # Get the unit of a MacroObject
 get_unit(obj::AbstractEdge) = unit(commodity_type(obj.timedata))    #TODO: check if this is correct
@@ -231,7 +229,7 @@ function prepare_costs(model::Model)
             variable_cost,
             :USD,
         ),
-        OutputRow(  
+        OutputRow(
             :all,
             :cost,
             :all,
@@ -253,8 +251,7 @@ end
 # E.g., get_macro_objs(system, AbstractEdge)
 # E.g., get_macro_objs(asset, AbstractEdge, return_ids_map=true)
 # The return_ids_map is used to return a map of the MacroObjects to the asset they belong to
-get_macro_objs(system::System, T::Type{<:MacroObject}, return_ids_map::Bool=false) =
-    get_macro_objs(system.assets, T, return_ids_map)
+get_macro_objs(system::System, T::Type{<:MacroObject}) = get_macro_objs(system.assets, T)
 get_macro_objs(assets::Vector{<:AbstractAsset}, T::Type{<:MacroObject}) =
     reduce(vcat, [get_macro_objs(asset, T) for asset in assets])
 function get_macro_objs(asset::AbstractAsset, T::Type{<:MacroObject})
@@ -370,7 +367,7 @@ end
 # Function to convert a vector of OutputRow objects to a DataFrame for 
 # visualization purposes
 convert_to_dataframe(data::Vector{OutputRow}) = DataFrame(data, copycols=false)
-function convert_to_dataframe(data::Vector{Tuple}, header::Vector)
+function convert_to_dataframe(data::Vector{<:Tuple}, header::Vector)
     @assert length(data[1]) == length(header)
     DataFrame(data, header)
 end
