@@ -14,12 +14,12 @@ struct OutputRow
     segment::Union{Int,Missing}
     time::Union{Int,Missing}
     value::Float64
-    unit::Symbol
+    # unit::Symbol # Commented out for now
 end
 
 # Ctor if the case_name is missing
-OutputRow(commodity::Symbol, commodity_subtype::Union{Symbol,Missing}, zone::Symbol, resource_id::Symbol, component_id::Symbol, type::Symbol, variable::Symbol, year::Union{Int,Missing}, segment::Union{Int,Missing}, time::Union{Int,Missing}, value::Float64, unit::Symbol) =
-    OutputRow(missing, commodity, commodity_subtype, zone, resource_id, component_id, type, variable, year, segment, time, value, unit)
+OutputRow(commodity::Symbol, commodity_subtype::Union{Symbol,Missing}, zone::Symbol, resource_id::Symbol, component_id::Symbol, type::Symbol, variable::Symbol, year::Union{Int,Missing}, segment::Union{Int,Missing}, time::Union{Int,Missing}, value::Float64) =
+    OutputRow(missing, commodity, commodity_subtype, zone, resource_id, component_id, type, variable, year, segment, time, value)
 
 #### Helper functions to extract optimal values of fields from MacroObjects ####
 # The following functions are used to extract the values after the model has been solved
@@ -43,7 +43,7 @@ function get_optimal_vars(objs::Vector{T}, field_list::Tuple, scaling::Float64=1
                 missing,
                 missing,
                 Float64(value(f(obj))) * scaling,
-                get_unit(obj),
+                # get_unit(obj),
             ) for obj in objs for f in field_list
         ]
     else
@@ -60,7 +60,7 @@ function get_optimal_vars(objs::Vector{T}, field_list::Tuple, scaling::Float64=1
                 missing,
                 missing,
                 Float64(value(f(obj))) * scaling,
-                get_unit(obj),
+                # get_unit(obj),
             ) for obj in objs for f in field_list
         ]
     end
@@ -122,7 +122,7 @@ function get_optimal_vars_timeseries(
                     s,
                     t,
                     has_segments ? value(f(obj, s, t)) * scaling : value(f(obj, t)) * scaling,
-                    get_unit(obj),
+                    # get_unit(obj),
                 )
             end
         end
@@ -141,7 +141,7 @@ function get_optimal_vars_timeseries(
                     s,
                     t,
                     has_segments ? value(f(obj, s, t)) * scaling : value(f(obj, t)) * scaling,
-                    get_unit(obj),
+                    # get_unit(obj),
                 )
             end
         end
@@ -217,7 +217,7 @@ function prepare_costs(model::Model, scaling::Float64=1.0)
             missing,
             missing,
             fixed_cost * scaling^2,
-            :USD,
+            # :USD,
         ),
         OutputRow(
             :all,
@@ -231,7 +231,7 @@ function prepare_costs(model::Model, scaling::Float64=1.0)
             missing,
             missing,
             variable_cost * scaling^2,
-            :USD,
+            # :USD,
         ),
         OutputRow(
             :all,
@@ -245,7 +245,7 @@ function prepare_costs(model::Model, scaling::Float64=1.0)
             missing,
             missing,
             total_cost * scaling^2,
-            :USD,
+            # :USD,
         )
     ]
 end

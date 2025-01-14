@@ -35,7 +35,7 @@ function test_writing_output()
 
     @testset "OutputRow Tests" begin
         # Test the first constructor (no time field)
-        output1 = OutputRow(:commodity1, :commodity_subtype1, :zone1, :resource_id1, :component_id1, :type1, :variable1, 2025, 1, 1, 123.45, :unit1)
+        output1 = OutputRow(:commodity1, :commodity_subtype1, :zone1, :resource_id1, :component_id1, :type1, :variable1, 2025, 1, 1, 123.45)#, :unit1)
         @test output1.case_name === missing
         @test output1.commodity == :commodity1
         @test output1.commodity_subtype == :commodity_subtype1
@@ -48,10 +48,10 @@ function test_writing_output()
         @test output1.segment == 1
         @test output1.time == 1
         @test output1.value == 123.45
-        @test output1.unit == :unit1
+        # @test output1.unit == :unit1
 
         # Test the second constructor (for time series data)
-        output2 = OutputRow(:commodity2, :commodity_subtype2, :zone2, :resource_id2, :component_id2, :type2, :variable2, 2027, 2, 5, 678.90, :unit2)
+        output2 = OutputRow(:commodity2, :commodity_subtype2, :zone2, :resource_id2, :component_id2, :type2, :variable2, 2027, 2, 5, 678.90)#, :unit2)
         @test output2.case_name === missing
         @test output2.commodity == :commodity2
         @test output2.commodity_subtype == :commodity_subtype2
@@ -64,7 +64,7 @@ function test_writing_output()
         @test output2.segment == 2
         @test output2.time == 5
         @test output2.value == 678.90
-        @test output2.unit == :unit2
+        # @test output2.unit == :unit2
     end
 
     # Mock objects to use in tests
@@ -356,7 +356,7 @@ function test_writing_output()
         @test result[1].year === missing
         @test result[1].segment === missing
         @test result[1].time === missing
-        @test result[1].unit == :MWh
+        # @test result[1].unit == :MWh
         @test result[1].value == 200.0
         @test result[2].commodity == :Electricity
         @test result[2].commodity_subtype == :capacity
@@ -368,7 +368,7 @@ function test_writing_output()
         @test result[2].year === missing
         @test result[2].segment === missing
         @test result[2].time === missing
-        @test result[2].unit == :MWh
+        # @test result[2].unit == :MWh
         @test result[2].value == 202.0
         @test result[3].commodity == :Electricity
         @test result[3].commodity_subtype == :capacity
@@ -376,7 +376,7 @@ function test_writing_output()
         @test result[3].resource_id == :asset1
         @test result[3].component_id == :edge3
         @test result[3].type == Symbol("ThermalPower{NaturalGas}")
-        @test result[3].unit == :MWh
+        # @test result[3].unit == :MWh
         @test result[3].value == 204.0
         @test result[4].commodity == :Electricity
         @test result[4].commodity_subtype == :capacity
@@ -384,7 +384,7 @@ function test_writing_output()
         @test result[4].resource_id == :asset1
         @test result[4].component_id == :edge4
         @test result[4].type == Symbol("ThermalPower{NaturalGas}")
-        @test result[4].unit == :MWh
+        # @test result[4].unit == :MWh
         @test result[4].value == 206.0
         @test result[5].commodity == :Electricity
         @test result[5].commodity_subtype == :capacity
@@ -392,7 +392,7 @@ function test_writing_output()
         @test result[5].resource_id == :asset1
         @test result[5].component_id == :edge5
         @test result[5].type == Symbol("ThermalPower{NaturalGas}")
-        @test result[5].unit == :MWh
+        # @test result[5].unit == :MWh
         @test result[5].value == 208.0
         @test result[6].commodity == :Electricity
         @test result[6].commodity_subtype == :capacity
@@ -400,7 +400,7 @@ function test_writing_output()
         @test result[6].resource_id == :asset1
         @test result[6].component_id == :edge6
         @test result[6].type == Symbol("ThermalPower{NaturalGas}")
-        @test result[6].unit == :MWh
+        # @test result[6].unit == :MWh
         @test result[6].value == 210.0
         result = get_optimal_vars(Edge{Electricity}[edge_between_nodes], (new_capacity), 5.0)
         @test length(result) == 1
@@ -410,7 +410,7 @@ function test_writing_output()
         @test result[1].resource_id == :edge1
         @test result[1].component_id == :edge1
         @test result[1].type == Symbol("Edge{Electricity}")
-        @test result[1].unit == :MWh
+        # @test result[1].unit == :MWh
         @test result[1].value == 0.0
         result = get_optimal_vars(Storage[storage], new_capacity_storage, 5.0, Dict{Symbol, Base.RefValue{<: AbstractAsset}}(:storage1 => asset_ref2))
         @test length(result) == 1
@@ -420,7 +420,7 @@ function test_writing_output()
         @test result[1].resource_id == :asset2
         @test result[1].component_id == :storage1
         @test result[1].type == Symbol("Battery")
-        @test result[1].unit == :MWh
+        # @test result[1].unit == :MWh
         @test result[1].value == 500.0
         result = get_optimal_vars(Storage[storage], (new_capacity_storage), 5.0, Dict{Symbol, Base.RefValue{<: AbstractAsset}}(:storage1 => asset_ref2))
         @test length(result) == 1
@@ -430,11 +430,11 @@ function test_writing_output()
         @test result[1].resource_id == :asset2
         @test result[1].component_id == :storage1
         @test result[1].type == Symbol("Battery")
-        @test result[1].unit == :MWh
+        # @test result[1].unit == :MWh
         @test result[1].value == 500.0
     end
 
-    function check_output_row(row, expected_commodity, expected_commodity_subtype, expected_zone, expected_resource_id, expected_component_id, expected_type, expected_variable, expected_year, expected_segment, expected_time, expected_value, expected_unit)
+    function check_output_row(row, expected_commodity, expected_commodity_subtype, expected_zone, expected_resource_id, expected_component_id, expected_type, expected_variable, expected_year, expected_segment, expected_time, expected_value)
         @test row.commodity == expected_commodity
         @test row.commodity_subtype == expected_commodity_subtype
         @test row.zone == expected_zone
@@ -446,46 +446,46 @@ function test_writing_output()
         @test row.segment == expected_segment
         @test row.time == expected_time
         @test row.value == expected_value
-        @test row.unit == expected_unit
+        # @test row.unit == expected_unit
     end
 
     @testset "get_optimal_vars_timeseries Tests" begin
         expected_values = [
-            (:Electricity, :flow, :node1_node2, :asset1, :edge1, Symbol("ThermalPower{NaturalGas}"), :flow, missing, 1, [1, 2, 3], [1.0, 2.0, 3.0], :MWh),
-            (:Electricity, :flow, :node1, :asset1, :edge2, Symbol("ThermalPower{NaturalGas}"), :flow, missing, 1, [1, 2, 3], [4.0, 5.0, 6.0], :MWh),
-            (:Electricity, :flow, :node1, :asset1, :edge3, Symbol("ThermalPower{NaturalGas}"), :flow, missing, 1, [1, 2, 3], [7.0, 8.0, 9.0], :MWh),
-            (:Electricity, :flow, :node2, :asset1, :edge4, Symbol("ThermalPower{NaturalGas}"), :flow, missing, 1, [1, 2, 3], [10.0, 11.0, 12.0], :MWh),
-            (:Electricity, :flow, :node2, :asset1, :edge5, Symbol("ThermalPower{NaturalGas}"), :flow, missing, 1, [1, 2, 3], [13.0, 14.0, 15.0], :MWh),
-            (:Electricity, :flow, :internal, :asset1, :edge6, Symbol("ThermalPower{NaturalGas}"), :flow, missing, 1, [1, 2, 3], [16.0, 17.0, 18.0], :MWh)
+            (:Electricity, :flow, :node1_node2, :asset1, :edge1, Symbol("ThermalPower{NaturalGas}"), :flow, missing, 1, [1, 2, 3], [1.0, 2.0, 3.0]) #, :MWh),
+            (:Electricity, :flow, :node1, :asset1, :edge2, Symbol("ThermalPower{NaturalGas}"), :flow, missing, 1, [1, 2, 3], [4.0, 5.0, 6.0]) #, :MWh),
+            (:Electricity, :flow, :node1, :asset1, :edge3, Symbol("ThermalPower{NaturalGas}"), :flow, missing, 1, [1, 2, 3], [7.0, 8.0, 9.0]) #, :MWh),
+            (:Electricity, :flow, :node2, :asset1, :edge4, Symbol("ThermalPower{NaturalGas}"), :flow, missing, 1, [1, 2, 3], [10.0, 11.0, 12.0]) #, :MWh),
+            (:Electricity, :flow, :node2, :asset1, :edge5, Symbol("ThermalPower{NaturalGas}"), :flow, missing, 1, [1, 2, 3], [13.0, 14.0, 15.0]) #, :MWh),
+            (:Electricity, :flow, :internal, :asset1, :edge6, Symbol("ThermalPower{NaturalGas}"), :flow, missing, 1, [1, 2, 3], [16.0, 17.0, 18.0]) #, :MWh)
         ]
         result = get_optimal_vars_timeseries(mock_edges, flow, 1.0, obj_asset_map)
         @test length(result) == 18
         index = 1
-        for (commodity, commodity_subtype, zone, resource_id, component_id, type, variable, year, segment, times, values, unit) in expected_values
+        for (commodity, commodity_subtype, zone, resource_id, component_id, type, variable, year, segment, times, values) in expected_values
             for i in eachindex(times)
-                check_output_row(result[index], commodity, commodity_subtype, zone, resource_id, component_id, type, variable, year, segment, times[i], values[i], unit)
+                check_output_row(result[index], commodity, commodity_subtype, zone, resource_id, component_id, type, variable, year, segment, times[i], values[i])
                 index += 1
             end
         end
         result = get_optimal_vars_timeseries(storage, storage_level, 1.0, Dict{Symbol, Base.RefValue{<: AbstractAsset}}(:storage1 => asset_ref2))
         @test length(result) == 3
         for i = 1:3
-            check_output_row(result[i], :Electricity, :storage_level, :storage1, :asset2, :storage1, :Battery, :storage_level, missing, 1, i, i, :MWh)
+            check_output_row(result[i], :Electricity, :storage_level, :storage1, :asset2, :storage1, :Battery, :storage_level, missing, 1, i, i)
         end
         result = get_optimal_vars_timeseries(storage, tuple(storage_level), 1.0, Dict{Symbol, Base.RefValue{<: AbstractAsset}}(:storage1 => asset_ref2))
         @test length(result) == 3
         for i = 1:3
-            check_output_row(result[i], :Electricity, :storage_level, :storage1, :asset2, :storage1, :Battery, :storage_level, missing, 1, i, i, :MWh)
+            check_output_row(result[i], :Electricity, :storage_level, :storage1, :asset2, :storage1, :Battery, :storage_level, missing, 1, i, i)
         end
         result = get_optimal_vars_timeseries([node1, node2], max_non_served_demand, 1.0)
         @test length(result) == 6
         for i = 1:6
-            check_output_row(result[i], :Electricity, :max_non_served_demand, i <= 3 ? :node1 : :node2, i <= 3 ? :node1 : :node2, i <= 3 ? :node1 : :node2, Symbol("Node{Electricity}"), :max_non_served_demand, missing, 1, (i-1) % 3 + 1, i-1, :MWh)
+            check_output_row(result[i], :Electricity, :max_non_served_demand, i <= 3 ? :node1 : :node2, i <= 3 ? :node1 : :node2, i <= 3 ? :node1 : :node2, Symbol("Node{Electricity}"), :max_non_served_demand, missing, 1, (i-1) % 3 + 1, i-1)
         end
         result = get_optimal_vars_timeseries([node1, node2], tuple(max_non_served_demand), 1.0)
         @test length(result) == 6
         for i = 1:6
-            check_output_row(result[i], :Electricity, :max_non_served_demand, i <= 3 ? :node1 : :node2, i <= 3 ? :node1 : :node2, i <= 3 ? :node1 : :node2, Symbol("Node{Electricity}"), :max_non_served_demand, missing, 1, (i-1) % 3 + 1, i-1, :MWh)
+            check_output_row(result[i], :Electricity, :max_non_served_demand, i <= 3 ? :node1 : :node2, i <= 3 ? :node1 : :node2, i <= 3 ? :node1 : :node2, Symbol("Node{Electricity}"), :max_non_served_demand, missing, 1, (i-1) % 3 + 1, i-1)
         end
     end
 
@@ -529,21 +529,21 @@ function test_writing_output()
         
     @testset "convert_to_dataframe Tests" begin
         output_rows = [
-            OutputRow(:case_name1, :commodity1, :commodity_subtype1, :zone1, :resource_id1, :component_id1, :type1, :variable1, 2025, 1, 1, 123.45, :unit1),
-            OutputRow(:case_name2, :commodity2, :commodity_subtype2, :zone2, :resource_id2, :component_id2, :type2, :variable2, 2027, 2, 5, 678.90, :unit2)
+            OutputRow(:case_name1, :commodity1, :commodity_subtype1, :zone1, :resource_id1, :component_id1, :type1, :variable1, 2025, 1, 1, 123.45) #, :unit1),
+            OutputRow(:case_name2, :commodity2, :commodity_subtype2, :zone2, :resource_id2, :component_id2, :type2, :variable2, 2027, 2, 5, 678.90) #, :unit2)
         ]
         df1 = convert_to_dataframe(output_rows)
 
         output_rows_tuple = [
-            (:case_name1, :commodity1, :commodity_subtype1, :zone1, :resource_id1, :component_id1, :type1, :variable1, 2025, 1, 1, 123.45, :unit1),
-            (:case_name2, :commodity2, :commodity_subtype2, :zone2, :resource_id2, :component_id2, :type2, :variable2, 2027, 2, 5, 678.90, :unit2)
+            (:case_name1, :commodity1, :commodity_subtype1, :zone1, :resource_id1, :component_id1, :type1, :variable1, 2025, 1, 1, 123.45) #, :unit1),
+            (:case_name2, :commodity2, :commodity_subtype2, :zone2, :resource_id2, :component_id2, :type2, :variable2, 2027, 2, 5, 678.90) #, :unit2)
         ]
-        header = [:case_name, :commodity, :commodity_subtype, :zone, :resource_id, :component_id, :type, :variable, :year, :segment, :time, :value, :unit]
+        header = [:case_name, :commodity, :commodity_subtype, :zone, :resource_id, :component_id, :type, :variable, :year, :segment, :time, :value] #, :unit]
         df2 = convert_to_dataframe(output_rows_tuple, header)
 
         for df in [df1, df2]
             @test size(df, 1) == 2  # Number of rows
-            @test size(df, 2) == 13  # Number of columns
+            @test size(df, 2) == 12  # Number of columns
             @test df[1, :case_name] == :case_name1
             @test df[1, :commodity] == :commodity1
             @test df[1, :commodity_subtype] == :commodity_subtype1
@@ -556,7 +556,7 @@ function test_writing_output()
             @test df[1, :segment] == 1
             @test df[1, :time] == 1
             @test df[1, :value] == 123.45
-            @test df[1, :unit] == :unit1
+            # @test df[1, :unit] == :unit1
             @test df[2, :case_name] == :case_name2
             @test df[2, :commodity] == :commodity2
             @test df[2, :commodity_subtype] == :commodity_subtype2
@@ -569,7 +569,7 @@ function test_writing_output()
             @test df[2, :segment] == 2
             @test df[2, :time] == 5
             @test df[2, :value] == 678.90
-            @test df[2, :unit] == :unit2
+            # @test df[2, :unit] == :unit2
         end
     end
 end
