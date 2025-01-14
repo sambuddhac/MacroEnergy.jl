@@ -24,8 +24,10 @@ get_optimal_flow(system)
 ```
 """
 function get_optimal_flow(system::System)
+    @info "Getting optimal flow values for the system"
+    scaling = system.settings.Scaling ? ScalingFactor : 1.0
     edges, edge_asset_map = get_edges(system, return_ids_map=true)
-    eflow = get_optimal_vars_timeseries(edges, flow, edge_asset_map)
+    eflow = get_optimal_vars_timeseries(edges, flow, scaling, edge_asset_map)
     df = convert_to_dataframe(eflow)
     df[!, (!isa).(eachcol(df), Vector{Missing})] # remove missing columns
 end
@@ -47,9 +49,10 @@ asset = get_asset_by_id(system, :elec_SE)
 get_optimal_flow(asset)
 ```
 """
-function get_optimal_flow(asset::AbstractAsset)
+function get_optimal_flow(asset::AbstractAsset; scaling::Float64=1.0)
+    @info "Getting optimal flow values for the asset $(id(asset))"
     edges, edge_asset_map = get_edges(asset, return_ids_map=true)
-    eflow = get_optimal_vars_timeseries(edges, flow, edge_asset_map)
+    eflow = get_optimal_vars_timeseries(edges, flow, scaling, edge_asset_map)
     df = convert_to_dataframe(eflow)
     df[!, (!isa).(eachcol(df), Vector{Missing})] # remove missing columns
 end
@@ -72,8 +75,9 @@ elec_edge = asset.elec_edge
 get_optimal_flow(elec_edge)
 ```
 """
-function get_optimal_flow(edge::AbstractEdge)
-    eflow = get_optimal_vars_timeseries(edge, flow)
+function get_optimal_flow(edge::AbstractEdge; scaling::Float64=1.0)
+    @info "Getting optimal flow values for the edge $(id(edge))"
+    eflow = get_optimal_vars_timeseries(edge, flow, scaling)
     df = convert_to_dataframe(eflow)
     df[!, (!isa).(eachcol(df), Vector{Missing})] # remove missing columns
 end

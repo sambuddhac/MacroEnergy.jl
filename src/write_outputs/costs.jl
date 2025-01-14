@@ -21,8 +21,17 @@ get_optimal_costs(model)
    3 │ all        cost               all     all          all           Cost    TotalCost     36787.3  USD
 ```
 """
-function get_optimal_costs(model::Model)
-    costs = prepare_costs(model)
+function get_optimal_costs(model::Model, scaling::Float64=1.0)
+    @info "Getting optimal costs for the system."
+    costs = prepare_costs(model, scaling)
+    df = convert_to_dataframe(costs)
+    df[!, (!isa).(eachcol(df), Vector{Missing})] # remove missing columns
+end
+
+function get_optimal_costs(model::Model, system::System)
+    @info "Getting optimal costs for the system."
+    scaling = system.settings.Scaling ? ScalingFactor : 1.0
+    costs = prepare_costs(model, scaling)
     df = convert_to_dataframe(costs)
     df[!, (!isa).(eachcol(df), Vector{Missing})] # remove missing columns
 end

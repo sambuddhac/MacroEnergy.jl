@@ -25,9 +25,9 @@ OutputRow(commodity::Symbol, commodity_subtype::Union{Symbol,Missing}, zone::Sym
 # The following functions are used to extract the values after the model has been solved
 # from a list of MacroObjects (e.g., edges, and storage) and a list of fields (e.g., capacity, new_capacity, ret_capacity)
 #   e.g.: get_optimal_vars(edges, (capacity, new_capacity, ret_capacity), :MW)
-get_optimal_vars(objs::Vector{T}, field::Function, obj_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}=Dict{Symbol,Base.RefValue{<:AbstractAsset}}()) where {T<:Union{AbstractEdge,Storage}} =
-    get_optimal_vars(objs, (field,), obj_asset_map)
-function get_optimal_vars(objs::Vector{T}, field_list::Tuple, obj_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}=Dict{Symbol,Base.RefValue{<:AbstractAsset}}()) where {T<:Union{AbstractEdge,Storage}}
+get_optimal_vars(objs::Vector{T}, field::Function, scaling::Float64=1.0, obj_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}=Dict{Symbol,Base.RefValue{<:AbstractAsset}}()) where {T<:Union{AbstractEdge,Storage}} =
+    get_optimal_vars(objs, (field,), scaling, obj_asset_map)
+function get_optimal_vars(objs::Vector{T}, field_list::Tuple, scaling::Float64=1.0, obj_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}=Dict{Symbol,Base.RefValue{<:AbstractAsset}}()) where {T<:Union{AbstractEdge,Storage}}
     # the obj_asset_map is used to map the asset component (e.g., natgas_1_ng_edge, natgas_2_ng_edge, natgas_1_elec_edge) to the actual asset id (e.g., natgas_1)
     if isempty(obj_asset_map)
         return OutputRow[
@@ -42,7 +42,7 @@ function get_optimal_vars(objs::Vector{T}, field_list::Tuple, obj_asset_map::Dic
                 missing,
                 missing,
                 missing,
-                Float64(value(f(obj))),
+                Float64(value(f(obj))) * scaling,
                 get_unit(obj),
             ) for obj in objs for f in field_list
         ]
@@ -59,7 +59,7 @@ function get_optimal_vars(objs::Vector{T}, field_list::Tuple, obj_asset_map::Dic
                 missing,
                 missing,
                 missing,
-                Float64(value(f(obj))),
+                Float64(value(f(obj))) * scaling,
                 get_unit(obj),
             ) for obj in objs for f in field_list
         ]
@@ -72,30 +72,34 @@ end
 function get_optimal_vars_timeseries(
     objs::Vector{T},
     field_list::Tuple,
+    scaling::Float64=1.0,
     obj_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}=Dict{Symbol,Base.RefValue{<:AbstractAsset}}()
 ) where {T<:Union{AbstractEdge,Storage,Node}}
-    reduce(vcat, [get_optimal_vars_timeseries(o, field_list, obj_asset_map) for o in objs])
+    reduce(vcat, [get_optimal_vars_timeseries(o, field_list, scaling, obj_asset_map) for o in objs])
 end
 
 function get_optimal_vars_timeseries(
     objs::Vector{T},
     f::Function,
+    scaling::Float64=1.0,
     obj_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}=Dict{Symbol,Base.RefValue{<:AbstractAsset}}()
 ) where {T<:Union{AbstractEdge,Storage,Node}}
-    reduce(vcat, [get_optimal_vars_timeseries(o, f, obj_asset_map) for o in objs])
+    reduce(vcat, [get_optimal_vars_timeseries(o, f, scaling, obj_asset_map) for o in objs])
 end
 
 function get_optimal_vars_timeseries(
     obj::T,
     field_list::Tuple,
+    scaling::Float64=1.0,
     obj_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}=Dict{Symbol,Base.RefValue{<:AbstractAsset}}()
 ) where {T<:Union{AbstractEdge,Storage,Node}}
-    reduce(vcat, [get_optimal_vars_timeseries(obj, f, obj_asset_map) for f in field_list])
+    reduce(vcat, [get_optimal_vars_timeseries(obj, f, scaling, obj_asset_map) for f in field_list])
 end
 
 function get_optimal_vars_timeseries(
     obj::T,
     f::Function,
+    scaling::Float64=1.0,
     obj_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}=Dict{Symbol,Base.RefValue{<:AbstractAsset}}()
 ) where {T<:Union{AbstractEdge,Storage,Node}}
     time_axis = time_interval(obj)
@@ -117,7 +121,7 @@ function get_optimal_vars_timeseries(
                     missing,
                     s,
                     t,
-                    has_segments ? value(f(obj, s, t)) : value(f(obj, t)),
+                    has_segments ? value(f(obj, s, t)) * scaling : value(f(obj, t)) * scaling,
                     get_unit(obj),
                 )
             end
@@ -136,7 +140,7 @@ function get_optimal_vars_timeseries(
                     missing,
                     s,
                     t,
-                    has_segments ? value(f(obj, s, t)) : value(f(obj, t)),
+                    has_segments ? value(f(obj, s, t)) * scaling : value(f(obj, t)) * scaling,
                     get_unit(obj),
                 )
             end
@@ -196,7 +200,7 @@ get_unit(obj::AbstractEdge) = unit(commodity_type(obj.timedata))    #TODO: check
 get_unit(obj::T) where {T<:Union{Node,Storage}} = unit(commodity_type(obj))
 
 # Get the costs from the model
-function prepare_costs(model::Model)
+function prepare_costs(model::Model, scaling::Float64=1.0)
     fixed_cost = value(model[:eFixedCost])
     variable_cost = value(model[:eVariableCost])
     total_cost = fixed_cost + variable_cost
@@ -212,7 +216,7 @@ function prepare_costs(model::Model)
             missing,
             missing,
             missing,
-            fixed_cost,
+            fixed_cost * scaling^2,
             :USD,
         ),
         OutputRow(
@@ -226,7 +230,7 @@ function prepare_costs(model::Model)
             missing,
             missing,
             missing,
-            variable_cost,
+            variable_cost * scaling^2,
             :USD,
         ),
         OutputRow(
@@ -240,7 +244,7 @@ function prepare_costs(model::Model)
             missing,
             missing,
             missing,
-            total_cost,
+            total_cost * scaling^2,
             :USD,
         )
     ]
@@ -339,27 +343,29 @@ edges_with_capacity_variables(edges::Vector{<:AbstractEdge}) =
 
 # Function to collect all the outputs from a system and return them as a DataFrame
 function collect_results(system::System, model::Model)
+    scaling = system.settings.Scaling ? ScalingFactor : 1.0
+
     edges, edge_asset_map = get_edges(system, return_ids_map=true)
 
     # capacity variables 
     field_list = (capacity, new_capacity, ret_capacity)
     edges_with_capacity = edges_with_capacity_variables(edges)
     edges_with_capacity_asset_map = filter(edge -> edge[1] in id.(edges_with_capacity), edge_asset_map)
-    ecap = get_optimal_vars(edges_with_capacity, field_list, edges_with_capacity_asset_map)
+    ecap = get_optimal_vars(edges_with_capacity, field_list, scaling, edges_with_capacity_asset_map)
 
     ## time series
     # edge flow
-    eflow = get_optimal_vars_timeseries(edges, flow, edge_asset_map)
+    eflow = get_optimal_vars_timeseries(edges, flow, scaling, edge_asset_map)
 
     # non_served_demand
-    nsd = get_optimal_vars_timeseries(system.locations, non_served_demand, edge_asset_map)
+    nsd = get_optimal_vars_timeseries(system.locations, non_served_demand, scaling, edge_asset_map)
 
     # storage storage_level
     storages, storage_asset_map = get_storage(system, return_ids_map=true)
-    storlevel = get_optimal_vars_timeseries(storages, storage_level, storage_asset_map)
+    storlevel = get_optimal_vars_timeseries(storages, storage_level, scaling, storage_asset_map)
 
     # costs
-    costs = prepare_costs(model)
+    costs = prepare_costs(model, scaling)
 
     convert_to_dataframe(reduce(vcat, [ecap, eflow, nsd, storlevel, costs]))
 end
