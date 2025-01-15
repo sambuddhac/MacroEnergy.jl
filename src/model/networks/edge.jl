@@ -78,6 +78,10 @@ Edge(
 ) = make_edge(id, data, time_data, commodity, start_vertex, end_vertex)
 
 
+# Function to filter edges with capacity variables from a Vector of edges.
+edges_with_capacity_variables(edges::Vector{<:AbstractEdge}) =
+    AbstractEdge[edge for edge in edges if has_capacity(edge)]
+
 ######### Edge interface #########
 all_constraints(e::AbstractEdge) = e.constraints;
 availability(e::AbstractEdge) = e.availability;

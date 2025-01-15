@@ -35,7 +35,6 @@ end
 Node(data::AbstractDict{Symbol,Any}, time_data::TimeData, commodity::DataType) =
     make_node(data, time_data, commodity)
 
-
 ######### Node interface #########
 commodity_type(n::Node{T}) where {T} = T;
 demand(n::Node) = n.demand;

@@ -78,7 +78,6 @@ include("model/networks/transformation.jl")
 include("model/networks/location.jl")
 include("model/networks/edge.jl")
 include("model/networks/asset.jl")
-
 include("model/system.jl")
 include("model/networks/macroobject.jl")
 
