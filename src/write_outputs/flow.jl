@@ -14,12 +14,12 @@ Get the optimal flow values for all edges in a system.
 ```julia
 get_optimal_flow(system)
 186984×11 DataFrame
-    Row │ commodity    commodity_subtype  zone        resource_id                component_id                       type              variable  segment  time   value       unit   
-        │ Symbol       Symbol             Symbol      Symbol                     Symbol                             Symbol            Symbol    Int64    Int64  Float64     Symbol 
-────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-      1 │ Biomass      flow               bioherb_SE  SE_BECCS_Electricity_Herb  SE_BECCS_Electricity_Herb_biomas…  BECCSElectricity  flow            1      1  0.0         t
-      2 │ Biomass      flow               bioherb_SE  SE_BECCS_Electricity_Herb  SE_BECCS_Electricity_Herb_biomas…  BECCSElectricity  flow            1      2  0.0         t
-      3 │ Biomass      flow               bioherb_SE  SE_BECCS_Electricity_Herb  SE_BECCS_Electricity_Herb_biomas…  BECCSElectricity  flow            1      3  0.0         t
+    Row │ commodity    commodity_subtype  zone        resource_id                component_id                       type              variable  segment  time   value     
+        │ Symbol       Symbol             Symbol      Symbol                     Symbol                             Symbol            Symbol    Int64    Int64  Float64
+────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+      1 │ Biomass      flow               bioherb_SE  SE_BECCS_Electricity_Herb  SE_BECCS_Electricity_Herb_biomas…  BECCSElectricity  flow            1      1  0.0    
+      2 │ Biomass      flow               bioherb_SE  SE_BECCS_Electricity_Herb  SE_BECCS_Electricity_Herb_biomas…  BECCSElectricity  flow            1      2  0.0    
+      3 │ Biomass      flow               bioherb_SE  SE_BECCS_Electricity_Herb  SE_BECCS_Electricity_Herb_biomas…  BECCSElectricity  flow            1      3  0.0    
       ...
 ```
 """

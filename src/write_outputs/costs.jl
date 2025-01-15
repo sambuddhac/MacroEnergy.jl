@@ -12,13 +12,13 @@ Get the total, fixed, and variable costs for the system.
 # Example
 ```julia
 get_optimal_costs(model)
-3×9 DataFrame
- Row │ commodity  commodity_subtype  zone    resource_id  component_id  type    variable      value    unit   
-     │ Symbol     Symbol             Symbol  Symbol       Symbol        Symbol  Symbol        Float64  Symbol 
-─────┼────────────────────────────────────────────────────────────────────────────────────────────────────────
-   1 │ all        cost               all     all          all           Cost    FixedCost     22471.1  USD
-   2 │ all        cost               all     all          all           Cost    VariableCost  14316.2  USD
-   3 │ all        cost               all     all          all           Cost    TotalCost     36787.3  USD
+3×8 DataFrame
+ Row │ commodity  commodity_subtype  zone    resource_id  component_id  type    variable      value   
+     │ Symbol     Symbol             Symbol  Symbol       Symbol        Symbol  Symbol        Float64 
+─────┼───────────────────────────────────────────────────────────────────────────────────────────────
+   1 │ all        cost               all     all          all           Cost    FixedCost     22471.1
+   2 │ all        cost               all     all          all           Cost    VariableCost  14316.2
+   3 │ all        cost               all     all          all           Cost    TotalCost     36787.3
 ```
 """
 function get_optimal_costs(model::Model, scaling::Float64=1.0)

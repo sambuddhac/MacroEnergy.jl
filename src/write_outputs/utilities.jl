@@ -24,7 +24,7 @@ OutputRow(commodity::Symbol, commodity_subtype::Union{Symbol,Missing}, zone::Sym
 #### Helper functions to extract optimal values of fields from MacroObjects ####
 # The following functions are used to extract the values after the model has been solved
 # from a list of MacroObjects (e.g., edges, and storage) and a list of fields (e.g., capacity, new_capacity, ret_capacity)
-#   e.g.: get_optimal_vars(edges, (capacity, new_capacity, ret_capacity), :MW)
+#   e.g.: get_optimal_vars(edges, (capacity, new_capacity, ret_capacity))
 get_optimal_vars(objs::Vector{T}, field::Function, scaling::Float64=1.0, obj_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}=Dict{Symbol,Base.RefValue{<:AbstractAsset}}()) where {T<:Union{AbstractEdge,Storage}} =
     get_optimal_vars(objs, (field,), scaling, obj_asset_map)
 function get_optimal_vars(objs::Vector{T}, field_list::Tuple, scaling::Float64=1.0, obj_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}=Dict{Symbol,Base.RefValue{<:AbstractAsset}}()) where {T<:Union{AbstractEdge,Storage}}
@@ -68,7 +68,7 @@ end
 
 # This function is used to extract the optimal values of given fields from a 
 # list of MacroObjects at different time intervals.
-# e.g., get_optimal_vars_timeseries(edges, flow, :my_unit)
+# e.g., get_optimal_vars_timeseries(edges, flow)
 function get_optimal_vars_timeseries(
     objs::Vector{T},
     field_list::Tuple,
@@ -149,7 +149,7 @@ function get_optimal_vars_timeseries(
     out
 end
 
-# Get the commodity name of a MacroObject
+# Get the commodity type of a MacroObject
 get_commodity_name(obj::AbstractEdge) = Symbol(commodity_type(obj))
 get_commodity_name(obj::Node) = Symbol(commodity_type(obj))
 get_commodity_name(obj::Storage) = Symbol(commodity_type(obj))
@@ -185,7 +185,7 @@ get_zone_name(v::AbstractVertex) = id(v)
 function get_zone_name(e::AbstractEdge)
     region_name = join((id(n) for n in (e.start_vertex, e.end_vertex) if isa(n, Node)), "_")
     if isempty(region_name)
-        region_name = :internal # TODO: fix this
+        region_name = :internal # edge not connecting nodes
     end
     Symbol(region_name)
 end
@@ -199,7 +199,11 @@ get_type(obj::T) where {T<:Union{AbstractEdge,Node,Storage}} = Symbol(typeof(obj
 get_unit(obj::AbstractEdge) = unit(commodity_type(obj.timedata))    #TODO: check if this is correct
 get_unit(obj::T) where {T<:Union{Node,Storage}} = unit(commodity_type(obj))
 
-# Get the costs from the model
+#### Helper functions to extract final costs from the optimized model ####
+# This fuction will returns:
+# - Variable cost
+# - Fixed cost
+# - Total cost
 function prepare_costs(model::Model, scaling::Float64=1.0)
     fixed_cost = value(model[:eFixedCost])
     variable_cost = value(model[:eVariableCost])
@@ -251,6 +255,31 @@ function prepare_costs(model::Model, scaling::Float64=1.0)
 end
 
 # Function to collect all the outputs from a system and return them as a DataFrame
+"""
+    collect_results(system::System, model::Model)
+
+Returns a `DataFrame` with all the results after the optimization is performed. 
+
+# Arguments
+- `system::System`: The system object containing the case inputs.
+- `model::Model`: The model being optimized.
+
+# Returns
+- `DataFrame`: A `DataFrame containing all the outputs from a system.
+
+# Example
+```julia
+collect_results(system, model)
+198534×12 DataFrame
+    Row │ case_name  commodity    commodity_subtype  zone        resource_id                component_id                       type              variable  segment  time   value     
+        │ Missing    Symbol       Symbol             Symbol      Symbol                     Symbol                             Symbol            Symbol    Int64    Int64  Float64
+────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+      1 │   missing  Biomass      flow               bioherb_SE  SE_BECCS_Electricity_Herb  SE_BECCS_Electricity_Herb_biomas…  BECCSElectricity  flow            1      1  0.0    
+      2 │   missing  Biomass      flow               bioherb_SE  SE_BECCS_Electricity_Herb  SE_BECCS_Electricity_Herb_biomas…  BECCSElectricity  flow            1      2  0.0    
+      3 │   missing  Biomass      flow               bioherb_SE  SE_BECCS_Electricity_Herb  SE_BECCS_Electricity_Herb_biomas…  BECCSElectricity  flow            1      3  0.0    
+      ...
+```
+"""
 function collect_results(system::System, model::Model)
     scaling = system.settings.Scaling ? ScalingFactor : 1.0
 
@@ -288,6 +317,25 @@ function convert_to_dataframe(data::Vector{<:Tuple}, header::Vector)
 end
 
 # Function to collect the results from a system and write them to a CSV file
+"""
+    write_results(file_path::AbstractString, system::System, model::Model)
+
+Collects all the results as a `DataFrame` and then writes them to disk after the optimization is performed. 
+
+# Arguments
+- `file_path::AbstractString`: full path of the file to export. 
+- `system::System`: The system object containing the case inputs.
+- `model::Model`: The model being optimized.
+
+# Returns
+
+# Example
+```julia
+write_results(case_path * "results.csv", system, model) # CSV
+write_results(case_path * "results.csv.gz", system, model)  # GZIP
+write_results(case_path * "results.parquet", system, model) # PARQUET
+```
+"""
 function write_results(file_path::AbstractString, system::System, model::Model)
     @info "Writing results to $file_path"
     output = collect_results(system, model)
@@ -315,6 +363,7 @@ function write_csv(file_path::AbstractString, data::AbstractDataFrame, compress:
     CSV.write(file_path, data, compress=compress)
 end
 
+# Function to write a DataFrame to a Parquet file
 function write_parquet(filepath::String, data::DataFrame)
     # Parquet2 does not support Symbol columns
     # Convert Symbol columns to String in place
