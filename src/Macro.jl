@@ -1,6 +1,7 @@
 module Macro
 
 using CSV, JSON3, GZip, Parquet2
+using Dates
 using DuckDB
 using DataFrames
 using JuMP
@@ -171,6 +172,7 @@ export AbstractAsset,
     PolicyConstraint,
     PowerLine,
     RampingLimitConstraint,
+    run_case,
     Storage,
     StorageCapacityConstraint,
     StorageChargeDischargeRatioConstraint,
@@ -185,7 +187,10 @@ export AbstractAsset,
     Transformation,
     Uranium,
     VRE,
-    run_case,
+    write_capacity_results,
+    write_costs,
+    write_dataframe,
+    write_flow_results,
     write_results
     
 end # module Macro

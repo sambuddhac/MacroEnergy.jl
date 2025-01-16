@@ -31,6 +31,9 @@ import Macro:
     get_optimal_ret_capacity,
     get_optimal_flow,
     get_optimal_costs,
+    write_capacity_results,
+    write_costs,
+    write_flow_results,
     write_results
 
 
@@ -253,19 +256,26 @@ function test_writing_outputs(system, model)
     @test_nowarn get_optimal_flow(system.assets[1], scaling=1.0)
     @test_nowarn get_optimal_flow(system.assets[1].elec_edge, scaling=1.0)
     @test_nowarn get_optimal_costs(model)
+    @test_nowarn get_optimal_costs(system, model)
+    @test_nowarn write_capacity_results(joinpath(@__DIR__, "test_capacity.csv"), system)
+    @test_nowarn write_costs(joinpath(@__DIR__, "test_costs.csv"), system, model)
+    @test_nowarn write_flow_results(joinpath(@__DIR__, "test_flow.csv"), system)
     @test_nowarn write_results(joinpath(@__DIR__, "test_outputs.csv.gz"), system, model)
     @test_nowarn write_results(joinpath(@__DIR__, "test_outputs.parquet"), system, model)
     @test_throws ArgumentError write_results("test.zip", system, model)
     rm(joinpath(@__DIR__, "test_outputs.csv.gz"))   # clean up
     rm(joinpath(@__DIR__, "test_outputs.parquet"))  # clean up
+    rm(joinpath(@__DIR__, "test_capacity.csv"))     # clean up
+    rm(joinpath(@__DIR__, "test_costs.csv"))        # clean up
+    rm(joinpath(@__DIR__, "test_flow.csv"))         # clean up
     return nothing
 end 
 
 function test_workflow()
-    @testset "Test Struct Creation" begin
+    @testset "Struct Creation Tests" begin
         test_load_inputs()
     end
-    @testset "Test Model Generation and Optimization" begin
+    @testset "Model Generation and Optim Tests   " begin
         @warn_error_logger test_model_generation_and_optimization()
     end
 

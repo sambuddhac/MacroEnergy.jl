@@ -338,24 +338,47 @@ write_results(case_path * "results.parquet", system, model) # PARQUET
 """
 function write_results(file_path::AbstractString, system::System, model::Model)
     @info "Writing results to $file_path"
+
+    # Prepare output data
     output = collect_results(system, model)
-    if all(ismissing.(output.case_name))
-        output.case_name .= basename(system.data_dirpath)
-    end
-    if all(ismissing.(output.year))
-        output.year .= 2025
+    output.case_name .= coalesce.(output.case_name, basename(system.data_dirpath))
+    output.year .= coalesce.(output.year, year(now()))
+
+    # Write the DataFrame
+    write_dataframe(file_path, output)
+end
+
+"""
+    write_dataframe(file_path::AbstractString, df::AbstractDataFrame)
+
+Write a DataFrame to a file in the appropriate format based on file extension.
+Supported formats: .csv, .csv.gz, .parquet
+
+# Arguments
+- `file_path::AbstractString`: Path where to save the file
+- `df::AbstractDataFrame`: DataFrame to write
+"""
+function write_dataframe(file_path::AbstractString, df::AbstractDataFrame)
+    # Extract file extension and check if supported in Macro
+    extension = lowercase(splitext(file_path)[2])
+    # Create a map (supported_formats => write functions)
+    supported_formats = Dict(
+        ".csv" => (path, data) -> write_csv(path, data, false),
+        ".csv.gz" => (path, data) -> write_csv(path, data, true),
+        ".parquet" => write_parquet
+    )
+    
+    # Validate file extension
+    if !any(ext -> endswith(file_path, ext), keys(supported_formats))
+        throw(ArgumentError("Unsupported file extension: $extension. Supported formats: $(join(keys(supported_formats), ", "))"))
     end
 
-    is_csv = occursin(".csv", file_path)
-    is_parquet = occursin(".parquet", file_path)
-    if is_csv
-        compress = occursin(".gz", file_path)
-        write_csv(file_path, output, compress)
-    elseif is_parquet
-        write_parquet(file_path, output)
-    else
-        throw(ArgumentError("Unsupported file extension: $file_path"))
-    end
+    # Get the appropriate writer function
+    writer = first(writer for (ext, writer) in supported_formats if endswith(file_path, ext))
+    # Write the DataFrame using the appropriate writer function
+    writer(file_path, df)
+    
+    return nothing
 end
 
 # Function to write a DataFrame to a CSV file
@@ -364,7 +387,7 @@ function write_csv(file_path::AbstractString, data::AbstractDataFrame, compress:
 end
 
 # Function to write a DataFrame to a Parquet file
-function write_parquet(filepath::String, data::DataFrame)
+function write_parquet(file_path::AbstractString, data::DataFrame)
     # Parquet2 does not support Symbol columns
     # Convert Symbol columns to String in place
     for col in names(data)
@@ -372,5 +395,5 @@ function write_parquet(filepath::String, data::DataFrame)
             transform!(data, col => ByRow(string) => col)
         end
     end
-    Parquet2.writefile(filepath, data)
+    Parquet2.writefile(file_path, data)
 end

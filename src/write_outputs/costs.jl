@@ -28,10 +28,30 @@ function get_optimal_costs(model::Model, scaling::Float64=1.0)
     df[!, (!isa).(eachcol(df), Vector{Missing})] # remove missing columns
 end
 
-function get_optimal_costs(model::Model, system::System)
+function get_optimal_costs(system::System, model::Model)
     @info "Getting optimal costs for the system."
     scaling = system.settings.Scaling ? ScalingFactor : 1.0
     costs = prepare_costs(model, scaling)
     df = convert_to_dataframe(costs)
     df[!, (!isa).(eachcol(df), Vector{Missing})] # remove missing columns
+end
+
+"""
+    write_costs(file_path::AbstractString, system::System)
+
+Write the optimal costs for the system to a file.
+The extension of the file determines the format of the file.
+
+# Arguments
+- `file_path::AbstractString`: The path to the file where the results will be written
+- `system::System`: The system containing the assets/edges to analyze
+
+# Returns
+- `nothing`: The function returns nothing, but writes the results to the file
+"""
+function write_costs(file_path::AbstractString, system::System, model::Model)
+    @info "Writing costs to $file_path"
+    costs = get_optimal_costs(system, model)
+    write_dataframe(file_path, costs)
+    return nothing
 end

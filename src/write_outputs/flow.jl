@@ -82,6 +82,24 @@ function get_optimal_flow(edge::AbstractEdge; scaling::Float64=1.0)
     df[!, (!isa).(eachcol(df), Vector{Missing})] # remove missing columns
 end
 
+"""
+    write_flow_results(file_path::AbstractString, system::System)
 
+Write the optimal flow results for the system to a file.
+The extension of the file determines the format of the file.
+
+# Arguments
+- `file_path::AbstractString`: The path to the file where the results will be written
+- `system::System`: The system containing the edges to analyze
+
+# Returns
+- `nothing`: The function returns nothing, but writes the results to the file
+"""
+function write_flow_results(file_path::AbstractString, system::System)
+    @info "Writing flow results to $file_path"
+    flow_results = get_optimal_flow(system)
+    write_dataframe(file_path, flow_results)
+    return nothing
+end
 
 
