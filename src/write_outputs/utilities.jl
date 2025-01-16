@@ -21,7 +21,7 @@ end
 OutputRow(commodity::Symbol, commodity_subtype::Union{Symbol,Missing}, zone::Symbol, resource_id::Symbol, component_id::Symbol, type::Symbol, variable::Symbol, year::Union{Int,Missing}, segment::Union{Int,Missing}, time::Union{Int,Missing}, value::Float64) =
     OutputRow(missing, commodity, commodity_subtype, zone, resource_id, component_id, type, variable, year, segment, time, value)
 
-#### Helper functions to extract optimal values of fields from MacroObjects ####
+## Helper functions to extract optimal values of fields from MacroObjects ##
 # The following functions are used to extract the values after the model has been solved
 # from a list of MacroObjects (e.g., edges, and storage) and a list of fields (e.g., capacity, new_capacity, ret_capacity)
 #   e.g.: get_optimal_vars(edges, (capacity, new_capacity, ret_capacity))
@@ -66,8 +66,7 @@ function get_optimal_vars(objs::Vector{T}, field_list::Tuple, scaling::Float64=1
     end
 end
 
-# This function is used to extract the optimal values of given fields from a 
-# list of MacroObjects at different time intervals.
+## Helper functions to extract the optimal values of given fields from a list of MacroObjects at different time intervals ##
 # e.g., get_optimal_vars_timeseries(edges, flow)
 function get_optimal_vars_timeseries(
     objs::Vector{T},
@@ -199,7 +198,7 @@ get_type(obj::T) where {T<:Union{AbstractEdge,Node,Storage}} = Symbol(typeof(obj
 get_unit(obj::AbstractEdge) = unit(commodity_type(obj.timedata))    #TODO: check if this is correct
 get_unit(obj::T) where {T<:Union{Node,Storage}} = unit(commodity_type(obj))
 
-#### Helper functions to extract final costs from the optimized model ####
+## Helper functions to extract final costs from the optimized model ##
 # This fuction will returns:
 # - Variable cost
 # - Fixed cost
