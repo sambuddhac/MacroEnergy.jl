@@ -161,7 +161,7 @@ function test_load(t_in::Transformation, t_true::T) where {T<:JSON3.Object}
     return nothing
 end
 
-function test_load(s_in::Storage{T}, s_true::S) where {T<:Commodity,S<:JSON3.Object}
+function test_load(s_in::AbstractStorage{T}, s_true::S) where {T<:Commodity,S<:JSON3.Object}
     @test s_in.id == Symbol(s_true.id)
     @test Symbol(commodity_type(s_in.timedata)) == Symbol(s_true.timedata)
     @test s_in.capacity_storage == get(s_true, :capacity_storage, 0.0)

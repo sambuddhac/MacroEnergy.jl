@@ -1,6 +1,6 @@
 struct GasStorage{T} <: AbstractAsset
     id::AssetId
-    gas_storage::Storage{T}
+    gas_storage::AbstractStorage{T}
     compressor_transform::Transformation
     discharge_edge::Edge{T}
     charge_edge::Edge{T}
@@ -8,7 +8,7 @@ struct GasStorage{T} <: AbstractAsset
     compressor_gas_edge::Edge{T}
 end
 
-GasStorage(id::AssetId,gas_storage::Storage{T},compressor_transform::Transformation,discharge_edge::Edge{T},charge_edge::Edge{T},compressor_elec_edge::Edge{Electricity},
+GasStorage(id::AssetId,gas_storage::AbstractStorage{T},compressor_transform::Transformation,discharge_edge::Edge{T},charge_edge::Edge{T},compressor_elec_edge::Edge{Electricity},
 compressor_gas_edge::Edge{T}) where T<:Commodity =
     GasStorage{T}(id,gas_storage,compressor_transform,discharge_edge,charge_edge,compressor_elec_edge,
     compressor_gas_edge)

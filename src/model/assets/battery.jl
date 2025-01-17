@@ -1,6 +1,6 @@
 struct Battery <: AbstractAsset
     id::AssetId
-    battery_storage::Storage{Electricity}
+    battery_storage::AbstractStorage{Electricity}
     discharge_edge::Edge{Electricity}
     charge_edge::Edge{Electricity}
 end

@@ -1,6 +1,6 @@
 struct HydroRes <: AbstractAsset
     id::AssetId
-    hydrostor::Storage{Electricity}
+    hydrostor::AbstractStorage{Electricity}
     discharge_edge::Edge{Electricity}
     inflow_edge::Edge{Electricity}
     spill_edge::Edge{Electricity}

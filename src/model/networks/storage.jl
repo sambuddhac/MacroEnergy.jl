@@ -1,6 +1,5 @@
-
-Base.@kwdef mutable struct Storage{T} <: AbstractVertex
-    @AbstractVertexBaseAttributes()
+macro AbstractStorageBaseAttributes()
+    esc(quote
     can_expand::Bool = false
     can_retire::Bool = false
     capacity_storage::Union{AffExpr,Float64} = 0.0
@@ -22,6 +21,12 @@ Base.@kwdef mutable struct Storage{T} <: AbstractVertex
     spillage_edge::Union{Nothing,AbstractEdge} = nothing
     storage_level::Union{JuMPVariable,Vector{Float64}} = Vector{VariableRef}()
     storage_loss_fraction::Float64 = 0.0
+    end)
+end
+
+Base.@kwdef mutable struct Storage{T} <: AbstractStorage{T}
+    @AbstractVertexBaseAttributes()
+    @AbstractStorageBaseAttributes()
 end
 
 function make_storage(
@@ -55,32 +60,32 @@ Storage(id::Symbol, data::Dict{Symbol,Any}, time_data::TimeData, commodity::Data
 
 
 ######### Storage interface #########
-all_constraints(g::Storage) = g.constraints;
-capacity_storage(g::Storage) = g.capacity_storage;
-charge_edge(g::Storage) = g.charge_edge;
-charge_discharge_ratio(g::Storage) = g.charge_discharge_ratio;
-commodity_type(g::Storage{T}) where {T} = T;
-discharge_edge(g::Storage) = g.discharge_edge;
-existing_capacity_storage(g::Storage) = g.existing_capacity_storage;
-fixed_om_cost_storage(g::Storage) = g.fixed_om_cost_storage;
-investment_cost_storage(g::Storage) = g.investment_cost_storage;
-min_capacity_storage(g::Storage) = g.min_capacity_storage;
-max_capacity_storage(g::Storage) = g.max_capacity_storage;
-max_duration(g::Storage) = g.max_duration;
-max_storage_level(g::Storage) = g.max_storage_level;
-min_duration(g::Storage) = g.min_duration;
-min_outflow_fraction(g::Storage) = g.min_outflow_fraction;
-min_storage_level(g::Storage) = g.min_storage_level;
-new_capacity_storage(g::Storage) = g.new_capacity_storage;
-ret_capacity_storage(g::Storage) = g.ret_capacity_storage;
-spillage_edge(g::Storage) = g.spillage_edge;
-storage_level(g::Storage) = g.storage_level;
-storage_level(g::Storage, t::Int64) = storage_level(g)[t];
-storage_loss_fraction(g::Storage) = g.storage_loss_fraction;
+all_constraints(g::AbstractStorage) = g.constraints;
+capacity_storage(g::AbstractStorage) = g.capacity_storage;
+charge_edge(g::AbstractStorage) = g.charge_edge;
+charge_discharge_ratio(g::AbstractStorage) = g.charge_discharge_ratio;
+commodity_type(g::AbstractStorage{T}) where {T} = T;
+discharge_edge(g::AbstractStorage) = g.discharge_edge;
+existing_capacity_storage(g::AbstractStorage) = g.existing_capacity_storage;
+fixed_om_cost_storage(g::AbstractStorage) = g.fixed_om_cost_storage;
+investment_cost_storage(g::AbstractStorage) = g.investment_cost_storage;
+min_capacity_storage(g::AbstractStorage) = g.min_capacity_storage;
+max_capacity_storage(g::AbstractStorage) = g.max_capacity_storage;
+max_duration(g::AbstractStorage) = g.max_duration;
+max_storage_level(g::AbstractStorage) = g.max_storage_level;
+min_duration(g::AbstractStorage) = g.min_duration;
+min_outflow_fraction(g::AbstractStorage) = g.min_outflow_fraction;
+min_storage_level(g::AbstractStorage) = g.min_storage_level;
+new_capacity_storage(g::AbstractStorage) = g.new_capacity_storage;
+ret_capacity_storage(g::AbstractStorage) = g.ret_capacity_storage;
+spillage_edge(g::AbstractStorage) = g.spillage_edge;
+storage_level(g::AbstractStorage) = g.storage_level;
+storage_level(g::AbstractStorage, t::Int64) = storage_level(g)[t];
+storage_loss_fraction(g::AbstractStorage) = g.storage_loss_fraction;
 ######### Storage interface #########
 
 
-function add_linking_variables!(g::Storage, model::Model)
+function add_linking_variables!(g::AbstractStorage, model::Model)
 
     g.new_capacity_storage =
     @variable(model, lower_bound = 0.0, base_name = "vNEWCAPSTOR_$(g.id)")
@@ -91,7 +96,7 @@ function add_linking_variables!(g::Storage, model::Model)
 
 end
 
-function define_available_capacity!(g::Storage, model::Model)
+function define_available_capacity!(g::AbstractStorage, model::Model)
 
     g.capacity_storage = @expression(
         model,
@@ -101,7 +106,7 @@ function define_available_capacity!(g::Storage, model::Model)
 
 end
 
-function planning_model!(g::Storage, model::Model)
+function planning_model!(g::AbstractStorage, model::Model)
 
     if !g.can_expand
         fix(new_capacity_storage(g), 0.0; force = true)
@@ -130,7 +135,7 @@ function planning_model!(g::Storage, model::Model)
 
 end
 
-function operation_model!(g::Storage, model::Model)
+function operation_model!(g::AbstractStorage, model::Model)
 
     g.storage_level = @variable(
         model,
