@@ -20,17 +20,34 @@ function make(::Type{GasStorage}, data::AbstractDict{Symbol,Any}, system::System
     storage_data = process_data(data[gas_storage_key])
     T = commodity_types()[Symbol(storage_data[:commodity])];
 
-    gas_storage = Storage(
-        Symbol(id, "_", gas_storage_key),
-        storage_data,
-        system.time_data[Symbol(T)],
-        T,
-    )
-    gas_storage.constraints = get(
-        storage_data,
-        :constraints,
-        [BalanceConstraint(), StorageCapacityConstraint()],
-    )
+
+    long_duration = get(storage_data, :long_duration, false)
+
+    if long_duration==true
+        gas_storage = LongDurationStorage(
+            Symbol(id, "_", gas_storage_key),
+            storage_data,
+            system.time_data[Symbol(T)],
+            T,
+        )
+        gas_storage.constraints = get(
+            storage_data,
+            :constraints,
+            [BalanceConstraint(), StorageCapacityConstraint(),LongDurationStorageImplicitMinMaxConstraint()],
+        )
+    else
+        gas_storage = Storage(
+            Symbol(id, "_", gas_storage_key),
+            storage_data,
+            system.time_data[Symbol(T)],
+            T,
+        )
+        gas_storage.constraints = get(
+            storage_data,
+            :constraints,
+            [BalanceConstraint(), StorageCapacityConstraint()],
+        )
+    end
 
     compressor_key = :transforms
     transform_data = process_data(data[compressor_key])

@@ -12,15 +12,29 @@ function make(::Type{HydroRes}, data::AbstractDict{Symbol,Any}, system::System)
     storage_key = :storage
     storage_data = process_data(data[storage_key])
 
-    hydrostor = Storage(
-        Symbol(id, "_", storage_key),
-        storage_data,
-        system.time_data[:Electricity],
-        Electricity,
-    )
-    hydrostor.constraints = get(
-        storage_data,
-        :constraints,[BalanceConstraint()])
+    long_duration = get(storage_data, :long_duration, false)
+
+    if long_duration==true
+        hydrostor = LongDurationStorage(
+            Symbol(id, "_", storage_key),
+            storage_data,
+            system.time_data[:Electricity],
+            Electricity,
+        )
+        hydrostor.constraints = get(
+            storage_data,
+            :constraints,[BalanceConstraint(),LongDurationStorageImplicitMinMaxConstraint()])
+    else
+        hydrostor = Storage(
+            Symbol(id, "_", storage_key),
+            storage_data,
+            system.time_data[:Electricity],
+            Electricity,
+        )
+        hydrostor.constraints = get(
+            storage_data,
+            :constraints,[BalanceConstraint()])
+    end
 
     discharge_edge_key = :discharge_edge
     discharge_edge_data = process_data(data[:edges][discharge_edge_key])

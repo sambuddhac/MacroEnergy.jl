@@ -87,6 +87,9 @@ function create_time_data(
             ),
             subperiod_indices = eachindex(subperiods),
             hours_per_timestep = time_data[:HoursPerTimeStep][sym],
+            period_map = Dict(
+                eachindex(subperiods) .=> eachindex(subperiods)
+            )
         )
     end
     return all_timedata

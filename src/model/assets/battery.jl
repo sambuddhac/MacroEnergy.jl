@@ -48,24 +48,46 @@ function make(::Type{Battery}, data::AbstractDict{Symbol,Any}, system::System)
     storage_data = process_data(data[storage_key])
     commodity_symbol = Symbol(storage_data[:commodity])
     commodity = commodity_types()[commodity_symbol]
-    battery_storage =
+
+    long_duration = get(storage_data, :long_duration, false)
+
+    if long_duration==true
+        battery_storage =
+        LongDurationStorage(
+            Symbol(id, "_", storage_key), 
+            storage_data, 
+            system.time_data[commodity_symbol], 
+            commodity
+        )
+        
+        battery_storage.constraints = get(
+            storage_data,
+            :constraints,
+            [
+                BalanceConstraint(),
+                StorageCapacityConstraint(),
+                StorageSymmetricCapacityConstraint(),
+                LongDurationStorageImplicitMinMaxConstraint()
+            ],
+        )
+    else
+        battery_storage =
         Storage(
             Symbol(id, "_", storage_key), 
             storage_data, 
             system.time_data[commodity_symbol], 
             commodity
         )
-    battery_storage.constraints = get(
-        storage_data,
-        :constraints,
-        [
-            BalanceConstraint(),
-            StorageCapacityConstraint(),
-            StorageMaxDurationConstraint(),
-            StorageMinDurationConstraint(),
-            StorageSymmetricCapacityConstraint(),
-        ],
-    )
+        battery_storage.constraints = get(
+            storage_data,
+            :constraints,
+            [
+                BalanceConstraint(),
+                StorageCapacityConstraint(),
+                StorageSymmetricCapacityConstraint(),
+            ],
+        )
+    end
 
     charge_edge_key = :charge_edge
     charge_edge_data = process_data(data[:edges][charge_edge_key])
