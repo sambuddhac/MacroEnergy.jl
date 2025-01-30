@@ -117,5 +117,5 @@ function fetch_data(path::AbstractString, dict::AbstractDict{Symbol, Any}, root_
         end
     end
     @warn "Could not find: \"$(path)\", full path: $(abspath(path))"
-    return AbstractDict{Symbol, Any}()
+    return path
 end
