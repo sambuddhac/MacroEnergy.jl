@@ -42,3 +42,7 @@ function rel_or_abs_path(path::T, rel_dir::T = pwd())::String where {T<:Abstract
         # throw(ArgumentError("File $path not found"))
     end
 end
+
+recursive_merge(x::AbstractDict...) = merge(recursive_merge, x...)
+recursive_merge(x::AbstractVector...) = cat(x...; dims = 1)
+recursive_merge(x...) = x[end]
