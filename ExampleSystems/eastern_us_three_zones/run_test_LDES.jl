@@ -5,24 +5,10 @@ using YAML
 using Gurobi
 
 case_path = @__DIR__
-periodmap = Macro.CSV.read(case_path*"/timeseries_3weeks/Period_map.csv",Macro.DataFrame)
-rep_periods = unique(sort(periodmap,3).Rep_Period);
-tdr_settings = YAML.load_file(case_path*"/timeseries_3weeks/time_domain_reduction_settings.yml")
-timesteps_per_rep_period = tdr_settings["TimestepsPerRepPeriod"]
-weights_unscaled = [length(findall(periodmap[:,:Rep_Period].==p)) for p in rep_periods]
-weight_total = tdr_settings["WeightTotal"]
-weights = weight_total*weights_unscaled/sum(weights_unscaled)
-
 println("###### ###### ######")
 println("Running case at $(case_path)")
 
 system = Macro.load_system(case_path)
-
-for c in keys(system.time_data)
-    system.time_data[c].period_map = Dict(periodmap.Period_Index .=> periodmap.Rep_Period)
-    system.time_data[c].subperiod_weights = Dict(rep_periods .=> weights)
-    system.time_data[c].subperiod_indices = rep_periods
-end
 
 model = Macro.generate_model(system)
 
@@ -43,7 +29,8 @@ storage_discharge = Macro.value.(Macro.flow(discharge_edge))
 
 full_storage_lvl = zeros(168*365)
 MODELED_SUBPERIODS = 1:365
-period_map = Dict(periodmap.Period_Index .=> periodmap.Rep_Period)
+period_map = system.time_data[:Electricity].period_map
+rep_periods = system.time_data[:Electricity].subperiod_indices
 for n in MODELED_SUBPERIODS
     subperiod_hours = collect((n-1)*168 + 1: n*168)
     rep_subperiod_hours = collect(Macro.subperiods(g)[findfirst(Macro.subperiod_indices(g).==period_map[n])])
