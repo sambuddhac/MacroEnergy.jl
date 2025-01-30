@@ -84,14 +84,13 @@ end
 
 function validate_time_data(
     time_data::AbstractDict{Symbol,Any},
-    case_commodities::Dict{Symbol,DataType},
+    case_commodities::Dict{Symbol,DataType}
 )
     # Check that the time data has the correct fields
     @assert haskey(time_data, :PeriodLength)
     @assert haskey(time_data, :HoursPerTimeStep)
     @assert haskey(time_data, :HoursPerSubperiod)
-    # @assert haskey(time_data, :SubperiodWeights)  # TODO: Implement this
-
+    @assert haskey(time_data, :WeightTotal)
     # Check that the time data has the correct values    
     @assert time_data[:PeriodLength] > 0
     @assert all(values(time_data[:HoursPerTimeStep]) .> 0)
@@ -107,39 +106,93 @@ end
 
 function create_time_data(
     time_data::AbstractDict{Symbol,Any},
-    commodities::Dict{Symbol,DataType},
+    commodities::Dict{Symbol,DataType}
 )
-    period_length = time_data[:PeriodLength]
     all_timedata = Dict{Symbol,TimeData}()
-    for (sym, type) in commodities 
-        hours_per_timestep = time_data[:HoursPerTimeStep][sym]
-        if hours_per_timestep > 1
-            error("MACRO does not support different temporal resolutions yet. Please use hourly resolution for all comoodities.")
-        else
-            time_interval = 1:period_length
-
-            hours_per_subperiod = time_data[:HoursPerSubperiod][sym]
-            subperiods = collect(
-                Iterators.partition(
-                    time_interval,
-                    hours_per_subperiod,
-                ),
-            )
-            weights_per_subperiod = hours_per_subperiod 
-        end
-
-        all_timedata[sym] = Macro.TimeData{type}(;
-            time_interval = time_interval,
-            subperiods = subperiods,
-            subperiod_weights = Dict(
-                eachindex(subperiods) .=> weights_per_subperiod / hours_per_subperiod,
-            ),
-            subperiod_indices = eachindex(subperiods),
-            hours_per_timestep = time_data[:HoursPerTimeStep][sym],
-            period_map = Dict(
-                eachindex(subperiods) .=> eachindex(subperiods)
-            )
-        )
+    for (sym, type) in commodities
+        all_timedata[sym] = create_commodity_timedata(sym, type, time_data)
     end
     return all_timedata
+end
+
+function create_commodity_timedata(
+    sym::Symbol,
+    type::DataType,
+    time_data::AbstractDict{Symbol,Any}
+)
+    period_length = time_data[:PeriodLength]
+
+    time_interval = 1:period_length
+    
+    hours_per_timestep = time_data[:HoursPerTimeStep][sym]
+    validate_temporal_resolution(hours_per_timestep)
+
+    subperiods = create_subperiods(time_data, sym)
+
+    unique_rep_periods = get_unique_rep_periods(time_data, sym)
+    weights = get_weights(time_data, sym)
+
+    period_map = get_timedata_period_map(time_data, sym)
+
+    return TimeData{type}(;
+        time_interval = time_interval,
+        hours_per_timestep = hours_per_timestep,
+        subperiods = subperiods,
+        subperiod_indices = unique_rep_periods,
+        subperiod_weights = Dict(unique_rep_periods .=> weights),
+        period_map = period_map
+    )
+end
+
+function validate_temporal_resolution(hours_per_timestep::Int)
+    hours_per_timestep != 1 && error("MACRO does not support different temporal resolutions yet. Please use hourly resolution for all comoodities.")
+end
+
+function create_subperiods(time_data::AbstractDict{Symbol,Any}, sym::Symbol)
+    period_length = time_data[:PeriodLength]
+    time_interval = 1:period_length
+    hours_per_subperiod = time_data[:HoursPerSubperiod][sym]
+    return collect(Iterators.partition(time_interval, hours_per_subperiod))
+end
+
+function get_unique_rep_periods(time_data::AbstractDict{Symbol,Any}, sym::Symbol)
+    if haskey(time_data, :PeriodMap)
+        period_map = time_data[:PeriodMap]
+        rep_periods = period_map[!, :Rep_Period]
+        rep_period_indices = period_map[!, :Rep_Period_Index]
+        rep_periods = rep_periods[sortperm(rep_period_indices)]
+        return unique(rep_periods)
+    else
+        subperiods = create_subperiods(time_data, sym)
+        return eachindex(subperiods)
+    end
+end
+
+function get_weights(time_data::AbstractDict{Symbol,Any}, sym::Symbol)
+    if haskey(time_data, :PeriodMap)
+        period_map = time_data[:PeriodMap]
+        unique_rep_periods = get_unique_rep_periods(time_data, sym)
+        weights_unscaled = create_weights_unscaled(period_map, unique_rep_periods)
+        weights_total = time_data[:WeightTotal]
+        weights = weights_total * weights_unscaled / sum(weights_unscaled)
+        return weights
+    else
+        return 1 # if no period map, all subperiods have the same weight
+    end
+end
+
+function create_weights_unscaled(period_map::DataFrame, unique_rep_periods::AbstractVector{Int})
+    rep_periods = period_map[!, :Rep_Period]    # list of rep period for each time step
+    return Int[length(findall(rep_periods .== p)) for p in unique_rep_periods]
+end
+
+function get_timedata_period_map(time_data::AbstractDict{Symbol,Any}, sym::Symbol)
+    if haskey(time_data, :PeriodMap)
+        return Dict(time_data[:PeriodMap][!, :Period_Index] .=> time_data[:PeriodMap][!, :Rep_Period])
+    # if no period map, return a dictionary with the subperiods as keys and values
+    # Note: this is the default behavior for the period map
+    else
+        subperiods = create_subperiods(time_data, sym)
+        return Dict(eachindex(subperiods) .=> eachindex(subperiods))
+    end
 end
