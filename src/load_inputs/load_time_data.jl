@@ -59,6 +59,20 @@ function validate_period_map(period_map_data::DataFrame)
     @assert typeof(period_map_data[!, :Rep_Period_Index]) == Vector{Int}
 end
 
+function validate_and_set_default_weight_total!(data::AbstractDict{Symbol,Any})
+    # Check if WeightTotal exists and is an integer
+    if haskey(data, :WeightTotal)
+        if !isa(data[:WeightTotal], Integer)
+            throw(ArgumentError("WeightTotal must be an integer, got $(typeof(data[:WeightTotal]))"))
+        end
+    # If WeightTotal does not exist, use default value of 8760 (hours per year)
+    else
+        @warn("WeightTotal not found in time_data.json")
+        @info("Using default value of 8760 (hours per year) for all commodities")
+        data[:WeightTotal] = 8760
+    end
+end
+
 function validate_time_data(
     time_data::AbstractDict{Symbol,Any},
     case_commodities::Dict{Symbol,DataType},
