@@ -17,11 +17,13 @@ function write_json(file_path::AbstractString, data::Dict{Symbol,Any})::Nothing
     return nothing
 end
 
-const JSON_EXT = (".json", ".json.gz")
+macro JSON_EXT()
+    return (".json", ".json.gz")
+end
 
-isjson(path::AbstractString) = any(endswith.(path, JSON_EXT))
+isjson(path::AbstractString) = any(endswith.(path, @JSON_EXT))
 
 # Fetch all json files in the directory
 function get_json_files(path::AbstractString)
-    return filter(x -> any(endswith.(x, JSON_EXT)), readdir(path))
+    return filter(x -> any(endswith.(x, @JSON_EXT)), readdir(path))
 end
