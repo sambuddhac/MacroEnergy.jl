@@ -8,12 +8,15 @@ function generate_system!(
     lazy_load::Bool = true,
 )::nothing
     # Load the system data file
+    @info("Generating system from $file_path")
     system_data = load_system_data(file_path, system.data_dirpath; lazy_load = lazy_load)
     generate_system!(system, system_data)
     return nothing
 end
 
 function generate_system!(system::System, system_data::AbstractDict{Symbol,Any})::Nothing
+    @info("Generating system")
+    start_time = time();
     # Configure the settings
     system.settings = configure_settings(system_data[:settings], system.data_dirpath)
 
@@ -29,6 +32,6 @@ function generate_system!(system::System, system_data::AbstractDict{Symbol,Any})
 
     # Load the assets
     load!(system, system_data[:assets])
-
+    @info("Done generating system. It took $(round(time() - start_time, digits=2)) seconds")
     return nothing
 end

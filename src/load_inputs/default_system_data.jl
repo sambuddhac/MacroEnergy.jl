@@ -45,6 +45,7 @@ function prep_system_data(
         system_data = read_json(file_path)
         # Load a hard-coded set of default locations for the system data
         # This could be moved to the settings defaults later
+        @debug("Loading system data from $file_path")
         add_default_system_data!(system_data, default_file_path)
     else
         @warn("No system data file found at $file_path.\nUsing default system data")
@@ -53,6 +54,7 @@ function prep_system_data(
 
     # FIXME currently overwriting and then re-reading the system_data
     # This is a little janky, but lets us quickly use the JSON parsing functions
+    @debug("Writing updated system data to $file_path")
     open(file_path, "w") do io
         JSON3.pretty(io, system_data)
     end

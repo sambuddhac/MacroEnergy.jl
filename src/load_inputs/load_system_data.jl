@@ -15,11 +15,16 @@ function load_system_data(
     lazy_load::Bool = true,
 )::Dict{Symbol,Any}
     file_path = abspath(rel_or_abs_path(file_path, rel_path))
+    @info("Loading system data")
+    start_time = time()
+    @debug("Loading system data from $path")
 
     prep_system_data(file_path, default_file_path)
 
     # Load the system data from the JSON file(s)
-    return load_json_inputs(file_path; rel_path=rel_path, lazy_load = lazy_load)
+    data = load_json_inputs(file_path; rel_path=rel_path, lazy_load = lazy_load)
+    @info("Done loading system data. It took $(round(time() - start_time, digits=2)) seconds")
+    return data
 end
 
 """

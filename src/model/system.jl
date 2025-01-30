@@ -23,6 +23,7 @@ function add!(system::System, location::Node)
 end
 
 function empty_system(data_dirpath::String)
+    @debug("Creating empty system, with data relative path set to $data_dirpath")
     return System(
         data_dirpath,
         NamedTuple(),

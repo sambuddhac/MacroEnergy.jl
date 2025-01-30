@@ -15,13 +15,19 @@ function load_system(
     end
 
     if isjson(path)
+        @info("Loading system from $path")
+        start_time = time()
+
         system = empty_system(dirname(path))
         system_data = load_system_data(path; lazy_load = lazy_load)
         generate_system!(system, system_data)
-        @show system.settings.Scaling
+
         if system.settings.Scaling
+            @info(" -- Scaling system")
             scaling!(system)
         end
+
+        @info("Done loading system. It took $(round(time() - start_time, digits=2)) seconds")
         return system
     else
         throw(
