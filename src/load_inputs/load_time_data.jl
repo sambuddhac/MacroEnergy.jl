@@ -1,21 +1,7 @@
 function load_time_data(
-    path::AbstractString,
-    commodities::Dict{Symbol,DataType},
-    rel_path::AbstractString,
-)
-    path = rel_or_abs_path(path, rel_path)
-    if isdir(path)
-        path = joinpath(path, "time_data.json")
-    end
-    # read in the list of commodities from the data directory
-    isfile(path) || error("Time data not found at $(abspath(path))")
-    return load_time_data(JSON3.read(path), commodities)
-end
-
-function load_time_data(
     data::AbstractDict{Symbol,Any},
     commodities::Dict{Symbol,DataType},
-    rel_path::AbstractString,
+    rel_path::AbstractString
 )
     if haskey(data, :path)
         path = rel_or_abs_path(data[:path], rel_path)
@@ -25,7 +11,30 @@ function load_time_data(
     end
 end
 
-function load_time_data(data::AbstractDict{Symbol,Any}, commodities::Dict{Symbol,DataType})
+function load_time_data(
+    path::AbstractString,
+    commodities::Dict{Symbol,DataType},
+    rel_path::AbstractString
+)
+    path = rel_or_abs_path(path, rel_path)
+    if isdir(path)
+        path = joinpath(path, "time_data.json")
+    end
+    # read in the list of commodities from the data directory
+    isfile(path) || error("Time data not found at $(abspath(path))")
+
+    # Before reading the time data into the macro data structures
+    # we make sure that the period map is loaded and the weight total is set
+    data = copy(JSON3.read(path))
+    haskey(data, :PeriodMap) && load_period_map!(data, rel_path)
+    validate_and_set_default_weight_total!(data)
+    return load_time_data(data, commodities)
+end
+
+function load_time_data(
+    data::AbstractDict{Symbol,Any},
+    commodities::Dict{Symbol,DataType}
+)
     # validate the time data
     validate_time_data(data, commodities)
 
