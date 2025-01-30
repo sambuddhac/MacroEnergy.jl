@@ -9,17 +9,12 @@ function load_system(
 
     # The path should either be a a file path to a JSON file, preferably "system_data.json"
     # or a directory containing "system_data.json"
-    # We'll check the absolute path first, then the path relative to the working directory
 
-    # If path ends with ".json", we assume it's a file
-    if isjson(path)
-        path = rel_or_abs_path(path)
-    else
-        # Assume it's a dir, ignoring other possible suffixes
-        path = rel_or_abs_path(joinpath(path, "system_data.json"))
+    if isdir(path)
+        path = joinpath(path, "system_data.json")
     end
 
-    if isfile(path)
+    if isjson(path)
         system = empty_system(dirname(path))
         system_data = load_system_data(path; lazy_load = lazy_load)
         generate_system!(system, system_data)
