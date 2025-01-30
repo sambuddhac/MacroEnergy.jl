@@ -25,7 +25,7 @@ function load_time_series_data(
     file_path::AbstractString,
     header::T,
 )::Vector{Float64} where {T<:Union{Symbol,String}}
-    time_series = load_csv(file_path, select = Symbol(header))
+    time_series = read_csv(file_path, Symbol(header))
     return time_series[!, header]
 end
 
