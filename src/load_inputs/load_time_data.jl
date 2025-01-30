@@ -33,6 +33,32 @@ function load_time_data(data::AbstractDict{Symbol,Any}, commodities::Dict{Symbol
     return create_time_data(data, commodities)
 end
 
+function load_period_map!(
+    data::AbstractDict{Symbol,Any},
+    rel_path::AbstractString
+)
+    period_map_data = data[:PeriodMap]
+    # if the period map is file path, load it
+    if haskey(period_map_data, :path)
+        path = rel_or_abs_path(period_map_data[:path], rel_path)
+        period_map_data = load_period_map(path)
+    end
+    validate_period_map(period_map_data)
+    data[:PeriodMap] = period_map_data
+end
+
+function load_period_map(path::AbstractString)
+    isfile(path) || error("Period map file not found at $(abspath(path))")
+    return CSV.read(path, DataFrame)
+end
+
+function validate_period_map(period_map_data::DataFrame)
+    @assert names(period_map_data) == ["Period_Index", "Rep_Period", "Rep_Period_Index"]
+    @assert typeof(period_map_data[!, :Period_Index]) == Vector{Int}
+    @assert typeof(period_map_data[!, :Rep_Period]) == Vector{Int}
+    @assert typeof(period_map_data[!, :Rep_Period_Index]) == Vector{Int}
+end
+
 function validate_time_data(
     time_data::AbstractDict{Symbol,Any},
     case_commodities::Dict{Symbol,DataType},
