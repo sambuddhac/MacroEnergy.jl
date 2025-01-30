@@ -10,7 +10,7 @@ function load_default_system_data(
     if isfile(default_file_path)
         default_system_data = read_json(default_file_path)
     else
-        @warn("No default system data file found at $default_file_path")
+        error("No default system data file found at $default_file_path")
     end
     return default_system_data
 end
@@ -43,13 +43,13 @@ function prep_system_data(
 )::Nothing
     if isfile(file_path)
         system_data = read_json(file_path)
+        # Load a hard-coded set of default locations for the system data
+        # This could be moved to the settings defaults later
+        add_default_system_data!(system_data, default_file_path)
     else
-        error("No system data file found at $file_path")
+        @warn("No system data file found at $file_path.\nUsing default system data")
+        system_data = load_default_system_data(default_file_path)
     end
-
-    # Load a hard-coded set of default locations for the system data
-    # This could be moved to the settings defaults later
-    add_default_system_data!(system_data, default_file_path)
 
     # FIXME currently overwriting and then re-reading the system_data
     # This is a little janky, but lets us quickly use the JSON parsing functions
