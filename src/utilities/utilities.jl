@@ -32,7 +32,7 @@ end
 # path relative to rel_dir
 ###### ###### ###### ###### ###### ######
 
-function rel_or_abs_path(path::T, rel_dir::T = pwd())::T where {T<:AbstractString}
+function rel_or_abs_path(path::T, rel_dir::T = pwd())::String where {T<:AbstractString}
     if ispath(path)
         return path
     elseif ispath(joinpath(rel_dir, path))
