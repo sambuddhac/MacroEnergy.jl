@@ -25,35 +25,35 @@ function load_time_data(
 
     # Before reading the time data into the macro data structures
     # we make sure that the period map is loaded and the weight total is set
-    data = copy(JSON3.read(path))
-    haskey(data, :PeriodMap) && load_period_map!(data, rel_path)
-    validate_and_set_default_weight_total!(data)
-    return load_time_data(data, commodities)
+    time_data = copy(JSON3.read(path))
+    haskey(time_data, :PeriodMap) && load_period_map!(time_data, rel_path)
+    validate_and_set_default_weight_total!(time_data)
+    return load_time_data(time_data, commodities)
 end
 
 function load_time_data(
-    data::AbstractDict{Symbol,Any},
+    time_data::AbstractDict{Symbol,Any},
     commodities::Dict{Symbol,DataType}
 )
     # validate the time data
-    validate_time_data(data, commodities)
+    validate_time_data(time_data, commodities)
 
     # create the time data object
-    return create_time_data(data, commodities)
+    return create_time_data(time_data, commodities)
 end
 
 function load_period_map!(
-    data::AbstractDict{Symbol,Any},
+    time_data::AbstractDict{Symbol,Any},
     rel_path::AbstractString
 )
-    period_map_data = data[:PeriodMap]
+    period_map_data = time_data[:PeriodMap]
     # if the period map is file path, load it
     if haskey(period_map_data, :path)
         path = rel_or_abs_path(period_map_data[:path], rel_path)
         period_map_data = load_period_map(path)
     end
     validate_period_map(period_map_data)
-    data[:PeriodMap] = period_map_data
+    time_data[:PeriodMap] = period_map_data
 end
 
 function load_period_map(path::AbstractString)
@@ -68,17 +68,17 @@ function validate_period_map(period_map_data::DataFrame)
     @assert typeof(period_map_data[!, :Rep_Period_Index]) == Vector{Int}
 end
 
-function validate_and_set_default_weight_total!(data::AbstractDict{Symbol,Any})
+function validate_and_set_default_weight_total!(time_data::AbstractDict{Symbol,Any})
     # Check if WeightTotal exists and is an integer
-    if haskey(data, :WeightTotal)
-        if !isa(data[:WeightTotal], Integer)
-            throw(ArgumentError("WeightTotal must be an integer, got $(typeof(data[:WeightTotal]))"))
+    if haskey(time_data, :WeightTotal)
+        if !isa(time_data[:WeightTotal], Integer)
+            throw(ArgumentError("WeightTotal must be an integer, got $(typeof(time_data[:WeightTotal]))"))
         end
     # If WeightTotal does not exist, use default value of 8760 (hours per year)
     else
         @warn("WeightTotal not found in time_data.json")
         @info("Using PeriodLength as default value for WeightTotal")
-        data[:WeightTotal] = data[:PeriodLength]
+        time_data[:WeightTotal] = time_data[:PeriodLength]
     end
 end
 
