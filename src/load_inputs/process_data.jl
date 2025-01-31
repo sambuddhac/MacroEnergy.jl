@@ -58,7 +58,7 @@ end
 function check_and_convert_inf!(data::AbstractDict{Symbol,Any})
     convert_inf_string_to_value(data, :max_line_reinforcement)
     convert_inf_string_to_value(data, :max_capacity)
-    convert_inf_string_to_value(data, :max_capacity_storage)
+    convert_inf_string_to_value(data, :max_capacity)
     return nothing
 end
 

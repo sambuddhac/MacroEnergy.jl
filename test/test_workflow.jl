@@ -119,7 +119,7 @@ function test_load(e_in::AbstractEdge{T}, e_true::S) where {T<:Commodity,S<:JSON
     @test e_in.distance == get(e_true, :distance, 0.0)
     @test e_in.capacity == get(e_true, :capacity, 0.0)
     @test e_in.new_capacity == get(e_true, :new_capacity, 0.0)
-    @test e_in.ret_capacity == get(e_true, :ret_capacity, 0.0)
+    @test e_in.retired_capacity == get(e_true, :retired_capacity, 0.0)
     @test e_in.flow == get(e_true, :flow, Vector{VariableRef}())
     test_load(e_in.constraints, get(e_true, :constraints, Vector{AbstractTypeConstraint}()))
     return nothing
@@ -174,21 +174,21 @@ end
 
 function test_load(s_in::AbstractStorage{T}, s_true::S) where {T<:Commodity,S<:JSON3.Object}
     @test s_in.id == Symbol(s_true.id)
-    @test typesymbol(commodity_type(s_in.timedata)) == Symbol(s_true.timedata)
-    @test s_in.capacity_storage == get(s_true, :capacity_storage, 0.0)
-    @test s_in.new_capacity_storage == get(s_true, :new_capacity_storage, 0.0)
-    @test s_in.ret_capacity_storage == get(s_true, :ret_capacity_storage, 0.0)
+    @test Symbol(commodity_type(s_in.timedata)) == Symbol(s_true.timedata)
+    @test s_in.capacity == get(s_true, :capacity, 0.0)
+    @test s_in.new_capacity == get(s_true, :new_capacity, 0.0)
+    @test s_in.ret_capacity == get(s_true, :ret_capacity, 0.0)
     @test s_in.storage_level == get(s_true, :storage_level, Vector{VariableRef}())
-    @test s_in.min_capacity_storage == get(s_true, :min_capacity_storage, 0.0)
+    @test s_in.min_capacity == get(s_true, :min_capacity, 0.0)
     s_true_max_capacity =
-        get(s_true, :max_capacity_storage, "Inf") == "Inf" ? Inf :
-        get(s_true, :max_capacity_storage, Inf)
-    @test s_in.max_capacity_storage == s_true_max_capacity
-    @test s_in.existing_capacity_storage == get(s_true, :existing_capacity_storage, 0.0)
+        get(s_true, :max_capacity, "Inf") == "Inf" ? Inf :
+        get(s_true, :max_capacity, Inf)
+    @test s_in.max_capacity == s_true_max_capacity
+    @test s_in.existing_capacity == get(s_true, :existing_capacity, 0.0)
     @test s_in.can_expand == get(s_true, :can_expand, false)
     @test s_in.can_retire == get(s_true, :can_retire, false)
-    @test s_in.investment_cost_storage == get(s_true, :investment_cost_storage, 0.0)
-    @test s_in.fixed_om_cost_storage == get(s_true, :fixed_om_cost_storage, 0.0)
+    @test s_in.investment_cost == get(s_true, :investment_cost, 0.0)
+    @test s_in.fixed_om_cost == get(s_true, :fixed_om_cost, 0.0)
     @test s_in.min_storage_level == get(s_true, :min_storage_level, 0.0)
     @test s_in.min_duration == get(s_true, :min_duration, 0.0)
     @test s_in.max_duration == get(s_true, :max_duration, 0.0)

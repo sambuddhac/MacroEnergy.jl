@@ -38,7 +38,7 @@ function attributes_to_scale(e::EdgeWithUC)
 end
 
 function attributes_to_scale(g::AbstractStorage)
-    return [:existing_capacity_storage, :fixed_om_cost_storage, :investment_cost_storage, :max_capacity_storage, :min_capacity_storage]
+    return [:capacity_size,:existing_capacity,:fixed_om_cost,:investment_cost,:max_capacity,:min_capacity]
 end
 
 function attributes_to_scale(t::Transformation)
