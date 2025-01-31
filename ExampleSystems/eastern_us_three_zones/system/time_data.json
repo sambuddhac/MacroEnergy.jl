@@ -20,6 +20,6 @@
     "PeriodLength": 504,
     "WeightTotal": 8760,
     "PeriodMap": {
-        "path": "timeseries_3weeks/Period_map.csv"
+        "path": "system/Period_map.csv"
     }
 }
