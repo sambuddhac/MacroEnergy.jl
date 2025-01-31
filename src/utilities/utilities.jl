@@ -32,7 +32,7 @@ end
 # path relative to rel_dir
 ###### ###### ###### ###### ###### ######
 
-function rel_or_abs_path(path::T, rel_dir::T = pwd())::T where {T<:AbstractString}
+function rel_or_abs_path(path::T, rel_dir::T = pwd())::String where {T<:AbstractString}
     if ispath(path)
         return path
     elseif ispath(joinpath(rel_dir, path))
@@ -42,3 +42,7 @@ function rel_or_abs_path(path::T, rel_dir::T = pwd())::T where {T<:AbstractStrin
         # throw(ArgumentError("File $path not found"))
     end
 end
+
+recursive_merge(x::AbstractDict...) = merge(recursive_merge, x...)
+recursive_merge(x::AbstractVector...) = cat(x...; dims = 1)
+recursive_merge(x...) = x[end]

@@ -8,8 +8,13 @@ function load_time_series_data!(system::System, data::AbstractDict{Symbol,Any})
 
     # load each time series data and update the data dictionary
     for (value, keys) in time_series_paths
-        file_path = rel_or_abs_path(value[:path], system.data_dirpath)
-        time_series = load_time_series_data(file_path, value[:header])
+        # If the value is a Dict with :path and :header keys, then load the data
+        if isa(value, DataFrame) || isa(value, Vector{Float64})
+            time_series = value
+        else
+            file_path = rel_or_abs_path(value[:path], system.data_dirpath)
+            time_series = load_time_series_data(file_path, value[:header])
+        end
         update_data!(data, keys[1:end-1], time_series) # end-1 to exclude the :timeseries key itself and replace it with the actual data
     end
 
@@ -20,7 +25,7 @@ function load_time_series_data(
     file_path::AbstractString,
     header::T,
 )::Vector{Float64} where {T<:Union{Symbol,String}}
-    time_series = load_csv(file_path, select = Symbol(header))
+    time_series = read_csv(file_path, Symbol(header))
     return time_series[!, header]
 end
 

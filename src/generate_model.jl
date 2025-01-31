@@ -1,6 +1,6 @@
 function generate_model(system::System)
 
-    @info("Starting model generation")
+    @info("Generating model")
 
     start_time = time();
 
@@ -12,21 +12,21 @@ function generate_model(system::System)
 
     model[:eVariableCost] = AffExpr(0.0)
 
-    @info("Adding linking variables")
+    @info(" -- Adding linking variables")
     add_linking_variables!(system, model) 
 
-    @info("Defining available capacity")
+    @info(" -- Defining available capacity")
     define_available_capacity!(system, model)
 
-    @info("Generating planning model")
+    @info(" -- Generating planning model")
     planning_model!(system, model)
 
-    @info("Generating operational model")
+    @info(" -- Generating operational model")
     operation_model!(system, model)
 
     @objective(model, Min, model[:eFixedCost] + model[:eVariableCost])
 
-    @info("Model generation complete, it took $(time() - start_time) seconds")
+    @info(" -- Model generation complete. It took $(round(time() - start_time, digits=2)) seconds")
 
     return model
 

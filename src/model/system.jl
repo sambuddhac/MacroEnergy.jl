@@ -7,6 +7,9 @@ mutable struct System
     locations::Vector{Node}
 end
 
+asset_ids(system::System) = map(x -> x.id, system.assets)
+location_ids(system::System) = map(x -> x.id, system.locations)
+
 function set_data_dirpath!(system::System, data_dirpath::String)
     system.data_dirpath = data_dirpath
 end
@@ -20,6 +23,7 @@ function add!(system::System, location::Node)
 end
 
 function empty_system(data_dirpath::String)
+    @debug("Creating empty system, with data relative path set to $data_dirpath")
     return System(
         data_dirpath,
         NamedTuple(),

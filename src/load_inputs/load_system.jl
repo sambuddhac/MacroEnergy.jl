@@ -2,28 +2,32 @@
 # Functions for the user to load a system based on JSON files
 ###### ###### ###### ###### ###### ######
 
-function load_system(path::AbstractString = pwd())::System
+function load_system(
+    path::AbstractString = pwd();
+    lazy_load::Bool=true,
+)::System
 
     # The path should either be a a file path to a JSON file, preferably "system_data.json"
     # or a directory containing "system_data.json"
-    # We'll check the absolute path first, then the path relative to the working directory
 
-    # If path ends with ".json", we assume it's a file
-    if isjson(path)
-        path = rel_or_abs_path(path)
-    else
-        # Assume it's a dir, ignoring other possible suffixes
-        path = rel_or_abs_path(joinpath(path, "system_data.json"))
+    if isdir(path)
+        path = joinpath(path, "system_data.json")
     end
 
-    if isfile(path)
+    if isjson(path)
+        @info("Loading system from $path")
+        start_time = time()
+
         system = empty_system(dirname(path))
-        system_data = load_system_data(path)
+        system_data = load_system_data(path; lazy_load = lazy_load)
         generate_system!(system, system_data)
-        @show system.settings.Scaling
+
         if system.settings.Scaling
+            @info(" -- Scaling system")
             scaling!(system)
         end
+
+        @info("Done loading system. It took $(round(time() - start_time, digits=2)) seconds")
         return system
     else
         throw(
@@ -39,7 +43,7 @@ end
 
 function load_system(
     system_data::AbstractDict{Symbol,Any},
-    dir_path::AbstractString = pwd(),
+    dir_path::AbstractString = pwd()
 )::System
     # The path should point to the location of the system data files
     # If path is not provided, we assume the data is in the current working directory

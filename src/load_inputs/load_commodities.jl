@@ -21,6 +21,15 @@ function load_commodities(data::AbstractDict{Symbol,Any}, rel_path::AbstractStri
     end
 end
 
+function load_commodities(data::AbstractVector{Dict{Symbol,Any}}, rel_path::AbstractString)
+    for item in data
+        if isa(item, AbstractDict{Symbol,Any}) && haskey(item, :commodities)
+            return load_commodities(item, rel_path)
+        end
+    end
+    error("Commodity data not found or incorrectly formatted in system_data")
+end
+
 function load_commodities(data::AbstractVector{<:AbstractString}, rel_path::AbstractString)
     # Probably means we have a vector of commdity types
     return load_commodities(Symbol.(data))
