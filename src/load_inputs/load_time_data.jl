@@ -77,8 +77,8 @@ function validate_and_set_default_weight_total!(data::AbstractDict{Symbol,Any})
     # If WeightTotal does not exist, use default value of 8760 (hours per year)
     else
         @warn("WeightTotal not found in time_data.json")
-        @info("Using default value of 8760 (hours per year) for all commodities")
-        data[:WeightTotal] = 8760
+        @info("Using PeriodLength as default value for WeightTotal")
+        data[:WeightTotal] = data[:PeriodLength]
     end
 end
 
