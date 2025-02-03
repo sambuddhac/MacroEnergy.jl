@@ -7,6 +7,7 @@ using JuMP
 using Revise
 using InteractiveUtils
 using Printf: @printf
+using MacroEnergySystemsScaling
 
 import Base: /
 
