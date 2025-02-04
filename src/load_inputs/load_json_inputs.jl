@@ -100,6 +100,11 @@ function fetch_data(path::AbstractString, dict::AbstractDict{Symbol, Any}, root_
     if isfile(path) && isjson(path)
         return load_json_inputs(path; rel_path=root_path, lazy_load=lazy_load)
     end
+
+    if isfile(path) && iscsv(path)
+        return load_csv(path)
+    end
+
     # In the future we can include a CSV -> Dict conversion
     # if isfile(path) && iscsv(path)
         # return load_time_series_data(path, dict[:header])

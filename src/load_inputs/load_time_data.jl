@@ -24,10 +24,9 @@ function load_time_data(
     isfile(path) || error("Time data not found at $(abspath(path))")
 
     # Before reading the time data into the macro data structures
-    # we make sure that the period map is loaded and the weight total is set
+    # we make sure that the period map is loaded
     time_data = copy(JSON3.read(path))
     haskey(time_data, :PeriodMap) && load_period_map!(time_data, rel_path)
-    validate_and_set_default_weight_total!(time_data)
     return load_time_data(time_data, commodities)
 end
 
@@ -35,6 +34,9 @@ function load_time_data(
     time_data::AbstractDict{Symbol,Any},
     commodities::Dict{Symbol,DataType}
 )
+    # make sure that the weight total is set: default values is PeriodLength
+    validate_and_set_default_weight_total!(time_data)
+    
     # validate the time data
     validate_time_data(time_data, commodities)
 
@@ -58,14 +60,14 @@ end
 
 function load_period_map(path::AbstractString)
     isfile(path) || error("Period map file not found at $(abspath(path))")
-    return CSV.read(path, DataFrame)
+    return load_csv(path)
 end
 
 function validate_period_map(period_map_data::DataFrame)
     @assert names(period_map_data) == ["Period_Index", "Rep_Period", "Rep_Period_Index"]
-    @assert typeof(period_map_data[!, :Period_Index]) == Vector{Int}
-    @assert typeof(period_map_data[!, :Rep_Period]) == Vector{Int}
-    @assert typeof(period_map_data[!, :Rep_Period_Index]) == Vector{Int}
+    @assert typeof(period_map_data[!, :Period_Index]) == Vector{Union{Missing, Int}}
+    @assert typeof(period_map_data[!, :Rep_Period]) == Vector{Union{Missing, Int}}
+    @assert typeof(period_map_data[!, :Rep_Period_Index]) == Vector{Union{Missing, Int}}
 end
 
 function validate_and_set_default_weight_total!(time_data::AbstractDict{Symbol,Any})
@@ -95,6 +97,9 @@ function validate_time_data(
     @assert time_data[:PeriodLength] > 0
     @assert all(values(time_data[:HoursPerTimeStep]) .> 0)
     @assert all(values(time_data[:HoursPerSubperiod]) .> 0)
+
+    # validate period map
+    haskey(time_data, :PeriodMap) && validate_period_map(time_data[:PeriodMap])
 
     # Check that the time data has the correct commodities
     @assert keys(time_data[:HoursPerTimeStep]) == keys(time_data[:HoursPerSubperiod])
@@ -181,7 +186,7 @@ function get_weights(time_data::AbstractDict{Symbol,Any}, sym::Symbol)
     end
 end
 
-function create_weights_unscaled(period_map::DataFrame, unique_rep_periods::AbstractVector{Int})
+function create_weights_unscaled(period_map::DataFrame, unique_rep_periods::AbstractVector{Union{Missing, Int}})
     rep_periods = period_map[!, :Rep_Period]    # list of rep period for each time step
     return Int[length(findall(rep_periods .== p)) for p in unique_rep_periods]
 end
