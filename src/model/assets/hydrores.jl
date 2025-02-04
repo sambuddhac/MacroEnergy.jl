@@ -19,7 +19,7 @@ function make(::Type{HydroRes}, data::AbstractDict{Symbol,Any}, system::System)
     StorageType = long_duration ? LongDurationStorage : Storage
     # if storage is long duration, add the corresponding constraint
     if long_duration
-        push!(default_constraints, LongDurationStorageImplicitMinMaxConstraint())
+        default_constraints = [BalanceConstraint(), LongDurationStorageImplicitMinMaxConstraint()]
     end
     # create the storage component of the hydro reservoir
     hydrostor = StorageType(
