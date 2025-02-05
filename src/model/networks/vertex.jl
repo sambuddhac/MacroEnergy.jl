@@ -3,6 +3,7 @@ macro AbstractVertexBaseAttributes()
         quote
             id::Symbol
             timedata::TimeData
+            location::Union{Missing, Location} = missing
 
             balance_data::Dict{Symbol,Dict{Symbol,Float64}} =
                 Dict{Symbol,Dict{Symbol,Float64}}()
