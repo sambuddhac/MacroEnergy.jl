@@ -21,3 +21,12 @@ function refresh_commodities_list!(loc::Location)
     loc.commodities =
         Set{Symbol}(typesymbol(commodity_type(node)) for node in values(loc.nodes))
 end
+
+function load_locations(data::Vector{String})
+    locations = Location[]
+    for loc_name in data
+        # In the future, we could pre-emptively find the relevant nodes
+        push!(locations, Location(;name=loc_name))
+    end
+    return locations
+end
