@@ -47,11 +47,13 @@
                     "commodity": "Hydrogen",
                     "can_expand": true,
                     "can_retire": false,
+                    "long_duration": true,
                     "constraints": {
                         "StorageCapacityConstraint": true,
                         "BalanceConstraint": true,
                         "StorageMaxDurationConstraint": true,
-                        "StorageChargeDischargeRatioConstraint": true
+                        "StorageChargeDischargeRatioConstraint": true,
+                        "LongDurationStorageImplicitMinMaxConstraint": true
                     }
                 }
             },

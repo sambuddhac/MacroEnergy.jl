@@ -89,7 +89,7 @@ function prepare_to_json(vertex::AbstractVertex)
 end
 
 # We override the default prepare_to_json function for storage objects to exclude discharge_edge and charge_edge
-function prepare_to_json(storage::Storage)
+function prepare_to_json(storage::AbstractStorage)
     fields_to_exclude = [:operation_expr, :discharge_edge, :charge_edge]
     storage_data = prepare_to_json(storage, fields_to_exclude)
     storage_data[:commodity] = commodity_type(storage)

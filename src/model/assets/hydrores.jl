@@ -1,6 +1,6 @@
 struct HydroRes <: AbstractAsset
     id::AssetId
-    hydrostor::Storage{Electricity}
+    hydrostor::AbstractStorage{Electricity}
     discharge_edge::Edge{Electricity}
     inflow_edge::Edge{Electricity}
     spill_edge::Edge{Electricity}
@@ -9,18 +9,26 @@ end
 function make(::Type{HydroRes}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 
+    ## Storage component of the hydro reservoir
     storage_key = :storage
     storage_data = process_data(data[storage_key])
+    default_constraints = [BalanceConstraint()]
 
-    hydrostor = Storage(
+    # check if the storage is a long duration storage
+    long_duration = get(storage_data, :long_duration, false)
+    StorageType = long_duration ? LongDurationStorage : Storage
+    # if storage is long duration, add the corresponding constraint
+    if long_duration
+        default_constraints = [BalanceConstraint(), LongDurationStorageImplicitMinMaxConstraint()]
+    end
+    # create the storage component of the hydro reservoir
+    hydrostor = StorageType(
         Symbol(id, "_", storage_key),
         storage_data,
         system.time_data[:Electricity],
         Electricity,
     )
-    hydrostor.constraints = get(
-        storage_data,
-        :constraints,[BalanceConstraint()])
+    hydrostor.constraints = get(storage_data, :constraints, default_constraints)
 
     discharge_edge_key = :discharge_edge
     discharge_edge_data = process_data(data[:edges][discharge_edge_key])

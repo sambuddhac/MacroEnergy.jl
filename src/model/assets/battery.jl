@@ -1,6 +1,6 @@
 struct Battery <: AbstractAsset
     id::AssetId
-    battery_storage::Storage{Electricity}
+    battery_storage::AbstractStorage{Electricity}
     discharge_edge::Edge{Electricity}
     charge_edge::Edge{Electricity}
 end
@@ -44,28 +44,32 @@ end
 function make(::Type{Battery}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 
+    ## Storage component of the battery
     storage_key = :storage
     storage_data = process_data(data[storage_key])
     commodity_symbol = Symbol(storage_data[:commodity])
     commodity = commodity_types()[commodity_symbol]
-    battery_storage =
-        Storage(
-            Symbol(id, "_", storage_key), 
-            storage_data, 
-            system.time_data[commodity_symbol], 
-            commodity
-        )
-    battery_storage.constraints = get(
+    default_constraints = [
+        BalanceConstraint(),
+        StorageCapacityConstraint(),
+        StorageSymmetricCapacityConstraint(),
+    ]
+        
+    # check if the storage is a long duration storage
+    long_duration = get(storage_data, :long_duration, false)
+    StorageType = long_duration ? LongDurationStorage : Storage
+    # if storage is long duration, add the corresponding constraint
+    if long_duration
+        push!(default_constraints, LongDurationStorageImplicitMinMaxConstraint())
+    end
+    # create the storage component of the battery
+    battery_storage = StorageType(
+        Symbol(id, "_", storage_key),
         storage_data,
-        :constraints,
-        [
-            BalanceConstraint(),
-            StorageCapacityConstraint(),
-            StorageMaxDurationConstraint(),
-            StorageMinDurationConstraint(),
-            StorageSymmetricCapacityConstraint(),
-        ],
+        system.time_data[commodity_symbol],
+        commodity,
     )
+    battery_storage.constraints = get(storage_data, :constraints, default_constraints)
 
     charge_edge_key = :charge_edge
     charge_edge_data = process_data(data[:edges][charge_edge_key])

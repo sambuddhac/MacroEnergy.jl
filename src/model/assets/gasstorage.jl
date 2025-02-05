@@ -1,6 +1,6 @@
 struct GasStorage{T} <: AbstractAsset
     id::AssetId
-    gas_storage::Storage{T}
+    gas_storage::AbstractStorage{T}
     compressor_transform::Transformation
     discharge_edge::Edge{T}
     charge_edge::Edge{T}
@@ -8,7 +8,7 @@ struct GasStorage{T} <: AbstractAsset
     compressor_gas_edge::Edge{T}
 end
 
-GasStorage(id::AssetId,gas_storage::Storage{T},compressor_transform::Transformation,discharge_edge::Edge{T},charge_edge::Edge{T},compressor_elec_edge::Edge{Electricity},
+GasStorage(id::AssetId,gas_storage::AbstractStorage{T},compressor_transform::Transformation,discharge_edge::Edge{T},charge_edge::Edge{T},compressor_elec_edge::Edge{Electricity},
 compressor_gas_edge::Edge{T}) where T<:Commodity =
     GasStorage{T}(id,gas_storage,compressor_transform,discharge_edge,charge_edge,compressor_elec_edge,
     compressor_gas_edge)
@@ -16,22 +16,32 @@ compressor_gas_edge::Edge{T}) where T<:Commodity =
 function make(::Type{GasStorage}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 
+    ## Storage component of the gas storage
     gas_storage_key = :storage
     storage_data = process_data(data[gas_storage_key])
-    T = commodity_types()[Symbol(storage_data[:commodity])];
+    T = commodity_types()[Symbol(storage_data[:commodity])]
+    default_constraints = [
+        BalanceConstraint(),
+        StorageCapacityConstraint(),
+    ]
 
-    gas_storage = Storage(
+    # check if the storage is a long duration storage
+    long_duration = get(storage_data, :long_duration, false)
+    StorageType = long_duration ? LongDurationStorage : Storage
+    # if storage is long duration, add the corresponding constraint
+    if long_duration
+        push!(default_constraints, LongDurationStorageImplicitMinMaxConstraint())
+    end
+    # create the storage component of the gas storage
+    gas_storage = StorageType(
         Symbol(id, "_", gas_storage_key),
         storage_data,
         system.time_data[Symbol(T)],
         T,
     )
-    gas_storage.constraints = get(
-        storage_data,
-        :constraints,
-        [BalanceConstraint(), StorageCapacityConstraint()],
-    )
+    gas_storage.constraints = get(storage_data, :constraints, default_constraints)
 
+    ## Compressor component of the gas storage
     compressor_key = :transforms
     transform_data = process_data(data[compressor_key])
     compressor_transform = Transformation(;

@@ -29,6 +29,7 @@ abstract type AbstractTimeData{T<:Commodity} end
 ## Structure types
 abstract type MacroObject end
 abstract type AbstractVertex <: MacroObject end
+abstract type AbstractStorage{T<:Commodity} <: AbstractVertex end
 
 ## Network types
 abstract type AbstractEdge{T<:Commodity} <: MacroObject end
@@ -139,6 +140,8 @@ export AbstractAsset,
     HydroRes,
     Hydrogen,
     HydrogenLine,
+    LongDurationStorage,
+    LongDurationStorageImplicitMinMaxConstraint,
     MaxCapacityConstraint,
     MaxNonServedDemandConstraint,
     MaxNonServedDemandPerSegmentConstraint,

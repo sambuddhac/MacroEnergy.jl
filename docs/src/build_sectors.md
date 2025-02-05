@@ -133,7 +133,7 @@ The creation of the second asset, `MyAsset2`, follows very similar steps to the 
 ```julia
 struct MyAsset2 <: AbstractAsset
     id::AssetId
-    myasset2_storage::Storage{MyNewSector}  # <--- Storage unit
+    myasset2_storage::AbstractStorage{MyNewSector}  # <--- Storage unit
     discharge_edge::Edge{MyNewSector}
     charge_edge::Edge{MyNewSector}
 end

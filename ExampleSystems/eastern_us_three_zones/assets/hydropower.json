@@ -41,10 +41,12 @@
                     "commodity": "Electricity",
                     "can_expand": false,
                     "can_retire": false,
+                    "long_duration": true,
                     "constraints": {
                         "MinStorageOutflowConstraint": true,
                         "StorageChargeDischargeRatioConstraint": true,
-                        "BalanceConstraint": true
+                        "BalanceConstraint": true,
+                        "LongDurationStorageImplicitMinMaxConstraint": true
                     }
                 }
             },

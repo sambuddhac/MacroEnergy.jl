@@ -1,5 +1,5 @@
 function scaling!(y::Union{AbstractVertex,AbstractEdge})
-    atts_vec = attributes_to_scale(y);
+    atts_vec = attributes_to_scale(y)
 
     for f in atts_vec
         setfield!(y, f, getfield(y, f) / ScalingFactor)
@@ -26,19 +26,19 @@ function scaling!(system::System)
 end
 
 function attributes_to_scale(n::Node)
-    return [:demand,:max_supply,:price,:price_nsd,:price_supply,:price_unmet_policy,:rhs_policy]
+    return [:demand, :max_supply, :price, :price_nsd, :price_supply, :price_unmet_policy, :rhs_policy]
 end
 
 function attributes_to_scale(e::Edge)
-    return [:capacity_size,:existing_capacity,:fixed_om_cost,:investment_cost,:max_capacity,:min_capacity,:variable_om_cost]
+    return [:capacity_size, :existing_capacity, :fixed_om_cost, :investment_cost, :max_capacity, :min_capacity, :variable_om_cost]
 end
 
 function attributes_to_scale(e::EdgeWithUC)
-    return [:capacity_size,:existing_capacity,:fixed_om_cost,:investment_cost,:max_capacity,:min_capacity,:variable_om_cost,:startup_cost]
+    return [:capacity_size, :existing_capacity, :fixed_om_cost, :investment_cost, :max_capacity, :min_capacity, :variable_om_cost, :startup_cost]
 end
 
-function attributes_to_scale(g::Storage)
-    return [:existing_capacity_storage,:fixed_om_cost_storage,:investment_cost_storage,:max_capacity_storage,:min_capacity_storage]
+function attributes_to_scale(g::AbstractStorage)
+    return [:existing_capacity_storage, :fixed_om_cost_storage, :investment_cost_storage, :max_capacity_storage, :min_capacity_storage]
 end
 
 function attributes_to_scale(t::Transformation)
@@ -46,8 +46,8 @@ function attributes_to_scale(t::Transformation)
 end
 
 
-function /(d::Dict,factor::Float64)
-    for (k,v) in d
+function /(d::Dict, factor::Float64)
+    for (k, v) in d
         d[k] = v / factor
     end
     return d

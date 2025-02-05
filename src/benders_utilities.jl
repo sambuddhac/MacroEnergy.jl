@@ -109,7 +109,7 @@ function get_available_capacity!(g::Transformation, AvailableCapacity::Dict{Symb
 
 end
 
-function get_available_capacity!(g::Storage, AvailableCapacity::Dict{Symbol, AffExpr})
+function get_available_capacity!(g::AbstractStorage, AvailableCapacity::Dict{Symbol, AffExpr})
 
     AvailableCapacity[g.id] = g.capacity_storage;
 
