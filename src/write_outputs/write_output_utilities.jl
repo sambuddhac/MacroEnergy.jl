@@ -43,7 +43,7 @@ function get_optimal_vars(objs::Vector{T}, field_list::Tuple, scaling::Float64=1
                 missing,
                 missing,
                 Float64(value(f(obj))) * scaling,
-                # get_unit(obj),
+                # get_unit(obj, f),
             ) for obj in objs for f in field_list
         ]
     else
@@ -60,7 +60,7 @@ function get_optimal_vars(objs::Vector{T}, field_list::Tuple, scaling::Float64=1
                 missing,
                 missing,
                 Float64(value(f(obj))) * scaling,
-                # get_unit(obj),
+                # get_unit(obj, f),
             ) for obj in objs for f in field_list
         ]
     end
@@ -121,7 +121,7 @@ function get_optimal_vars_timeseries(
                     s,
                     t,
                     has_segments ? value(f(obj, s, t)) * scaling : value(f(obj, t)) * scaling,
-                    # get_unit(obj),
+                    # get_unit(obj, f),
                 )
             end
         end
@@ -140,7 +140,7 @@ function get_optimal_vars_timeseries(
                     s,
                     t,
                     has_segments ? value(f(obj, s, t)) * scaling : value(f(obj, t)) * scaling,
-                    # get_unit(obj),
+                    # get_unit(obj, f),
                 )
             end
         end
@@ -195,8 +195,8 @@ get_type(asset::Base.RefValue{<:AbstractAsset}) = Symbol(typeof(asset).parameter
 get_type(obj::T) where {T<:Union{AbstractEdge,Node,Storage}} = Symbol(typeof(obj))
 
 # Get the unit of a MacroObject
-get_unit(obj::AbstractEdge) = unit(commodity_type(obj.timedata))    #TODO: check if this is correct
-get_unit(obj::T) where {T<:Union{Node,Storage}} = unit(commodity_type(obj))
+get_unit(obj::AbstractEdge, f::Function) = unit(commodity_type(obj.timedata), f)    #TODO: check if this is correct
+get_unit(obj::T, f::Function) where {T<:Union{Node,Storage}} = unit(commodity_type(obj), f)
 
 ## Helper functions to extract final costs from the optimized model ##
 # This fuction will returns:
@@ -270,12 +270,12 @@ Returns a `DataFrame` with all the results after the optimization is performed.
 ```julia
 collect_results(system, model)
 198534×12 DataFrame
-    Row │ case_name  commodity    commodity_subtype  zone        resource_id                component_id                       type              variable  segment  time   value     
+    Row │ case_name  commodity    commodity_subtype  zone        resource_id                component_id                       type              variable  segment  time   value
         │ Missing    Symbol       Symbol             Symbol      Symbol                     Symbol                             Symbol            Symbol    Int64    Int64  Float64
-────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-      1 │   missing  Biomass      flow               bioherb_SE  SE_BECCS_Electricity_Herb  SE_BECCS_Electricity_Herb_biomas…  BECCSElectricity  flow            1      1  0.0    
-      2 │   missing  Biomass      flow               bioherb_SE  SE_BECCS_Electricity_Herb  SE_BECCS_Electricity_Herb_biomas…  BECCSElectricity  flow            1      2  0.0    
-      3 │   missing  Biomass      flow               bioherb_SE  SE_BECCS_Electricity_Herb  SE_BECCS_Electricity_Herb_biomas…  BECCSElectricity  flow            1      3  0.0    
+────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+      1 │   missing  Biomass      flow               bioherb_SE  SE_BECCS_Electricity_Herb  SE_BECCS_Electricity_Herb_biomas…  BECCSElectricity  flow            1      1  0.0
+      2 │   missing  Biomass      flow               bioherb_SE  SE_BECCS_Electricity_Herb  SE_BECCS_Electricity_Herb_biomas…  BECCSElectricity  flow            1      2  0.0
+      3 │   missing  Biomass      flow               bioherb_SE  SE_BECCS_Electricity_Herb  SE_BECCS_Electricity_Herb_biomas…  BECCSElectricity  flow            1      3  0.0
       ...
 ```
 """

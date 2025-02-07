@@ -115,9 +115,9 @@ include("benders_utilities.jl")
 
 include("model/scaling.jl")
 
-include("write_outputs/assets_capacity.jl")
+include("write_outputs/capacity.jl")
 include("write_outputs/flow.jl")
-include("write_outputs/utilities.jl")
+include("write_outputs/write_output_utilities.jl")
 include("write_outputs/costs.jl")
 include("write_outputs/write_system_data.jl")
 
