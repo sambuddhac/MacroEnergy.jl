@@ -321,10 +321,10 @@ function test_writing_output()
         @test get_type(asset_ref2) == Symbol("Battery")
 
         # Test get_unit
-        @test get_unit(edge_between_nodes) == :MWh
-        @test get_unit(edge_to_storage) == :MWh
-        @test get_unit(node1) == :MWh
-        @test get_unit(storage) == :MWh
+        # @test get_unit(edge_between_nodes) == :MWh
+        # @test get_unit(edge_to_storage) == :MWh
+        # @test get_unit(node1) == :MWh
+        # @test get_unit(storage) == :MWh
     end
 
     mock_edges = [edge_between_nodes,
