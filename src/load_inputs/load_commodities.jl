@@ -12,6 +12,20 @@ function commodity_types(m::Module = Macro)
     return COMMODITY_TYPES
 end
 
+function make_commodity(new_commodity::String)
+    s = Meta.parse("abstract type $new_commodity end")
+    return eval(s)
+end
+
+function make_commodity(new_commodity::String, parent_type::Symbol)
+    s = Meta.parse("abstract type $new_commodity <: $parent_type end")
+    return eval(s)
+end
+
+function make_commodity(new_commodity::String, parent_type::DataType)
+    return make_commodity(new_commodity, Base.typename(parent_type).name)
+end
+
 function load_commodities(path::AbstractString, rel_path::AbstractString)
     path = rel_or_abs_path(path, rel_path)
     if isdir(path)
