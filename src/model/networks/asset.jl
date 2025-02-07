@@ -34,6 +34,11 @@ function print_struct_info(info::Vector{Tuple{Symbol, DataType}})
     end    
 end
 
+# The following functions are used to extract all the assets of a given type from a System or a Vector of Assets
+function get_assets_sametype(assets::Vector{AbstractAsset}, asset_type::T) where T<:Type{<:AbstractAsset}
+    return filter(a -> typeof(a) == asset_type, assets)
+end
+
 # The following functions are used to extract all the edges from an Asset or a Vector of Assets
 # If return_ids_map=True, a `Dict` is also returned mapping edge ids to the corresponding asset objects.
 get_edges(asset::AbstractAsset; return_ids_map::Bool=false) = return_ids_map ? get_macro_objs_with_map(asset, AbstractEdge) : get_macro_objs(asset, AbstractEdge)

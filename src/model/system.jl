@@ -53,6 +53,9 @@ function find_node(nodes_list::Vector{Node}, id::Symbol)
     return nothing
 end
 
+# The following functions are used to extract all the assets of a given type from a System or a Vector of Assets
+get_assets_sametype(system::System, asset_type::T) where T<:Type{<:AbstractAsset} = get_assets_sametype(system.assets, asset_type)
+
 # Function to extract all the nodes, edges, storages, and transformations from a system
 # If return_ids_map=True, a `Dict` is also returned mapping edge ids to the corresponding asset objects.
 get_nodes(system::System) = system.locations
