@@ -103,7 +103,7 @@ function validate_time_data(
 
     # Check that the time data has the correct commodities
     @assert keys(time_data[:HoursPerTimeStep]) == keys(time_data[:HoursPerSubperiod])
-    @assert keys(time_data[:HoursPerTimeStep]) == keys(case_commodities)
+    @assert keys(time_data[:HoursPerTimeStep]) <= keys(case_commodities)
     macro_commodities = commodity_types(Macro) # Get the available commodities
     validate_commodities(keys(time_data[:HoursPerTimeStep]), macro_commodities)
     validate_commodities(keys(time_data[:HoursPerSubperiod]), macro_commodities)
@@ -114,8 +114,20 @@ function create_time_data(
     commodities::Dict{Symbol,DataType}
 )
     all_timedata = Dict{Symbol,TimeData}()
+    time_data_keys = keys(time_data[:HoursPerTimeStep])
     for (sym, type) in commodities
-        all_timedata[sym] = create_commodity_timedata(sym, type, time_data)
+        if sym in time_data_keys
+            all_timedata[sym] = create_commodity_timedata(sym, type, time_data)
+        else
+            # Check if sym is any of supertypes(type), and if so load the time data from there
+            for supertype in supertypes(type)
+                if Symbol(supertype) in time_data_keys
+                    @debug "Using time data from $(supertype) for $(sym)"
+                    all_timedata[sym] = create_commodity_timedata(Symbol(supertype), type, time_data)
+                    break
+                end
+            end
+        end
     end
     return all_timedata
 end

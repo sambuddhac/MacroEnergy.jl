@@ -12,18 +12,21 @@ function commodity_types(m::Module = Macro)
     return COMMODITY_TYPES
 end
 
-function make_commodity(new_commodity::String)
-    s = Meta.parse("abstract type $new_commodity end")
-    return eval(s)
+function make_commodity(new_commodity::Union{String,Symbol})
+    s = Meta.parse("abstract type $new_commodity <: Commodity end")
+    eval(s)
+    return nothing
 end
 
-function make_commodity(new_commodity::String, parent_type::Symbol)
+function make_commodity(new_commodity::Union{String,Symbol}, parent_type::Union{String,Symbol})
     s = Meta.parse("abstract type $new_commodity <: $parent_type end")
-    return eval(s)
+    eval(s)
+    return nothing
 end
 
-function make_commodity(new_commodity::String, parent_type::DataType)
-    return make_commodity(new_commodity, Base.typename(parent_type).name)
+function make_commodity(new_commodity::Union{String,Symbol}, parent_type::DataType)
+    make_commodity(new_commodity, typesymbol(parent_type))
+    return nothing
 end
 
 function load_commodities(path::AbstractString, rel_path::AbstractString)
@@ -67,6 +70,36 @@ function load_commodities(data::AbstractDict{Symbol,Any})
     return load_commodities(data[:commodities])
 end
 
+function load_commodities(commodities::AbstractVector{<:Any}, rel_path::AbstractString="")
+    macro_commodities = commodity_types()
+    sub_commodities = Vector{Dict{Symbol,Any}}()
+    for commodity in commodities
+        if commodity isa Dict
+        end
+        if commodity isa AbstractString
+            if Symbol(commodity) ∉ keys(macro_commodities)
+                error("Unknown commodity: $commodity")
+            end
+        elseif commodity isa Dict && haskey(commodity, :name) && commodity[:name] ∉ keys(commodity_types()) && haskey(commodity, :acts_like)
+            push!(sub_commodities, commodity)
+        else
+            error("Invalid commodity format: $commodity")
+        end
+    end
+    for commodity in sub_commodities
+        new_name = Symbol(commodity[:name])
+        parent_name = Symbol(commodity[:acts_like])
+        commodity_keys = keys(commodity_types())
+        if parent_name ∈ commodity_keys
+            make_commodity(new_name, parent_name)
+            COMMODITY_TYPES[new_name] = getfield(Macro, new_name)
+        else
+            error("Unknown parent commodity: $parent_name")
+        end
+    end
+    return commodity_types()
+end
+
 load_commodities(commodities::AbstractVector{<:AbstractString}) =
     load_commodities(Symbol.(commodities))
 
@@ -80,7 +113,6 @@ function load_commodities(commodities::Vector{Symbol})
     filter!(((key, _),) -> key in commodities, macro_commodities)
     return macro_commodities
 end
-
 
 function validate_commodities(
     commodities,
