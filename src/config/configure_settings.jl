@@ -1,6 +1,7 @@
 function default_settings()
     return (
-        ConstraintScaling = true,
+        ConstraintScaling = false,
+        WriteSubcommodities = false,
     )
 end
 

@@ -21,7 +21,7 @@ function generate_system!(system::System, system_data::AbstractDict{Symbol,Any})
     system.settings = configure_settings(system_data[:settings], system.data_dirpath)
 
     # Load the commodities
-    system.commodities = load_commodities(system_data[:commodities], system.data_dirpath)
+    system.commodities = load_commodities(system_data[:commodities], system.data_dirpath, system.settings.WriteSubcommodities)
 
     # Load the time data
     system.time_data =
