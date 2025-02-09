@@ -7,7 +7,7 @@ Base.@kwdef mutable struct Location <: MacroObject
 end
 
 function add_node!(loc::Location, node::Node{T}, replace::Bool = false) where {T<:Commodity}
-    node_commodity = Symbol(commodity_type(node))
+    node_commodity = typesymbol(commodity_type(node))
     # If a node of the same type exists then throw an error unless replace is true
     if ((node_commodity in loc.commodities) || (node_commodity in keys(loc.nodes))) &&
        !replace
@@ -19,5 +19,5 @@ end
 
 function refresh_commodities_list!(loc::Location)
     loc.commodities =
-        Set{Symbol}(Symbol(commodity_type(node)) for node in values(loc.nodes))
+        Set{Symbol}(typesymbol(commodity_type(node)) for node in values(loc.nodes))
 end

@@ -173,12 +173,12 @@ end
 # This is called when the "Type" of the object is a commodity
 # We can do:
 #   Commodity -> Node{Commodity}
-#   
+
 function make(commodity::Type{<:Commodity}, data::AbstractDict{Symbol,Any}, system)
 
     data = process_data(data)
 
-    node = Node(data, system.time_data[Symbol(commodity)], commodity)
+    node = Node(data, system.time_data[typesymbol(commodity)], commodity)
 
     #### Note that not all nodes have a balance constraint, e.g., a NG source node does not have one. So the default should be empty.
     node.constraints = get(data, :constraints, Vector{AbstractTypeConstraint}())

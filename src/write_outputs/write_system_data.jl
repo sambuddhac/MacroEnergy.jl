@@ -52,7 +52,7 @@ end
 function prepare_to_json(node::Node)
     fields_to_exclude = [:policy_budgeting_vars, :policy_slack_vars]
     return Dict{Symbol,Any}(
-        :type => Symbol(commodity_type(node)),
+        :type => typesymbol(commodity_type(node)),
         :instance_data => prepare_to_json(node, fields_to_exclude),
     )
 end
@@ -131,7 +131,7 @@ end
 
 # TimeData field of MacroObjects are written as the commodity type
 function prepare_to_json(timedata::TimeData)
-    return Symbol(commodity_type(timedata))
+    return typesymbol(commodity_type(timedata))
 end
 
 function prepare_to_json(data::Dict{Symbol,TimeData})
