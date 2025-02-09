@@ -98,7 +98,7 @@ end
 function test_load(e_in::AbstractEdge{T}, e_true::S) where {T<:Commodity,S<:JSON3.Object}
     @test e_in.start_vertex.id == Symbol(e_true.start_vertex)
     @test e_in.end_vertex.id == Symbol(e_true.end_vertex)
-    @test Symbol(commodity_type(e_in.timedata)) == Symbol(e_true.timedata)
+    @test typesymbol(commodity_type(e_in.timedata)) == Symbol(e_true.timedata)
     @test e_in.unidirectional == get(e_true, :unidirectional, true)
     @test e_in.has_capacity == get(e_true, :has_capacity, false)
     @test e_in.can_retire == get(e_true, :can_retire, false)
@@ -143,7 +143,7 @@ function test_load(n_in::Node{T}, n_true::S) where {T<:Commodity,S<:JSON3.Object
     @test Symbol(T) == Symbol(n_true.type)
     n_true_instance_data = n_true.instance_data
     @test n_in.id == Symbol(n_true_instance_data.id)
-    @test Symbol(commodity_type(n_in.timedata)) == Symbol(n_true_instance_data.timedata)
+    @test typesymbol(commodity_type(n_in.timedata)) == Symbol(n_true_instance_data.timedata)
     @test n_in.demand == get(n_true_instance_data, :demand, Vector{Float64}())
     @test n_in.price == get(n_true_instance_data, :price, Float64[])
     @test n_in.max_nsd == get(n_true_instance_data, :max_nsd, [0.0])
@@ -167,14 +167,14 @@ end
 
 function test_load(t_in::Transformation, t_true::T) where {T<:JSON3.Object}
     @test t_in.id == Symbol(t_true.id)
-    @test Symbol(commodity_type(t_in.timedata)) == Symbol(t_true.timedata)
+    @test typesymbol(commodity_type(t_in.timedata)) == Symbol(t_true.timedata)
     test_load(t_in.constraints, get(t_true, :constraints, Vector{AbstractTypeConstraint}()))
     return nothing
 end
 
 function test_load(s_in::AbstractStorage{T}, s_true::S) where {T<:Commodity,S<:JSON3.Object}
     @test s_in.id == Symbol(s_true.id)
-    @test Symbol(commodity_type(s_in.timedata)) == Symbol(s_true.timedata)
+    @test typesymbol(commodity_type(s_in.timedata)) == Symbol(s_true.timedata)
     @test s_in.capacity_storage == get(s_true, :capacity_storage, 0.0)
     @test s_in.new_capacity_storage == get(s_true, :new_capacity_storage, 0.0)
     @test s_in.ret_capacity_storage == get(s_true, :ret_capacity_storage, 0.0)
