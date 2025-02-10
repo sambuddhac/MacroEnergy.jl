@@ -23,8 +23,6 @@ macro AbstractStorageBaseAttributes()
     retired_capacity::Union{AffExpr,Float64} = 0.0
     retired_units::Union{JuMPVariable,Float64} = 0.0
     spillage_edge::Union{Nothing,AbstractEdge} = nothing
-    capacity::Union{AffExpr,Float64} = 0.0
-    capacity_size::Float64 = 1.0
     storage_level::Union{JuMPVariable,Vector{Float64}} = Vector{VariableRef}()
     end)
 end
