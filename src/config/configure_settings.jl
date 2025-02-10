@@ -1,5 +1,7 @@
 function default_settings()
-    return (Scaling = false,)
+    return (
+        ConstraintScaling = true,
+    )
 end
 
 namedtuple(d::T) where {T<:AbstractDict} = (; (Symbol(k) => v for (k, v) in d)...)
@@ -39,7 +41,7 @@ function configure_settings(model_settings::NamedTuple)
 end
 
 function validate_settings(settings::NamedTuple)
-    @assert settings[:Scaling] ∈ (0, 1)
+    @assert settings[:ConstraintScaling] ∈ (false, true)
 end
 
 function validate_names(settings::NamedTuple)

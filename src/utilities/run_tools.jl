@@ -18,7 +18,10 @@ function run_case(case_path::AbstractString=@__DIR__; lazy_load::Bool=true, opti
 
     set_optimizer_attributes(model, "BarConvTol"=>1e-3,"Crossover" => 0, "Method" => 2)
 
-    scale_constraints!(model)
+    if system.settings.ConstraintScaling
+        @info "Scaling constraints and RHS"
+        scale_constraints!(model)
+    end
 
     optimize!(model)
 
