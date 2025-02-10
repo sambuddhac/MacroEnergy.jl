@@ -176,5 +176,6 @@ export AbstractAsset,
     ThermalPowerCCS,
     Transformation,
     Uranium,
-    VRE
+    VRE,
+    run_case
 end # module Macro
