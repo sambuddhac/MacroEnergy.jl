@@ -1,24 +1,33 @@
-function run_case(case_path::AbstractString=@__DIR__; optimizer::DataType=HiGHS.Optimizer, lazy_load::Bool=true)
+function run_case(case_path::AbstractString=@__DIR__; lazy_load::Bool=true, optimizer::DataType=HiGHS.Optimizer, optimizer_env::Any=missing)
     println("###### ###### ######")
     println("Running case at $(case_path)")
 
-    system = Macro.load_system(case_path; lazy_load=lazy_load)
+    system = load_system(case_path; lazy_load=lazy_load)
 
-    model = Macro.generate_model(system)
+    model = generate_model(system)
 
-    Macro.set_optimizer(model, optimizer);
+    if !ismissing(optimizer_env)
+        try 
+            optimizer_with_env = optimizer(optimizer_env)
+            set_optimizer(model, () -> optimizer_with_env);
+        catch
+            error("Error creating optimizer with environment. Check that the environment is valid.")
+        end
+    else
+        set_optimizer(model, optimizer);
+    end
 
-    Macro.set_optimizer_attributes(model, "BarConvTol"=>1e-3,"Crossover" => 0, "Method" => 2)
+    set_optimizer_attributes(model, "BarConvTol"=>1e-3,"Crossover" => 0, "Method" => 2)
 
     scale_constraints!(model)
 
-    Macro.optimize!(model)
+    optimize!(model)
 
-    capacity_results = Macro.get_optimal_asset_capacity(system)
+    capacity_results = get_optimal_asset_capacity(system)
 
     results_dir = joinpath(case_path, "results")
     mkpath(results_dir)
-    Macro.write_csv(joinpath(results_dir, "capacity.csv"), capacity_results)
+    write_csv(joinpath(results_dir, "capacity.csv"), capacity_results)
 
     return system, model
 end
