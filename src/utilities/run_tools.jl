@@ -16,7 +16,11 @@ function run_case(case_path::AbstractString=@__DIR__; lazy_load::Bool=true, opti
         set_optimizer(model, optimizer);
     end
 
-    set_optimizer_attributes(model, "BarConvTol"=>1e-3,"Crossover" => 0, "Method" => 2)
+    try
+        set_optimizer_attributes(model, "BarConvTol"=>1e-3,"Crossover" => 0, "Method" => 2)
+    catch
+        @warn("Error setting optimizer attributes. Check that the optimizer is valid.")
+    end
 
     if system.settings.ConstraintScaling
         @info "Scaling constraints and RHS"

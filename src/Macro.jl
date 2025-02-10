@@ -4,6 +4,7 @@ using CSV, JSON3, GZip
 using DuckDB
 using DataFrames
 using JuMP
+using HiGHS
 using Revise
 using InteractiveUtils
 using Printf: @printf
