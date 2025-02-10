@@ -8,8 +8,7 @@ function run_case(case_path::AbstractString=@__DIR__; lazy_load::Bool=true, opti
 
     if !ismissing(optimizer_env)
         try 
-            optimizer_with_env = optimizer(optimizer_env)
-            set_optimizer(model, () -> optimizer_with_env);
+            set_optimizer(model, () -> optimizer(optimizer_env));
         catch
             error("Error creating optimizer with environment. Check that the environment is valid.")
         end
