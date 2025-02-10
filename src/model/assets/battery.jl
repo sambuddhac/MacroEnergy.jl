@@ -17,7 +17,7 @@ end
         - existing_capacity: Float64
         - investment_cost: Float64
         - fixed_om_cost: Float64
-        - storage_loss_fraction: Float64
+        - loss_fraction: Float64
         - min_duration: Float64
         - max_duration: Float64
         - min_storage_level: Float64

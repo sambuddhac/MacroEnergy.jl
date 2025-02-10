@@ -160,7 +160,7 @@ function operation_model!(g::Storage, model::Model)
             model,
             [t in time_interval(g)],
             -storage_level(g, t) +
-            (1 - storage_loss_fraction(g)) *
+            (1 - loss_fraction(g)) *
             storage_level(g, timestepbefore(t, 1, subperiods(g)))
         )
 
@@ -264,7 +264,7 @@ function planning_model!(g::LongDurationStorage, model::Model)
     NPeriods = length(MODELED_SUBPERIODS);
 
     @constraint(model,[r in MODELED_SUBPERIODS], 
-        storage_initial(g, r) <= capacity_storage(g)
+        storage_initial(g, r) <= capacity(g)
     )
 
     @constraint(model, [r in MODELED_SUBPERIODS], 
@@ -292,11 +292,11 @@ function operation_model!(g::LongDurationStorage, model::Model)
             [t in time_interval(g)],
             if t ∈ STARTS 
                 -storage_level(g, t) +
-                (1 - storage_loss_fraction(g)) *
+                (1 - loss_fraction(g)) *
                 (storage_level(g, timestepbefore(t, 1, subperiods(g))) - storage_change(g, current_subperiod(g,t)))
             else
                 -storage_level(g, t) +
-                (1 - storage_loss_fraction(g)) *
+                (1 - loss_fraction(g)) *
                 storage_level(g, timestepbefore(t, 1, subperiods(g)))
             end
         )
