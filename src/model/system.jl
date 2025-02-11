@@ -52,3 +52,26 @@ function find_node(nodes_list::Vector{Node}, id::Symbol)
     error("Vertex $id not found")
     return nothing
 end
+
+# The following functions are used to extract all the assets of a given type from a System or a Vector of Assets
+get_assets_sametype(system::System, asset_type::T) where T<:Type{<:AbstractAsset} = get_assets_sametype(system.assets, asset_type)
+
+# Function to extract all the nodes, edges, storages, and transformations from a system
+# If return_ids_map=True, a `Dict` is also returned mapping edge ids to the corresponding asset objects.
+get_nodes(system::System) = system.locations
+get_edges(system::System; return_ids_map::Bool=false) = return_ids_map ? get_macro_objs_with_map(system, AbstractEdge) : get_macro_objs(system, AbstractEdge)
+get_storage(system::System; return_ids_map::Bool=false) = return_ids_map ? get_macro_objs_with_map(system, Storage) : get_macro_objs(system, Storage)
+get_transformations(system::System; return_ids_map::Bool=false) = return_ids_map ? get_macro_objs_with_map(system, Transformation) : get_macro_objs(system, Transformation)
+
+# Function to extract the edges with capacity variables from a system.
+# If return_ids_map=True, a `Dict` is also returned mapping edge ids to the corresponding asset objects.  
+function edges_with_capacity_variables(system::System; return_ids_map::Bool=false)
+    if return_ids_map
+        edges, edge_asset_map = get_edges(system, return_ids_map=true)
+        edges_with_capacity = edges_with_capacity_variables(edges)
+        edges_with_capacity_asset_map = filter(edge -> edge[1] in id.(edges_with_capacity), edge_asset_map)
+        return edges_with_capacity, edges_with_capacity_asset_map
+    else
+        return edges_with_capacity_variables(system.assets)
+    end
+end

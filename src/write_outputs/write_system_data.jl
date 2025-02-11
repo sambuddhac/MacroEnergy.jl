@@ -12,7 +12,7 @@
 # end
 function write_system_data(
     system_data::AbstractDict{Symbol,Any},
-    file_path::AbstractString = "",
+    file_path::AbstractString="",
 )::Nothing
     if file_path == ""
         file_path = joinpath(pwd(), "printed_system_data.json")
@@ -59,7 +59,7 @@ end
 
 function prepare_to_json(asset::AbstractAsset)
     asset_data = Dict{Symbol,Any}(
-        :type => typeof(asset),
+        :type => Base.typename(typeof(asset)).name,  # e.g., this will give just "ThermalPower" instead of "ThermalPower{NaturalGas}"
         :instance_data => Dict{Symbol,Any}(
             :edges => Dict{Symbol,Any}(),
             :transforms => Dict{Symbol,Any}(),
@@ -71,6 +71,10 @@ function prepare_to_json(asset::AbstractAsset)
         data = getfield(asset, f)
         if isa(data, AbstractEdge)
             asset_data[:instance_data][:edges][f] = prepare_to_json(data)
+            asset_data[:instance_data][:edges][f][:type] = commodity_type(data)
+            if isa(data, EdgeWithUC)
+                asset_data[:instance_data][:edges][f][:uc] = true
+            end
         elseif isa(data, Transformation)
             asset_data[:instance_data][:transforms] = prepare_to_json(data)
         elseif isa(data, Storage)
@@ -96,8 +100,8 @@ function prepare_to_json(storage::AbstractStorage)
     return storage_data
 end
 
-# This function prepares MacroObject objects (e.g., Storage, Transformation, Nodes, Edges). Note: edges have their own function
-function prepare_to_json(object::MacroObject, fields_to_exclude::Vector{Symbol} = Symbol[])
+# This function prepares MacroObject objects (e.g., Storage, Transformation, Nodes, Edges)
+function prepare_to_json(object::MacroObject, fields_to_exclude::Vector{Symbol}=Symbol[])
     object_data = Dict{Symbol,Any}()
     for field in filter(x -> !in(x, fields_to_exclude), Base.fieldnames(typeof(object)))
         data = getfield(object, field)

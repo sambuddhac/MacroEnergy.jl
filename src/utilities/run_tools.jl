@@ -28,12 +28,16 @@ function run_case(case_path::AbstractString=@__DIR__; lazy_load::Bool=true, opti
     end
 
     optimize!(model)
-
-    capacity_results = get_optimal_asset_capacity(system)
-
+    
+    ## Output results
     results_dir = joinpath(case_path, "results")
     mkpath(results_dir)
-    write_csv(joinpath(results_dir, "capacity.csv"), capacity_results)
+    
+    # Capacity results
+    write_capacity_results(joinpath(results_dir, "capacity.csv"), system)
+    
+    # Cost results
+    write_costs(joinpath(results_dir, "costs.csv"), model)
 
     return system, model
 end

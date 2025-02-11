@@ -58,7 +58,6 @@ end
 Storage(id::Symbol, data::Dict{Symbol,Any}, time_data::TimeData, commodity::DataType) =
     make_storage(id, data, time_data, commodity)
 
-
 ######### Storage interface #########
 all_constraints(g::AbstractStorage) = g.constraints;
 capacity_storage(g::AbstractStorage) = g.capacity_storage;

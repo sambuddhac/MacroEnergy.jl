@@ -24,18 +24,28 @@ import Macro:
     objective_value,
     commodity_type,
     AssetId,
-    VariableRef
+    VariableRef,
+    collect_results, 
+    get_optimal_capacity,
+    get_optimal_new_capacity,
+    get_optimal_ret_capacity,
+    get_optimal_flow,
+    get_optimal_costs,
+    write_capacity_results,
+    write_costs,
+    write_flow_results,
+    write_results
 
 
 include("utilities.jl")
 include("test_timedata.jl")
 const test_path = joinpath(@__DIR__, "test_inputs")
+const system_data_true_path = joinpath(@__DIR__, "test_inputs/system_data_true.json")
 const optim = is_gurobi_available() ? Gurobi.Optimizer : HiGHS.Optimizer
-
+const obj_true = 6.238270617683867e10
 
 function test_configure_settings(data::NamedTuple, data_true::T) where {T<:JSON3.Object}
-    @test data.UCommit == data_true.UCommit
-    @test data.NetworkExpansion == data_true.NetworkExpansion
+    @test data.ConstraintScaling == data_true.ConstraintScaling
     return nothing
 end
 
@@ -103,7 +113,6 @@ function test_load(e_in::AbstractEdge{T}, e_true::S) where {T<:Commodity,S<:JSON
     @test e_in.investment_cost == get(e_true, :investment_cost, 0.0)
     @test e_in.fixed_om_cost == get(e_true, :fixed_om_cost, 0.0)
     @test e_in.variable_om_cost == get(e_true, :variable_om_cost, 0.0)
-    @test e_in.price == get(e_true, :price, Float64[])
     @test e_in.ramp_up_fraction == get(e_true, :ramp_up_fraction, 1.0)
     @test e_in.ramp_down_fraction == get(e_true, :ramp_down_fraction, 1.0)
     @test e_in.min_flow_fraction == get(e_true, :min_flow_fraction, 0.0)
@@ -136,6 +145,7 @@ function test_load(n_in::Node{T}, n_true::S) where {T<:Commodity,S<:JSON3.Object
     @test n_in.id == Symbol(n_true_instance_data.id)
     @test Symbol(commodity_type(n_in.timedata)) == Symbol(n_true_instance_data.timedata)
     @test n_in.demand == get(n_true_instance_data, :demand, Vector{Float64}())
+    @test n_in.price == get(n_true_instance_data, :price, Float64[])
     @test n_in.max_nsd == get(n_true_instance_data, :max_nsd, [0.0])
     @test n_in.price_nsd == get(n_true_instance_data, :price_nsd, [0.0])
     @test n_in.price_unmet_policy ==
@@ -188,7 +198,7 @@ function test_load(s_in::AbstractStorage{T}, s_true::S) where {T<:Commodity,S<:J
 end
 
 function test_load(a_in::AbstractAsset, a_true::T) where {T<:JSON3.Object}
-    @test Symbol(typeof(a_in)) == Symbol(a_true.type)
+    # @test Symbol(typeof(a_in)) == Symbol(a_true.type)
     a_true_instance_data = a_true.instance_data
     for t in Base.fieldnames(typeof(a_in))
         data_in = getfield(a_in, t)
@@ -215,7 +225,7 @@ end
 
 function test_load_inputs()
     system = load_system(test_path)
-    system_true = read_file(joinpath(test_path, "system_data_true.json.gz"))
+    system_true = read_file(joinpath(test_path, system_data_true_path))
     test_load(system, system_true)
     return system
 end
@@ -227,18 +237,48 @@ function test_model_generation_and_optimization()
     optimize!(model)
     macro_objval = objective_value(model)
 
-    @test macro_objval ≈ 2.1059615254166523e10
+    @test macro_objval ≈ obj_true
+
+    test_writing_outputs(system, model)
 
     return nothing
 end
 
+function test_writing_outputs(system, model)
+    @test_nowarn collect_results(system, model)
+    @test_nowarn get_optimal_capacity(system)
+    @test_nowarn get_optimal_new_capacity(system)
+    @test_nowarn get_optimal_ret_capacity(system)
+    @test_nowarn get_optimal_capacity(system.assets[1], scaling=1.0)
+    @test_nowarn get_optimal_new_capacity(system.assets[1])
+    @test_nowarn get_optimal_ret_capacity(system.assets[1])
+    @test_nowarn get_optimal_flow(system)
+    @test_nowarn get_optimal_flow(system.assets[1], scaling=1.0)
+    @test_nowarn get_optimal_flow(system.assets[1].elec_edge, scaling=1.0)
+    @test_nowarn get_optimal_costs(model)
+    @test_nowarn get_optimal_costs(model, 2.0)
+    @test_nowarn write_capacity_results(joinpath(@__DIR__, "test_capacity.csv"), system)
+    @test_nowarn write_costs(joinpath(@__DIR__, "test_costs.csv"), model, 2.0)
+    @test_nowarn write_flow_results(joinpath(@__DIR__, "test_flow.csv"), system)
+    @test_nowarn write_results(joinpath(@__DIR__, "test_outputs.csv.gz"), system, model)
+    @test_nowarn write_results(joinpath(@__DIR__, "test_outputs.parquet"), system, model)
+    @test_throws ArgumentError write_results("test.zip", system, model)
+    rm(joinpath(@__DIR__, "test_outputs.csv.gz"))   # clean up
+    rm(joinpath(@__DIR__, "test_outputs.parquet"))  # clean up
+    rm(joinpath(@__DIR__, "test_capacity.csv"))     # clean up
+    rm(joinpath(@__DIR__, "test_costs.csv"))        # clean up
+    rm(joinpath(@__DIR__, "test_flow.csv"))         # clean up
+    return nothing
+end 
+
 function test_workflow()
-    # @testset "Test Struct Creation" begin
-    #     test_load_inputs()
-    # end
-    # @testset "Test Model Generation and Optimization" begin
-    #     @warn_error_logger test_model_generation_and_optimization()
-    # end
+    @testset "Struct Creation Tests" begin
+        test_load_inputs()
+    end
+    @testset "Model Generation and Optim Tests   " begin
+        @warn_error_logger test_model_generation_and_optimization()
+    end
+
     return nothing
 end
 

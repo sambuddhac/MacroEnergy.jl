@@ -1,6 +1,7 @@
 module Macro
 
-using CSV, JSON3, GZip
+using CSV, JSON3, GZip, Parquet2
+using Dates
 using DuckDB
 using DataFrames
 using JuMP
@@ -69,6 +70,7 @@ end
 include_all_in_folder("utilities")
 
 # include files
+include("model/units.jl")
 include("model/time_management.jl")
 include("model/networks/vertex.jl")
 include("model/networks/node.jl")
@@ -77,7 +79,6 @@ include("model/networks/transformation.jl")
 include("model/networks/location.jl")
 include("model/networks/edge.jl")
 include("model/networks/asset.jl")
-
 include("model/system.jl")
 include("model/networks/macroobject.jl")
 
@@ -114,8 +115,10 @@ include("benders_utilities.jl")
 
 include("model/scaling.jl")
 
-include("write_outputs/assets_capacity.jl")
-include("write_outputs/utilities.jl")
+include("write_outputs/capacity.jl")
+include("write_outputs/flow.jl")
+include("write_outputs/write_output_utilities.jl")
+include("write_outputs/costs.jl")
 include("write_outputs/write_system_data.jl")
 
 export AbstractAsset,
@@ -130,6 +133,7 @@ export AbstractAsset,
     CO2CapConstraint,
     CO2Captured,
     CapacityConstraint,
+    collect_results,
     Commodity,
     Edge,
     EdgeWithUC,
@@ -138,6 +142,11 @@ export AbstractAsset,
     ElectricDAC,
     FuelCell,
     GasStorage,
+    get_optimal_capacity, 
+    get_optimal_costs,
+    get_optimal_flow,
+    get_optimal_new_capacity,
+    get_optimal_ret_capacity,
     HydroRes,
     Hydrogen,
     HydrogenLine,
@@ -163,6 +172,7 @@ export AbstractAsset,
     PolicyConstraint,
     PowerLine,
     RampingLimitConstraint,
+    run_case,
     Storage,
     StorageCapacityConstraint,
     StorageChargeDischargeRatioConstraint,
@@ -177,5 +187,10 @@ export AbstractAsset,
     Transformation,
     Uranium,
     VRE,
-    run_case
+    write_capacity_results,
+    write_costs,
+    write_dataframe,
+    write_flow_results,
+    write_results
+    
 end # module Macro
