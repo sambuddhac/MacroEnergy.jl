@@ -80,6 +80,13 @@ Get the optimal retired capacity values for all assets/edges in a system.
 # Example
 ```julia
 get_optimal_ret_capacity(system)
+153×8 DataFrame
+ Row │ commodity    commodity_subtype  zone           resource_id                        component_id                       type              variable      value    
+     │ Symbol       Symbol             Symbol         Symbol                             Symbol                             Symbol            Symbol        Float64  
+─────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   1 │ Biomass      capacity           bioherb_SE     SE_BECCS_Electricity_Herb          SE_BECCS_Electricity_Herb_biomas…  BECCSElectricity  ret_capacity  0.0
+   2 │ Biomass      capacity           bioherb_MIDAT  MIDAT_BECCS_Electricity_Herb       MIDAT_BECCS_Electricity_Herb_bio…  BECCSElectricity  ret_capacity  0.0
+   3 │ Biomass      capacity           bioherb_NE     NE_BECCS_Electricity_Herb          NE_BECCS_Electricity_Herb_biomas…  BECCSElectricity  ret_capacity  0.0
 ```
 """
 get_optimal_ret_capacity(system::System) = get_optimal_capacity_by_field(system, ret_capacity)

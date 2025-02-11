@@ -18,6 +18,7 @@ makedocs(;
             "Assets" => "assets.md",
             "Constraints" => "constraints.md"
         ],
+        "Output" => "output.md",
         "Modeling with Macro" => [
             "How to build a sector" => "build_sectors.md",
             "How to create an example case" => "create_example_case.md",

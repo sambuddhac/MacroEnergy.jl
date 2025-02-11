@@ -1,11 +1,12 @@
 # Utility function to get the optimal capacity by macro object field
 """
-    get_optimal_flow(system::System)
+    get_optimal_flow(system::System, scaling::Float64=1.0)
 
 Get the optimal flow values for all edges in a system.
 
 # Arguments
 - `system::System`: The system containing the all edges to output
+- `scaling::Float64`: The scaling factor for the results.
 
 # Returns
 - `DataFrame`: A dataframe containing the optimal flow values for all edges, with missing columns removed
@@ -32,12 +33,13 @@ function get_optimal_flow(system::System, scaling::Float64=1.0)
 end
 
 """
-    get_optimal_flow(asset::AbstractAsset)
+    get_optimal_flow(asset::AbstractAsset, scaling::Float64=1.0)
 
 Get the optimal flow values for all edges in an asset.
 
 # Arguments
 - `asset::AbstractAsset`: The asset containing the edges to analyze
+- `scaling::Float64`: The scaling factor for the results.
 
 # Returns
 - `DataFrame`: A dataframe containing the optimal flow values for all edges, with missing columns removed
@@ -57,12 +59,13 @@ function get_optimal_flow(asset::AbstractAsset; scaling::Float64=1.0)
 end
 
 """
-    get_optimal_flow(edge::AbstractEdge)
+    get_optimal_flow(edge::AbstractEdge, scaling::Float64=1.0)
 
 Get the optimal flow values for an edge.
 
 # Arguments
 - `edge::AbstractEdge`: The edge to analyze
+- `scaling::Float64`: The scaling factor for the results.
 
 # Returns
 - `DataFrame`: A dataframe containing the optimal flow values for the edge, with missing columns removed

@@ -255,14 +255,14 @@ end
 
 # Function to collect all the outputs from a system and return them as a DataFrame
 """
-    collect_results(system::System, model::Model)
+    collect_results(system::System, model::Model, scaling::Float64=1.0)
 
 Returns a `DataFrame` with all the results after the optimization is performed. 
 
 # Arguments
 - `system::System`: The system object containing the case inputs.
 - `model::Model`: The model being optimized.
-
+- `scaling::Float64`: The scaling factor for the results.
 # Returns
 - `DataFrame`: A `DataFrame containing all the outputs from a system.
 
