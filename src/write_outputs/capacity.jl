@@ -1,16 +1,14 @@
 # Utility function to get the optimal capacity by macro object field
-function get_optimal_capacity_by_field(system::System, capacity_func::Function, to_scale::Bool=false)
+function get_optimal_capacity_by_field(system::System, capacity_func::Function, scaling::Float64=1.0)
     @info "Getting optimal values for $(Symbol(capacity_func)) for the system."
-    scaling = system.settings.Scaling && to_scale ? ScalingFactor : 1.0
     edges, edge_asset_idmap = edges_with_capacity_variables(system, return_ids_map=true)
     asset_capacity = get_optimal_vars(edges, capacity_func, scaling, edge_asset_idmap)
     df = convert_to_dataframe(asset_capacity)
     df[!, (!isa).(eachcol(df), Vector{Missing})] # remove missing columns
 end
 
-function get_optimal_capacity_by_field(asset::AbstractAsset, capacity_func::Function, to_scale::Bool=false, scaling::Float64=1.0)
+function get_optimal_capacity_by_field(asset::AbstractAsset, capacity_func::Function, scaling::Float64=1.0)
     @info "Getting optimal values for $(Symbol(capacity_func)) for the asset $(id(asset))."
-    scaling = to_scale ? scaling : 1.0
     edges, edge_asset_idmap = edges_with_capacity_variables(asset, return_ids_map=true)
     asset_capacity = get_optimal_vars(edges, capacity_func, scaling, edge_asset_idmap)
     df = convert_to_dataframe(asset_capacity)
@@ -41,7 +39,7 @@ get_optimal_capacity(system)
    3 │ Electricity  capacity           elec_NE        existing_wind_NE                   existing_wind_NE_edge              VRE               capacity   3.6545
 ```
 """
-get_optimal_capacity(system::System) = get_optimal_capacity_by_field(system, capacity, true)
+get_optimal_capacity(system::System) = get_optimal_capacity_by_field(system, capacity)
 
 """
     get_optimal_new_capacity(system::System)
@@ -86,7 +84,7 @@ get_optimal_ret_capacity(system)
 """
 get_optimal_ret_capacity(system::System) = get_optimal_capacity_by_field(system, ret_capacity)
 
-get_optimal_capacity(asset::AbstractAsset; scaling::Float64=1.0) = get_optimal_capacity_by_field(asset, capacity, true, scaling)
+get_optimal_capacity(asset::AbstractAsset; scaling::Float64=1.0) = get_optimal_capacity_by_field(asset, capacity, scaling)
 get_optimal_new_capacity(asset::AbstractAsset) = get_optimal_capacity_by_field(asset, new_capacity)
 get_optimal_ret_capacity(asset::AbstractAsset) = get_optimal_capacity_by_field(asset, ret_capacity)
 

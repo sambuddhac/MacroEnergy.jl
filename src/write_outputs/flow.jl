@@ -23,9 +23,8 @@ get_optimal_flow(system)
       ...
 ```
 """
-function get_optimal_flow(system::System)
+function get_optimal_flow(system::System, scaling::Float64=1.0)
     @info "Getting optimal flow values for the system"
-    scaling = system.settings.Scaling ? ScalingFactor : 1.0
     edges, edge_asset_map = get_edges(system, return_ids_map=true)
     eflow = get_optimal_vars_timeseries(edges, flow, scaling, edge_asset_map)
     df = convert_to_dataframe(eflow)

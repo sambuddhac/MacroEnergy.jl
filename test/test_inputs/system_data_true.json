@@ -9,7 +9,7 @@
         "CO2Captured"
     ],
     "settings": {
-        "Scaling": false
+        "ConstraintScaling": false
     },
     "nodes": [
         {

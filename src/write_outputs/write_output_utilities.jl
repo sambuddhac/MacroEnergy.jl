@@ -279,9 +279,7 @@ collect_results(system, model)
       ...
 ```
 """
-function collect_results(system::System, model::Model)
-    scaling = system.settings.Scaling ? ScalingFactor : 1.0
-
+function collect_results(system::System, model::Model, scaling::Float64=1.0)
     edges, edge_asset_map = get_edges(system, return_ids_map=true)
 
     # capacity variables 

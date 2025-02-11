@@ -37,8 +37,7 @@ function run_case(case_path::AbstractString=@__DIR__; lazy_load::Bool=true, opti
     write_capacity_results(joinpath(results_dir, "capacity.csv"), system)
     
     # Cost results
-    cost_results = get_optimal_costs(system, model)
-    write_dataframe(joinpath(results_dir, "costs.csv"), cost_results)
+    write_costs(joinpath(results_dir, "costs.csv"), model)
 
     return system, model
 end
