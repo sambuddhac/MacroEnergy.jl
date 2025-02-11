@@ -4,9 +4,11 @@ using CSV, JSON3, GZip
 using DuckDB
 using DataFrames
 using JuMP
+using HiGHS
 using Revise
 using InteractiveUtils
 using Printf: @printf
+using MacroEnergySystemsScaling
 
 import Base: /
 
@@ -44,7 +46,6 @@ abstract type PolicyConstraint <: OperationConstraint end
 abstract type PlanningConstraint <: AbstractTypeConstraint end
 
 # global constants
-const ScalingFactor = 1e3;     # When equal to 1e3: MWh--> GWh, tons --> ktons, $/MWh --> M$/GWh, $/ton --> M$/kton
 const H2_MWh = 33.33 # MWh per tonne of H2
 const NG_MWh = 0.29307107 # MWh per MMBTU of NG 
 const AssetId = Symbol
@@ -175,5 +176,6 @@ export AbstractAsset,
     ThermalPowerCCS,
     Transformation,
     Uranium,
-    VRE
+    VRE,
+    run_case
 end # module Macro

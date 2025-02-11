@@ -22,11 +22,6 @@ function load_system(
         system_data = load_system_data(path; lazy_load = lazy_load)
         generate_system!(system, system_data)
 
-        if system.settings.Scaling
-            @info(" -- Scaling system")
-            scaling!(system)
-        end
-
         @info("Done loading system. It took $(round(time() - start_time, digits=2)) seconds")
         return system
     else

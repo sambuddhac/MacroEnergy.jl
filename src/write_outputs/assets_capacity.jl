@@ -6,11 +6,7 @@ function get_optimal_asset_capacity(system::System)
     asset_new_units = Vector{Float64}(undef, num_assets)
     asset_ret_units = Vector{Float64}(undef, num_assets)  
 
-    if system.settings.Scaling
-        scaling_factor = 1e3;
-    else
-        scaling_factor = 1;
-    end
+    scaling_factor = 1;
 
     for i in eachindex(system.assets)
         a = system.assets[i]
