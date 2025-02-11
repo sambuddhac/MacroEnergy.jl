@@ -1,6 +1,6 @@
 # Utility function to get the optimal capacity by macro object field
 function get_optimal_capacity_by_field(system::System, capacity_func::Function, scaling::Float64=1.0)
-    @info "Getting optimal values for $(Symbol(capacity_func)) for the system."
+    @debug " -- Getting optimal values for $(Symbol(capacity_func)) for the system."
     edges, edge_asset_idmap = edges_with_capacity_variables(system, return_ids_map=true)
     asset_capacity = get_optimal_vars(edges, capacity_func, scaling, edge_asset_idmap)
     df = convert_to_dataframe(asset_capacity)
@@ -8,7 +8,7 @@ function get_optimal_capacity_by_field(system::System, capacity_func::Function, 
 end
 
 function get_optimal_capacity_by_field(asset::AbstractAsset, capacity_func::Function, scaling::Float64=1.0)
-    @info "Getting optimal values for $(Symbol(capacity_func)) for the asset $(id(asset))."
+    @debug " -- Getting optimal values for $(Symbol(capacity_func)) for the asset $(id(asset))."
     edges, edge_asset_idmap = edges_with_capacity_variables(asset, return_ids_map=true)
     asset_capacity = get_optimal_vars(edges, capacity_func, scaling, edge_asset_idmap)
     df = convert_to_dataframe(asset_capacity)

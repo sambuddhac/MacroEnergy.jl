@@ -22,7 +22,7 @@ get_optimal_costs(model)
 ```
 """
 function get_optimal_costs(model::Model, scaling::Float64=1.0)
-    @info "Getting optimal costs for the system."
+    @debug " -- Getting optimal costs for the system."
     costs = prepare_costs(model, scaling)
     df = convert_to_dataframe(costs)
     df[!, (!isa).(eachcol(df), Vector{Missing})] # remove missing columns
