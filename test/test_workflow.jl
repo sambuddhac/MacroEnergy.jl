@@ -34,7 +34,8 @@ import Macro:
     write_capacity_results,
     write_costs,
     write_flow_results,
-    write_results
+    write_results,
+    typesymbol
 
 
 include("utilities.jl")
