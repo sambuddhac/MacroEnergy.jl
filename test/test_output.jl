@@ -7,7 +7,7 @@ import Macro:
     TimeData,
     capacity,
     new_capacity,
-    ret_capacity,
+    retired_capacity,
     flow,
     new_capacity_storage,
     storage_level,
@@ -275,7 +275,7 @@ function test_writing_output()
         # Test get_commodity_subtype for a vertex
         @test get_commodity_subtype(capacity) == :capacity
         @test get_commodity_subtype(new_capacity) == :capacity
-        @test get_commodity_subtype(ret_capacity) == :capacity
+        @test get_commodity_subtype(retired_capacity) == :capacity
         @test get_commodity_subtype(flow) == :flow
         @test get_commodity_subtype(storage_level) == :storage_level
         @test get_commodity_subtype(non_served_demand) == :non_served_demand

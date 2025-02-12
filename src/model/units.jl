@@ -15,7 +15,7 @@ end
 
 function unit(commodity::Symbol, f::Function)::Symbol
     unit = DEFAULT_UNITS[commodity]
-    if any(f .== [capacity, new_capacity, ret_capacity])
+    if any(f .== [capacity, new_capacity, retired_capacity])
         return convert_power_to_energy_unit(unit)
     elseif any(f .== [flow, non_served_demand, storage_level])
         return unit

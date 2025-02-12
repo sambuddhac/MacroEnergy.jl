@@ -28,7 +28,7 @@ import Macro:
     collect_results, 
     get_optimal_capacity,
     get_optimal_new_capacity,
-    get_optimal_ret_capacity,
+    get_optimal_retired_capacity,
     get_optimal_flow,
     get_optimal_costs,
     write_capacity_results,
@@ -177,7 +177,7 @@ function test_load(s_in::AbstractStorage{T}, s_true::S) where {T<:Commodity,S<:J
     @test Symbol(commodity_type(s_in.timedata)) == Symbol(s_true.timedata)
     @test s_in.capacity == get(s_true, :capacity, 0.0)
     @test s_in.new_capacity == get(s_true, :new_capacity, 0.0)
-    @test s_in.ret_capacity == get(s_true, :ret_capacity, 0.0)
+    @test s_in.retired_capacity == get(s_true, :retired_capacity, 0.0)
     @test s_in.storage_level == get(s_true, :storage_level, Vector{VariableRef}())
     @test s_in.min_capacity == get(s_true, :min_capacity, 0.0)
     s_true_max_capacity =
@@ -248,10 +248,10 @@ function test_writing_outputs(system, model)
     @test_nowarn collect_results(system, model)
     @test_nowarn get_optimal_capacity(system)
     @test_nowarn get_optimal_new_capacity(system)
-    @test_nowarn get_optimal_ret_capacity(system)
+    @test_nowarn get_optimal_retired_capacity(system)
     @test_nowarn get_optimal_capacity(system.assets[1], scaling=1.0)
     @test_nowarn get_optimal_new_capacity(system.assets[1])
-    @test_nowarn get_optimal_ret_capacity(system.assets[1])
+    @test_nowarn get_optimal_retired_capacity(system.assets[1])
     @test_nowarn get_optimal_flow(system)
     @test_nowarn get_optimal_flow(system.assets[1], scaling=1.0)
     @test_nowarn get_optimal_flow(system.assets[1].elec_edge, scaling=1.0)

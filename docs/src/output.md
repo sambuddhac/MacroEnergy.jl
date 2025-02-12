@@ -43,18 +43,18 @@ write_dataframe(joinpath(results_dir, "results.parquet"), results) # Write the d
 
 ## Capacity Results
 
-Results can be obtained either for the entire `system` or for specific `assets` using the [`get_optimal_capacity`](@ref), [`get_optimal_new_capacity`](@ref), and [`get_optimal_ret_capacity`](@ref) functions:
+Results can be obtained either for the entire `system` or for specific `assets` using the [`get_optimal_capacity`](@ref), [`get_optimal_new_capacity`](@ref), and [`get_optimal_retired_capacity`](@ref) functions:
 
 ```julia
 # System-level results
 capacity_results = get_optimal_capacity(system)
 new_capacity_results = get_optimal_new_capacity(system)
-ret_capacity_results = get_optimal_ret_capacity(system)
+retired_capacity_results = get_optimal_retired_capacity(system)
 
 # Asset-level results
 capacity_results = get_optimal_capacity(asset)
 new_capacity_results = get_optimal_new_capacity(asset)
-ret_capacity_results = get_optimal_ret_capacity(asset)
+retired_capacity_results = get_optimal_retired_capacity(asset)
 ```
 
 To write system-level capacity results directly to a file, users can use the [`write_capacity_results`](@ref) function:
