@@ -88,7 +88,7 @@
                     "storage":{
                         "investment_cost_storage": 873.013307,
                         "fixed_om_cost_storage":28.75810056,
-                        "storage_loss_fraction": 0.0,
+                        "loss_fraction": 0.0,
                         "min_storage_level": 0.3
                     }
                 },
@@ -125,7 +125,7 @@
                     "storage":{
                         "investment_cost_storage": 873.013307,
                         "fixed_om_cost_storage":28.75810056,
-                        "storage_loss_fraction": 0.0,
+                        "loss_fraction": 0.0,
                         "min_storage_level": 0.3
                     }
                 },
@@ -162,7 +162,7 @@
                     "storage":{
                         "investment_cost_storage": 873.013307,
                         "fixed_om_cost_storage":28.75810056,
-                        "storage_loss_fraction": 0.0,
+                        "loss_fraction": 0.0,
                         "min_storage_level": 0.3
                     }
                 }
