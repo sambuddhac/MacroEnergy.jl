@@ -415,7 +415,7 @@ function test_writing_output()
         result = get_optimal_vars(Storage[storage], new_capacity, 5.0, Dict{Symbol, Base.RefValue{<: AbstractAsset}}(:storage1 => asset_ref2))
         @test length(result) == 1
         @test result[1].commodity == :Electricity
-        @test result[1].commodity_subtype == :new_capacity
+        @test result[1].commodity_subtype == :capacity
         @test result[1].zone == :storage1
         @test result[1].resource_id == :asset2
         @test result[1].component_id == :storage1
@@ -425,7 +425,7 @@ function test_writing_output()
         result = get_optimal_vars(Storage[storage], (new_capacity), 5.0, Dict{Symbol, Base.RefValue{<: AbstractAsset}}(:storage1 => asset_ref2))
         @test length(result) == 1
         @test result[1].commodity == :Electricity
-        @test result[1].commodity_subtype == :new_capacity
+        @test result[1].commodity_subtype == :capacity
         @test result[1].zone == :storage1
         @test result[1].resource_id == :asset2
         @test result[1].component_id == :storage1
