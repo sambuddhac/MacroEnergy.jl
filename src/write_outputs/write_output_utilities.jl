@@ -313,6 +313,53 @@ function convert_to_dataframe(data::Vector{<:Tuple}, header::Vector)
     DataFrame(data, header)
 end
 
+"""
+    reshape_wide(df::DataFrame; variable_col::Symbol=:variable, value_col::Symbol=:value)
+
+Reshape a DataFrame from long to wide format.
+
+# Arguments
+- `df::DataFrame`: Input DataFrame
+- `variable_col::Symbol`: Column name containing variable names
+- `value_col::Symbol`: Column name containing values
+
+# Examples
+```julia
+df_long = DataFrame(id=[1,1,2,2], variable=[:a,:b,:a,:b], value=[10,30,20,40])
+df_wide = reshape_wide(df_long)
+```
+"""
+function reshape_wide(df::DataFrame; variable_col::Symbol=:variable, value_col::Symbol=:value)
+    if !all(col -> col ∈ propertynames(df), [variable_col, value_col])
+        throw(ArgumentError("DataFrame must contain '$variable_col' and '$value_col' columns for wide format"))
+    end
+    return unstack(df, variable_col, value_col)
+end
+
+"""
+    reshape_long(df::DataFrame; id_cols::Vector{Symbol}=Symbol[], view::Bool=true)
+
+Reshape a DataFrame from wide to long format.
+
+# Arguments
+- `df::DataFrame`: Input DataFrame
+- `id_cols::Vector{Symbol}`: Columns to use as identifiers when stacking
+- `view::Bool`: Whether to return a view of the DataFrame instead of a copy
+
+# Examples
+```julia
+df_wide = DataFrame(id=[1,2], a=[10,20], b=[30,40])
+df_long = reshape_long(df_wide, id_cols=[:id])
+```
+"""
+function reshape_long(df::DataFrame; id_cols::Vector{Symbol}=Symbol[], view::Bool=true)
+    if isempty(id_cols)
+        return stack(df, view=view)
+    else
+        return stack(df, Not(id_cols), view=view)
+    end
+end
+
 # Function to collect the results from a system and write them to a CSV file
 """
     write_results(file_path::AbstractString, system::System, model::Model)
