@@ -23,13 +23,23 @@ function refresh_commodities_list!(loc::Location)
         Set{Symbol}(typesymbol(commodity_type(node)) for node in values(loc.nodes))
 end
 
-function load_locations!(system::AbstractSystem, data::Vector{String})
+function load_locations!(system::AbstractSystem, rel_or_abs_path::String, data::Vector{String})
     locations = Location[]
     for loc_id in data
         # In the future, we could pre-emptively find the relevant nodes
         push!(locations, Location(;id=Symbol(loc_id), system=system))
     end
     system.locations = locations
+    return nothing
+end
+
+function load_locations!(system::AbstractSystem, rel_or_abs_path::String, data::AbstractDict{Symbol, Any})
+    if haskey(data, :path)
+        data = eager_load_json_inputs(data, rel_or_abs_path)
+        load_locations!(system, rel_or_abs_path, data[:locations])
+    else
+        error("Location data is not in the expected format")
+    end
     return nothing
 end
 
