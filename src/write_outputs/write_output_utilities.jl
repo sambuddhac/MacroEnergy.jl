@@ -23,8 +23,8 @@ OutputRow(commodity::Symbol, commodity_subtype::Union{Symbol,Missing}, zone::Sym
 
 ## Helper functions to extract optimal values of fields from MacroObjects ##
 # The following functions are used to extract the values after the model has been solved
-# from a list of MacroObjects (e.g., edges, and storage) and a list of fields (e.g., capacity, new_capacity, ret_capacity)
-#   e.g.: get_optimal_vars(edges, (capacity, new_capacity, ret_capacity))
+# from a list of MacroObjects (e.g., edges, and storage) and a list of fields (e.g., capacity, new_capacity, retired_capacity)
+#   e.g.: get_optimal_vars(edges, (capacity, new_capacity, retired_capacity))
 get_optimal_vars(objs::Vector{T}, field::Function, scaling::Float64=1.0, obj_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}=Dict{Symbol,Base.RefValue{<:AbstractAsset}}()) where {T<:Union{AbstractEdge,Storage}} =
     get_optimal_vars(objs, (field,), scaling, obj_asset_map)
 function get_optimal_vars(objs::Vector{T}, field_list::Tuple, scaling::Float64=1.0, obj_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}=Dict{Symbol,Base.RefValue{<:AbstractAsset}}()) where {T<:Union{AbstractEdge,Storage}}
@@ -157,7 +157,7 @@ get_commodity_name(obj::Storage) = Symbol(commodity_type(obj))
 # e.g., "capacity" for capacity variables, "flow" for flow variables, etc.
 function get_commodity_subtype(f::Function)
     field_name = Symbol(f)
-    if any(field_name .== (:capacity, :new_capacity, :ret_capacity))
+    if any(field_name .== (:capacity, :new_capacity, :retired_capacity))
         return :capacity
     # elseif f == various cost # TODO: implement this
     #     return :cost
@@ -283,7 +283,7 @@ function collect_results(system::System, model::Model, scaling::Float64=1.0)
     edges, edge_asset_map = get_edges(system, return_ids_map=true)
 
     # capacity variables 
-    field_list = (capacity, new_capacity, ret_capacity)
+    field_list = (capacity, new_capacity, retired_capacity)
     edges_with_capacity = edges_with_capacity_variables(edges)
     edges_with_capacity_asset_map = filter(edge -> edge[1] in id.(edges_with_capacity), edge_asset_map)
     ecap = get_optimal_vars(edges_with_capacity, field_list, scaling, edges_with_capacity_asset_map)

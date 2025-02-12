@@ -111,7 +111,7 @@ end
 
 function get_available_capacity!(g::AbstractStorage, AvailableCapacity::Dict{Symbol, AffExpr})
 
-    AvailableCapacity[g.id] = g.capacity_storage;
+    AvailableCapacity[g.id] = g.capacity;
 
 end
 

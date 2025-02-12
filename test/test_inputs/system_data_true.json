@@ -8817,7 +8817,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_edge": {
                         "new_capacity": 0,
@@ -8844,7 +8844,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_captured_edge": {
                         "new_capacity": 0,
@@ -8871,7 +8871,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "biomass_edge": {
                         "new_capacity": 0,
@@ -9408,7 +9408,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0.4,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_emission_edge": {
                         "new_capacity": 0,
@@ -9435,7 +9435,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -9497,7 +9497,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_edge": {
                         "new_capacity": 0,
@@ -9524,7 +9524,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_captured_edge": {
                         "new_capacity": 0,
@@ -9551,7 +9551,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "biomass_edge": {
                         "new_capacity": 0,
@@ -10088,7 +10088,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0.4,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_emission_edge": {
                         "new_capacity": 0,
@@ -10115,7 +10115,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -10177,7 +10177,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_edge": {
                         "new_capacity": 0,
@@ -10204,7 +10204,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_captured_edge": {
                         "new_capacity": 0,
@@ -10231,7 +10231,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "biomass_edge": {
                         "new_capacity": 0,
@@ -10768,7 +10768,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0.4,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_emission_edge": {
                         "new_capacity": 0,
@@ -10795,7 +10795,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -10857,7 +10857,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "h2_edge": {
                         "new_capacity": 0,
@@ -10884,7 +10884,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_edge": {
                         "new_capacity": 0,
@@ -10911,7 +10911,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_captured_edge": {
                         "new_capacity": 0,
@@ -10938,7 +10938,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "biomass_edge": {
                         "new_capacity": 0,
@@ -11475,7 +11475,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0.85,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_emission_edge": {
                         "new_capacity": 0,
@@ -11502,7 +11502,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -11568,7 +11568,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "h2_edge": {
                         "new_capacity": 0,
@@ -11595,7 +11595,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_edge": {
                         "new_capacity": 0,
@@ -11622,7 +11622,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_captured_edge": {
                         "new_capacity": 0,
@@ -11649,7 +11649,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "biomass_edge": {
                         "new_capacity": 0,
@@ -12186,7 +12186,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0.85,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_emission_edge": {
                         "new_capacity": 0,
@@ -12213,7 +12213,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -12279,7 +12279,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "h2_edge": {
                         "new_capacity": 0,
@@ -12306,7 +12306,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_edge": {
                         "new_capacity": 0,
@@ -12333,7 +12333,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_captured_edge": {
                         "new_capacity": 0,
@@ -12360,7 +12360,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "biomass_edge": {
                         "new_capacity": 0,
@@ -12897,7 +12897,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0.85,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_emission_edge": {
                         "new_capacity": 0,
@@ -12924,7 +12924,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -12990,7 +12990,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_edge": {
                         "new_capacity": 0,
@@ -13527,7 +13527,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_captured_edge": {
                         "new_capacity": 0,
@@ -13554,7 +13554,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -13608,7 +13608,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_edge": {
                         "new_capacity": 0,
@@ -14145,7 +14145,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_captured_edge": {
                         "new_capacity": 0,
@@ -14172,7 +14172,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -14226,7 +14226,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_edge": {
                         "new_capacity": 0,
@@ -14763,7 +14763,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_captured_edge": {
                         "new_capacity": 0,
@@ -14790,7 +14790,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -14844,7 +14844,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "h2_edge": {
                         "new_capacity": 0,
@@ -14876,7 +14876,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0.1,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -14926,7 +14926,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "h2_edge": {
                         "new_capacity": 0,
@@ -14958,7 +14958,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0.1,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -15008,7 +15008,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "h2_edge": {
                         "new_capacity": 0,
@@ -15040,7 +15040,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0.1,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -15609,7 +15609,7 @@
                         "min_flow_fraction": 0.3,
                         "distance": 0,
                         "uc": true,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "fuel_edge": {
                         "new_capacity": 0,
@@ -15636,7 +15636,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_edge": {
                         "new_capacity": 0,
@@ -15663,7 +15663,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -16238,7 +16238,7 @@
                         "min_flow_fraction": 0.3,
                         "distance": 0,
                         "uc": true,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "fuel_edge": {
                         "new_capacity": 0,
@@ -16265,7 +16265,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_edge": {
                         "new_capacity": 0,
@@ -16292,7 +16292,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -16867,7 +16867,7 @@
                         "min_flow_fraction": 0.3,
                         "distance": 0,
                         "uc": true,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "fuel_edge": {
                         "new_capacity": 0,
@@ -16894,7 +16894,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_edge": {
                         "new_capacity": 0,
@@ -16921,7 +16921,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -17494,7 +17494,7 @@
                         "min_flow_fraction": 0.25,
                         "distance": 0,
                         "uc": true,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "fuel_edge": {
                         "new_capacity": 0,
@@ -17521,7 +17521,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_edge": {
                         "new_capacity": 0,
@@ -17548,7 +17548,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -18121,7 +18121,7 @@
                         "min_flow_fraction": 0.25,
                         "distance": 0,
                         "uc": true,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "fuel_edge": {
                         "new_capacity": 0,
@@ -18148,7 +18148,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_edge": {
                         "new_capacity": 0,
@@ -18175,7 +18175,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -18748,7 +18748,7 @@
                         "min_flow_fraction": 0.25,
                         "distance": 0,
                         "uc": true,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "fuel_edge": {
                         "new_capacity": 0,
@@ -18775,7 +18775,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_edge": {
                         "new_capacity": 0,
@@ -18802,7 +18802,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -18840,19 +18840,19 @@
                     },
                     "charge_discharge_ratio": 1,
                     "timedata": "Hydrogen",
-                    "fixed_om_cost_storage": 0,
+                    "fixed_om_cost": 0,
                     "can_expand": true,
-                    "capacity_storage": 0,
+                    "capacity": 0,
                     "min_duration": 0,
-                    "max_capacity_storage": "Inf",
+                    "max_capacity": "Inf",
                     "commodity": "Hydrogen",
                     "min_outflow_fraction": 0,
-                    "investment_cost_storage": 0,
-                    "storage_loss_fraction": 0,
+                    "investment_cost": 0,
+                    "loss_fraction": 0,
                     "min_storage_level": 0,
-                    "existing_capacity_storage": 0,
+                    "existing_capacity": 0,
                     "max_duration": 8.846121602,
-                    "ret_capacity_storage": 0,
+                    "retired_capacity": 0,
                     "constraints": {
                         "StorageCapacityConstraint": true,
                         "StorageMaxDurationConstraint": true,
@@ -18860,9 +18860,9 @@
                         "BalanceConstraint": true
                     },
                     "spillage_edge": null,
-                    "min_capacity_storage": 0,
+                    "min_capacity": 0,
                     "id": "h2pipe_MA_to_CT_storage",
-                    "new_capacity_storage": 0
+                    "new_capacity": 0
                 },
                 "id": "h2pipe_MA_to_CT",
                 "edges": {
@@ -18891,7 +18891,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "compressor_gas_edge": {
                         "new_capacity": 0,
@@ -18918,7 +18918,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "discharge_edge": {
                         "new_capacity": 0,
@@ -18948,7 +18948,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 491.4512001,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "charge_edge": {
                         "new_capacity": 0,
@@ -18978,7 +18978,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -19014,19 +19014,19 @@
                     },
                     "charge_discharge_ratio": 1,
                     "timedata": "Hydrogen",
-                    "fixed_om_cost_storage": 0,
+                    "fixed_om_cost": 0,
                     "can_expand": true,
-                    "capacity_storage": 0,
+                    "capacity": 0,
                     "min_duration": 0,
-                    "max_capacity_storage": "Inf",
+                    "max_capacity": "Inf",
                     "commodity": "Hydrogen",
                     "min_outflow_fraction": 0,
-                    "investment_cost_storage": 0,
-                    "storage_loss_fraction": 0,
+                    "investment_cost": 0,
+                    "loss_fraction": 0,
                     "min_storage_level": 0,
-                    "existing_capacity_storage": 0,
+                    "existing_capacity": 0,
                     "max_duration": 8.846121602,
-                    "ret_capacity_storage": 0,
+                    "retired_capacity": 0,
                     "constraints": {
                         "StorageCapacityConstraint": true,
                         "StorageMaxDurationConstraint": true,
@@ -19034,9 +19034,9 @@
                         "BalanceConstraint": true
                     },
                     "spillage_edge": null,
-                    "min_capacity_storage": 0,
+                    "min_capacity": 0,
                     "id": "h2pipe_CT_to_MA_storage",
-                    "new_capacity_storage": 0
+                    "new_capacity": 0
                 },
                 "id": "h2pipe_CT_to_MA",
                 "edges": {
@@ -19065,7 +19065,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "compressor_gas_edge": {
                         "new_capacity": 0,
@@ -19092,7 +19092,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "discharge_edge": {
                         "new_capacity": 0,
@@ -19122,7 +19122,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 491.4512001,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "charge_edge": {
                         "new_capacity": 0,
@@ -19152,7 +19152,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -19188,19 +19188,19 @@
                     },
                     "charge_discharge_ratio": 1,
                     "timedata": "Hydrogen",
-                    "fixed_om_cost_storage": 0,
+                    "fixed_om_cost": 0,
                     "can_expand": true,
-                    "capacity_storage": 0,
+                    "capacity": 0,
                     "min_duration": 0,
-                    "max_capacity_storage": "Inf",
+                    "max_capacity": "Inf",
                     "commodity": "Hydrogen",
                     "min_outflow_fraction": 0,
-                    "investment_cost_storage": 0,
-                    "storage_loss_fraction": 0,
+                    "investment_cost": 0,
+                    "loss_fraction": 0,
                     "min_storage_level": 0,
-                    "existing_capacity_storage": 0,
+                    "existing_capacity": 0,
                     "max_duration": 8.525925965,
-                    "ret_capacity_storage": 0,
+                    "retired_capacity": 0,
                     "constraints": {
                         "StorageCapacityConstraint": true,
                         "StorageMaxDurationConstraint": true,
@@ -19208,9 +19208,9 @@
                         "BalanceConstraint": true
                     },
                     "spillage_edge": null,
-                    "min_capacity_storage": 0,
+                    "min_capacity": 0,
                     "id": "h2pipe_ME_to_MA_storage",
-                    "new_capacity_storage": 0
+                    "new_capacity": 0
                 },
                 "id": "h2pipe_ME_to_MA",
                 "edges": {
@@ -19239,7 +19239,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "compressor_gas_edge": {
                         "new_capacity": 0,
@@ -19266,7 +19266,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "discharge_edge": {
                         "new_capacity": 0,
@@ -19296,7 +19296,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 473.6625536,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "charge_edge": {
                         "new_capacity": 0,
@@ -19326,7 +19326,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -19362,19 +19362,19 @@
                     },
                     "charge_discharge_ratio": 1,
                     "timedata": "Hydrogen",
-                    "fixed_om_cost_storage": 0,
+                    "fixed_om_cost": 0,
                     "can_expand": true,
-                    "capacity_storage": 0,
+                    "capacity": 0,
                     "min_duration": 0,
-                    "max_capacity_storage": "Inf",
+                    "max_capacity": "Inf",
                     "commodity": "Hydrogen",
                     "min_outflow_fraction": 0,
-                    "investment_cost_storage": 0,
-                    "storage_loss_fraction": 0,
+                    "investment_cost": 0,
+                    "loss_fraction": 0,
                     "min_storage_level": 0,
-                    "existing_capacity_storage": 0,
+                    "existing_capacity": 0,
                     "max_duration": 8.525925965,
-                    "ret_capacity_storage": 0,
+                    "retired_capacity": 0,
                     "constraints": {
                         "StorageCapacityConstraint": true,
                         "StorageMaxDurationConstraint": true,
@@ -19382,9 +19382,9 @@
                         "BalanceConstraint": true
                     },
                     "spillage_edge": null,
-                    "min_capacity_storage": 0,
+                    "min_capacity": 0,
                     "id": "h2pipe_MA_to_ME_storage",
-                    "new_capacity_storage": 0
+                    "new_capacity": 0
                 },
                 "id": "h2pipe_MA_to_ME",
                 "edges": {
@@ -19413,7 +19413,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "compressor_gas_edge": {
                         "new_capacity": 0,
@@ -19440,7 +19440,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "discharge_edge": {
                         "new_capacity": 0,
@@ -19470,7 +19470,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 473.6625536,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "charge_edge": {
                         "new_capacity": 0,
@@ -19500,7 +19500,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -19536,28 +19536,28 @@
                     },
                     "charge_discharge_ratio": 0,
                     "timedata": "Hydrogen",
-                    "fixed_om_cost_storage": 28.75810056,
+                    "fixed_om_cost": 28.75810056,
                     "can_expand": true,
-                    "capacity_storage": 0,
+                    "capacity": 0,
                     "min_duration": 0,
-                    "max_capacity_storage": "Inf",
+                    "max_capacity": "Inf",
                     "commodity": "Hydrogen",
                     "min_outflow_fraction": 0,
-                    "investment_cost_storage": 873.013307,
-                    "storage_loss_fraction": 0,
+                    "investment_cost": 873.013307,
+                    "loss_fraction": 0,
                     "min_storage_level": 0.3,
-                    "existing_capacity_storage": 0,
+                    "existing_capacity": 0,
                     "max_duration": 0,
-                    "ret_capacity_storage": 0,
+                    "retired_capacity": 0,
                     "constraints": {
                         "StorageCapacityConstraint": true,
                         "MinStorageLevelConstraint": true,
                         "BalanceConstraint": true
                     },
                     "spillage_edge": null,
-                    "min_capacity_storage": 0,
+                    "min_capacity": 0,
                     "id": "MA_Above_ground_storage_storage",
-                    "new_capacity_storage": 0
+                    "new_capacity": 0
                 },
                 "id": "MA_Above_ground_storage",
                 "edges": {
@@ -19586,7 +19586,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "compressor_gas_edge": {
                         "new_capacity": 0,
@@ -19613,7 +19613,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "discharge_edge": {
                         "new_capacity": 0,
@@ -19644,7 +19644,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "charge_edge": {
                         "new_capacity": 0,
@@ -19674,7 +19674,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -19710,28 +19710,28 @@
                     },
                     "charge_discharge_ratio": 0,
                     "timedata": "Hydrogen",
-                    "fixed_om_cost_storage": 28.75810056,
+                    "fixed_om_cost": 28.75810056,
                     "can_expand": true,
-                    "capacity_storage": 0,
+                    "capacity": 0,
                     "min_duration": 0,
-                    "max_capacity_storage": "Inf",
+                    "max_capacity": "Inf",
                     "commodity": "Hydrogen",
                     "min_outflow_fraction": 0,
-                    "investment_cost_storage": 873.013307,
-                    "storage_loss_fraction": 0,
+                    "investment_cost": 873.013307,
+                    "loss_fraction": 0,
                     "min_storage_level": 0.3,
-                    "existing_capacity_storage": 0,
+                    "existing_capacity": 0,
                     "max_duration": 0,
-                    "ret_capacity_storage": 0,
+                    "retired_capacity": 0,
                     "constraints": {
                         "StorageCapacityConstraint": true,
                         "MinStorageLevelConstraint": true,
                         "BalanceConstraint": true
                     },
                     "spillage_edge": null,
-                    "min_capacity_storage": 0,
+                    "min_capacity": 0,
                     "id": "CT_Above_ground_storage_storage",
-                    "new_capacity_storage": 0
+                    "new_capacity": 0
                 },
                 "id": "CT_Above_ground_storage",
                 "edges": {
@@ -19760,7 +19760,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "compressor_gas_edge": {
                         "new_capacity": 0,
@@ -19787,7 +19787,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "discharge_edge": {
                         "new_capacity": 0,
@@ -19818,7 +19818,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "charge_edge": {
                         "new_capacity": 0,
@@ -19848,7 +19848,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -19884,28 +19884,28 @@
                     },
                     "charge_discharge_ratio": 0,
                     "timedata": "Hydrogen",
-                    "fixed_om_cost_storage": 28.75810056,
+                    "fixed_om_cost": 28.75810056,
                     "can_expand": true,
-                    "capacity_storage": 0,
+                    "capacity": 0,
                     "min_duration": 0,
-                    "max_capacity_storage": "Inf",
+                    "max_capacity": "Inf",
                     "commodity": "Hydrogen",
                     "min_outflow_fraction": 0,
-                    "investment_cost_storage": 873.013307,
-                    "storage_loss_fraction": 0,
+                    "investment_cost": 873.013307,
+                    "loss_fraction": 0,
                     "min_storage_level": 0.3,
-                    "existing_capacity_storage": 0,
+                    "existing_capacity": 0,
                     "max_duration": 0,
-                    "ret_capacity_storage": 0,
+                    "retired_capacity": 0,
                     "constraints": {
                         "StorageCapacityConstraint": true,
                         "MinStorageLevelConstraint": true,
                         "BalanceConstraint": true
                     },
                     "spillage_edge": null,
-                    "min_capacity_storage": 0,
+                    "min_capacity": 0,
                     "id": "ME_Above_ground_storage_storage",
-                    "new_capacity_storage": 0
+                    "new_capacity": 0
                 },
                 "id": "ME_Above_ground_storage",
                 "edges": {
@@ -19934,7 +19934,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "compressor_gas_edge": {
                         "new_capacity": 0,
@@ -19961,7 +19961,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "discharge_edge": {
                         "new_capacity": 0,
@@ -19992,7 +19992,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "charge_edge": {
                         "new_capacity": 0,
@@ -20022,7 +20022,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -20059,19 +20059,19 @@
                     },
                     "charge_discharge_ratio": 1,
                     "timedata": "Electricity",
-                    "fixed_om_cost_storage": 0,
+                    "fixed_om_cost": 0,
                     "can_expand": false,
-                    "capacity_storage": 0,
+                    "capacity": 0,
                     "min_duration": 0,
-                    "max_capacity_storage": "Inf",
+                    "max_capacity": "Inf",
                     "commodity": "Electricity",
                     "min_outflow_fraction": 0.109311313,
-                    "investment_cost_storage": 0,
-                    "storage_loss_fraction": 0,
+                    "investment_cost": 0,
+                    "loss_fraction": 0,
                     "min_storage_level": 0,
-                    "existing_capacity_storage": 0,
+                    "existing_capacity": 0,
                     "max_duration": 0,
-                    "ret_capacity_storage": 0,
+                    "retired_capacity": 0,
                     "constraints": {
                         "MinStorageOutflowConstraint": true,
                         "StorageChargeDischargeRatioConstraint": true,
@@ -20101,11 +20101,11 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
-                    "min_capacity_storage": 0,
+                    "min_capacity": 0,
                     "id": "CT_conventional_hydroelectric_1_storage",
-                    "new_capacity_storage": 0
+                    "new_capacity": 0
                 },
                 "id": "CT_conventional_hydroelectric_1",
                 "edges": {
@@ -20644,7 +20644,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "spill_edge": {
                         "new_capacity": 0,
@@ -20671,7 +20671,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "discharge_edge": {
                         "new_capacity": 0,
@@ -20702,7 +20702,7 @@
                         "ramp_up_fraction": 0.83,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -20724,19 +20724,19 @@
                     },
                     "charge_discharge_ratio": 1,
                     "timedata": "Electricity",
-                    "fixed_om_cost_storage": 0,
+                    "fixed_om_cost": 0,
                     "can_expand": false,
-                    "capacity_storage": 0,
+                    "capacity": 0,
                     "min_duration": 0,
-                    "max_capacity_storage": "Inf",
+                    "max_capacity": "Inf",
                     "commodity": "Electricity",
                     "min_outflow_fraction": 0.095,
-                    "investment_cost_storage": 0,
-                    "storage_loss_fraction": 0,
+                    "investment_cost": 0,
+                    "loss_fraction": 0,
                     "min_storage_level": 0,
-                    "existing_capacity_storage": 0,
+                    "existing_capacity": 0,
                     "max_duration": 0,
-                    "ret_capacity_storage": 0,
+                    "retired_capacity": 0,
                     "constraints": {
                         "MinStorageOutflowConstraint": true,
                         "StorageChargeDischargeRatioConstraint": true,
@@ -20766,11 +20766,11 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
-                    "min_capacity_storage": 0,
+                    "min_capacity": 0,
                     "id": "ME_conventional_hydroelectric_1_storage",
-                    "new_capacity_storage": 0
+                    "new_capacity": 0
                 },
                 "id": "ME_conventional_hydroelectric_1",
                 "edges": {
@@ -21309,7 +21309,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "spill_edge": {
                         "new_capacity": 0,
@@ -21336,7 +21336,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "discharge_edge": {
                         "new_capacity": 0,
@@ -21367,7 +21367,7 @@
                         "ramp_up_fraction": 0.083,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -21389,19 +21389,19 @@
                     },
                     "charge_discharge_ratio": 1,
                     "timedata": "Electricity",
-                    "fixed_om_cost_storage": 0,
+                    "fixed_om_cost": 0,
                     "can_expand": false,
-                    "capacity_storage": 0,
+                    "capacity": 0,
                     "min_duration": 0,
-                    "max_capacity_storage": "Inf",
+                    "max_capacity": "Inf",
                     "commodity": "Electricity",
                     "min_outflow_fraction": 0.135129141,
-                    "investment_cost_storage": 0,
-                    "storage_loss_fraction": 0,
+                    "investment_cost": 0,
+                    "loss_fraction": 0,
                     "min_storage_level": 0,
-                    "existing_capacity_storage": 0,
+                    "existing_capacity": 0,
                     "max_duration": 0,
-                    "ret_capacity_storage": 0,
+                    "retired_capacity": 0,
                     "constraints": {
                         "MinStorageOutflowConstraint": true,
                         "StorageChargeDischargeRatioConstraint": true,
@@ -21431,11 +21431,11 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
-                    "min_capacity_storage": 0,
+                    "min_capacity": 0,
                     "id": "MA_conventional_hydroelectric_1_storage",
-                    "new_capacity_storage": 0
+                    "new_capacity": 0
                 },
                 "id": "MA_conventional_hydroelectric_1",
                 "edges": {
@@ -21974,7 +21974,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "spill_edge": {
                         "new_capacity": 0,
@@ -22001,7 +22001,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "discharge_edge": {
                         "new_capacity": 0,
@@ -22032,7 +22032,7 @@
                         "ramp_up_fraction": 0.083,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -22580,7 +22580,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -23130,7 +23130,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -23680,7 +23680,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -23721,7 +23721,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "ng_edge": {
                         "new_capacity": 0,
@@ -23748,7 +23748,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_edge": {
                         "new_capacity": 0,
@@ -24285,7 +24285,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_captured_edge": {
                         "new_capacity": 0,
@@ -24312,7 +24312,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_emission_edge": {
                         "new_capacity": 0,
@@ -24339,7 +24339,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -24402,7 +24402,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "ng_edge": {
                         "new_capacity": 0,
@@ -24429,7 +24429,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_edge": {
                         "new_capacity": 0,
@@ -24966,7 +24966,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_captured_edge": {
                         "new_capacity": 0,
@@ -24993,7 +24993,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_emission_edge": {
                         "new_capacity": 0,
@@ -25020,7 +25020,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -25083,7 +25083,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "ng_edge": {
                         "new_capacity": 0,
@@ -25110,7 +25110,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_edge": {
                         "new_capacity": 0,
@@ -25647,7 +25647,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_captured_edge": {
                         "new_capacity": 0,
@@ -25674,7 +25674,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_emission_edge": {
                         "new_capacity": 0,
@@ -25701,7 +25701,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -25764,7 +25764,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "fuel_edge": {
                         "new_capacity": 0,
@@ -25791,7 +25791,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "h2_edge": {
                         "new_capacity": 0,
@@ -26337,7 +26337,7 @@
                         "min_flow_fraction": 0.85,
                         "distance": 0,
                         "uc": true,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_edge": {
                         "new_capacity": 0,
@@ -26364,7 +26364,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -26422,7 +26422,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "fuel_edge": {
                         "new_capacity": 0,
@@ -26449,7 +26449,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "h2_edge": {
                         "new_capacity": 0,
@@ -26995,7 +26995,7 @@
                         "min_flow_fraction": 0,
                         "distance": 0,
                         "uc": true,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_edge": {
                         "new_capacity": 0,
@@ -27022,7 +27022,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -27080,7 +27080,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "fuel_edge": {
                         "new_capacity": 0,
@@ -27107,7 +27107,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "h2_edge": {
                         "new_capacity": 0,
@@ -27653,7 +27653,7 @@
                         "min_flow_fraction": 0,
                         "distance": 0,
                         "uc": true,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_edge": {
                         "new_capacity": 0,
@@ -27680,7 +27680,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -27738,7 +27738,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "fuel_edge": {
                         "new_capacity": 0,
@@ -27765,7 +27765,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "h2_edge": {
                         "new_capacity": 0,
@@ -28311,7 +28311,7 @@
                         "min_flow_fraction": 0.85,
                         "distance": 0,
                         "uc": true,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_edge": {
                         "new_capacity": 0,
@@ -28338,7 +28338,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_captured_edge": {
                         "new_capacity": 0,
@@ -28365,7 +28365,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -28427,7 +28427,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "fuel_edge": {
                         "new_capacity": 0,
@@ -28454,7 +28454,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "h2_edge": {
                         "new_capacity": 0,
@@ -29000,7 +29000,7 @@
                         "min_flow_fraction": 0.85,
                         "distance": 0,
                         "uc": true,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_edge": {
                         "new_capacity": 0,
@@ -29027,7 +29027,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_captured_edge": {
                         "new_capacity": 0,
@@ -29054,7 +29054,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -29116,7 +29116,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "fuel_edge": {
                         "new_capacity": 0,
@@ -29143,7 +29143,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "h2_edge": {
                         "new_capacity": 0,
@@ -29689,7 +29689,7 @@
                         "min_flow_fraction": 0.85,
                         "distance": 0,
                         "uc": true,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_edge": {
                         "new_capacity": 0,
@@ -29716,7 +29716,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_captured_edge": {
                         "new_capacity": 0,
@@ -29743,7 +29743,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -29818,7 +29818,7 @@
                         "min_flow_fraction": 0.5,
                         "distance": 0,
                         "uc": true,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "fuel_edge": {
                         "new_capacity": 0,
@@ -29845,7 +29845,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_edge": {
                         "new_capacity": 0,
@@ -29872,7 +29872,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_captured_edge": {
                         "new_capacity": 0,
@@ -29899,7 +29899,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -29976,7 +29976,7 @@
                         "min_flow_fraction": 0.5,
                         "distance": 0,
                         "uc": true,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "fuel_edge": {
                         "new_capacity": 0,
@@ -30003,7 +30003,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_edge": {
                         "new_capacity": 0,
@@ -30030,7 +30030,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_captured_edge": {
                         "new_capacity": 0,
@@ -30057,7 +30057,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -30134,7 +30134,7 @@
                         "min_flow_fraction": 0.5,
                         "distance": 0,
                         "uc": true,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "fuel_edge": {
                         "new_capacity": 0,
@@ -30161,7 +30161,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_edge": {
                         "new_capacity": 0,
@@ -30188,7 +30188,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_captured_edge": {
                         "new_capacity": 0,
@@ -30215,7 +30215,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -30292,7 +30292,7 @@
                         "min_flow_fraction": 0.5,
                         "distance": 0,
                         "uc": true,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "fuel_edge": {
                         "new_capacity": 0,
@@ -30319,7 +30319,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_edge": {
                         "new_capacity": 0,
@@ -30346,7 +30346,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -30415,7 +30415,7 @@
                         "min_flow_fraction": 0.3,
                         "distance": 0,
                         "uc": true,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "fuel_edge": {
                         "new_capacity": 0,
@@ -30442,7 +30442,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_edge": {
                         "new_capacity": 0,
@@ -30469,7 +30469,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -30538,7 +30538,7 @@
                         "min_flow_fraction": 0.3,
                         "distance": 0,
                         "uc": true,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "fuel_edge": {
                         "new_capacity": 0,
@@ -30565,7 +30565,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_edge": {
                         "new_capacity": 0,
@@ -30592,7 +30592,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -30652,7 +30652,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 123.0584,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -30695,7 +30695,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 196.5385,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -30716,28 +30716,28 @@
                     },
                     "charge_discharge_ratio": 0,
                     "timedata": "Electricity",
-                    "fixed_om_cost_storage": 5622,
+                    "fixed_om_cost": 5622,
                     "can_expand": true,
-                    "capacity_storage": 0,
+                    "capacity": 0,
                     "min_duration": 1,
-                    "max_capacity_storage": "Inf",
+                    "max_capacity": "Inf",
                     "commodity": "Electricity",
                     "min_outflow_fraction": 0,
-                    "investment_cost_storage": 22494,
-                    "storage_loss_fraction": 0,
+                    "investment_cost": 22494,
+                    "loss_fraction": 0,
                     "min_storage_level": 0,
-                    "existing_capacity_storage": 0,
+                    "existing_capacity": 0,
                     "max_duration": 10,
-                    "ret_capacity_storage": 0,
+                    "retired_capacity": 0,
                     "constraints": {
                         "StorageCapacityConstraint": true,
                         "StorageSymmetricCapacityConstraint": true,
                         "BalanceConstraint": true
                     },
                     "spillage_edge": null,
-                    "min_capacity_storage": 0,
+                    "min_capacity": 0,
                     "id": "storage_MA_storage",
-                    "new_capacity_storage": 0
+                    "new_capacity": 0
                 },
                 "id": "storage_MA",
                 "edges": {
@@ -30769,7 +30769,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "charge_edge": {
                         "new_capacity": 0,
@@ -30796,7 +30796,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -30817,28 +30817,28 @@
                     },
                     "charge_discharge_ratio": 0,
                     "timedata": "Electricity",
-                    "fixed_om_cost_storage": 5622,
+                    "fixed_om_cost": 5622,
                     "can_expand": true,
-                    "capacity_storage": 0,
+                    "capacity": 0,
                     "min_duration": 1,
-                    "max_capacity_storage": "Inf",
+                    "max_capacity": "Inf",
                     "commodity": "Electricity",
                     "min_outflow_fraction": 0,
-                    "investment_cost_storage": 22494,
-                    "storage_loss_fraction": 0,
+                    "investment_cost": 22494,
+                    "loss_fraction": 0,
                     "min_storage_level": 0,
-                    "existing_capacity_storage": 0,
+                    "existing_capacity": 0,
                     "max_duration": 10,
-                    "ret_capacity_storage": 0,
+                    "retired_capacity": 0,
                     "constraints": {
                         "StorageCapacityConstraint": true,
                         "StorageSymmetricCapacityConstraint": true,
                         "BalanceConstraint": true
                     },
                     "spillage_edge": null,
-                    "min_capacity_storage": 0,
+                    "min_capacity": 0,
                     "id": "storage_CT_storage",
-                    "new_capacity_storage": 0
+                    "new_capacity": 0
                 },
                 "id": "storage_CT",
                 "edges": {
@@ -30870,7 +30870,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "charge_edge": {
                         "new_capacity": 0,
@@ -30897,7 +30897,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -30918,28 +30918,28 @@
                     },
                     "charge_discharge_ratio": 0,
                     "timedata": "Electricity",
-                    "fixed_om_cost_storage": 5622,
+                    "fixed_om_cost": 5622,
                     "can_expand": true,
-                    "capacity_storage": 0,
+                    "capacity": 0,
                     "min_duration": 1,
-                    "max_capacity_storage": "Inf",
+                    "max_capacity": "Inf",
                     "commodity": "Electricity",
                     "min_outflow_fraction": 0,
-                    "investment_cost_storage": 22494,
-                    "storage_loss_fraction": 0,
+                    "investment_cost": 22494,
+                    "loss_fraction": 0,
                     "min_storage_level": 0,
-                    "existing_capacity_storage": 0,
+                    "existing_capacity": 0,
                     "max_duration": 10,
-                    "ret_capacity_storage": 0,
+                    "retired_capacity": 0,
                     "constraints": {
                         "StorageCapacityConstraint": true,
                         "StorageSymmetricCapacityConstraint": true,
                         "BalanceConstraint": true
                     },
                     "spillage_edge": null,
-                    "min_capacity_storage": 0,
+                    "min_capacity": 0,
                     "id": "storage_ME_storage",
-                    "new_capacity_storage": 0
+                    "new_capacity": 0
                 },
                 "id": "storage_ME",
                 "edges": {
@@ -30971,7 +30971,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "charge_edge": {
                         "new_capacity": 0,
@@ -30998,7 +30998,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -31050,7 +31050,7 @@
                         "min_flow_fraction": 0.468,
                         "distance": 0,
                         "uc": true,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "fuel_edge": {
                         "new_capacity": 0,
@@ -31077,7 +31077,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_edge": {
                         "new_capacity": 0,
@@ -31104,7 +31104,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -31173,7 +31173,7 @@
                         "min_flow_fraction": 0.338,
                         "distance": 0,
                         "uc": true,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "fuel_edge": {
                         "new_capacity": 0,
@@ -31200,7 +31200,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_edge": {
                         "new_capacity": 0,
@@ -31227,7 +31227,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -31296,7 +31296,7 @@
                         "min_flow_fraction": 0.474,
                         "distance": 0,
                         "uc": true,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "fuel_edge": {
                         "new_capacity": 0,
@@ -31323,7 +31323,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     },
                     "co2_edge": {
                         "new_capacity": 0,
@@ -31350,7 +31350,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -31915,7 +31915,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -32465,7 +32465,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -33015,7 +33015,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {
@@ -33565,7 +33565,7 @@
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
                         "distance": 0,
-                        "ret_capacity": 0
+                        "retired_capacity": 0
                     }
                 },
                 "transforms": {

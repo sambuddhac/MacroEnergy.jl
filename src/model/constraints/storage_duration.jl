@@ -9,7 +9,7 @@ function add_model_constraint!(ct::StorageMaxDurationConstraint, g::AbstractStor
 
     if max_duration(g) > 0
         ct.constraint_ref =
-            @constraint(model, capacity_storage(g) <= max_duration(g) * capacity(e))
+            @constraint(model, capacity(g) <= max_duration(g) * capacity(e))
     end
 
 
@@ -28,7 +28,7 @@ function add_model_constraint!(ct::StorageMinDurationConstraint, g::AbstractStor
 
     if max_duration(g) > 0
         ct.constraint_ref =
-            @constraint(model, capacity_storage(g) >= min_duration(g) * capacity(e))
+            @constraint(model, capacity(g) >= min_duration(g) * capacity(e))
     end
 
 

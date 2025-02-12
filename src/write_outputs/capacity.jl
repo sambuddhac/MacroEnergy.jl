@@ -67,7 +67,7 @@ get_optimal_new_capacity(system)
 get_optimal_new_capacity(system::System) = get_optimal_capacity_by_field(system, new_capacity)
 
 """
-    get_optimal_ret_capacity(system::System)
+    get_optimal_retired_capacity(system::System)
 
 Get the optimal retired capacity values for all assets/edges in a system.
 
@@ -79,21 +79,21 @@ Get the optimal retired capacity values for all assets/edges in a system.
 
 # Example
 ```julia
-get_optimal_ret_capacity(system)
+get_optimal_retired_capacity(system)
 153×8 DataFrame
  Row │ commodity    commodity_subtype  zone           resource_id                        component_id                       type              variable      value    
      │ Symbol       Symbol             Symbol         Symbol                             Symbol                             Symbol            Symbol        Float64  
 ─────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-   1 │ Biomass      capacity           bioherb_SE     SE_BECCS_Electricity_Herb          SE_BECCS_Electricity_Herb_biomas…  BECCSElectricity  ret_capacity  0.0
-   2 │ Biomass      capacity           bioherb_MIDAT  MIDAT_BECCS_Electricity_Herb       MIDAT_BECCS_Electricity_Herb_bio…  BECCSElectricity  ret_capacity  0.0
-   3 │ Biomass      capacity           bioherb_NE     NE_BECCS_Electricity_Herb          NE_BECCS_Electricity_Herb_biomas…  BECCSElectricity  ret_capacity  0.0
+   1 │ Biomass      capacity           bioherb_SE     SE_BECCS_Electricity_Herb          SE_BECCS_Electricity_Herb_biomas…  BECCSElectricity  retired_capacity  0.0
+   2 │ Biomass      capacity           bioherb_MIDAT  MIDAT_BECCS_Electricity_Herb       MIDAT_BECCS_Electricity_Herb_bio…  BECCSElectricity  retired_capacity  0.0
+   3 │ Biomass      capacity           bioherb_NE     NE_BECCS_Electricity_Herb          NE_BECCS_Electricity_Herb_biomas…  BECCSElectricity  retired_capacity  0.0
 ```
 """
-get_optimal_ret_capacity(system::System) = get_optimal_capacity_by_field(system, ret_capacity)
+get_optimal_retired_capacity(system::System) = get_optimal_capacity_by_field(system, retired_capacity)
 
 get_optimal_capacity(asset::AbstractAsset; scaling::Float64=1.0) = get_optimal_capacity_by_field(asset, capacity, scaling)
-get_optimal_new_capacity(asset::AbstractAsset) = get_optimal_capacity_by_field(asset, new_capacity)
-get_optimal_ret_capacity(asset::AbstractAsset) = get_optimal_capacity_by_field(asset, ret_capacity)
+get_optimal_new_capacity(asset::AbstractAsset; scaling::Float64=1.0) = get_optimal_capacity_by_field(asset, new_capacity, scaling)
+get_optimal_retired_capacity(asset::AbstractAsset; scaling::Float64=1.0) = get_optimal_capacity_by_field(asset, retired_capacity, scaling)
 
 """
     write_capacity_results(file_path::AbstractString, system::System)
@@ -118,8 +118,8 @@ function write_capacity_results(file_path::AbstractString, system::System)
     @info "Writing capacity results to $file_path"
     capacity_results = get_optimal_capacity(system)
     new_capacity_results = get_optimal_new_capacity(system)
-    ret_capacity_results = get_optimal_ret_capacity(system)
-    all_capacity_results = vcat(capacity_results, new_capacity_results, ret_capacity_results)
+    retired_capacity_results = get_optimal_retired_capacity(system)
+    all_capacity_results = vcat(capacity_results, new_capacity_results, retired_capacity_results)
     write_dataframe(file_path, all_capacity_results)
     return nothing
 end

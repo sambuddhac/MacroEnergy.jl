@@ -22,10 +22,12 @@ macro AbstractEdgeBaseAttributes()
         max_capacity::Float64 = Inf
         min_capacity::Float64 = 0.0
         min_flow_fraction::Float64 = 0.0
-        new_capacity::Union{JuMPVariable,Float64} = 0.0
+        new_capacity::Union{AffExpr,Float64} = 0.0
+        new_units::Union{JuMPVariable,Float64} = 0.0
         ramp_down_fraction::Float64 = 1.0
         ramp_up_fraction::Float64 = 1.0
-        ret_capacity::Union{JuMPVariable,Float64} = 0.0
+        retired_capacity::Union{AffExpr,Float64} = 0.0
+        retired_units::Union{JuMPVariable,Float64} = 0.0
         unidirectional::Bool = false
         variable_om_cost::Float64 = 0.0
     end)
@@ -106,9 +108,11 @@ max_capacity(e::AbstractEdge) = e.max_capacity;
 min_capacity(e::AbstractEdge) = e.min_capacity;
 min_flow_fraction(e::AbstractEdge) = e.min_flow_fraction;
 new_capacity(e::AbstractEdge) = e.new_capacity;
+new_units(e::AbstractEdge) = e.new_units;
 ramp_down_fraction(e::AbstractEdge) = e.ramp_down_fraction;
 ramp_up_fraction(e::AbstractEdge) = e.ramp_up_fraction;
-ret_capacity(e::AbstractEdge) = e.ret_capacity;
+retired_capacity(e::AbstractEdge) = e.retired_capacity;
+retired_units(e::AbstractEdge) = e.retired_units;
 start_vertex(e::AbstractEdge)::AbstractVertex = e.start_vertex;
 variable_om_cost(e::AbstractEdge) = e.variable_om_cost;
 ##### End of Edge interface #####
@@ -117,9 +121,13 @@ variable_om_cost(e::AbstractEdge) = e.variable_om_cost;
 function add_linking_variables!(e::AbstractEdge, model::Model)
 
     if has_capacity(e)
-        e.new_capacity = @variable(model, lower_bound = 0.0, base_name = "vNEWCAP_$(id(e))")
+        e.new_units = @variable(model, lower_bound = 0.0, base_name = "vNEWUNIT_$(id(e))")
 
-        e.ret_capacity = @variable(model, lower_bound = 0.0, base_name = "vRETCAP_$(id(e))")
+        e.retired_units = @variable(model, lower_bound = 0.0, base_name = "vRETUNIT_$(id(e))")
+
+        e.new_capacity = @expression(model, capacity_size(e) * new_units(e))
+        
+        e.retired_capacity = @expression(model, capacity_size(e) * retired_units(e))
     end
 
     return nothing
@@ -131,7 +139,7 @@ function define_available_capacity!(e::AbstractEdge,model::Model)
     if has_capacity(e)
         e.capacity = @expression(
             model,
-            capacity_size(e) * (new_capacity(e) - ret_capacity(e)) + existing_capacity(e)
+            new_capacity(e) - retired_capacity(e) + existing_capacity(e)
         )
     end
 
@@ -144,23 +152,23 @@ function planning_model!(e::AbstractEdge, model::Model)
     if has_capacity(e)
 
         if !can_expand(e)
-            fix(new_capacity(e), 0.0; force = true)
+            fix(new_units(e), 0.0; force = true)
         else
             if integer_decisions(e)
-                set_integer(new_capacity(e))
+                set_integer(new_units(e))
             end
             add_to_expression!(
                 model[:eFixedCost],
-                investment_cost(e) * capacity_size(e),
+                investment_cost(e),
                 new_capacity(e),
             )
         end
 
         if !can_retire(e)
-            fix(ret_capacity(e), 0.0; force = true)
+            fix(retired_units(e), 0.0; force = true)
         else
             if integer_decisions(e)
-                set_integer(ret_capacity(e))
+                set_integer(retired_units(e))
             end
         end
 
@@ -168,7 +176,7 @@ function planning_model!(e::AbstractEdge, model::Model)
             add_to_expression!(model[:eFixedCost], fixed_om_cost(e), capacity(e))
         end
 
-        @constraint(model, capacity_size(e) * ret_capacity(e) <= existing_capacity(e))
+        @constraint(model, retired_capacity(e) <= existing_capacity(e))
 
     end
 

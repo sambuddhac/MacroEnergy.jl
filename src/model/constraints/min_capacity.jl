@@ -5,17 +5,9 @@ Base.@kwdef mutable struct MinCapacityConstraint <: PlanningConstraint
 end
 
 
-function add_model_constraint!(ct::MinCapacityConstraint, e::Edge, model::Model)
+function add_model_constraint!(ct::MinCapacityConstraint, y::Union{AbstractEdge,AbstractStorage}, model::Model)
 
-    ct.constraint_ref = @constraint(model, capacity(e) >= min_capacity(e))
-
-    return nothing
-
-end
-
-function add_model_constraint!(ct::MinCapacityConstraint, g::AbstractStorage, model::Model)
-
-    ct.constraint_ref = @constraint(model, capacity_storage(g) >= min_capacity_storage(e))
+    ct.constraint_ref = @constraint(model, capacity(y) >= min_capacity(y))
 
     return nothing
 

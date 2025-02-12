@@ -10,7 +10,7 @@ function add_model_constraint!(ct::StorageCapacityConstraint, g::AbstractStorage
     ct.constraint_ref = @constraint(
         model,
         [t in time_interval(g)],
-        storage_level(g, t) <= capacity_storage(g)
+        storage_level(g, t) <= capacity(g)
     )
 
     return nothing
