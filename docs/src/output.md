@@ -18,7 +18,7 @@ To collect and save all results at once, users can use the [`collect_results`](@
 results = collect_results(system, model)
 
 # Or write directly to file
-write_results(joinpath(results_dir, "results.csv.gz"), system, model)
+write_results("results.csv.gz", system, model)
 ```
 
 !!! note "Output Format"
@@ -30,16 +30,19 @@ write_results(joinpath(results_dir, "results.csv.gz"), system, model)
     The output format is determined by the file extension. For example, to write the results to a Parquet file instead of a CSV file, use the following line:
 
     ```julia
-    write_results(joinpath(results_dir, "results.parquet"), system, model)
+    write_results("results.parquet", system, model)
     ```
 
 
 The function [`write_dataframe`](@ref) can be used to write a generic DataFrame to a file:
 
 ```julia
-write_dataframe(joinpath(results_dir, "results.csv"), results) # Write the dataframe to a CSV file
-write_dataframe(joinpath(results_dir, "results.parquet"), results) # Write the dataframe to a Parquet file
+write_dataframe("results.csv", results) # Write the dataframe to a CSV file
+write_dataframe("results.parquet", results) # Write the dataframe to a Parquet file
+write_dataframe("results.csv", results, drop_cols=[:commodity, :commodity_subtype]) # Drop the commodity and commodity_subtype columns before writing to CSV
 ```
+
+As can be seen in the example above, users have the option to drop columns from the DataFrame before writing the results to a file.
 
 ## Capacity Results
 
@@ -57,10 +60,17 @@ new_capacity_results = get_optimal_new_capacity(asset)
 retired_capacity_results = get_optimal_retired_capacity(asset)
 ```
 
-To write system-level capacity results directly to a file, users can use the [`write_capacity_results`](@ref) function:
+To write system-level capacity results directly to a file, users can use the [`write_capacity`](@ref) function:
 
 ```julia
-write_capacity_results(joinpath(results_dir, "capacity.csv"), system)
+write_capacity("capacity.csv", system)
+write_capacity("capacity.csv", system, drop_cols=[:commodity, :commodity_subtype, :zone])
+```
+
+By default, the results are written in wide format. Users can also write the results in long format by setting the `wide` argument to `false`:
+
+```julia
+write_capacity("capacity.csv", system, wide=false)
 ```
 
 ## Costs
@@ -74,7 +84,8 @@ cost_results = get_optimal_costs(model)
 To write the costs results directly to a file, users can use the [`write_costs`](@ref) function:
 
 ```julia
-write_costs(joinpath(results_dir, "costs.csv"), model)
+write_costs("costs.csv", model)
+write_costs("costs.csv", model, drop_cols=[:commodity, :commodity_subtype, :zone])
 ```
 
 ## Flow Results
@@ -89,8 +100,9 @@ flow_results = get_optimal_flow(system)
 flow_results = get_optimal_flow(asset)
 ```
 
-To write system-level flow results directly to a file, users can use the [`write_flow_results`](@ref) function:
+To write system-level flow results directly to a file, users can use the [`write_flow`](@ref) function:
 
 ```julia
-write_flow_results(joinpath(results_dir, "flows.csv"), system)
+write_flow("flows.csv", system)
+write_flow("flows.csv", system, drop_cols=[:commodity, :commodity_subtype, :zone])
 ```
