@@ -21,7 +21,7 @@ get_optimal_costs(model)
    3 │ all        cost               all     all          all           Cost    TotalCost     36787.3
 ```
 """
-function get_optimal_costs(model::Model, scaling::Float64=1.0)
+function get_optimal_costs(model::Model; scaling::Float64=1.0)
     @debug " -- Getting optimal costs for the system."
     costs = prepare_costs(model, scaling)
     df = convert_to_dataframe(costs)
@@ -29,7 +29,7 @@ function get_optimal_costs(model::Model, scaling::Float64=1.0)
 end
 
 """
-    write_costs(file_path::AbstractString, system::System)
+    write_costs(file_path::AbstractString, system::System; scaling::Float64=1.0, drop_cols::Vector{Symbol}=Symbol[])
 
 Write the optimal costs for the system to a file.
 The extension of the file determines the format of the file.
@@ -37,13 +37,15 @@ The extension of the file determines the format of the file.
 # Arguments
 - `file_path::AbstractString`: The path to the file where the results will be written
 - `system::System`: The system containing the assets/edges to analyze
+- `scaling::Float64`: The scaling factor for the results
+- `drop_cols::Vector{Symbol}`: Columns to drop from the DataFrame
 
 # Returns
 - `nothing`: The function returns nothing, but writes the results to the file
 """
-function write_costs(file_path::AbstractString, model::Model, scaling::Float64=1.0)
+function write_costs(file_path::AbstractString, model::Model; scaling::Float64=1.0, drop_cols::Vector{Symbol}=Symbol[])
     @info "Writing costs to $file_path"
-    costs = get_optimal_costs(model, scaling)
-    write_dataframe(file_path, costs)
+    costs = get_optimal_costs(model; scaling)
+    write_dataframe(file_path, costs, drop_cols)
     return nothing
 end
