@@ -34,10 +34,11 @@ function run_case(case_path::AbstractString=@__DIR__; lazy_load::Bool=true, opti
     results_dir = create_output_path(system)
     
     # Capacity results
-    write_capacity_results(joinpath(results_dir, "capacity.csv"), system)
+    write_capacity(joinpath(results_dir, "capacity.csv"), system)
     
     # Cost results
-    write_costs(joinpath(results_dir, "costs.csv"), model)
+    drop_cols = [:commodity, :commodity_subtype, :zone, :resource_id, :component_id, :type]
+    write_costs(joinpath(results_dir, "costs.csv"), model; drop_cols)
 
     # Flow results
     write_flow_results(joinpath(results_dir, "flow.csv"), system)
