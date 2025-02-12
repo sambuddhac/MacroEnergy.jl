@@ -73,7 +73,7 @@ function make(::Type{Battery}, data::AbstractDict{Symbol,Any}, system::System)
 
     charge_edge_key = :charge_edge
     charge_edge_data = process_data(data[:edges][charge_edge_key])
-    charge_start_node = find_node(system.locations, Symbol(charge_edge_data[:start_vertex]))
+    charge_start_node = find_node(system.locations, Symbol(charge_edge_data[:start_vertex]), commodity)
     charge_end_node = battery_storage
     battery_charge = Edge(
         Symbol(id, "_", charge_edge_key),
@@ -89,7 +89,7 @@ function make(::Type{Battery}, data::AbstractDict{Symbol,Any}, system::System)
     discharge_edge_data = process_data(data[:edges][discharge_edge_key])
     discharge_start_node = battery_storage
     discharge_end_node =
-        find_node(system.locations, Symbol(discharge_edge_data[:end_vertex]))
+        find_node(system.locations, Symbol(discharge_edge_data[:end_vertex]), commodity)
     battery_discharge = Edge(
         Symbol(id, "_", discharge_edge_key),
         discharge_edge_data,

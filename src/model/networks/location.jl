@@ -1,5 +1,6 @@
 Base.@kwdef mutable struct Location <: MacroObject
-    name::String
+    id::Symbol
+    system::AbstractSystem
     nodes::Dict{Symbol,Node} = Dict{Symbol,Node}()
     commodities::Set{Symbol} = Set{Symbol}()
     # We could change this to work on commodities, not symbols
@@ -11,7 +12,7 @@ function add_node!(loc::Location, node::Node{T}, replace::Bool = false) where {T
     # If a node of the same type exists then throw an error unless replace is true
     if ((node_commodity in loc.commodities) || (node_commodity in keys(loc.nodes))) &&
        !replace
-        error("A $node_commodity node already exists in the $(loc.name) location")
+        error("A $node_commodity node already exists in the $(loc.id) location")
     end
     loc.nodes[node_commodity] = node
     push!(loc.commodities, node_commodity)
@@ -22,11 +23,29 @@ function refresh_commodities_list!(loc::Location)
         Set{Symbol}(typesymbol(commodity_type(node)) for node in values(loc.nodes))
 end
 
-function load_locations(data::Vector{String})
+function load_locations!(system::AbstractSystem, data::Vector{String})
     locations = Location[]
-    for loc_name in data
+    for loc_id in data
         # In the future, we could pre-emptively find the relevant nodes
-        push!(locations, Location(;name=loc_name))
+        push!(locations, Location(;id=Symbol(loc_id), system=system))
     end
-    return locations
+    system.locations = locations
+    return nothing
+end
+
+function add_linking_variables!(location::Location, model::Model)
+    return nothing
+end
+
+function define_available_capacity!(location::Location, model::Model)
+    # FIXME to return capacities?
+    return nothing
+end
+
+function planning_model!(location::Location, model::Model)
+    return nothing
+end
+
+function operation_model!(location::Location, model::Model)
+    return nothing
 end

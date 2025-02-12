@@ -24,7 +24,7 @@ function generate_system!(system::System, system_data::AbstractDict{Symbol,Any})
     system.commodities = load_commodities(system_data[:commodities], system.data_dirpath, system.settings.WriteSubcommodities)
 
     # Load the locations
-    system.locations = load_locations(system_data[:locations])
+    load_locations!(system, system_data[:locations])
 
     # Load the time data
     system.time_data =

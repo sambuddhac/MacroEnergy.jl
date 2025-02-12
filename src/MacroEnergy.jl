@@ -30,6 +30,9 @@ abstract type LiquidFuels <: Commodity end ## MWh
 ## Time data types
 abstract type AbstractTimeData{T<:Commodity} end
 
+##
+abstract type AbstractSystem end
+
 ## Structure types
 abstract type MacroObject end
 abstract type AbstractVertex <: MacroObject end

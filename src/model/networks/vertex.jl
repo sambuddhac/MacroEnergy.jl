@@ -3,8 +3,7 @@ macro AbstractVertexBaseAttributes()
         quote
             id::Symbol
             timedata::TimeData
-            location::Union{Missing, Location} = missing
-
+            location::Union{Missing, Symbol} = missing
             balance_data::Dict{Symbol,Dict{Symbol,Float64}} =
                 Dict{Symbol,Dict{Symbol,Float64}}()
             constraints::Vector{AbstractTypeConstraint} = Vector{AbstractTypeConstraint}()
