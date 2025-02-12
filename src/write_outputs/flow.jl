@@ -24,7 +24,7 @@ get_optimal_flow(system)
       ...
 ```
 """
-function get_optimal_flow(system::System, scaling::Float64=1.0)
+function get_optimal_flow(system::System; scaling::Float64=1.0)
     @debug " -- Getting optimal flow values for the system"
     edges, edge_asset_map = get_edges(system, return_ids_map=true)
     eflow = get_optimal_vars_timeseries(edges, flow, scaling, edge_asset_map)
@@ -85,7 +85,7 @@ function get_optimal_flow(edge::AbstractEdge; scaling::Float64=1.0)
 end
 
 """
-    write_flow_results(file_path::AbstractString, system::System)
+    write_flow(file_path::AbstractString, system::System; scaling::Float64=1.0, drop_cols::Vector{Symbol}=Symbol[])
 
 Write the optimal flow results for the system to a file.
 The extension of the file determines the format of the file.
@@ -97,10 +97,10 @@ The extension of the file determines the format of the file.
 # Returns
 - `nothing`: The function returns nothing, but writes the results to the file
 """
-function write_flow_results(file_path::AbstractString, system::System)
+function write_flow(file_path::AbstractString, system::System; scaling::Float64=1.0, drop_cols::Vector{Symbol}=Symbol[])
     @info "Writing flow results to $file_path"
-    flow_results = get_optimal_flow(system)
-    write_dataframe(file_path, flow_results)
+    flow_results = get_optimal_flow(system; scaling)
+    write_dataframe(file_path, flow_results, drop_cols)
     return nothing
 end
 
