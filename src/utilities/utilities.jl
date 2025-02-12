@@ -16,6 +16,10 @@ function all_subtypes!(types::Dict{Symbol,DataType}, type::DataType)
     return nothing
 end
 
+function typesymbol(type::DataType)
+    return Base.typename(type).name
+end
+
 function fieldnames(type::T) where {T<:Type{<:AbstractAsset}}
     return filter(x -> x != :id, Base.fieldnames(type))
 end
