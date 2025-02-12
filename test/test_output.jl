@@ -9,7 +9,7 @@ import Macro:
     new_capacity,
     retired_capacity,
     flow,
-    new_capacity_storage,
+    new_capacity,
     storage_level,
     non_served_demand,
     max_non_served_demand,
@@ -100,7 +100,7 @@ function test_writing_output()
             subperiod_indices=[1, 2, 3],
             subperiod_weights=Dict(1 => 0.3, 2 => 0.5, 3 => 0.2)
         ),
-        new_capacity_storage=100.0,
+        new_capacity=100.0,
         storage_level=[1.0, 2.0, 3.0]
     )
 
@@ -412,20 +412,20 @@ function test_writing_output()
         @test result[1].type == Symbol("Edge{Electricity}")
         # @test result[1].unit == :MWh
         @test result[1].value == 0.0
-        result = get_optimal_vars(Storage[storage], new_capacity_storage, 5.0, Dict{Symbol, Base.RefValue{<: AbstractAsset}}(:storage1 => asset_ref2))
+        result = get_optimal_vars(Storage[storage], new_capacity, 5.0, Dict{Symbol, Base.RefValue{<: AbstractAsset}}(:storage1 => asset_ref2))
         @test length(result) == 1
         @test result[1].commodity == :Electricity
-        @test result[1].commodity_subtype == :new_capacity_storage
+        @test result[1].commodity_subtype == :new_capacity
         @test result[1].zone == :storage1
         @test result[1].resource_id == :asset2
         @test result[1].component_id == :storage1
         @test result[1].type == Symbol("Battery")
         # @test result[1].unit == :MWh
         @test result[1].value == 500.0
-        result = get_optimal_vars(Storage[storage], (new_capacity_storage), 5.0, Dict{Symbol, Base.RefValue{<: AbstractAsset}}(:storage1 => asset_ref2))
+        result = get_optimal_vars(Storage[storage], (new_capacity), 5.0, Dict{Symbol, Base.RefValue{<: AbstractAsset}}(:storage1 => asset_ref2))
         @test length(result) == 1
         @test result[1].commodity == :Electricity
-        @test result[1].commodity_subtype == :new_capacity_storage
+        @test result[1].commodity_subtype == :new_capacity
         @test result[1].zone == :storage1
         @test result[1].resource_id == :asset2
         @test result[1].component_id == :storage1
