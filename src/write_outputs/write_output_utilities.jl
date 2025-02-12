@@ -393,7 +393,7 @@ function write_results(file_path::AbstractString, system::System, model::Model)
 end
 
 """
-    write_dataframe(file_path::AbstractString, df::AbstractDataFrame)
+    write_dataframe(file_path::AbstractString, df::AbstractDataFrame, drop_cols::Vector{Symbol}=Symbol[])
 
 Write a DataFrame to a file in the appropriate format based on file extension.
 Supported formats: .csv, .csv.gz, .parquet
@@ -401,8 +401,9 @@ Supported formats: .csv, .csv.gz, .parquet
 # Arguments
 - `file_path::AbstractString`: Path where to save the file
 - `df::AbstractDataFrame`: DataFrame to write
+- `drop_cols::Vector{Symbol}`: Columns to drop from the DataFrame
 """
-function write_dataframe(file_path::AbstractString, df::AbstractDataFrame)
+function write_dataframe(file_path::AbstractString, df::AbstractDataFrame, drop_cols::Vector{Symbol}=Symbol[])
     # Extract file extension and check if supported in Macro
     extension = lowercase(splitext(file_path)[2])
     # Create a map (supported_formats => write functions)
@@ -419,6 +420,10 @@ function write_dataframe(file_path::AbstractString, df::AbstractDataFrame)
 
     # Get the appropriate writer function
     writer = first(writer for (ext, writer) in supported_formats if endswith(file_path, ext))
+
+    # Drop the columns specified by the user
+    select!(df, Not(drop_cols))
+
     # Write the DataFrame using the appropriate writer function
     writer(file_path, df)
     
