@@ -71,7 +71,7 @@ end
 # Checks on the kind of data
 ###### ###### ###### ###### ###### ######
 
-function check_and_convert_type(data::AbstractDict{Symbol,Any}, m::Module = Macro)
+function check_and_convert_type(data::AbstractDict{Symbol,Any}, m::Module = MacroEnergy)
     if !haskey(data, :type)
         throw(ArgumentError("Instance data does not have a :type field"))
     end

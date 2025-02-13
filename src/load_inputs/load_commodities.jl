@@ -1,13 +1,13 @@
 const COMMODITY_TYPES = Dict{Symbol,DataType}()
 
-function register_commodity_types!(m::Module = Macro)
+function register_commodity_types!(m::Module = MacroEnergy)
     empty!(COMMODITY_TYPES)
     for (commodity_name, commodity_type) in all_subtypes(m, :Commodity)
         COMMODITY_TYPES[commodity_name] = commodity_type
     end
 end
 
-function commodity_types(m::Module = Macro)
+function commodity_types(m::Module = MacroEnergy)
     isempty(COMMODITY_TYPES) && register_commodity_types!(m)
     return COMMODITY_TYPES
 end
@@ -114,7 +114,7 @@ function load_commodities(commodities::AbstractVector{<:Any}, rel_path::Abstract
         if parent_name ∈ commodity_keys
             @debug("Adding subcommodity $(new_name), which acts like commodity $(parent_name)")
             subcommodity_string = make_commodity(new_name, parent_name)
-            COMMODITY_TYPES[new_name] = getfield(Macro, new_name)
+            COMMODITY_TYPES[new_name] = getfield(MacroEnergy, new_name)
             if write_subcommodities
                 @debug("Will write subcommodity $(new_name) to file")
                 push!(subcommodities_lines, subcommodity_string)
@@ -156,7 +156,7 @@ end
 
 function validate_commodities(
     commodities,
-    macro_commodities::Dict{Symbol,DataType} = commodity_types(Macro),
+    macro_commodities::Dict{Symbol,DataType} = commodity_types(MacroEnergy),
 )
     if any(commodity -> commodity ∉ keys(macro_commodities), commodities)
         error("Unknown commodities: $(setdiff(commodities, keys(macro_commodities)))")
