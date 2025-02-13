@@ -3,7 +3,7 @@ module TestWorkflow
 using Test
 using Gurobi, HiGHS
 using CSV, DataFrames, JSON3
-import Macro:
+import MacroEnergy:
     System,
     AbstractEdge,
     Edge,

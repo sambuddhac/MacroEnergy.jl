@@ -1,4 +1,4 @@
-using Macro
+using MacroEnergy
 using Gurobi
 
 if !(@isdefined GRB_ENV)

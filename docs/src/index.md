@@ -1,10 +1,10 @@
 ```@meta
-CurrentModule = Macro
+CurrentModule = MacroEnergy
 ```
 
 # Macro
 
-Welcome to the [Macro](https://github.com/macroenergy/Macro) documentation!
+Welcome to the [Macro](https://github.com/macroenergy/MacroEnergy.jl.git) documentation!
 
 ## What is Macro?
 MAcro-Energy System Capacity Expansion & Resource Optimization Model (MACRO) is a bottom-up, electricity-centric, macro-energy systems optimization model. It is designed to capture capacity investments, operations, and energy flows across and between multiple energy sectors and can be used to explore the impacts of different energy policies, technology costs, and other exogenous factors on the energy system. 

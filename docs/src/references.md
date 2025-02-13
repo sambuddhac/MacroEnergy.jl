@@ -1,5 +1,5 @@
 # Package Reference
 
 ```@autodocs
-Modules = [Macro]
+Modules = [MacroEnergy]
 ```

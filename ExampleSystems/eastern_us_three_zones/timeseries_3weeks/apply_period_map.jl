@@ -1,6 +1,6 @@
 using Pkg
 Pkg.activate(dirname(dirname(dirname(@__DIR__))))
-using Macro
+using MacroEnergy
 using CSV
 using DataFrames
 using YAML

@@ -1,12 +1,12 @@
-using Macro
+using MacroEnergy
 using Documenter
 
-DocMeta.setdocmeta!(Macro, :DocTestSetup, :(using Macro); recursive = true)
+DocMeta.setdocmeta!(MacroEnergy, :DocTestSetup, :(using MacroEnergy); recursive = true)
 
 # Build documentation.
 # ====================
 makedocs(;
-    modules = [Macro],
+    modules = [MacroEnergy],
     authors = "",
     sitename = "Macro",
     format = Documenter.HTML(; prettyurls = get(ENV, "CI", "false") == "true"),
@@ -34,7 +34,7 @@ makedocs(;
 # Deploy built documentation.
 # ===========================
 deploydocs(;
-    repo="https://github.com/macroenergy/Macro",
+    repo="https://github.com/macroenergy/MacroEnergy.jl.git",
     target = "build",
     branch = "gh-pages",
     devbranch = "develop",

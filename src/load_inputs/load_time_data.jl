@@ -104,7 +104,7 @@ function validate_time_data(
     # Check that the time data has the correct commodities
     @assert keys(time_data[:HoursPerTimeStep]) == keys(time_data[:HoursPerSubperiod])
     @assert keys(time_data[:HoursPerTimeStep]) <= keys(case_commodities)
-    macro_commodities = commodity_types(Macro) # Get the available commodities
+    macro_commodities = commodity_types(MacroEnergy) # Get the available commodities
     validate_commodities(keys(time_data[:HoursPerTimeStep]), macro_commodities)
     validate_commodities(keys(time_data[:HoursPerSubperiod]), macro_commodities)
 end
@@ -162,7 +162,7 @@ function create_commodity_timedata(
 end
 
 function validate_temporal_resolution(hours_per_timestep::Int)
-    hours_per_timestep != 1 && error("MACRO does not support different temporal resolutions yet. Please use hourly resolution for all comoodities.")
+    hours_per_timestep != 1 && error("Macro does not support different temporal resolutions yet. Please use hourly resolution for all comoodities.")
 end
 
 function create_subperiods(time_data::AbstractDict{Symbol,Any}, sym::Symbol)

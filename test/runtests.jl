@@ -1,6 +1,6 @@
 import Test
 using Logging
-using Macro
+using MacroEnergy
 
 
 test_logger = ConsoleLogger(stderr, Logging.Warn)

@@ -34,7 +34,7 @@ function validate_constraints_data!(data::AbstractDict{Symbol,Any})
     return nothing
 end
 
-function validate_type_attribute(asset_type::Symbol, m::Module = Macro)
+function validate_type_attribute(asset_type::Symbol, m::Module = MacroEnergy)
     if !isdefined(m, asset_type)
         throw(ArgumentError("Type $(asset_type) not found in module $m"))
     end

@@ -1,7 +1,7 @@
 using Pkg, Coverage
 
 function get_coverage_data()
-    Pkg.test("Macro"; coverage=true)
+    Pkg.test("MacroEnergy"; coverage=true)
     return process_folder()
 end
 
@@ -10,7 +10,7 @@ function write_coverage_data(coverage_data::Dict{String,Any})
 end
 
 function run_coverage_test()
-    Pkg.test("Macro"; coverage=true)    # activate the environment
+    Pkg.test("MacroEnergy"; coverage=true)    # activate the environment
     LCOV.writefile("coverage/lcov.info", process_folder())
     # Find and remove all .cov files
     for (root, _, files) in walkdir(".")

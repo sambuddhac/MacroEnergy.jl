@@ -13,7 +13,7 @@ function add_model_constraint!(ct::MustRunConstraint, e::Edge, model::Model)
             flow(e, t) == availability(e, t) * capacity(e)
         )
     else
-         @warn "MustRunConstraint required for an edge that is not unidirectional so MACRO will not create this constraint"
+         @warn "MustRunConstraint required for an edge that is not unidirectional so Macro will not create this constraint"
     end
 
     return nothing

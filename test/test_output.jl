@@ -1,8 +1,8 @@
 module TestOutput
 
 using Test
-using Macro
-import Macro:
+using MacroEnergy
+import MacroEnergy:
     OutputRow,
     TimeData,
     capacity,
