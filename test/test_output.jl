@@ -1,7 +1,7 @@
 module TestOutput
 
 using Test
-using Macro
+using MacroEnergy
 import Macro:
     OutputRow,
     TimeData,

@@ -1,4 +1,4 @@
-using Macro
+using MacroEnergy
 
 case_dir = joinpath(@__DIR__, "eastern_us_three_zones")
 case_system_data = joinpath(case_dir, "system_data.json")
