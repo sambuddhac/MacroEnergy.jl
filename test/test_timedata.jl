@@ -1,8 +1,8 @@
 module TestTimeData
 
 using Test
-import Macro: TimeData, Hydrogen, NaturalGas, Electricity
-import Macro: load_time_data, load_period_map!, validate_and_set_default_weight_total!
+import MacroEnergy: TimeData, Hydrogen, NaturalGas, Electricity
+import MacroEnergy: load_time_data, load_period_map!, validate_and_set_default_weight_total!
 
 include("utilities.jl")
 
