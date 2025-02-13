@@ -41,13 +41,13 @@ function add_model_constraint!(ct::LongDurationStorageImplicitMinMaxConstraint, 
         )
 
     else
-        @warn "LongDurationStorageImplicitMinMaxConstraint is redundant when all modeled subperiods are representative subperiods so MACRO will not create this constraint"
+        @warn "LongDurationStorageImplicitMinMaxConstraint is redundant when all modeled subperiods are representative subperiods so Macro will not create this constraint"
     end
 
 end
 
 function add_model_constraint!(ct::LongDurationStorageImplicitMinMaxConstraint, g::Storage, model::Model)
    
-    @warn "$(g.id) is not a long duration storage resource, so MACRO will not create a LongDurationStorageImplicitMinMaxConstraint"
+    @warn "$(g.id) is not a long duration storage resource, so Macro will not create a LongDurationStorageImplicitMinMaxConstraint"
     
 end

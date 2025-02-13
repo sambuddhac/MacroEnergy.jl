@@ -16,7 +16,7 @@ function add_model_constraint!(
             non_served_demand(n, s, t) <= max_non_served_demand(n, s) * demand(n, t)
         )
     else
-        @warn "MaxNonServedDemandPerSegmentConstraint required for a node that does not have a non-served demand variable so MACRO will not create this constraint"
+        @warn "MaxNonServedDemandPerSegmentConstraint required for a node that does not have a non-served demand variable so Macro will not create this constraint"
     end
 
 end
