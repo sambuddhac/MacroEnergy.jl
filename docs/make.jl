@@ -1,7 +1,7 @@
 using MacroEnergy
 using Documenter
 
-DocMeta.setdocmeta!(Macro, :DocTestSetup, :(using MacroEnergy); recursive = true)
+DocMeta.setdocmeta!(MacroEnergy, :DocTestSetup, :(using MacroEnergy); recursive = true)
 
 # Build documentation.
 # ====================
