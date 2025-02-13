@@ -1,12 +1,12 @@
 # Macro type hierarchy
 
 ```@meta
-CurrentModule = Macro
+CurrentModule = MacroEnergy
 ```
 
 ### Commodities
 ```@example type_hierarchy
-using Macro # hide
+using MacroEnergy # hide
 using AbstractTrees # hide
 using InteractiveUtils # hide
 AbstractTrees.children(d::DataType) = subtypes(d) # hide
@@ -20,7 +20,7 @@ print_tree(AbstractAsset)
 
 ### Constraints
 ```@example type_hierarchy
-print_tree(Macro.AbstractTypeConstraint)
+print_tree(MacroEnergy.AbstractTypeConstraint)
 ```
 
 

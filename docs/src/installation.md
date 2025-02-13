@@ -14,13 +14,13 @@ To install the Macro package in Julia, please follow these steps:
 
 - **Add Macro to the environment**: you can install Macro using the Git URL (you might need to provide your GitHub username and password):
 ```julia
-(MyEnv) pkg> add https://github.com/macroenergy/Macro.git
+(MyEnv) pkg> add https://github.com/macroenergy/MacroEnergy.jl.git
 ```
 
 !!! tip "SSH key pair"
     If an SSH key pair is set up on your GitHub account, you can use the SSH URL instead of the HTTPS URL. 
     ```julia
-    (MyEnv) pkg> add git@github.com:macroenergy/Macro.git
+    (MyEnv) pkg> add git@github.com:macroenergy/MacroEnergy.jl.git
     ```
 
 Julia will now clone the package from the provided Git repository and install it, along with any dependencies the package might have.
@@ -30,5 +30,5 @@ Julia will now clone the package from the provided Git repository and install it
 - **Import the package**: You are now ready to use the Macro package in your Julia code. Simply import it by typing:
 
 ```julia
-using Macro
+using MacroEnergy
 ```
