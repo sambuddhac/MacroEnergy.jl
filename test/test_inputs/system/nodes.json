@@ -201,12 +201,7 @@
             "instance_data": [
                 {
                     "id": "bioherb_MA",
-                    "demand": {
-                        "timeseries": {
-                            "path": "system/demand.csv",
-                            "header": "Demand_Zero"
-                        }
-                    },
+                    "demand": [0.0],
                     "max_supply": [
                         10000,
                         20000,
@@ -220,12 +215,7 @@
                 },
                 {
                     "id": "bioherb_CT",
-                    "demand": {
-                        "timeseries": {
-                            "path": "system/demand.csv",
-                            "header": "Demand_Zero"
-                        }
-                    },
+                    "demand": [0.0],
                     "max_supply": [
                         80000,
                         160000,
@@ -239,12 +229,7 @@
                 },
                 {
                     "id": "bioherb_ME",
-                    "demand": {
-                        "timeseries": {
-                            "path": "system/demand.csv",
-                            "header": "Demand_Zero"
-                        }
-                    },
+                    "demand": [0.0],
                     "max_supply": [
                         400,
                         800,
@@ -258,12 +243,7 @@
                 },
                 {
                     "id": "biowood_MA",
-                    "demand": {
-                        "timeseries": {
-                            "path": "system/demand.csv",
-                            "header": "Demand_Zero"
-                        }
-                    },
+                    "demand": [0.0],
                     "max_supply": [
                         8000,
                         16000,
@@ -277,12 +257,7 @@
                 },
                 {
                     "id": "biowood_CT",
-                    "demand": {
-                        "timeseries": {
-                            "path": "system/demand.csv",
-                            "header": "Demand_Zero"
-                        }
-                    },
+                    "demand": [0.0],
                     "max_supply": [
                         15000,
                         30000,
@@ -296,12 +271,7 @@
                 },
                 {
                     "id": "biowood_ME",
-                    "demand": {
-                        "timeseries": {
-                            "path": "system/demand.csv",
-                            "header": "Demand_Zero"
-                        }
-                    },
+                    "demand": [0.0],
                     "max_supply": [
                         4000,
                         8000,
