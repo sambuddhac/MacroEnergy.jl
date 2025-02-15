@@ -62,16 +62,17 @@ end
 
 function insert_data(dict::Dict{Symbol, Any}, keys::Vector{Symbol}, data::Any)
     # Create nested dictionaries for each key in the vector
+    next_key = keys[1]
+    
     if length(keys) == 1
-        dict[keys[1]] = data
+        dict[next_key] = data
         return dict
     end
-
-    next_key = keys[1]
+    
     if !haskey(dict, next_key)
         dict[next_key] = Dict{Symbol, Any}()
     end
-    return insert_data(dict[keys[1]], keys[2:end], data)
+    return insert_data(dict[next_key], keys[2:end], data)
 end
 
 function csv_to_json(file_path::AbstractString, nesting_str::AbstractString="--")::Vector{Dict{Symbol,Any}}
@@ -97,4 +98,60 @@ function csv_to_json(file_path::AbstractString, nesting_str::AbstractString="--"
     end
 
     return all_json_data
+end
+
+function extract_data(json_data::AbstractDict{Symbol, Any}, row_data::AbstractDict{Symbol, Any}, prefix::AbstractString="", nesting_str::AbstractString="--")
+    for (key, value) in json_data
+        if value isa Dict
+            new_prefix = string(key) * nesting_str
+            extract_data(value, row_data, new_prefix, nesting_str)
+        elseif value isa Vector
+            if length(value) == 1
+                row_data[Symbol(prefix * string(key))] = value[1]
+            end
+            # move data to another CSV and make a link
+            continue
+        else
+            row_data[Symbol(prefix * string(key))] = value
+        end
+    end
+end
+
+function json_to_csv(json_data::AbstractDict{Symbol, Any}, nesting_str::AbstractString="--")
+    # We want to convert the input Dict into a row of data
+    # in a manner which is not affected by the order of the
+    # keys in the Dict.
+    
+    if !haskey(json_data, :type)
+        @debug("Missing :type key in $(json_data)")
+        error("Missing :type key in JSON data")
+    end
+        
+    if haskey(json_data, :global_data)
+        global_row_data = OrderedDict{Symbol, Any}()
+        extract_data(json_data[:global_data], global_row_data, "", nesting_str)
+    end
+
+    if !haskey(json_data, :instance_data)
+        #TODO: We need to decide if we want to keep this
+        # behaviour or return an error
+        return [global_row_data]
+    end
+
+    # Assuming haskey(json_data, :instance_data) = true
+    # As currently formatted, :Type and :id key must be
+    # the first and second columns in row_data
+    all_row_data = Vector{OrderedDict{Symbol, Any}}()
+    for instance_data in json_data[:instance_data]
+        row_data = OrderedDict{Symbol, Any}(
+            :Type => json_data[:type],
+            :id => instance_data[:id]
+        )
+        delete!(instance_data, :id)
+        merge!(row_data, deepcopy(global_row_data))
+        extract_data(instance_data, row_data, "", nesting_str)
+        push!(all_row_data, row_data)
+    end
+
+    return DataFrame(all_row_data)
 end
