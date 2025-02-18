@@ -121,7 +121,16 @@ include_all_in_folder("model/constraints")
 
 include("config/configure_settings.jl")
 
-include_all_in_folder("load_inputs")
+include_all_in_folder("load_inputs/file_io")
+include_all_in_folder("load_inputs/load_tools")
+include("load_inputs/default_system_data.jl")
+include("load_inputs/generate_system.jl")
+include("load_inputs/load_json_inputs.jl")
+include("load_inputs/load_csv_inputs.jl")
+include("load_inputs/load_system_data.jl")
+include("load_inputs/load_system.jl")
+include("load_inputs/load_time_data.jl")
+include("load_inputs/process_data.jl")
 
 include("generate_model.jl")
 
