@@ -94,64 +94,249 @@ function csv_to_json(file_path::AbstractString, nesting_str::AbstractString="--"
         for (col_name, dict_address) in column_map
             insert_data(json_data, dict_address, row[col_name])
         end
-        push!(all_json_data, json_data)
+        Base.push!(all_json_data, json_data)
     end
 
     return all_json_data
 end
 
-function extract_data(json_data::AbstractDict{Symbol, Any}, row_data::AbstractDict{Symbol, Any}, prefix::AbstractString="", nesting_str::AbstractString="--")
+Base.@kwdef mutable struct VectorData
+    file_path::String = "vector_data.csv"
+    headers::Vector{Symbol} = Symbol[]
+    data::Vector{Vector{Float64}} = Vector{Vector{Float64}}()
+    lengths::Vector{Int} = Int[]
+    max_length::Int = 0
+end
+
+function add!(vec_data::VectorData, data::Vector{<:Real}, header::Symbol)
+    if header in vec_data.headers
+        error("Header $header already exists in VectorData $(vec_data.file_path)")
+    end
+    Base.push!(vec_data.headers, header)
+    Base.push!(vec_data.data, data)
+    new_length = length(data)
+    Base.push!(vec_data.lengths, new_length)
+    vec_data.max_length = max(vec_data.max_length, new_length)
+    return nothing
+end
+
+function fillmissing!(vec_data::VectorData)
+    for (idx, vec) in enumerate(vec_data.data)
+        vec = [vec; fill(missing, vec_data.max_length - vec_data.lengths[idx])]
+    end
+    return nothing
+end
+
+function new_header(vec_data::VectorData, header::AbstractString)
+    if !(header in vec_data.headers)
+        return string(header)
+    end
+    counter = 1
+    new_header = string(header, "_", counter)
+    while new_header in vec_data.headers
+        counter += 1
+        new_header = string(header, "_", counter)
+    end
+    return new_header
+end
+
+function new_header(vec_data::VectorData, header::Symbol)
+    return new_header(vec_data, string(header))
+end
+
+function extract_data!(json_data::AbstractDict{Symbol, Any}, row_data::AbstractDict{Symbol, Any}, vec_data::VectorData, prefix::AbstractString="", nesting_str::AbstractString="--")
     for (key, value) in json_data
         if value isa Dict
-            new_prefix = string(key) * nesting_str
-            extract_data(value, row_data, new_prefix, nesting_str)
+            new_prefix = prefix * string(key) * nesting_str
+            extract_data!(value, row_data, vec_data, new_prefix, nesting_str)
         elseif value isa Vector
             if length(value) == 1
                 row_data[Symbol(prefix * string(key))] = value[1]
+            else
+                header = Symbol(new_header(vec_data, prefix * string(key)))
+                add!(vec_data, value, header)
+                row_data[header] = Dict{Symbol,Any}(
+                    :timeseries => Dict{Symbol,Any}(
+                        :path => vec_data.file_path,
+                        :header => header,
+                    )
+                )
             end
-            # move data to another CSV and make a link
-            continue
         else
             row_data[Symbol(prefix * string(key))] = value
         end
     end
 end
 
-function json_to_csv(json_data::AbstractDict{Symbol, Any}, nesting_str::AbstractString="--")
-    # We want to convert the input Dict into a row of data
-    # in a manner which is not affected by the order of the
-    # keys in the Dict.
-    
+Base.@kwdef struct RowData
+    asset_data::Dict{Symbol, Vector{OrderedDict{Symbol, Any}}} = Dict{Symbol, Vector{OrderedDict{Symbol, Any}}}()
+    assets::Set{Symbol} = Set{Symbol}()
+    headers::Dict{Symbol, Set{Symbol}} = Dict{Symbol, Set{Symbol}}()
+end
+
+function merge!(row_data::RowData, new_row_data::RowData)
+    for (asset_type, data) in new_row_data.asset_data
+        if haskey(row_data.asset_data, asset_type)
+            append!(row_data.asset_data[asset_type], data)
+            union!(row_data.headers[asset_type], new_row_data.headers[asset_type])
+        else
+            row_data.asset_data[asset_type] = data
+            row_data.headers[asset_type] = new_row_data.headers[asset_type]
+            Base.push!(row_data.assets, asset_type)
+        end
+    end
+    return nothing
+end
+
+function push!(row_data::RowData, asset_type::Symbol, data::OrderedDict{Symbol, Any})
+    if !haskey(row_data.asset_data, asset_type)
+        row_data.asset_data[asset_type] = Vector{OrderedDict{Symbol, Any}}()
+        row_data.headers[asset_type] = Set{Symbol}()
+        Base.push!(row_data.assets, asset_type)
+    end 
+    Base.push!(row_data.asset_data[asset_type], data)
+    union!(row_data.headers[asset_type], keys(data))
+    return nothing
+end
+
+function assets(row_data::RowData)
+    return row_data.assets
+end
+
+function fillmissing!(row_data::RowData)
+    for (asset_type, data) in row_data.asset_data
+        for row in data
+            for header in row_data.headers[asset_type]
+                if !haskey(row, header)
+                    row[header] = missing
+                end
+            end
+        end
+    end
+    return nothing
+end
+
+"""
+    json_to_csv(json_data::AbstractDict{Symbol, Any}, vec_data::VectorData=VectorData(), nesting_str::AbstractString="--")
+
+    Convert a JSON object to a CSV file. The Dict should contain a single 
+    asset described by :type, :instance_data, and possibly :global_data fields.
+
+    # Arguments
+    - `json_data`: The JSON object to convert.
+    - `vec_data`: The VectorData object to store the timeseries or other vector data in.
+    - `nesting_str`: The string used to denote nested properties.
+
+    # Returns
+    - A vector of OrderedDicts containing the data for each instance
+"""
+function json_to_csv(json_data::AbstractDict{Symbol, Any}, row_data::RowData=RowData(), vec_data::VectorData=VectorData(), nesting_str::AbstractString="--")
     if !haskey(json_data, :type)
         @debug("Missing :type key in $(json_data)")
-        error("Missing :type key in JSON data")
+        for (key, value) in json_data
+            if key in [:global_data, :instance_data]
+                error("Invalid JSON data format: $key should not be present without a :type key")
+            end
+            merge!(row_data, json_to_csv(value, RowData(), vec_data, nesting_str))
+        end
+        return row_data
     end
+
+    asset_type = Symbol(json_data[:type])
         
+    global_row_data = OrderedDict{Symbol, Any}()
     if haskey(json_data, :global_data)
-        global_row_data = OrderedDict{Symbol, Any}()
-        extract_data(json_data[:global_data], global_row_data, "", nesting_str)
+        extract_data!(json_data[:global_data], global_row_data, vec_data, "", nesting_str)
     end
 
     if !haskey(json_data, :instance_data)
         #TODO: We need to decide if we want to keep this
         # behaviour or return an error
-        return [global_row_data]
+        return RowData(OrderedDict(asset_type => global_row_data))
     end
 
     # Assuming haskey(json_data, :instance_data) = true
     # As currently formatted, :Type and :id key must be
     # the first and second columns in row_data
-    all_row_data = Vector{OrderedDict{Symbol, Any}}()
+    # all_row_data = Dict{Symbol, Vector{OrderedDict{Symbol, Any}}}(
+    #     asset_type => Vector{OrderedDict{Symbol, Any}}()
+    # )
     for instance_data in json_data[:instance_data]
-        row_data = OrderedDict{Symbol, Any}(
-            :Type => json_data[:type],
+        asset_row_data = OrderedDict{Symbol, Any}(
+            :Type => string(asset_type),
             :id => instance_data[:id]
         )
         delete!(instance_data, :id)
-        merge!(row_data, deepcopy(global_row_data))
-        extract_data(instance_data, row_data, "", nesting_str)
-        push!(all_row_data, row_data)
+        Base.merge!(asset_row_data, deepcopy(global_row_data))
+        extract_data!(instance_data, asset_row_data, vec_data, "", nesting_str)
+        push!(row_data, asset_type, asset_row_data)
     end
 
-    return DataFrame(all_row_data)
+    if vec_data.max_length > 0
+        fillmissing!(vec_data)
+        write_csv(vec_name.file_path, DataFrame(vec_data.data, vec_data.headers))
+    end
+        
+    return row_data
 end
+
+function json_to_csv(json_data::Vector{Dict{Symbol, Any}}, row_data::RowData=RowData(), vec_data::VectorData=VectorData(), nesting_str::AbstractString="--")
+    for json in json_data
+        merge!(row_data, json_to_csv(json, RowData(), vec_data, nesting_str))
+    end
+    return row_data
+end
+
+function file_suffix(file_path::AbstractString, suffix_options)
+    for suffix in suffix_options
+        if endswith(file_path, suffix)
+            return suffix
+        end
+    end
+    @debug ("File $file_path does not have a valid suffix in $suffix_options")
+    return ""
+end
+
+function convert_json_to_csv(file_path::AbstractString, rel_path::AbstractString=dirname(file_path), lazy_load::Bool=false, compress::Bool=false)
+    json_data = load_json_inputs(file_path; rel_path=rel_path, lazy_load=lazy_load)
+    csv_data = json_to_csv(json_data)
+    fillmissing!(csv_data)
+
+    dataframes = Vector{DataFrame}()
+    for (asset_type, asset_data) in csv_data.asset_data
+        file_root = string(asset_type)
+        csv_file_path = joinpath(
+            dirname(file_path),
+            "$file_root.csv"
+        )
+        counter = 0
+        while isdir(csv_file_path)
+            counter += 1
+            csv_file_path = joinpath(
+                dirname(file_path),
+                "$file_root_$counter.csv"
+            )  
+        end
+        df = DataFrame(asset_data)
+        Base.push!(dataframes, df)
+        write_csv(csv_file_path, df, compress)
+    end
+
+    return dataframes
+end
+
+function convert_jsons_to_csv(dir_path::AbstractString, rel_path::AbstractString=dir_path, lazy_load::Bool=false, compress::Bool=false)
+    json_files = readdir(dir_path)
+    #FIXME: Need to make this work with @JSON_EXT
+    json_files = filter(x -> endswith(x, ".json")||endswith(x, ".json.gz"), json_files)
+
+    dataframes = Vector{DataFrame}()
+    for json_file in json_files
+        json_file_path = joinpath(dir_path, json_file)
+        dfs = convert_json_to_csv(json_file_path, rel_path, lazy_load, compress)
+        append!(dataframes, dfs)
+    end
+
+    return dataframes
+end
+
