@@ -2,14 +2,13 @@ module TestTimeData
 
 using Test
 import MacroEnergy: TimeData, Hydrogen, NaturalGas, Electricity
-import MacroEnergy: load_time_data, load_period_map!, validate_and_set_default_weight_total!
+import MacroEnergy: load_time_data, load_period_map!
 
 include("utilities.jl")
 
 function test_time_data_commodity(input_data, expected_data, rel_path)
     haskey(input_data, :PeriodMap) && load_period_map!(input_data, rel_path)
-    validate_and_set_default_weight_total!(input_data)
-    
+
     time_data = load_time_data(input_data, Dict(
         :Hydrogen => Hydrogen,
         :NaturalGas => NaturalGas,
@@ -33,7 +32,6 @@ function test_load_time_data()
     # Test different input data
     scenarios = [
         (input_data_no_period_map, time_data_true_no_period_map, "No period map and weight total"),
-        (input_data_with_weight_total, time_data_true_no_period_map, "With weight total"),
         (input_data_with_period_map, time_data_true_with_period_map, "With period map")
     ]
     
@@ -52,18 +50,10 @@ input_data_no_period_map = Dict{Symbol,Any}(
     :PeriodLength => 504
 )
 
-input_data_with_weight_total = Dict{Symbol,Any}(
-    :HoursPerSubperiod => Dict(:Hydrogen => 168, :NaturalGas => 168, :Electricity => 168),
-    :HoursPerTimeStep => Dict(:Hydrogen => 1, :NaturalGas => 1, :Electricity => 1),
-    :PeriodLength => 504,
-    :WeightTotal => 8760
-)
-
 input_data_with_period_map = Dict{Symbol,Any}(
     :HoursPerSubperiod => Dict(:Hydrogen => 168, :NaturalGas => 168, :Electricity => 168),
     :HoursPerTimeStep => Dict(:Hydrogen => 1, :NaturalGas => 1, :Electricity => 1),
-    :PeriodLength => 504,
-    :WeightTotal => 8760,
+    :PeriodLength => 504
     :PeriodMap => Dict(
         :path => "system/Period_map.csv"
     )
