@@ -2,6 +2,8 @@ function default_settings()
     return (
         ConstraintScaling = false,
         WriteSubcommodities = false,
+        OverwriteResults = false,
+        OutputDir = "results",
     )
 end
 
