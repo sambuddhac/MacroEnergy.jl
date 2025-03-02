@@ -394,3 +394,81 @@ function write_parquet(file_path::AbstractString, data::DataFrame)
     end
     Parquet2.writefile(file_path, data)
 end
+
+"""
+    create_output_path(system::System, path::String=system.data_dirpath)
+
+Create and return the path to the output directory for storing results based on system settings.
+
+# Arguments
+- `system::System`: The system object containing settings and configuration
+- `path::String`: Base path for the output directory (defaults to system.data_dirpath)
+
+# Returns
+- `String`: Path to the created output directory
+
+The function creates an output directory based on system settings. If `OverwriteResults` 
+is false, it will avoid overwriting existing directories by appending incremental numbers 
+(e.g., "_001", "_002") to the directory name. The directory is created if it doesn't exist.
+
+# Example
+```julia
+julia> system.settings
+(..., OverwriteResults = true, OutputDir = "result_dir")
+julia> output_path = create_output_path(system)
+# Returns "path/to/system.data_dirpath/result_dir" or "path/to/system.data_dirpath/result_dir_001" if original exists
+julia> output_path = create_output_path(system, "path/to/output")
+# Returns "path/to/output/result_dir" or "path/to/output/result_dir_001" if original exists
+```
+"""
+function create_output_path(system::System, path::String=system.data_dirpath)
+    if system.settings.OverwriteResults
+        path = joinpath(path, system.settings.OutputDir)
+    else
+        # Find closest unused ouput directory name and create it
+        path = find_available_path(path, system.settings.OutputDir)
+    end
+    @debug "Writing results to $path"
+    mkpath(path)
+    return path
+end
+
+"""
+    find_available_path(path::String, basename::String="results"; max_attempts::Int=999)
+
+Choose an available output directory with the name "basename_<number>" by appending incremental numbers to the base path.
+
+# Arguments
+- `path::String`: Base path for the output directory.
+- `basename::String`: Base name of the output directory.
+- `max_attempts::Int`: Maximum number of attempts to find an available directory (default is 999).
+
+# Returns
+- `String`: Full path to the chosen output directory.
+
+The function first expands the given path to its full path and then attempts to find an available directory
+by appending incremental numbers (e.g., "basename_001", "basename_002") up to `max_attempts` times.
+If an available directory is found, it returns the full path to that directory. If no available
+directory is found after `max_attempts` attempts, it raises an error.
+
+# Example
+```julia
+julia> path = "path/to/output"
+julia> output_path = find_available_path(path)
+# Returns "path/to/output/results_001" or "path/to/output/results_002" etc.
+```
+"""
+function find_available_path(path::String, basename::String="results"; max_attempts::Int=999)
+    path = abspath(path) # expand path to the full path
+    
+    for i in 1:max_attempts
+        dir_name = "$(basename)_$(lpad(i, 3, '0'))"
+        full_path = joinpath(path, dir_name)
+        
+        if !isdir(full_path)
+            return full_path
+        end
+    end
+    
+    error("Could not find available directory after $max_attempts attempts")
+end
