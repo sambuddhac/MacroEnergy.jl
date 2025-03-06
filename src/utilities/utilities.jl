@@ -50,3 +50,43 @@ end
 recursive_merge(x::AbstractDict...) = merge(recursive_merge, x...)
 recursive_merge(x::AbstractVector...) = cat(x...; dims = 1)
 recursive_merge(x...) = x[end]
+
+###### ###### ###### ###### ###### ######
+
+function get_from(dict::T, keys::Vector{Symbol}, default) where T<:AbstractDict{Symbol, Any}
+    for key in keys
+        if haskey(dict, key)
+            return get(dict, key, default)
+        end
+    end
+    return default
+end
+
+function get_from(dicts::Vector{T}, key::Symbol, default) where T<:AbstractDict{Symbol, Any}
+    for dict in dicts
+        if haskey(dict, key)
+            return get(dict, key, default)
+        end
+    end
+    return default
+end
+
+function get_from(dicts::Vector{T}, keys::Vector{Symbol}, default) where T<:AbstractDict{Symbol, Any}
+    for dict in dicts
+        for key in keys
+            if haskey(dict, key)
+                return get(dict, key, default)
+            end
+        end
+    end
+    return default
+end
+
+function get_from(combos::Vector{Tuple{T, Symbol}}, default) where T<:AbstractDict{Symbol, Any}
+    for (dict, key) in combos
+        if haskey(dict, key)
+            return get(dict, key, default)
+        end
+    end
+    return default
+end
