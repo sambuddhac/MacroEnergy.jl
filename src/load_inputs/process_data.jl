@@ -2,6 +2,7 @@ function process_data(data::AbstractDict{Symbol,Any})
     if isa(data, JSON3.Object)
         data = copy(data) # this makes sure that data is a mutable object
     end
+    remove_missing!(data)
     validate_data(data)
     check_and_convert_inf!(data)
     check_and_convert_symbol!(data, :startup_fuel_balance_id)
@@ -10,6 +11,15 @@ function process_data(data::AbstractDict{Symbol,Any})
     haskey(data, :rhs_policy) && check_and_convert_rhs_policy!(data)
     haskey(data, :price_unmet_policy) && check_and_convert_price_unmet_policy!(data)
     return data
+end
+
+function remove_missing!(data::AbstractDict{Symbol,Any})
+    for key in keys(data)
+        if ismissing(data[key])
+            delete!(data, key)
+        end
+    end
+    return nothing
 end
 
 function validate_id!(data::AbstractDict{Symbol,Any})
