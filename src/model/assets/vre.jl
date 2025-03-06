@@ -4,6 +4,35 @@ struct VRE <: AbstractAsset
     edge::Edge{Electricity}
 end
 
+function default_data(::Type{VRE}, id=missing)
+    return Dict{Symbol, Any}(
+        :id => id,
+        :transforms => Dict{Symbol, Any}(
+            :timedata => "Electricity",
+        ),
+        :edges => Dict{Symbol, Any}(
+            :edge => Dict{Symbol, Any}(
+                :end_vertex => missing,
+                :type => "Electricity",
+                :unidirectional => true,
+                :investment_cost => 0.0,
+                :fixed_om_cost => 0.0,
+                :variable_om_cost => 0.0,
+                :has_capacity => true,
+                :can_expand => true,
+                :can_retire => false,
+                :capacity_size => 1.0,
+                :existing_capacity => 0.0,
+                :min_capacity => 0.0,
+                :max_capacity => Inf,
+                :availability => 1.0,
+                :constraints => Dict{Symbol,Bool}(
+                    :CapacityConstraint => true,
+                )
+            ),
+        ),
+    )
+end
 
 """
     make(::Type{<:VRE}, data::AbstractDict{Symbol, Any}, system::System) -> VRE
@@ -27,7 +56,18 @@ end
 function make(asset_type::Type{<:VRE}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 
+    data = recursive_merge(default_data(VRE), data)
+
     energy_key = :transforms
+    loaded_transform_data = Dict{Symbol,Any}(
+        key => get_from([
+                (data, Symbol("transform_", key)),
+                (data[energy_key], Symbol("transform_", key))],
+            missing)
+        for key in keys(data[energy_key])
+    )
+    remove_missing!(loaded_transform_data)
+    merge!(data[energy_key], loaded_transform_data)
     transform_data = process_data(data[energy_key])
     vre_transform = Transformation(;
         id = Symbol(id, "_", energy_key),
@@ -35,9 +75,22 @@ function make(asset_type::Type{<:VRE}, data::AbstractDict{Symbol,Any}, system::S
     )
 
     elec_edge_key = :edge
+    loaded_elec_edge_data = Dict{Symbol,Any}(
+        key => get_from([
+                (data, key),
+                (data, Symbol("edge_", key)),
+                (data[:edges][elec_edge_key], key),
+                (data[:edges][elec_edge_key], Symbol("edge_", key))],
+            missing)
+        for key in keys(data[:edges][elec_edge_key])
+    )
+    remove_missing!(loaded_elec_edge_data)
+    merge!(data[:edges][elec_edge_key], loaded_elec_edge_data)
     elec_edge_data = process_data(data[:edges][elec_edge_key])
     elec_start_node = vre_transform
-    elec_end_node = find_node(system.locations, Symbol(elec_edge_data[:end_vertex]))
+    end_vertex = get_from([(data, :location), (elec_edge_data, :end_vertex)], missing)
+    elec_edge_data[:end_vertex] = end_vertex
+    elec_end_node = find_node(system.locations, Symbol(end_vertex), Electricity)
     elec_edge = Edge(
         Symbol(id, "_", elec_edge_key),
         elec_edge_data,
