@@ -1,0 +1,89 @@
+{
+    "BECCS_Electricity": [
+        {
+            "type": "BECCSElectricity",
+            "global_data": {
+                "timedata": "Biomass",
+                "co2_sink": "co2_sink",
+                "co2_captured_sink": "co2_captured_sink",
+                "electricity_production": 1.656626506,
+                "capture_rate": 1.5313914,
+                "co2_content": 1.76022,
+                "emission_rate": 0.2288286,
+                "investment_cost": 696050.2868,
+                "fixed_om_cost": 193228.9157,
+                "variable_om_cost": 42.93975904,
+                "capacity_size": 400,
+                "min_flow_fraction": 0.4
+            },
+            "instance_data": [
+                {
+                    "id": "SE_BECCS_Electricity_Herb",
+                    "location": "SE",
+                    "biomass_type": "Biomass_Herb",
+                    "availability": {
+                        "timeseries": {
+                            "path": "system/availability.csv",
+                            "header": "SE_BECCS_Electricity_Herb"
+                        }
+                    }
+                },
+                {
+                    "id": "MIDAT_BECCS_Electricity_Herb",
+                    "location": "MIDAT",
+                    "biomass_type": "Biomass_Herb",
+                    "availability": {
+                        "timeseries": {
+                            "path": "system/availability.csv",
+                            "header": "MIDAT_BECCS_Electricity_Herb"
+                        }
+                    }
+                },
+                {
+                    "id": "NE_BECCS_Electricity_Herb",
+                    "location": "NE",
+                    "biomass_type": "Biomass_Herb",
+                    "availability": {
+                        "timeseries": {
+                            "path": "system/availability.csv",
+                            "header": "NE_BECCS_Electricity_Herb"
+                        }
+                    }
+                },
+                {
+                    "id": "SE_BECCS_Electricity_Wood",
+                    "location": "SE",
+                    "biomass_type": "Biomass_Wood",
+                    "availability": {
+                        "timeseries": {
+                            "path": "system/availability.csv",
+                            "header": "SE_BECCS_Electricity_Wood"
+                        }
+                    }
+                },
+                {
+                    "id": "MIDAT_BECCS_Electricity_Wood",
+                    "location": "MIDAT",
+                    "biomass_type": "Biomass_Wood",
+                    "availability": {
+                        "timeseries": {
+                            "path": "system/availability.csv",
+                            "header": "MIDAT_BECCS_Electricity_Wood"
+                        }
+                    }
+                },
+                {
+                    "id": "NE_BECCS_Electricity_Wood",
+                    "location": "NE",
+                    "biomass_type": "Biomass_Wood",
+                    "availability": {
+                        "timeseries": {
+                            "path": "system/availability.csv",
+                            "header": "NE_BECCS_Electricity_Wood"
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}
