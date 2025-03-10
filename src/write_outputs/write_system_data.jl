@@ -136,14 +136,14 @@ end
 
 function prepare_to_json(data::Dict{Symbol,TimeData})
     time_data = Dict(
-        :PeriodLength => 0,
+        :NumberOfSubperiods => 0,
         :HoursPerTimeStep => Dict{Symbol,Int}(),
         :HoursPerSubperiod => Dict{Symbol,Int}(),
     )
     for (k, v) in data
-        time_data[:PeriodLength] = v.time_interval[end]
+        time_data[:NumberOfSubperiods] = length(v.subperiod_indices)
         time_data[:HoursPerTimeStep][k] = v.hours_per_timestep
-        time_data[:HoursPerSubperiod][k] = v.time_interval[end] # TODO: Implement this
+        time_data[:HoursPerSubperiod][k] = length(v.subperiods[1]) # TODO: Check this
     end
 
     return time_data
