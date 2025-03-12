@@ -8,14 +8,17 @@
             "instance_data": [
                 {
                     "id": "natgas_SE",
+                    "location": "SE",
                     "price": [12.55668122]
                 },
                 {
                     "id": "natgas_MIDAT",
+                    "location": "MIDAT",
                     "price": [12.21546705]
                 },
                 {
                     "id": "natgas_NE",
+                    "location": "NE",
                     "price": [15.01342319]
                 }
             ]
@@ -43,18 +46,21 @@
             "instance_data": [
                 {
                     "id" : "biowood_SE",
+                    "location": "SE",
                     "demand": [0.0],
                     "max_supply":[8000,16000,24000],                    
                     "price_supply":[40,60,80]
                 },
                 {
                     "id" : "biowood_MIDAT",
+                    "location": "MIDAT",
                     "demand": [0.0],
                     "max_supply":[15000,30000,45000],                    
                     "price_supply":[40,60,80]
                 },
                 {
                     "id" : "biowood_NE",
+                    "location": "NE",
                     "demand": [0.0],
                     "max_supply":[4000,8000,12000],                    
                     "price_supply":[40,60,80]
@@ -73,18 +79,21 @@
             "instance_data": [
                 {
                     "id" : "bioherb_SE",
+                    "location": "SE",
                     "demand": [0.0],
                     "max_supply":[10000,20000,30000],                    
                     "price_supply":[40,60,80]
                 },
                 {
                     "id" : "bioherb_MIDAT",
+                    "location": "MIDAT",
                     "demand": [0.0],
                     "max_supply":[80000,160000,240000],                    
                     "price_supply":[40,60,80]
                 },
                 {
                     "id" : "bioherb_NE",
+                    "location": "NE",
                     "demand": [0.0],
                     "max_supply":[400,800,1200],                    
                     "price_supply":[40,60,80]
