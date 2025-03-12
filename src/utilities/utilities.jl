@@ -51,6 +51,10 @@ recursive_merge(x::AbstractDict...) = merge(recursive_merge, x...)
 recursive_merge(x::AbstractVector...) = cat(x...; dims = 1)
 recursive_merge(x...) = x[end]
 
+recursive_merge!(x::AbstractDict...) = merge!(recursive_merge!, x...)
+recursive_merge!(x::AbstractVector...) = cat(x...; dims = 1)
+recursive_merge!(x...) = x[end]
+
 ###### ###### ###### ###### ###### ######
 
 function get_from(dict::T, keys::Vector{Symbol}, default) where T<:AbstractDict{Symbol, Any}
