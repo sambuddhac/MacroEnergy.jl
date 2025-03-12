@@ -38,6 +38,7 @@ function default_data(::Type{Battery}, id=missing,)
                 :has_capacity => false,
                 :efficiency => 0.9,
                 :variable_om_cost => 0.0,
+                :constraints => Dict{Symbol,Bool}()
             ),
             :discharge_edge => Dict{Symbol,Any}(
                 :type => "Electricity",
@@ -119,6 +120,7 @@ function make(::Type{Battery}, data::AbstractDict{Symbol,Any}, system::System)
         )
     end
     remove_missing!(loaded_storage_data)
+    recursive_merge!(data[storage_key][:constraints], loaded_storage_data[:constraints])
     merge!(data[storage_key], loaded_storage_data)
     storage_data = process_data(data[storage_key])
     commodity_symbol = Symbol(storage_data[:commodity])
@@ -161,6 +163,7 @@ function make(::Type{Battery}, data::AbstractDict{Symbol,Any}, system::System)
         )
     end
     remove_missing!(loaded_charge_edge_data)
+    recursive_merge!(data[:edges][charge_edge_key][:constraints], loaded_charge_edge_data[:constraints])
     merge!(data[:edges][charge_edge_key], loaded_charge_edge_data)
     charge_edge_data = process_data(data[:edges][charge_edge_key])
     start_vertex = get_from([(data, :location), (charge_edge_data, :start_vertex)], missing)
@@ -194,6 +197,7 @@ function make(::Type{Battery}, data::AbstractDict{Symbol,Any}, system::System)
         )
     end
     remove_missing!(loaded_disharge_edge_data)
+    recursive_merge!(data[:edges][discharge_edge_key][:constraints], loaded_disharge_edge_data[:constraints])
     merge!(data[:edges][discharge_edge_key], loaded_disharge_edge_data)
     discharge_edge_data = process_data(data[:edges][discharge_edge_key])
     discharge_start_node = battery_storage
