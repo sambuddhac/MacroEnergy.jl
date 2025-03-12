@@ -95,7 +95,7 @@ end
 function make(::Type{BECCSHydrogen}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 
-    data = recursive_merge(default_data(BECCSHydrogen), data)
+    data = recursive_merge(default_data(BECCSHydrogen, id), data)
 
     beccs_transform_key = :transforms
     loaded_transform_data = Dict{Symbol, Any}(
@@ -105,7 +105,7 @@ function make(::Type{BECCSHydrogen}, data::AbstractDict{Symbol,Any}, system::Sys
                 (data[beccs_transform_key], key),
                 (data[beccs_transform_key], Symbol("transform_", key))],
             missing)
-        for key in keys(data[:transforms])
+        for key in keys(data[beccs_transform_key])
     )
     remove_missing!(loaded_transform_data)
     recursive_merge!(loaded_transform_data[:constraints], data[beccs_transform_key][:constraints])

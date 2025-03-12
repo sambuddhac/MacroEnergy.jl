@@ -57,7 +57,7 @@ end
 function make(asset_type::Type{<:VRE}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 
-    data = recursive_merge(default_data(VRE), data)
+    data = recursive_merge(default_data(VRE, id), data)
 
     energy_key = :transforms
     loaded_transform_data = Dict{Symbol,Any}(
