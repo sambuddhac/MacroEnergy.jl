@@ -3,118 +3,51 @@
         {
             "type": "ElectricDAC",
             "global_data":{
-                "transforms": {
-                    "timedata": "Electricity",
-                    "constraints": {
-                            "BalanceConstraint": true
-                    }
-                },
-                "edges" :{
-                    "co2_edge": {
-                        "type": "CO2",
-                        "unidirectional": true,
-                        "has_capacity": true,
-                        "start_vertex": "co2_sink",
-                        "can_retire": true,
-                        "can_expand": true,
-                        "uc": false,
-                        "constraints": {
-                            "CapacityConstraint": true,
-                            "RampingLimitConstraint": true
-                        },
-                        "integer_decisions": false
-                    },
-                    "elec_edge": {
-                        "type": "Electricity",
-                        "unidirectional": true,
-                        "has_capacity": false
-                    },
-                    "co2_captured_edge": {
-                        "type": "CO2Captured",
-                        "unidirectional": true,
-                        "has_capacity": false,
-                        "end_vertex": "co2_captured_sink"
-                    }
+                "electricity_consumption": 4.38,
+                "co2_sink": "co2_sink",
+                "co2_captured_sink": "co2_captured_sink",
+                "uc": false,
+                "integer_decisions": false,
+                "existing_capacity": 0.0,
+                "investment_cost": 939000.00,
+                "fixed_om_cost": 747000.00,
+                "variable_om_cost": 22.00,
+                "ramp_up_fraction": 1.0,
+                "ramp_down_fraction": 1.0,
+                "co2_constraints": {
+                    "RampingLimitConstraint": true
                 }
             },
             "instance_data":[
                 {
                     "id": "SE_Solvent_DAC",
-                    "transforms":{
-                        "electricity_consumption": 4.38
-                    },
-                    "edges":{
-                            "co2_edge": {
-                                "availability": {
-                                "timeseries": {
-                                    "path": "system/availability.csv",
-                                    "header": "SE_Solvent_DAC"
-                                    }
-                                },
-                                "existing_capacity": 0.0,
-                                "investment_cost": 939000.00,
-                                "fixed_om_cost": 747000.00,
-                                "variable_om_cost": 22.00,
-                                "ramp_up_fraction": 1.0,
-                                "ramp_down_fraction": 1.0
-                            },
-                            "elec_edge":{
-                                "start_vertex": "elec_SE"
-                            }
+                    "location": "SE",
+                    "availability": {
+                        "timeseries": {
+                            "path": "system/availability.csv",
+                            "header": "SE_Solvent_DAC"
                         }
-
+                    }
                 },
                 {
                     "id": "MIDAT_Solvent_DAC",
-                    "transforms":{
-                        "electricity_consumption": 4.38
-                    },
-                    "edges":{
-                            "co2_edge": {
-                                "availability": {
-                                "timeseries": {
-                                    "path": "system/availability.csv",
-                                    "header": "MIDAT_Solvent_DAC"
-                                    }
-                                },
-                                "existing_capacity": 0.0,
-                                "investment_cost": 939000.00,
-                                "fixed_om_cost": 747000.00,
-                                "variable_om_cost": 22.00,
-                                "ramp_up_fraction": 1.0,
-                                "ramp_down_fraction": 1.0
-                            },
-                            "elec_edge":{
-                                "start_vertex": "elec_MIDAT"
-                            }
+                    "location": "MIDAT",
+                    "availability": {
+                        "timeseries": {
+                            "path": "system/availability.csv",
+                            "header": "MIDAT_Solvent_DAC"
                         }
-
+                    }
                 },
                 {
                     "id": "NE_Solvent_DAC",
-                    "transforms":{
-                        "electricity_consumption": 4.38
-                    },
-                    "edges":{
-                            "co2_edge": {
-                                "availability": {
-                                "timeseries": {
-                                    "path": "system/availability.csv",
-                                    "header": "NE_Solvent_DAC"
-                                    }
-                                },
-                                "existing_capacity": 0.0,
-                                "investment_cost": 939000.00,
-                                "fixed_om_cost": 747000.00,
-                                "variable_om_cost": 22.00,
-                                "ramp_up_fraction": 1.0,
-                                "ramp_down_fraction": 1.0
-                            },
-                            "elec_edge":{
-                                "start_vertex": "elec_NE"
-                            }
+                    "location": "NE",
+                    "availability": {
+                        "timeseries": {
+                            "path": "system/availability.csv",
+                            "header": "NE_Solvent_DAC"
                         }
-
+                    }
                 }
             ]
         }
