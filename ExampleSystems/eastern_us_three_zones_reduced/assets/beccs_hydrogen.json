@@ -1,5 +1,5 @@
 {
-    "BECCS_Hydrogen": [
+    "BECCS_H2": [
         {
             "type": "BECCSHydrogen",
             "global_data": {
@@ -24,37 +24,67 @@
                     "id": "SE_BECCS_H2_Herb",
                     "location": "SE",
                     "biomass_type": "Biomass_Herb",
-                    "availability": [0.9]
+                    "availability": {
+                        "timeseries": {
+                            "path": "system/availability.csv",
+                            "header": "SE_BECCS_H2_Herb"
+                        }
+                    }
                 },
                 {
                     "id": "MIDAT_BECCS_H2_Herb",
                     "location": "MIDAT",
                     "biomass_type": "Biomass_Herb",
-                    "availability": [0.9]
+                    "availability": {
+                        "timeseries": {
+                            "path": "system/availability.csv",
+                            "header": "MIDAT_BECCS_H2_Herb"
+                        }
+                    }
                 },
                 {
                     "id": "NE_BECCS_H2_Herb",
                     "location": "NE",
                     "biomass_type": "Biomass_Herb",
-                    "availability": [0.9]
+                    "availability": {
+                        "timeseries": {
+                            "path": "system/availability.csv",
+                            "header": "NE_BECCS_Electricity_Herb"
+                        }
+                    }
                 },
                 {
                     "id": "SE_BECCS_H2_Wood",
                     "location": "SE",
                     "biomass_type": "Biomass_Wood",
-                    "availability": [0.9]
+                    "availability": {
+                        "timeseries": {
+                            "path": "system/availability.csv",
+                            "header": "SE_BECCS_H2_Wood"
+                        }
+                    }
                 },
                 {
                     "id": "MIDAT_BECCS_H2_Wood",
                     "location": "MIDAT",
                     "biomass_type": "Biomass_Wood",
-                    "availability": [0.9]
+                    "availability": {
+                        "timeseries": {
+                            "path": "system/availability.csv",
+                            "header": "MIDAT_BECCS_H2_Wood"
+                        }
+                    }
                 },
                 {
                     "id": "NE_BECCS_H2_Wood",
                     "location": "NE",
                     "biomass_type": "Biomass_Wood",
-                    "availability": [0.9]
+                    "availability": {
+                        "timeseries": {
+                            "path": "system/availability.csv",
+                            "header": "NE_BECCS_H2_Wood"
+                        }
+                    }
                 }
             ]
         }
