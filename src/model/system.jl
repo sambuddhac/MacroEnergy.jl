@@ -77,16 +77,20 @@ function find_node(location::Location, id::Symbol, commodity::Union{Missing,Data
         return nothing
     end
     if location.id == id
-        commodity_symbol = Symbol(commodity)
+        commodity_symbol = typesymbol(commodity)
         if commodity_symbol in location.commodities
+            @debug "Found $commodity node called $id"
             # If the location has a node of the commodity we need, return it
             return location.nodes[commodity_symbol]
         else
             # Otherwise, create a new node of the commodity and return it
-            return Node{commodity}(;
+            @debug "Making $commodity node called $id"
+            new_node = Node{commodity}(;
                 id = id,
                 timedata = location.system.time_data[commodity_symbol]
             )
+            add_node!(location, new_node)
+            push!(location.system.locations, new_node)
         end
     end
     return nothing
