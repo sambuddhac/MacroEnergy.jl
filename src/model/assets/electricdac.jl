@@ -64,19 +64,12 @@ function make(::Type{ElectricDAC}, data::AbstractDict{Symbol,Any}, system::Syste
     data = recursive_merge(default_data(ElectricDAC, id), data)
 
     electricdac_key = :transforms
-    loaded_transform_data = Dict{Symbol,Any}(
-        key => get_from([
-                (data, key),
-                (data, Symbol("transform_", key)),
-                (data[electricdac_key], key),
-                (data[electricdac_key], Symbol("transform_", key))],
-            missing)
-        for key in keys(data[electricdac_key])
-    )
-    remove_missing!(loaded_transform_data)
-    recursive_merge!(loaded_transform_data[:constraints], data[electricdac_key][:constraints])
-    merge!(data[electricdac_key], loaded_transform_data)
-    transform_data = process_data(data[electricdac_key])
+    @process_data(transform_data, data[electricdac_key], [
+        (data, key),
+        (data, Symbol("transform_", key)),
+        (data[electricdac_key], key),
+        (data[electricdac_key], Symbol("transform_", key))
+    ])
     electricdac_transform = Transformation(;
         id = Symbol(id, "_", electricdac_key),
         timedata = system.time_data[Symbol(transform_data[:timedata])],
@@ -84,20 +77,12 @@ function make(::Type{ElectricDAC}, data::AbstractDict{Symbol,Any}, system::Syste
     )
     
     co2_edge_key = :co2_edge
-    loaded_co2_edge_data = Dict{Symbol,Any}(
-        key => get_from([
-                (data, key),
-                (data, Symbol("co2_", key)),
-                (data[:edges][co2_edge_key], key),
-                (data[:edges][co2_edge_key], Symbol("co2_", key))],
-            missing)
-        for key in keys(data[:edges][co2_edge_key]
-        )
-    )
-    remove_missing!(loaded_co2_edge_data)
-    recursive_merge!(loaded_co2_edge_data[:constraints], data[:edges][co2_edge_key][:constraints])
-    merge!(data[:edges][co2_edge_key], loaded_co2_edge_data)
-    co2_edge_data = process_data(data[:edges][co2_edge_key])
+    @process_data(co2_edge_data, data[:edges][co2_edge_key], [
+        (data, key),
+        (data, Symbol("co2_", key)),
+        (data[:edges][co2_edge_key], key),
+        (data[:edges][co2_edge_key], Symbol("co2_", key))
+    ])
     start_vertex = get_from([(data, :co2_sink), (co2_edge_data, :start_vertex)], missing)
     co2_edge_data[:start_vertex] = start_vertex
     co2_start_node = find_node(system.locations, Symbol(start_vertex), CO2)
@@ -114,19 +99,11 @@ function make(::Type{ElectricDAC}, data::AbstractDict{Symbol,Any}, system::Syste
     co2_edge.unidirectional = get(co2_edge_data, :unidirectional, true)
 
     elec_edge_key = :elec_edge
-    loaded_elec_edge_data = Dict{Symbol,Any}(
-        key => get_from([
-                (data, Symbol("elec_", key)),
-                (data[:edges][elec_edge_key], key),
-                (data[:edges][elec_edge_key], Symbol("elec_", key))],
-            missing)
-        for key in keys(data[:edges][elec_edge_key]
-        )
-    )
-    remove_missing!(loaded_elec_edge_data)
-    recursive_merge!(loaded_elec_edge_data[:constraints], data[:edges][elec_edge_key][:constraints])
-    merge!(data[:edges][elec_edge_key], loaded_elec_edge_data)
-    elec_edge_data = process_data(data[:edges][elec_edge_key])
+    @process_data(elec_edge_data, data[:edges][elec_edge_key], [
+        (data, Symbol("elec_", key)),
+        (data[:edges][elec_edge_key], key),
+        (data[:edges][elec_edge_key], Symbol("elec_", key))
+    ])
     start_vertex = get_from([(data, :location), (elec_edge_data, :start_vertex)], missing)
     elec_edge_data[:start_vertex] = start_vertex
     elec_start_node = find_node(system.locations, Symbol(start_vertex), Electricity)
@@ -143,19 +120,11 @@ function make(::Type{ElectricDAC}, data::AbstractDict{Symbol,Any}, system::Syste
     elec_edge.unidirectional = get(elec_edge_data, :unidirectional, true)
 
     co2_captured_edge_key = :co2_captured_edge
-    loaded_co2_captured_edge_data = Dict{Symbol,Any}(
-        key => get_from([
-                (data, Symbol("co2_captured_", key)),
-                (data[:edges][co2_captured_edge_key], key),
-                (data[:edges][co2_captured_edge_key], Symbol("co2_captured_", key))],
-            missing)
-        for key in keys(data[:edges][co2_captured_edge_key]
-        )
-    )
-    remove_missing!(loaded_co2_captured_edge_data)
-    recursive_merge!(loaded_co2_captured_edge_data[:constraints], data[:edges][co2_captured_edge_key][:constraints])
-    merge!(data[:edges][co2_captured_edge_key], loaded_co2_captured_edge_data)
-    co2_captured_edge_data = process_data(data[:edges][co2_captured_edge_key])
+    @process_data(co2_captured_edge_data, data[:edges][co2_captured_edge_key], [
+        (data, Symbol("co2_captured_", key)),
+        (data[:edges][co2_captured_edge_key], key),
+        (data[:edges][co2_captured_edge_key], Symbol("co2_captured_", key))
+    ])
     co2_captured_start_node = electricdac_transform
     end_vertex = get_from([(data, :co2_captured_sink), (co2_captured_edge_data, :end_vertex)], missing)
     co2_captured_edge_data[:end_vertex] = end_vertex

@@ -105,24 +105,11 @@ function make(::Type{Battery}, data::AbstractDict{Symbol,Any}, system::System)
 
     ## Storage component of the battery
     storage_key = :storage
-    if haskey(data, storage_key)
-        loaded_storage_data = Dict{Symbol,Any}(
-            key => get_from([
-                    (data, Symbol("storage_", key)),
-                    (data[storage_key], Symbol("storage_", key)),
-                    (data[storage_key], key)],
-                missing)
-            for key in keys(data[storage_key])
-        )
-    else
-        loaded_storage_data = Dict{Symbol,Any}(
-            key => get(data, Symbol("storage_", key), missing) for key in keys(data[storage_key])
-        )
-    end
-    remove_missing!(loaded_storage_data)
-    recursive_merge!(data[storage_key][:constraints], loaded_storage_data[:constraints])
-    merge!(data[storage_key], loaded_storage_data)
-    storage_data = process_data(data[storage_key])
+    @process_data(storage_data, data[storage_key], [
+        (data, Symbol("storage_", key)),
+        (data[storage_key], Symbol("storage_", key)),
+        (data[storage_key], key)
+    ])
     commodity_symbol = Symbol(storage_data[:commodity])
     commodity = commodity_types()[commodity_symbol]
     default_constraints = [
@@ -148,24 +135,11 @@ function make(::Type{Battery}, data::AbstractDict{Symbol,Any}, system::System)
 
     ## Charge data of the battery
     charge_edge_key = :charge_edge
-    if haskey(data, :edges) && haskey(data[:edges], charge_edge_key)
-        loaded_charge_edge_data = Dict{Symbol,Any}(
-            key => get_from([
-                    (data, Symbol("charge_", key)),
-                    (data[:edges][charge_edge_key], Symbol("charge_", key)),
-                    (data[:edges][charge_edge_key], key)],
-                missing)
-            for key in keys(data[:edges][charge_edge_key])
-        )
-    else
-        loaded_charge_edge_data = Dict{Symbol,Any}(
-            key => get(data, Symbol("charge_", key), missing) for key in keys(data[:edges][charge_edge_key])
-        )
-    end
-    remove_missing!(loaded_charge_edge_data)
-    recursive_merge!(data[:edges][charge_edge_key][:constraints], loaded_charge_edge_data[:constraints])
-    merge!(data[:edges][charge_edge_key], loaded_charge_edge_data)
-    charge_edge_data = process_data(data[:edges][charge_edge_key])
+    @process_data(charge_edge_data, data[:edges][charge_edge_key], [
+        (data, Symbol("charge_", key)),
+        (data[:edges][charge_edge_key], Symbol("charge_", key)),
+        (data[:edges][charge_edge_key], key)
+    ])
     start_vertex = get_from([(data, :location), (charge_edge_data, :start_vertex)], missing)
     charge_edge_data[:start_vertex] = start_vertex
     charge_start_node = find_node(system.locations, Symbol(start_vertex), commodity)
@@ -182,24 +156,11 @@ function make(::Type{Battery}, data::AbstractDict{Symbol,Any}, system::System)
 
     ## Discharge output of the battery
     discharge_edge_key = :discharge_edge
-    if haskey(data, :edges) && haskey(data[:edges], discharge_edge_key)
-        loaded_disharge_edge_data = Dict{Symbol,Any}(
-            key => get_from([
-                    (data, Symbol("discharge_", key)),
-                    (data[:edges][discharge_edge_key], Symbol("discharge_", key)),
-                    (data[:edges][discharge_edge_key], key)],
-                missing)
-            for key in keys(data[:edges][discharge_edge_key])
-        )
-    else
-        loaded_disharge_edge_data = Dict{Symbol,Any}(
-            key => get(data, Symbol("discharge_", key), missing) for key in keys(data[:edges][discharge_edge_key])
-        )
-    end
-    remove_missing!(loaded_disharge_edge_data)
-    recursive_merge!(data[:edges][discharge_edge_key][:constraints], loaded_disharge_edge_data[:constraints])
-    merge!(data[:edges][discharge_edge_key], loaded_disharge_edge_data)
-    discharge_edge_data = process_data(data[:edges][discharge_edge_key])
+    @process_data(discharge_edge_data, data[:edges][discharge_edge_key], [
+        (data, Symbol("discharge_", key)),
+        (data[:edges][discharge_edge_key], Symbol("discharge_", key)),
+        (data[:edges][discharge_edge_key], key)
+    ])
     discharge_start_node = battery_storage
     end_vertex = get_from([(data, :location), (discharge_edge_data, :end_vertex)], missing)
     discharge_edge_data[:end_vertex] = end_vertex

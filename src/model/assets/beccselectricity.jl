@@ -107,19 +107,12 @@ function make(::Type{BECCSElectricity}, data::AbstractDict{Symbol,Any}, system::
     data = recursive_merge(default_data(BECCSElectricity, id), data)
 
     beccs_transform_key = :transforms
-    loaded_transform_data = Dict{Symbol, Any}(
-        key => get_from([
-                (data, key),
-                (data, Symbol("transform_", key)),
-                (data[beccs_transform_key], key),
-                (data[beccs_transform_key], Symbol("transform_", key))],
-            missing)
-        for key in keys(data[beccs_transform_key])
-    )
-    remove_missing!(loaded_transform_data)
-    recursive_merge!(loaded_transform_data[:constraints], data[beccs_transform_key][:constraints])
-    merge!(data[beccs_transform_key], loaded_transform_data)
-    transform_data = process_data(data[beccs_transform_key])
+    @process_data(transform_data, data[beccs_transform_key], [
+        (data, key),
+        (data, Symbol("transform_", key)),
+        (data[beccs_transform_key], key),
+        (data[beccs_transform_key], Symbol("transform_", key))
+    ])
     beccs_transform = Transformation(;
         id = Symbol(id, "_", beccs_transform_key),
         timedata = system.time_data[Symbol(transform_data[:timedata])],
@@ -127,19 +120,12 @@ function make(::Type{BECCSElectricity}, data::AbstractDict{Symbol,Any}, system::
     )
 
     biomass_edge_key = :biomass_edge
-    loaded_biomass_data = Dict{Symbol, Any}(
-        key => get_from([
-                (data, key),
-                (data, Symbol("biomass_", key)),
-                (data[:edges][biomass_edge_key], Symbol("biomass_", key)),
-                (data[:edges][biomass_edge_key], key)],
-            missing)
-        for key in keys(data[:edges][biomass_edge_key])
-    )
-    remove_missing!(loaded_biomass_data)
-    recursive_merge!(loaded_biomass_data[:constraints], data[:edges][biomass_edge_key][:constraints])
-    merge!(data[:edges][biomass_edge_key], loaded_biomass_data)
-    biomass_edge_data = process_data(data[:edges][biomass_edge_key])
+    @process_data(biomass_edge_data, data[:edges][biomass_edge_key], [
+        (data, key),
+        (data, Symbol("biomass_", key)),
+        (data[:edges][biomass_edge_key], key),
+        (data[:edges][biomass_edge_key], Symbol("biomass_", key))
+    ])
     commodity_symbol = Symbol(biomass_edge_data[:type])
     start_vertex = get_from([(data, :location), (biomass_edge_data, :start_vertex)], missing)
     biomass_edge_data[:start_vertex] = start_vertex
@@ -157,18 +143,11 @@ function make(::Type{BECCSElectricity}, data::AbstractDict{Symbol,Any}, system::
     biomass_edge.unidirectional = get(biomass_edge_data, :unidirectional, true)
 
     co2_edge_key = :co2_edge
-    loaded_co2_data = Dict{Symbol, Any}(
-        key => get_from([
-                (data, Symbol("co2_", key)),
-                (data[:edges][co2_edge_key], Symbol("co2_", key)),
-                (data[:edges][co2_edge_key], key)],
-            missing)
-        for key in keys(data[:edges][co2_edge_key])
-    )
-    remove_missing!(loaded_co2_data)
-    recursive_merge!(loaded_co2_data[:constraints], data[:edges][co2_edge_key][:constraints])
-    merge!(data[:edges][co2_edge_key], loaded_co2_data)
-    co2_edge_data = process_data(data[:edges][co2_edge_key])
+    @process_data(co2_edge_data, data[:edges][co2_edge_key], [
+        (data, Symbol("co2_", key)),
+        (data[:edges][co2_edge_key], key),
+        (data[:edges][co2_edge_key], Symbol("co2_", key))
+    ])
     start_vertex = get_from([(data, :co2_sink), (co2_edge_data, :start_vertex)], missing)
     co2_edge_data[:start_vertex] = start_vertex
     co2_start_node = find_node(system.locations, Symbol(start_vertex), CO2)
@@ -181,23 +160,16 @@ function make(::Type{BECCSElectricity}, data::AbstractDict{Symbol,Any}, system::
         co2_start_node,
         co2_end_node,
     )
-    co2_edge.constraints = Vector{AbstractTypeConstraint}()
-    co2_edge.unidirectional = true;
-    co2_edge.has_capacity = false;
+    co2_edge.constraints = get(co2_edge_data, :constraints, Vector{AbstractTypeConstraint}())
+    co2_edge.unidirectional = get(co2_edge_data, :unidirectional, true)
+    co2_edge.has_capacity = get(co2_edge_data, :has_capacity, false)
 
     co2_emission_edge_key = :co2_emission_edge
-    loaded_co2_emission_data = Dict{Symbol, Any}(
-        key => get_from([
-                (data, Symbol("co2_emission_", key)),
-                (data[:edges][co2_emission_edge_key], Symbol("co2_emission_", key)),
-                (data[:edges][co2_emission_edge_key], key)],
-            missing)
-        for key in keys(data[:edges][co2_emission_edge_key])
-    )
-    remove_missing!(loaded_co2_emission_data)
-    recursive_merge!(loaded_co2_emission_data[:constraints], data[:edges][co2_emission_edge_key][:constraints])
-    merge!(data[:edges][co2_emission_edge_key], loaded_co2_emission_data)
-    co2_emission_edge_data = process_data(data[:edges][co2_emission_edge_key])
+    @process_data(co2_emission_edge_data, data[:edges][co2_emission_edge_key], [
+        (data, Symbol("co2_emission_", key)),
+        (data[:edges][co2_emission_edge_key], key),
+        (data[:edges][co2_emission_edge_key], Symbol("co2_emission_", key))
+    ])
     co2_emission_start_node = beccs_transform
     end_vertex = get_from([(data, :co2_sink), (co2_emission_edge_data, :end_vertex)], missing)
     co2_emission_edge_data[:end_vertex] = end_vertex
@@ -210,23 +182,16 @@ function make(::Type{BECCSElectricity}, data::AbstractDict{Symbol,Any}, system::
         co2_emission_start_node,
         co2_emission_end_node,
     )
-    co2_emission_edge.constraints = Vector{AbstractTypeConstraint}()
-    co2_emission_edge.unidirectional = true;
-    co2_emission_edge.has_capacity = false;
+    co2_emission_edge.constraints = get(co2_emission_edge_data, :constraints, Vector{AbstractTypeConstraint}())
+    co2_emission_edge.unidirectional = get(co2_emission_edge_data, :unidirectional, true)
+    co2_emission_edge.has_capacity = get(co2_emission_edge_data, :has_capacity, false)
 
     elec_edge_key = :elec_edge
-    loaded_elec_data = Dict{Symbol, Any}(
-        key => get_from([
-                (data, Symbol("elec_", key)),
-                (data[:edges][elec_edge_key], Symbol("elec_", key)),
-                (data[:edges][elec_edge_key], key)],
-            missing)
-        for key in keys(data[:edges][elec_edge_key])
-    )
-    remove_missing!(loaded_elec_data)
-    recursive_merge!(loaded_elec_data[:constraints], data[:edges][elec_edge_key][:constraints])
-    merge!(data[:edges][elec_edge_key], loaded_elec_data)
-    elec_edge_data = process_data(data[:edges][elec_edge_key])
+    @process_data(elec_edge_data, data[:edges][elec_edge_key], [
+        (data, Symbol("elec_", key)),
+        (data[:edges][elec_edge_key], key),
+        (data[:edges][elec_edge_key], Symbol("elec_", key))
+    ])
     elec_start_node = beccs_transform
     end_vertex = get_from([(data, :location), (elec_edge_data, :end_vertex)], missing)
     elec_edge_data[:end_vertex] = end_vertex
@@ -239,23 +204,16 @@ function make(::Type{BECCSElectricity}, data::AbstractDict{Symbol,Any}, system::
         elec_start_node,
         elec_end_node,
     )
-    elec_edge.constraints = Vector{AbstractTypeConstraint}()
-    elec_edge.unidirectional = true;
-    elec_edge.has_capacity = false;
+    elec_edge.constraints = get(elec_edge_data, :constraints, Vector{AbstractTypeConstraint}())
+    elec_edge.unidirectional = get(elec_edge_data, :unidirectional, true)
+    elec_edge.has_capacity = get(elec_edge_data, :has_capacity, false)
 
     co2_captured_edge_key = :co2_captured_edge
-    loaded_co2_captured_data = Dict{Symbol, Any}(
-        key => get_from([
-                (data, Symbol("co2_captured_", key)),
-                (data[:edges][co2_captured_edge_key], Symbol("co2_captured_", key)),
-                (data[:edges][co2_captured_edge_key], key)],
-            missing)
-        for key in keys(data[:edges][co2_captured_edge_key])
-    )
-    remove_missing!(loaded_co2_captured_data)
-    recursive_merge!(loaded_co2_captured_data[:constraints], data[:edges][co2_captured_edge_key][:constraints])
-    merge!(data[:edges][co2_captured_edge_key], loaded_co2_captured_data)
-    co2_captured_edge_data = process_data(data[:edges][co2_captured_edge_key])
+    @process_data(co2_captured_edge_data, data[:edges][co2_captured_edge_key], [
+        (data, Symbol("co2_captured_", key)),
+        (data[:edges][co2_captured_edge_key], Symbol("co2_captured_", key)),
+        (data[:edges][co2_captured_edge_key], key)
+    ])
     co2_captured_start_node = beccs_transform
     end_vertex = get_from([(data, :co2_captured_sink), (co2_captured_edge_data, :end_vertex)], missing)
     co2_captured_edge_data[:end_vertex] = end_vertex
@@ -268,9 +226,9 @@ function make(::Type{BECCSElectricity}, data::AbstractDict{Symbol,Any}, system::
         co2_captured_start_node,
         co2_captured_end_node,
     )
-    co2_captured_edge.constraints = Vector{AbstractTypeConstraint}()
-    co2_captured_edge.unidirectional = true;
-    co2_captured_edge.has_capacity = false;
+    co2_captured_edge.constraints = get(co2_captured_edge_data, :constraints, Vector{AbstractTypeConstraint}())
+    co2_captured_edge.unidirectional = get(co2_captured_edge_data, :unidirectional, true)
+    co2_captured_edge.has_capacity = get(co2_captured_edge_data, :has_capacity, false)
 
     beccs_transform.balance_data = Dict(
         :elec_production => Dict(

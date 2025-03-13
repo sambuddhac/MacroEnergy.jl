@@ -82,16 +82,12 @@ function make(::Type{Electrolyzer}, data::AbstractDict{Symbol,Any}, system::Syst
     data = recursive_merge(default_data(Electrolyzer, id), data)
 
     electrolyzer_key = :transforms
-    loaded_transform_data = Dict{Symbol, Any}(
-        key => get_from([
-                (data, key),
-                (data, Symbol("transform_", key)),
-                (data[electrolyzer_key], key),
-                (data[electrolyzer_key], Symbol("transform_", key))],
-            missing)
-        for key in keys(data[electrolyzer_key])
-    )
-    @process_data(transform_data, data[electrolyzer_key], loaded_transform_data)
+    @process_data(transform_data, data[electrolyzer_key], [
+        (data, key),
+        (data, Symbol("transform_", key)),
+        (data[electrolyzer_key], key),
+        (data[electrolyzer_key], Symbol("transform_", key))
+        ])
     electrolyzer = Transformation(;
         id = Symbol(id, "_", electrolyzer_key),
         timedata = system.time_data[Symbol(transform_data[:timedata])],
@@ -99,15 +95,11 @@ function make(::Type{Electrolyzer}, data::AbstractDict{Symbol,Any}, system::Syst
     )
 
     elec_edge_key = :elec_edge
-    loaded_elec_edge_data = Dict{Symbol, Any}(
-        key => get_from([
-                (data, Symbol("elec_", key)),
-                (data[:edges][elec_edge_key], key),
-                (data[:edges][elec_edge_key], Symbol("elec_", key))],
-            missing)
-        for key in keys(data[:edges][elec_edge_key])
-    )
-    @process_data(elec_edge_data, data[:edges][elec_edge_key], loaded_elec_edge_data)
+    @process_data(elec_edge_data, data[:edges][elec_edge_key], [
+                    (data, Symbol("elec_", key)),
+                    (data[:edges][elec_edge_key], key),
+                    (data[:edges][elec_edge_key], Symbol("elec_", key))
+    ])
     start_vertex = get_from([(data, :location), (elec_edge_data, :start_vertex)], missing)
     elec_edge_data[:start_vertex] = start_vertex
     elec_start_node = find_node(system.locations, Symbol(start_vertex), Electricity)
@@ -123,16 +115,12 @@ function make(::Type{Electrolyzer}, data::AbstractDict{Symbol,Any}, system::Syst
     elec_edge.unidirectional = get(elec_edge_data, :unidirectional, true)
 
     h2_edge_key = :h2_edge
-    loaded_h2_edge_data = Dict{Symbol, Any}(
-        key => get_from([
-                (data, key),
-                (data, Symbol("h2_", key)),
-                (data[:edges][h2_edge_key], key),
-                (data[:edges][h2_edge_key], Symbol("h2_", key))],
-            missing)
-        for key in keys(data[:edges][h2_edge_key])
-    )
-    @process_data(h2_edge_data, data[:edges][h2_edge_key], loaded_h2_edge_data)
+    @process_data(h2_edge_data, data[:edges][h2_edge_key], [
+                    (data, key),
+                    (data, Symbol("h2_", key)),
+                    (data[:edges][h2_edge_key], key),
+                    (data[:edges][h2_edge_key], Symbol("h2_", key))
+    ])
     h2_start_node = electrolyzer
     end_vertex = get_from([(data, :location), (h2_edge_data, :end_vertex)], missing)
     h2_edge_data[:end_vertex] = end_vertex
