@@ -38,7 +38,7 @@
                 "transforms": {},
                 "edges": {
                     "discharge_edge": {
-                        "type": "Electricity",
+                        "commodity": "Electricity",
                         "unidirectional": true,
                         "has_capacity": true,
                         "can_expand": false,
@@ -49,7 +49,7 @@
                         }
                     },
                     "charge_edge": {
-                        "type": "Electricity",
+                        "commodity": "Electricity",
                         "unidirectional": true,
                         "has_capacity": false
                     }

@@ -11,7 +11,7 @@
                 "edges": {
                     "edge": {
                         "id": "elec",
-                        "type": "Electricity",
+                        "commodity": "Electricity",
                         "unidirectional": true,
                         "can_expand": true,
                         "can_retire": false,
@@ -76,7 +76,7 @@
                 },
                 "edges": {
                     "edge": {
-                        "type": "Electricity",
+                        "commodity": "Electricity",
                         "unidirectional": true,
                         "can_expand": true,
                         "can_retire": false,

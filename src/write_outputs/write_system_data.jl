@@ -71,7 +71,7 @@ function prepare_to_json(asset::AbstractAsset)
         data = getfield(asset, f)
         if isa(data, AbstractEdge)
             asset_data[:instance_data][:edges][f] = prepare_to_json(data)
-            asset_data[:instance_data][:edges][f][:type] = commodity_type(data)
+            asset_data[:instance_data][:edges][f][:commodity] = commodity_type(data)
             if isa(data, EdgeWithUC)
                 asset_data[:instance_data][:edges][f][:uc] = true
             end

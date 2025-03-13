@@ -11,7 +11,7 @@
                 },
                 "edges": {
                     "discharge_edge": {
-                        "type": "Hydrogen",
+                        "commodity": "Hydrogen",
                         "unidirectional": true,
                         "can_expand": true,
                         "can_retire": false,
@@ -22,7 +22,7 @@
                         }
                     },
                     "charge_edge": {
-                        "type": "Hydrogen",
+                        "commodity": "Hydrogen",
                         "unidirectional": true,
                         "has_capacity": true,
                         "can_expand": true,
@@ -32,12 +32,12 @@
                         }
                     },
                     "compressor_elec_edge": {
-                        "type": "Electricity",
+                        "commodity": "Electricity",
                         "unidirectional": true,
                         "has_capacity": false
                     },
                     "compressor_gas_edge": {
-                        "type": "Hydrogen",
+                        "commodity": "Hydrogen",
                         "unidirectional": true,
                         "has_capacity": false
                     }

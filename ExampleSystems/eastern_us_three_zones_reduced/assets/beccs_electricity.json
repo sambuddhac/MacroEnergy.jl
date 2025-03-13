@@ -23,7 +23,7 @@
                 {
                     "id": "SE_BECCS_Electricity_Herb",
                     "location": "SE",
-                    "biomass_type": "Biomass_Herb",
+                    "biomass_commodity": "Biomass_Herb",
                     "availability": {
                         "timeseries": {
                             "path": "system/availability.csv",
@@ -34,7 +34,7 @@
                 {
                     "id": "MIDAT_BECCS_Electricity_Herb",
                     "location": "MIDAT",
-                    "biomass_type": "Biomass_Herb",
+                    "biomass_commodity": "Biomass_Herb",
                     "availability": {
                         "timeseries": {
                             "path": "system/availability.csv",
@@ -45,7 +45,7 @@
                 {
                     "id": "NE_BECCS_Electricity_Herb",
                     "location": "NE",
-                    "biomass_type": "Biomass_Herb",
+                    "biomass_commodity": "Biomass_Herb",
                     "availability": {
                         "timeseries": {
                             "path": "system/availability.csv",
@@ -56,7 +56,7 @@
                 {
                     "id": "SE_BECCS_Electricity_Wood",
                     "location": "SE",
-                    "biomass_type": "Biomass_Wood",
+                    "biomass_commodity": "Biomass_Wood",
                     "availability": {
                         "timeseries": {
                             "path": "system/availability.csv",
@@ -67,7 +67,7 @@
                 {
                     "id": "MIDAT_BECCS_Electricity_Wood",
                     "location": "MIDAT",
-                    "biomass_type": "Biomass_Wood",
+                    "biomass_commodity": "Biomass_Wood",
                     "availability": {
                         "timeseries": {
                             "path": "system/availability.csv",
@@ -78,7 +78,7 @@
                 {
                     "id": "NE_BECCS_Electricity_Wood",
                     "location": "NE",
-                    "biomass_type": "Biomass_Wood",
+                    "biomass_commodity": "Biomass_Wood",
                     "availability": {
                         "timeseries": {
                             "path": "system/availability.csv",

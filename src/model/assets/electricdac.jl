@@ -18,7 +18,7 @@ function default_data(::Type{ElectricDAC}, id=missing)
         ),
         :edges => Dict{Symbol,Any}(
             :co2_edge => Dict{Symbol,Any}(
-                :type => "CO2",
+                :commodity => "CO2",
                 :start_vertex => missing,
                 :timedata => "CO2",
                 :constraints => Dict{Symbol,Bool}(
@@ -39,7 +39,7 @@ function default_data(::Type{ElectricDAC}, id=missing)
                 :ramp_down_fraction => 1.0,
             ),
             :elec_edge => Dict{Symbol,Any}(
-                :type => "Electricity",
+                :commodity => "Electricity",
                 :start_vertex => missing,
                 :timedata => "Electricity",
                 :constraints => Dict{Symbol,Bool}(),
@@ -47,7 +47,7 @@ function default_data(::Type{ElectricDAC}, id=missing)
                 :has_capacity => false,
             ),
             :co2_captured_edge => Dict{Symbol,Any}(
-                :type => "CO2Captured",
+                :commodity => "CO2Captured",
                 :end_vertex => missing,
                 :timedata => "CO2Captured",
                 :constraints => Dict{Symbol,Bool}(),

@@ -5,7 +5,7 @@
             "global_data": {
                 "edges": {
                     "h2_edge": {
-                        "type": "Hydrogen",
+                        "commodity": "Hydrogen",
                         "unidirectional": false,
                         "can_expand": true,
                         "can_retire": false,

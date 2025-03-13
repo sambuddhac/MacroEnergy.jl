@@ -5,7 +5,7 @@
             "global_data": {
                 "edges": {
                     "elec_edge": {
-                        "type": "Electricity",
+                        "commodity": "Electricity",
                         "has_capacity": true,
                         "unidirectional": false,
                         "can_expand": true,

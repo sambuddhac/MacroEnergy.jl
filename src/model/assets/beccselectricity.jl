@@ -23,7 +23,7 @@ function default_data(::Type{BECCSElectricity}, id=missing,)
         ),
         :edges => Dict{Symbol,Any}(
             :biomass_edge => Dict{Symbol,Any}(
-                :type => "Biomass",
+                :commodity => "Biomass",
                 :start_vertex => missing,
                 :unidirectional => true,
                 :has_capacity => true,
@@ -42,7 +42,7 @@ function default_data(::Type{BECCSElectricity}, id=missing,)
                 )
             ),
             :co2_edge => Dict{Symbol,Any}(
-                :type => "CO2",
+                :commodity => "CO2",
                 :start_vertex => missing,
                 :unidirectional => true,
                 :has_capacity => true,
@@ -56,7 +56,7 @@ function default_data(::Type{BECCSElectricity}, id=missing,)
                 :constraints => Dict{Symbol,Bool}()
             ),
             :co2_emission_edge => Dict{Symbol,Any}(
-                :type => "CO2",
+                :commodity => "CO2",
                 :end_vertex => missing,
                 :unidirectional => true,
                 :has_capacity => false,
@@ -70,7 +70,7 @@ function default_data(::Type{BECCSElectricity}, id=missing,)
                 :constraints => Dict{Symbol,Bool}()
             ),
             :elec_edge => Dict{Symbol,Any}(
-                :type => "Electricity",
+                :commodity => "Electricity",
                 :end_vertex => missing,
                 :unidirectional => true,
                 :has_capacity => true,
@@ -84,7 +84,7 @@ function default_data(::Type{BECCSElectricity}, id=missing,)
                 :constraints => Dict{Symbol,Bool}()
             ),
             :co2_captured_edge => Dict{Symbol,Any}(
-                :type => "CO2Captured",
+                :commodity => "CO2Captured",
                 :end_vertex => missing,
                 :unidirectional => true,
                 :has_capacity => true,
@@ -126,7 +126,7 @@ function make(::Type{BECCSElectricity}, data::AbstractDict{Symbol,Any}, system::
         (data[:edges][biomass_edge_key], key),
         (data[:edges][biomass_edge_key], Symbol("biomass_", key))
     ])
-    commodity_symbol = Symbol(biomass_edge_data[:type])
+    commodity_symbol = Symbol(biomass_edge_data[:commodity])
     start_vertex = get_from([(data, :location), (biomass_edge_data, :start_vertex)], missing)
     biomass_edge_data[:start_vertex] = start_vertex
     biomass_start_node = find_node(system.locations, Symbol(start_vertex), commodity_types()[commodity_symbol])

@@ -2,26 +2,25 @@
     "BECCS_Hydrogen": [
         {
             "type": "BECCSHydrogen",
-            "global_data":{
+            "global_data": {
                 "transforms": {
                     "timedata": "Biomass",
                     "constraints": {
-                            "BalanceConstraint": true
+                        "BalanceConstraint": true
                     }
                 },
-                "edges":{
-                    "elec_edge":{
-                        "type": "Electricity",
+                "edges": {
+                    "elec_edge": {
+                        "commodity": "Electricity",
                         "unidirectional": true,
                         "has_capacity": false
                     },
-                    "h2_edge":{
-                        "type": "Hydrogen",
+                    "h2_edge": {
+                        "commodity": "Hydrogen",
                         "unidirectional": true,
                         "has_capacity": false
                     },
-                    "biomass_edge":{
-                        "type": "Biomass",
+                    "biomass_edge": {
                         "unidirectional": true,
                         "has_capacity": true,
                         "can_expand": true,
@@ -32,26 +31,26 @@
                             "MinFlowConstraint": true
                         }
                     },
-                    "co2_edge":{
-                        "type": "CO2",
+                    "co2_edge": {
+                        "commodity": "CO2",
                         "unidirectional": true,
                         "has_capacity": false,
                         "start_vertex": "co2_sink"
                     },
                     "co2_emission_edge": {
-                        "type": "CO2",
+                        "commodity": "CO2",
                         "unidirectional": true,
                         "has_capacity": false,
                         "end_vertex": "co2_sink"
                     },
                     "co2_captured_edge": {
-                        "type": "CO2Captured",
+                        "commodity": "CO2Captured",
                         "unidirectional": true,
                         "has_capacity": false
                     }
                 }
             },
-            "instance_data":[
+            "instance_data": [
                 {
                     "id": "SE_BECCS_H2_Herb",
                     "transforms":{
@@ -79,7 +78,7 @@
                         "elec_edge": {
                             "start_vertex": "elec_SE"
                         },
-                        "h2_edge":{
+                        "h2_edge": {
                             "end_vertex": "h2_SE"
                         },
                         "co2_captured_edge": {
@@ -98,6 +97,7 @@
                     },
                     "edges": {
                         "biomass_edge": {
+                            "commodity": "Biomass_Herb",
                             "start_vertex": "bioherb_MIDAT",
                             "availability": {
                                 "timeseries": {
@@ -114,7 +114,7 @@
                         "elec_edge": {
                             "start_vertex": "elec_MIDAT"
                         },
-                        "h2_edge":{
+                        "h2_edge": {
                             "end_vertex": "h2_MIDAT"
                         },
                         "co2_captured_edge": {
@@ -133,6 +133,7 @@
                     },
                     "edges": {
                         "biomass_edge": {
+                            "commodity": "Biomass_Herb",
                             "start_vertex": "bioherb_NE",
                             "availability": {
                                 "timeseries": {
@@ -149,7 +150,7 @@
                         "elec_edge": {
                             "start_vertex": "elec_NE"
                         },
-                        "h2_edge":{
+                        "h2_edge": {
                             "end_vertex": "h2_NE"
                         },
                         "co2_captured_edge": {
@@ -168,6 +169,7 @@
                     },
                     "edges": {
                         "biomass_edge": {
+                            "commodity": "Biomass_Wood",
                             "start_vertex": "biowood_SE",
                             "availability": {
                                 "timeseries": {
@@ -184,7 +186,7 @@
                         "elec_edge": {
                             "start_vertex": "elec_SE"
                         },
-                        "h2_edge":{
+                        "h2_edge": {
                             "end_vertex": "h2_SE"
                         },
                         "co2_captured_edge": {
@@ -203,6 +205,7 @@
                     },
                     "edges": {
                         "biomass_edge": {
+                            "commodity": "Biomass_Wood",
                             "start_vertex": "biowood_MIDAT",
                             "availability": {
                                 "timeseries": {
@@ -219,7 +222,7 @@
                         "elec_edge": {
                             "start_vertex": "elec_MIDAT"
                         },
-                        "h2_edge":{
+                        "h2_edge": {
                             "end_vertex": "h2_MIDAT"
                         },
                         "co2_captured_edge": {
@@ -238,6 +241,7 @@
                     },
                     "edges": {
                         "biomass_edge": {
+                            "commodity": "Biomass_Wood",
                             "start_vertex": "biowood_NE",
                             "availability": {
                                 "timeseries": {
@@ -254,7 +258,7 @@
                         "elec_edge": {
                             "start_vertex": "elec_NE"
                         },
-                        "h2_edge":{
+                        "h2_edge": {
                             "end_vertex": "h2_NE"
                         },
                         "co2_captured_edge": {

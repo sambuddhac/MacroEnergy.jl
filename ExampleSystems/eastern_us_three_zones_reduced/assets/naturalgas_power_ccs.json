@@ -12,7 +12,7 @@
                 },
                 "edges": {
                     "elec_edge": {
-                        "type": "Electricity",
+                        "commodity": "Electricity",
                         "uc": true,
                         "unidirectional": true,
                         "has_capacity": true,
@@ -28,18 +28,18 @@
                         }
                     },
                     "fuel_edge": {
-                        "type": "NaturalGas",
+                        "commodity": "NaturalGas",
                         "unidirectional": true,
                         "has_capacity": false
                     },
                     "co2_edge": {
-                        "type": "CO2",
+                        "commodity": "CO2",
                         "unidirectional": true,
                         "has_capacity": false,
                         "end_vertex": "co2_sink"
                     },
                     "co2_captured_edge": {
-                        "type": "CO2Captured",
+                        "commodity": "CO2Captured",
                         "unidirectional": true,
                         "has_capacity": false,
                         "end_vertex": "co2_captured_sink"

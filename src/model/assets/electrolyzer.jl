@@ -18,7 +18,7 @@ function default_data(::Type{Electrolyzer}, id=missing)
         ),
         :edges => Dict(
             :h2_edge => Dict(
-                :type => Hydrogen,
+                :commodity => "Hydrogen",
                 :end_vertex => missing,
                 :unidirectional => true,
                 :has_capacity => true,
@@ -37,7 +37,7 @@ function default_data(::Type{Electrolyzer}, id=missing)
                 ),
             ),
             :elec_edge => Dict(
-                :type => Electricity,
+                :commodity => "Electricity",
                 :start_vertex => missing,
                 :unidirectional => true,
                 :has_capacity => false,

@@ -8,25 +8,16 @@ function default_data(::Type{VRE}, id=missing)
     return Dict{Symbol, Any}(
         :id => id,
         :transforms => Dict{Symbol, Any}(
+            :id => missing,
             :timedata => "Electricity",
-            :constraints => Dict{Symbol,Bool}()
+            :location => missing,
+            :constraints => Dict{Symbol,Bool}(),
         ),
         :edges => Dict{Symbol, Any}(
-            :edge => Dict{Symbol, Any}(
-                :end_vertex => missing,
-                :type => "Electricity",
-                :unidirectional => true,
-                :investment_cost => 0.0,
-                :fixed_om_cost => 0.0,
-                :variable_om_cost => 0.0,
+            :edge => @edge_data(
+                :commodity => "Electricity",
                 :has_capacity => true,
                 :can_expand => true,
-                :can_retire => false,
-                :capacity_size => 1.0,
-                :existing_capacity => 0.0,
-                :min_capacity => 0.0,
-                :max_capacity => Inf,
-                :availability => 1.0,
                 :constraints => Dict{Symbol,Bool}(
                     :CapacityConstraint => true,
                 )

@@ -130,7 +130,7 @@ function make(::Type{ThermalHydrogen}, data::AbstractDict{Symbol,Any}, system::S
     h2_edge.unidirectional = true;
     fuel_edge_key = :fuel_edge
     fuel_edge_data = process_data(data[:edges][fuel_edge_key])
-    T = commodity_types()[Symbol(fuel_edge_data[:type])];
+    T = commodity_types()[Symbol(fuel_edge_data[:commodity])];
 
     fuel_start_node = find_node(system.locations, Symbol(fuel_edge_data[:start_vertex]))
     fuel_end_node = thermalhydrogen_transform
