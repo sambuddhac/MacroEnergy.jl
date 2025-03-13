@@ -94,3 +94,26 @@ function get_from(combos::Vector{Tuple{T, Symbol}}, default) where T<:AbstractDi
     end
     return default
 end
+
+###### ###### ###### ###### ###### ######
+
+# macro process_data(name, data, loaded_data)
+#     return esc(quote
+#         remove_missing!($loaded_data)
+#         recursive_merge!($loaded_data[:constraints], $data[:constraints])
+#         merge!($data, $loaded_data)
+#         $name = process_data($data)
+#     end)
+# end
+
+macro process_data(name, data, get_from_tuples)
+    return esc(quote
+        local loaded_data = Dict{Symbol,Any}(
+            key => get_from($get_from_tuples, missing) for key in keys($data)
+        )
+        remove_missing!(loaded_data)
+        recursive_merge!(loaded_data[:constraints], $data[:constraints])
+        merge!($data, loaded_data)
+        $name = process_data($data)
+    end)
+end
