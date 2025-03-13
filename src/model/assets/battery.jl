@@ -8,20 +8,9 @@ end
 function default_data(::Type{Battery}, id=missing,)
     return Dict{Symbol,Any}(
         :id => id,
-        :storage => Dict{Symbol,Any}(
+        :storage => @storage_data(
             :commodity => "Electricity",
             :can_retire => false,
-            :can_expand => true,
-            :long_duration => false,
-            :existing_capacity => 0.0,
-            :investment_cost => 0.0,
-            :fixed_om_cost => 0.0,
-            :loss_fraction => 0.0,
-            :min_duration => 0.0,
-            :max_duration => 0.0,
-            :min_storage_level => 0.0,
-            :min_capacity => 0.0,
-            :max_capacity => Inf,
             :constraints => Dict{Symbol,Bool}(
                 :StorageCapacityConstraint => true,
                 :StorageSymmetricCapacityConstraint => true,
@@ -31,34 +20,20 @@ function default_data(::Type{Battery}, id=missing,)
             )
         ),
         :edges => Dict{Symbol,Any}(
-            :charge_edge => Dict{Symbol,Any}(
-                :type => "Electricity",
-                :start_vertex => missing,
-                :unidirectional => true,
-                :has_capacity => false,
-                :efficiency => 0.9,
-                :variable_om_cost => 0.0,
-                :constraints => Dict{Symbol,Bool}()
+            :charge_edge => @edge_data(
+                :commodity => "Electricity",
             ),
-            :discharge_edge => Dict{Symbol,Any}(
-                :type => "Electricity",
-                :end_vertex => missing,
-                :unidirectional => true,
+            :discharge_edge => @edge_data(
+                :commodity => "Electricity",
                 :has_capacity => true,
-                :existing_capacity => 0.0,
                 :can_expand => true,
-                :can_retire => false,
-                :efficiency => 0.9,
-                :investment_cost => 0.0,
-                :fixed_om_cost => 0.0,
-                :variable_om_cost => 0.0,
                 :constraints => Dict{Symbol,Bool}(
                     :CapacityConstraint => true,
                     :StorageDischargeLimitConstraint => true,
                     :RampingLimitConstraint => true
                 )
-            ),
-        ),
+            )
+        )
     )
 end
 
