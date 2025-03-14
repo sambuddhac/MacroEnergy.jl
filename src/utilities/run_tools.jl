@@ -30,8 +30,8 @@ function run_case(case_path::AbstractString=@__DIR__; lazy_load::Bool=true, opti
     optimize!(model)
     
     ## Output results
-    results_dir = joinpath(case_path, "results")
-    mkpath(results_dir)
+    # Create results directory
+    results_dir = create_output_path(system)
     
     # Capacity results
     write_capacity_results(joinpath(results_dir, "capacity.csv"), system)

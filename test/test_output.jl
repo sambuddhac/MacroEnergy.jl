@@ -28,6 +28,8 @@ import MacroEnergy:
     get_optimal_vars_timeseries,
     convert_to_dataframe, 
     empty_system, 
+    create_output_path,
+    find_available_path,
     add!
 
 
@@ -570,6 +572,86 @@ function test_writing_output()
             @test df[2, :time] == 5
             @test df[2, :value] == 678.90
             # @test df[2, :unit] == :unit2
+        end
+    end
+
+    @testset "get_output_dir Tests" begin
+        # Create a temporary directory for testing
+        test_dir = mktempdir()
+        
+        # Create a mock system with different settings
+        system1 = empty_system(test_dir)
+        system1.settings = (OutputDir = "results", OverwriteResults = true)
+        
+        # Test overwriting existing directory
+        output_path1 = create_output_path(system1)
+        @test isdir(output_path1)
+        @test output_path1 == joinpath(test_dir, "results")
+        
+        # Create second path - should still use same directory
+        output_path2 = create_output_path(system1)
+        @test output_path2 == output_path1
+        
+        # Test with OverwriteResults = 0 (no overwrite)
+        system2 = empty_system(test_dir)
+        system2.settings = (OutputDir = "results", OverwriteResults = false)
+        
+        # This is the second call, so it should create "results_001"
+        output_path3 = create_output_path(system2)
+        @test isdir(output_path3)
+        @test output_path3 == joinpath(test_dir, "results_001")
+        
+        # Third call should create "results_002"
+        output_path4 = create_output_path(system2)
+        @test isdir(output_path4)
+        @test output_path4 == joinpath(test_dir, "results_002")
+
+        # Test with path argument specified
+        output_path6 = create_output_path(system2, joinpath(test_dir, "path", "to", "output"))
+        @test isdir(output_path6)
+        @test output_path6 == joinpath(test_dir, "path", "to", "output", "results_001")
+
+        # Second call with path argument should create "path/to/output/results_002"
+        output_path7 = create_output_path(system2, joinpath(test_dir, "path", "to", "output"))
+        @test isdir(output_path7)
+        @test output_path7 == joinpath(test_dir, "path", "to", "output", "results_002")
+        
+        # Cleanup
+        rm(test_dir, recursive=true)
+
+        @testset "choose_output_dir Tests" begin
+            # Create a temporary directory for testing
+            test_dir = mktempdir()
+            
+            # Test with non-existing directory
+            result = find_available_path(test_dir)
+            @test result == joinpath(test_dir, "results_001") # Should return original path if it doesn't exist
+            
+            
+            # Create multiple directories and test incremental numbering
+            mkpath(joinpath(test_dir, "newdir_002"))
+            mkpath(joinpath(test_dir, "newdir_004"))
+            result = find_available_path(test_dir, "newdir")
+            @test result == joinpath(test_dir, "newdir_001")  # Should append _001
+
+            mkpath(joinpath(test_dir, "newdir_001"))
+            result = find_available_path(test_dir, "newdir")
+            @test result == joinpath(test_dir, "newdir_003")
+
+            # Test with path containing trailing slash
+            path_with_slash = joinpath(test_dir, "dirwithslash/")
+            mkpath(path_with_slash)
+            result = find_available_path(path_with_slash)
+            @test result == joinpath(test_dir, "dirwithslash/results_001")
+            
+            # Test with path containing spaces
+            path_with_spaces = joinpath(test_dir, "my dir")
+            mkpath(path_with_spaces)
+            result = find_available_path(path_with_spaces)
+            @test result == joinpath(test_dir, "my dir/results_001")
+            
+            # Cleanup
+            rm(test_dir, recursive=true)
         end
     end
 end
