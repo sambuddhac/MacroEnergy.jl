@@ -41,8 +41,7 @@
                     "co2_captured_edge": {
                         "type": "CO2Captured",
                         "unidirectional": true,
-                        "has_capacity": false,
-                        "end_vertex": "co2_captured_sink"
+                        "has_capacity": false
                     }
                 },
                 "storage": {}
@@ -58,10 +57,10 @@
                     "edges": {
                         "elec_edge": {
                             "end_vertex": "elec_SE",
-                            "investment_cost": 150408.6558,
+                            "investment_cost": 105122.0711,
                             "existing_capacity": 0.0,
-                            "fixed_om_cost": 65100,
-                            "variable_om_cost": 5.73,
+                            "fixed_om_cost": 47800,
+                            "variable_om_cost": 3.76,
                             "capacity_size": 377,
                             "startup_cost": 97,
                             "startup_fuel_consumption": 0.058614214,                            
@@ -73,6 +72,9 @@
                         },
                         "fuel_edge": {
                             "start_vertex": "natgas_SE"
+                        },
+                        "co2_captured_edge": {
+                            "end_vertex": "co2_captured_SE"
                         }
                     }
                 },
@@ -86,10 +88,10 @@
                     "edges": {
                         "elec_edge": {
                             "end_vertex": "elec_MIDAT",
-                            "investment_cost": 158946.1077,
+                            "investment_cost": 111088.9792,
                             "existing_capacity": 0.0,
-                            "fixed_om_cost": 65100,
-                            "variable_om_cost": 5.73,
+                            "fixed_om_cost": 47800,
+                            "variable_om_cost": 3.76,
                             "capacity_size": 377,
                             "startup_cost": 97,
                             "startup_fuel_consumption": 0.058614214,                            
@@ -101,6 +103,9 @@
                         },
                         "fuel_edge": {
                             "start_vertex": "natgas_MIDAT"
+                        },
+                        "co2_captured_edge": {
+                            "end_vertex": "co2_captured_MIDAT"
                         }
                     }
                 },
@@ -114,10 +119,10 @@
                     "edges": {
                         "elec_edge": {
                             "end_vertex": "elec_NE",
-                            "investment_cost": 173266.9946,
+                            "investment_cost": 121097.9862,
                             "existing_capacity": 0.0,
-                            "fixed_om_cost": 65100,
-                            "variable_om_cost": 5.73,
+                            "fixed_om_cost": 47800,
+                            "variable_om_cost": 3.76,
                             "capacity_size": 377,
                             "startup_cost": 97,
                             "startup_fuel_consumption": 0.058614214,                            
@@ -129,6 +134,9 @@
                         },
                         "fuel_edge": {
                             "start_vertex": "natgas_NE"
+                        },
+                        "co2_captured_edge": {
+                            "end_vertex": "co2_captured_NE"
                         }
                     }
                 }

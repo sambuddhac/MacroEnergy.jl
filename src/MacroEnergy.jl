@@ -25,6 +25,7 @@ abstract type CO2Captured <: CO2 end ## tonnes
 abstract type Coal <: Commodity end ## MWh
 abstract type Biomass <: Commodity end ## tonnes
 abstract type Uranium <: Commodity end ## MWh
+abstract type LiquidFuels <: Commodity end ## MWh
 
 ## Time data types
 abstract type AbstractTimeData{T<:Commodity} end
@@ -99,9 +100,19 @@ include("model/assets/natgasdac.jl")
 include("model/assets/electricdac.jl")
 include("model/assets/beccselectricity.jl")
 include("model/assets/beccshydrogen.jl")
+include("model/assets/beccsgasoline.jl")
+include("model/assets/beccsliquidfuels.jl")
+include("model/assets/beccsnaturalgas.jl")
 include("model/assets/hydrores.jl")
 include("model/assets/mustrun.jl")
 
+include("model/assets/fossilfuelsupstream.jl")
+include("model/assets/fuelsenduse.jl")
+
+include("model/assets/syntheticnaturalgas.jl")
+include("model/assets/syntheticliquidfuels.jl")
+
+include("model/assets/co2injection.jl")
 
 include_all_in_folder("model/constraints")
 
@@ -129,9 +140,14 @@ export AbstractAsset,
     Coal,
     BECCSElectricity,
     BECCSHydrogen,
+    BECCSGasoline,
+    BECCSLiquidFuels,
+    BECCSNaturalGas,
     CO2,
     CO2CapConstraint,
     CO2Captured,
+    CO2Injection,
+    CO2StorageConstraint,
     CapacityConstraint,
     collect_results,
     Commodity,
@@ -140,7 +156,9 @@ export AbstractAsset,
     Electricity,
     Electrolyzer,
     ElectricDAC,
+    FossilFuelsUpstream,
     FuelCell,
+    FuelsEndUse,
     GasStorage,
     get_optimal_capacity, 
     get_optimal_costs,
@@ -152,6 +170,7 @@ export AbstractAsset,
     HydrogenLine,
     LongDurationStorage,
     LongDurationStorageImplicitMinMaxConstraint,
+    LiquidFuels,
     MaxCapacityConstraint,
     MaxNonServedDemandConstraint,
     MaxNonServedDemandPerSegmentConstraint,
@@ -166,6 +185,7 @@ export AbstractAsset,
     MustRunConstraint,
     NaturalGas,
     NaturalGasDAC,
+    NaturalGasFossilUpstream,
     Node,
     OperationConstraint,
     PlanningConstraint,
@@ -180,6 +200,8 @@ export AbstractAsset,
     StorageMinDurationConstraint,
     StorageSymmetricCapacityConstraint,
     StorageDischargeLimitConstraint,
+    SyntheticNaturalGas,
+    SyntheticLiquidFuels,
     ThermalHydrogen,
     ThermalPower,
     ThermalHydrogenCCS,

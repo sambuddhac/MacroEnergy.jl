@@ -41,8 +41,7 @@
                     "co2_captured_edge": {
                         "type": "CO2Captured",
                         "unidirectional": true,
-                        "has_capacity": false,
-                        "end_vertex": "co2_captured_sink"
+                        "has_capacity": false
                     },
                     "elec_edge":{
                         "type": "Electricity",
@@ -70,11 +69,11 @@
                                     }
                                 },
                                 "existing_capacity": 0.0,
-                                "investment_cost": 57497.91679,
-                                "fixed_om_cost": 23292.27286,
-                                "variable_om_cost": 9.262366684,
-                                "capacity_size": 1082.95,
-                                "startup_cost": 0.253936008,
+                                "investment_cost": 57483.3197,
+                                "fixed_om_cost": 23286.35962,
+                                "variable_om_cost": 10.25864433,
+                                "capacity_size": 1083.225,
+                                "startup_cost": 0.253871541,
                                 "min_up_time": 22,
                                 "min_down_time": 12,
                                 "ramp_up_fraction": 0.5,
@@ -86,6 +85,9 @@
                             },
                             "elec_edge":{
                                 "start_vertex": "elec_SE"
+                            },
+                            "co2_captured_edge": {
+                                "end_vertex": "co2_captured_SE"
                             }
                         }
                 },
@@ -107,11 +109,11 @@
                                     }
                                 },
                                 "existing_capacity": 0.0,
-                                "investment_cost": 57497.91679,
-                                "fixed_om_cost": 23292.27286,
-                                "variable_om_cost": 9.262366684,
-                                "capacity_size": 1082.95,
-                                "startup_cost": 0.253936008,
+                                "investment_cost": 57483.3197,
+                                "fixed_om_cost": 23286.35962,
+                                "variable_om_cost": 10.25864433,
+                                "capacity_size": 1083.225,
+                                "startup_cost": 0.253871541,
                                 "min_up_time": 22,
                                 "min_down_time": 12,
                                 "ramp_up_fraction": 0.5,
@@ -123,6 +125,9 @@
                             },
                             "elec_edge":{
                                 "start_vertex": "elec_MIDAT"
+                            },
+                            "co2_captured_edge": {
+                                "end_vertex": "co2_captured_MIDAT"
                             }
                         }
                 },
@@ -144,11 +149,11 @@
                                     }
                                 },
                                 "existing_capacity": 0.0,
-                                "investment_cost": 57497.91679,
-                                "fixed_om_cost": 23292.27286,
-                                "variable_om_cost": 9.262366684,
-                                "capacity_size": 1082.95,
-                                "startup_cost": 0.253936008,
+                                "investment_cost": 57483.3197,
+                                "fixed_om_cost": 23286.35962,
+                                "variable_om_cost": 10.25864433,
+                                "capacity_size": 1083.225,
+                                "startup_cost": 0.253871541,
                                 "min_up_time": 22,
                                 "min_down_time": 12,
                                 "ramp_up_fraction": 0.5,
@@ -160,6 +165,9 @@
                             },
                             "elec_edge":{
                                 "start_vertex": "elec_NE"
+                            },
+                            "co2_captured_edge": {
+                                "end_vertex": "co2_captured_NE"
                             }
                         }
                 },
@@ -181,11 +189,11 @@
                                     }
                                 },
                                 "existing_capacity": 0.0,
-                                "investment_cost": 72747.64782,
-                                "fixed_om_cost": 30029.56635,
-                                "variable_om_cost": 6.26789741,
-                                "capacity_size": 791.538,
-                                "startup_cost": 0.253936008,
+                                "investment_cost": 72729.17926,
+                                "fixed_om_cost": 30021.9427,
+                                "variable_om_cost": 6.942084285,
+                                "capacity_size": 791.739,
+                                "startup_cost": 0.253871541,
                                 "min_up_time": 3,
                                 "min_down_time": 3,
                                 "ramp_up_fraction": 0.5,
@@ -197,6 +205,9 @@
                             },
                             "elec_edge":{
                                 "start_vertex": "elec_SE"
+                            },
+                            "co2_captured_edge": {
+                                "end_vertex": "co2_captured_SE"
                             }
                         }
                 },
@@ -218,11 +229,11 @@
                                     }
                                 },
                                 "existing_capacity": 0.0,
-                                "investment_cost": 72747.64782,
-                                "fixed_om_cost": 30029.56635,
-                                "variable_om_cost": 6.26789741,
-                                "capacity_size": 791.538,
-                                "startup_cost": 0.253936008,
+                                "investment_cost": 72729.17926,
+                                "fixed_om_cost": 30021.9427,
+                                "variable_om_cost": 6.942084285,
+                                "capacity_size": 791.739,
+                                "startup_cost": 0.253871541,
                                 "min_up_time": 3,
                                 "min_down_time": 3,
                                 "ramp_up_fraction": 0.5,
@@ -234,6 +245,9 @@
                             },
                             "elec_edge":{
                                 "start_vertex": "elec_MIDAT"
+                            },
+                            "co2_captured_edge": {
+                                "end_vertex": "co2_captured_MIDAT"
                             }
                         }
                 },
@@ -255,11 +269,11 @@
                                     }
                                 },
                                 "existing_capacity": 0.0,
-                                "investment_cost": 72747.64782,
-                                "fixed_om_cost": 30029.56635,
-                                "variable_om_cost": 6.26789741,
-                                "capacity_size": 791.538,
-                                "startup_cost": 0.253936008,
+                                "investment_cost": 72729.17926,
+                                "fixed_om_cost": 30021.9427,
+                                "variable_om_cost": 6.942084285,
+                                "capacity_size": 791.739,
+                                "startup_cost": 0.253871541,
                                 "min_up_time": 3,
                                 "min_down_time": 3,
                                 "ramp_up_fraction": 0.5,
@@ -271,6 +285,9 @@
                             },
                             "elec_edge":{
                                 "start_vertex": "elec_NE"
+                            },
+                            "co2_captured_edge": {
+                                "end_vertex": "co2_captured_NE"
                             }
                         }
                 }
