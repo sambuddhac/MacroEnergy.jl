@@ -54,7 +54,7 @@ input_data_no_period_map = Dict{Symbol,Any}(
 input_data_with_period_map = Dict{Symbol,Any}(
     :HoursPerSubperiod => Dict(:Hydrogen => 168, :NaturalGas => 168, :Electricity => 168),
     :HoursPerTimeStep => Dict(:Hydrogen => 1, :NaturalGas => 1, :Electricity => 1),
-    :NumberOfSubperiods => 3
+    :NumberOfSubperiods => 3,
     :PeriodMap => Dict(
         :path => "system/Period_map.csv"
     )
