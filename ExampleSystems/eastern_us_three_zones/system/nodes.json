@@ -180,7 +180,6 @@
             "instance_data": [
                 {
                     "id": "elec_SE",
-                    "location": "SE",
                     "demand": {
                         "timeseries": {
                             "path": "system/demand.csv",
@@ -190,7 +189,6 @@
                 },
                 {
                     "id": "elec_MIDAT",
-                    "location": "MIDAT",
                     "demand": {
                         "timeseries": {
                             "path": "system/demand.csv",
@@ -200,7 +198,6 @@
                 },
                 {
                     "id": "elec_NE",
-                    "location": "NE",
                     "demand": {
                         "timeseries": {
                             "path": "system/demand.csv",
@@ -229,7 +226,6 @@
             "instance_data": [
                 {
                     "id": "h2_SE",
-                    "location": "SE",
                     "demand": {
                         "timeseries": {
                             "path": "system/demand.csv",
@@ -239,7 +235,6 @@
                 },
                 {
                     "id": "h2_MIDAT",
-                    "location": "MIDAT",
                     "demand": {
                         "timeseries": {
                             "path": "system/demand.csv",
@@ -249,7 +244,6 @@
                 },
                 {
                     "id": "h2_NE",
-                    "location": "NE",
                     "demand": {
                         "timeseries": {
                             "path": "system/demand.csv",
