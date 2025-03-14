@@ -30564,7 +30564,7 @@
             "Electricity": 1,
             "CO2Captured": 1
         },
-        "PeriodLength": 504
+        "NumberOfSubperiods" : 3
     },
     "data_dirpath": "test/test_inputs"
 }

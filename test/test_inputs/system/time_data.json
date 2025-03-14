@@ -17,5 +17,5 @@
         "Biomass": 1,
         "Uranium": 1
     },
-    "PeriodLength": 504
+    "NumberOfSubperiods" : 3
 }

@@ -86,11 +86,11 @@ function validate_time_data(
     case_commodities::Dict{Symbol,DataType}
 )
     # Check that the time data has the correct fields
-    @assert haskey(time_data, :PeriodLength)
+    @assert haskey(time_data, :NumberOfSubperiods)
     @assert haskey(time_data, :HoursPerTimeStep)
     @assert haskey(time_data, :HoursPerSubperiod)
     # Check that the time data has the correct values    
-    @assert time_data[:PeriodLength] > 0
+    @assert time_data[:NumberOfSubperiods] > 0
     @assert all(values(time_data[:HoursPerTimeStep]) .> 0)
     @assert all(values(time_data[:HoursPerSubperiod]) .> 0)
 
@@ -133,11 +133,17 @@ function create_commodity_timedata(
     type::DataType,
     time_data::AbstractDict{Symbol,Any}
 )
-    period_length = time_data[:PeriodLength]
+    number_of_subperiods = time_data[:NumberOfSubperiods];
+
+    hours_per_subperiod = time_data[:HoursPerSubperiod][sym]
+
+    total_hours_modeled = time_data[:TotalHoursModeled]
+
+    hours_per_timestep = time_data[:HoursPerTimeStep][sym]
+
+    period_length = number_of_subperiods * hours_per_subperiod;
 
     time_interval = 1:period_length
-    
-    hours_per_timestep = time_data[:HoursPerTimeStep][sym]
 
     validate_temporal_resolution(hours_per_timestep)
 
@@ -146,10 +152,6 @@ function create_commodity_timedata(
     period_map  = get_timedata_period_map(time_data, sym)
 
     unique_rep_periods = get_unique_rep_periods(period_map)
-
-    hours_per_subperiod = time_data[:HoursPerSubperiod][sym]
-
-    total_hours_modeled = time_data[:TotalHoursModeled]
 
     weights = get_weights(period_map, unique_rep_periods, hours_per_subperiod, total_hours_modeled)
 
@@ -168,9 +170,9 @@ function validate_temporal_resolution(hours_per_timestep::Int)
 end
 
 function create_subperiods(time_data::AbstractDict{Symbol,Any}, sym::Symbol)
-    period_length = time_data[:PeriodLength]
-    time_interval = 1:period_length
+    number_of_subperiods = time_data[:NumberOfSubperiods]
     hours_per_subperiod = time_data[:HoursPerSubperiod][sym]
+    time_interval = 1:number_of_subperiods * hours_per_subperiod;
     return collect(Iterators.partition(time_interval, hours_per_subperiod))
 end
 
