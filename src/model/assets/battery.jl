@@ -14,8 +14,6 @@ function default_data(::Type{Battery}, id=missing,)
             :constraints => Dict{Symbol,Bool}(
                 :StorageCapacityConstraint => true,
                 :StorageSymmetricCapacityConstraint => true,
-                :StorageMinDurationConstraint => true,
-                :StorageMaxDurationConstraint => true,
                 :BalanceConstraint => true
             )
         ),
@@ -115,9 +113,12 @@ function make(::Type{Battery}, data::AbstractDict{Symbol,Any}, system::System)
         (data[:edges][charge_edge_key], Symbol("charge_", key)),
         (data[:edges][charge_edge_key], key)
     ])
-    start_vertex = get_from([(data, :location), (charge_edge_data, :start_vertex)], missing)
-    charge_edge_data[:start_vertex] = start_vertex
-    charge_start_node = find_node(system.locations, Symbol(start_vertex), commodity)
+    @start_vertex(
+        charge_start_node,
+        charge_edge_data,
+        commodity,
+        [(data, :location), (charge_edge_data, :start_vertex)],
+    )
     charge_end_node = battery_storage
     battery_charge = Edge(
         Symbol(id, "_", charge_edge_key),
@@ -137,9 +138,12 @@ function make(::Type{Battery}, data::AbstractDict{Symbol,Any}, system::System)
         (data[:edges][discharge_edge_key], key)
     ])
     discharge_start_node = battery_storage
-    end_vertex = get_from([(data, :location), (discharge_edge_data, :end_vertex)], missing)
-    discharge_edge_data[:end_vertex] = end_vertex
-    discharge_end_node = find_node(system.locations, Symbol(end_vertex), commodity)
+    @end_vertex(
+        discharge_end_node,
+        discharge_edge_data,
+        commodity,
+        [(data, :location), (discharge_edge_data, :end_vertex)],
+    )
     battery_discharge = Edge(
         Symbol(id, "_", discharge_edge_key),
         discharge_edge_data,
@@ -158,13 +162,13 @@ function make(::Type{Battery}, data::AbstractDict{Symbol,Any}, system::System)
     battery_storage.discharge_edge = battery_discharge
     battery_storage.charge_edge = battery_charge
     discharge_efficiency = get_from([
-            (data, :discharge_efficiency),
             (discharge_edge_data, :discharge_efficiency),
-            (discharge_edge_data, :efficiency)], 0.9)
+            (discharge_edge_data, :efficiency)
+        ], 0.9)
     charge_efficiency = get_from([
-            (data, :charge_efficiency),
             (charge_edge_data, :charge_efficiency),
-            (charge_edge_data, :efficiency)], 0.9)
+            (charge_edge_data, :efficiency)
+        ], 0.9)
     battery_storage.balance_data = Dict(
         :storage => Dict(
             battery_discharge.id => 1 / discharge_efficiency,

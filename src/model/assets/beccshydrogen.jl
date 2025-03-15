@@ -9,84 +9,44 @@ struct BECCSHydrogen <: AbstractAsset
     co2_captured_edge::Edge{CO2Captured}
 end
 
-function default_data(::Type{BECCSHydrogen}, id=missing,)
+function default_data(::Type{BECCSHydrogen}, id=missing)
     return Dict{Symbol, Any}(
         :id => id,
-        :transforms => Dict{Symbol, Any}(
+        :transforms => @transform_data(
             :timedata => "Biomass",
-            :hydrogen_production =>  0.0,
-            :electricity_consumption =>  0.0,
-            :capture_rate =>  0.0,
-            :co2_content => 0.0,
-            :emission_rate => 0.0,
             :constraints => Dict{Symbol,Bool}(
                 :BalanceConstraint => true
             ),
+            :hydrogen_production => 0.0,
+            :electricity_consumption => 0.0,
+            :capture_rate => 1.0,
+            :co2_content => 0.0,
+            :emission_rate => 1.0
         ),
         :edges => Dict{Symbol, Any}(
-            :elec_edge => Dict{Symbol, Any}(
+            :elec_edge => @edge_data(
                 :commodity => "Electricity",
-                :start_vertex => missing,
-                :unidirectional => true,
-                :has_capacity => false,
-                :can_expand => false,
-                :can_retire => false,
-                :constraints => Dict{Symbol,Bool}()
             ),
-            :h2_edge => Dict{Symbol, Any}(
+            :h2_edge => @edge_data(
                 :commodity => "Hydrogen",
-                :start_vertex => missing,
-                :unidirectional => true,
-                :has_capacity => false,
-                :can_expand => false,
-                :can_retire => false,
-                :constraints => Dict{Symbol,Bool}()
             ),
-            :biomass_edge => Dict{Symbol, Any}(
+            :biomass_edge => @edge_data(
                 :commodity => "Biomass",
-                :start_vertex => missing,
-                :unidirectional => true,
-                :integer_decisions => false,
                 :has_capacity => true,
-                :existing_capacity => 0.0,
-                :capacity_size => 1.0,
                 :can_expand => true,
                 :can_retire => true,
-                :investment_cost => 0.0,
-                :fixed_om_cost => 0.0,
-                :variable_om_cost => 0.0,
-                :availability => 1.0,
-                :min_flow_fraction => 0.0,
                 :constraints => Dict{Symbol,Bool}(
                     :CapacityConstraint => true,
                 )
             ),
-            :co2_edge => Dict{Symbol, Any}(
+            :co2_edge => @edge_data(
                 :commodity => "CO2",
-                :start_vertex => missing,
-                :unidirectional => true,
-                :has_capacity => false,
-                :can_expand => false,
-                :can_retire => false,
-                :constraints => Dict{Symbol,Bool}()
             ),
-            :co2_emission_edge => Dict{Symbol, Any}(
+            :co2_emission_edge => @edge_data(
                 :commodity => "CO2",
-                :end_vertex => missing,
-                :unidirectional => true,
-                :has_capacity => false,
-                :can_expand => false,
-                :can_retire => false,
-                :constraints => Dict{Symbol,Bool}()
             ),
-            :co2_captured_edge => Dict{Symbol, Any}(
+            :co2_captured_edge => @edge_data(
                 :commodity => "CO2Captured",
-                :end_vertex => missing,
-                :unidirectional => true,
-                :has_capacity => false,
-                :can_expand => false,
-                :can_retire => false,
-                :constraints => Dict{Symbol,Bool}()
             )
         )
     )
@@ -118,9 +78,13 @@ function make(::Type{BECCSHydrogen}, data::AbstractDict{Symbol,Any}, system::Sys
         (data[:edges][biomass_edge_key], Symbol("biomass_", key))
     ])
     commodity_symbol = Symbol(biomass_edge_data[:commodity])
-    start_vertex = get_from([(data, :location), (biomass_edge_data, :start_vertex)], missing)
-    biomass_edge_data[:start_vertex] = start_vertex
-    biomass_start_node = find_node(system.locations, Symbol(start_vertex), commodity_types()[commodity_symbol])
+    commodity = commodity_types()[commodity_symbol]
+    @start_vertex(
+        biomass_start_node,
+        biomass_edge_data,
+        commodity,
+        [(data, :location), (biomass_edge_data, :start_vertex)]
+    )
     biomass_end_node = beccs_transform
     biomass_edge = Edge(
         Symbol(id, "_", biomass_edge_key),
@@ -140,9 +104,12 @@ function make(::Type{BECCSHydrogen}, data::AbstractDict{Symbol,Any}, system::Sys
         (data[:edges][h2_edge_key], Symbol("h2_", key))
     ])
     h2_start_node = beccs_transform
-    end_vertex = get_from([(data, :location), (h2_edge_data, :end_vertex)], missing)
-    h2_edge_data[:end_vertex] = end_vertex
-    h2_end_node = find_node(system.locations, Symbol(end_vertex), Hydrogen)
+    @end_vertex(
+        h2_end_node,
+        h2_edge_data,
+        Hydrogen,
+        [(data, :location), (h2_edge_data, :end_vertex)]
+    )
     h2_edge = Edge(
         Symbol(id, "_", h2_edge_key),
         h2_edge_data,
@@ -161,9 +128,12 @@ function make(::Type{BECCSHydrogen}, data::AbstractDict{Symbol,Any}, system::Sys
         (data[:edges][co2_edge_key], key),
         (data[:edges][co2_edge_key], Symbol("co2_", key))
     ])
-    start_vertex = get_from([(data, :co2_sink), (co2_edge_data, :start_vertex)], missing)
-    co2_edge_data[:start_vertex] = start_vertex
-    co2_start_node = find_node(system.locations, Symbol(start_vertex), CO2)
+    @start_vertex(
+        co2_start_node,
+        co2_edge_data,
+        CO2,
+        [(data, :co2_sink), (co2_edge_data, :start_vertex)],
+    )
     co2_end_node = beccs_transform
     co2_edge = Edge(
         Symbol(id, "_", co2_edge_key),
@@ -184,9 +154,12 @@ function make(::Type{BECCSHydrogen}, data::AbstractDict{Symbol,Any}, system::Sys
         (data[:edges][co2_emission_edge_key], Symbol("co2_emission_", key))
     ])
     co2_emission_start_node = beccs_transform
-    end_vertex = get_from([(data, :co2_sink), (co2_emission_edge_data, :end_vertex)], missing)
-    co2_emission_edge_data[:end_vertex] = end_vertex
-    co2_emission_end_node = find_node(system.locations, Symbol(end_vertex), CO2)
+    @end_vertex(
+        co2_emission_end_node,
+        co2_emission_edge_data,
+        CO2,
+        [(data, :co2_sink), (co2_emission_edge_data, :end_vertex)],
+    )
     co2_emission_edge = Edge(
         Symbol(id, "_", co2_emission_edge_key),
         co2_emission_edge_data,
@@ -205,10 +178,13 @@ function make(::Type{BECCSHydrogen}, data::AbstractDict{Symbol,Any}, system::Sys
         (data[:edges][elec_edge_key], key),
         (data[:edges][elec_edge_key], Symbol("elec_", key))
     ])
+    @start_vertex(
+        elec_start_node,
+        elec_edge_data,
+        Electricity,
+        [(data, :location), (elec_edge_data, :start_vertex)],
+    )
     elec_end_node = beccs_transform
-    start_vertex = get_from([(data, :location), (elec_edge_data, :start_vertex)], missing)
-    elec_edge_data[:start_vertex] = start_vertex
-    elec_start_node = find_node(system.locations, Symbol(start_vertex), Electricity)
     elec_edge = Edge(
         Symbol(id, "_", elec_edge_key),
         elec_edge_data,
@@ -228,9 +204,12 @@ function make(::Type{BECCSHydrogen}, data::AbstractDict{Symbol,Any}, system::Sys
         (data[:edges][co2_captured_edge_key], key)
     ])
     co2_captured_start_node = beccs_transform
-    end_vertex = get_from([(data, :co2_captured_sink), (co2_captured_edge_data, :end_vertex)], missing)
-    co2_captured_edge_data[:end_vertex] = end_vertex
-    co2_captured_end_node = find_node(system.locations, Symbol(end_vertex), CO2Captured)
+    @end_vertex(
+        co2_captured_end_node,
+        co2_captured_edge_data,
+        CO2Captured,
+        [(data, :co2_captured_sink), (co2_captured_edge_data, :end_vertex)],
+    )
     co2_captured_edge = Edge(
         Symbol(id, "_", co2_captured_edge_key),
         co2_captured_edge_data,

@@ -7,11 +7,8 @@ end
 function default_data(::Type{VRE}, id=missing)
     return Dict{Symbol, Any}(
         :id => id,
-        :transforms => Dict{Symbol, Any}(
-            :id => missing,
+        :transforms => @transform_data(
             :timedata => "Electricity",
-            :location => missing,
-            :constraints => Dict{Symbol,Bool}(),
         ),
         :edges => Dict{Symbol, Any}(
             :edge => @edge_data(
@@ -69,23 +66,23 @@ function make(asset_type::Type{<:VRE}, data::AbstractDict{Symbol,Any}, system::S
     )
 
     elec_edge_key = :edge
-    loaded_elec_edge_data = Dict{Symbol,Any}(
-        key => get_from([
-                (data, key),
-                (data, Symbol("edge_", key)),
-                (data[:edges][elec_edge_key], key),
-                (data[:edges][elec_edge_key], Symbol("edge_", key))],
-            missing)
-        for key in keys(data[:edges][elec_edge_key])
+    @process_data(
+        elec_edge_data,
+        data[:edges][elec_edge_key],
+        [
+            (data, key),
+            (data, Symbol("elec_", key)),
+            (data[:edges][elec_edge_key], key),
+            (data[:edges][elec_edge_key], Symbol("elec_", key)),
+        ],
     )
-    remove_missing!(loaded_elec_edge_data)
-    recursive_merge!(data[:edges][elec_edge_key][:constraints], loaded_elec_edge_data[:constraints])
-    merge!(data[:edges][elec_edge_key], loaded_elec_edge_data)
-    elec_edge_data = process_data(data[:edges][elec_edge_key])
     elec_start_node = vre_transform
-    end_vertex = get_from([(data, :location), (elec_edge_data, :end_vertex)], missing)
-    elec_edge_data[:end_vertex] = end_vertex
-    elec_end_node = find_node(system.locations, Symbol(end_vertex), Electricity)
+    @end_vertex(
+        elec_end_node,
+        elec_edge_data,
+        Electricity,
+        [(data, :location), (elec_edge_data, :end_vertex)]
+    )
     elec_edge = Edge(
         Symbol(id, "_", elec_edge_key),
         elec_edge_data,

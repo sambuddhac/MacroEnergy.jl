@@ -5,11 +5,45 @@ struct CO2Injection <: AbstractAsset
     co2_storage_edge::Edge{CO2Captured}
 end
 
+function default_data(::Type{CO2Injection}, id=missing)
+    return Dict{Symbol, Any}(
+        id => id,
+        :transforms => Dict{Symbol, Any}(
+
+        ),
+        :edges => Dict{Symbol, Any}(
+            :co2_captured_edge => @edge_data(
+                :commodity => "CO2Captured",
+                :has_capacity => true,
+                :can_expand => false,
+                :can_retire => false,
+                :constraints => Dict{Symbol,Bool}(
+                    :CapacityConstraint => true,
+                )
+            ),
+            :co2_storage_edge => @edge_data(
+                :commodity => "CO2Captured",
+            )
+        )
+    )
+end
+
 function make(::Type{CO2Injection}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 
+    data = recursive_merge(default_data(CO2Injection, id), data)
+
     co2injection_key = :transforms
-    transform_data = process_data(data[co2injection_key])
+    @process_data(
+        transform_data,
+        data[co2injection_key],
+        [
+            (data, key),
+            (data, Symbol("transform_", key)),
+            (data[co2injection_key], key),
+            (data[co2injection_key], Symbol("transform_", key))
+        ]
+    )
     co2injection_transform = Transformation(;
         id = Symbol(id, "_", co2injection_key),
         timedata = system.time_data[Symbol(transform_data[:timedata])],
@@ -17,8 +51,22 @@ function make(::Type{CO2Injection}, data::AbstractDict{Symbol,Any}, system::Syst
     )
 
     co2_captured_edge_key = :co2_captured_edge
-    co2_captured_edge_data = process_data(data[:edges][co2_captured_edge_key])
-    co2_captured_start_node = find_node(system.locations, Symbol(co2_captured_edge_data[:start_vertex]))
+    @process_data(
+        co2_captured_edge_data,
+        data[:edges][co2_captured_edge_key],
+        [
+            (data, key),
+            (data, Symbol("co2_captured_", key)),
+            (data[:edges][co2_captured_edge_key], key),
+            (data[:edges][co2_captured_edge_key], Symbol("co2_captured_", key))
+        ]
+    )
+    @start_vertex(
+        co2_captured_start_node,
+        co2_captured_edge_data,
+        CO2Captured,
+        [(data, :co2_sink), (data, :location), (co2_captured_edge_data, :start_vertex)]
+    )
     co2_captured_end_node = co2injection_transform
     co2_captured_edge = Edge(
         Symbol(id, "_", co2_captured_edge_key),
@@ -32,9 +80,22 @@ function make(::Type{CO2Injection}, data::AbstractDict{Symbol,Any}, system::Syst
     co2_captured_edge.unidirectional = get(co2_captured_edge_data, :unidirectional, true)
 
     co2_storage_edge_key = :co2_storage_edge
-    co2_storage_edge_data = process_data(data[:edges][co2_storage_edge_key])
+    @process_data(
+        co2_storage_edge_data,
+        data[:edges][co2_storage_edge_key],
+        [
+            (data, Symbol("co2_storage_", key)),
+            (data[:edges][co2_storage_edge_key], key),
+            (data[:edges][co2_storage_edge_key], Symbol("co2_storage_", key))
+        ]
+    )
     co2_storage_start_node = co2injection_transform
-    co2_storage_end_node = find_node(system.locations, Symbol(co2_storage_edge_data[:end_vertex]))
+    @end_vertex(
+        co2_storage_end_node,
+        co2_storage_edge_data,
+        CO2Captured,
+        [(data, :co2_storage), (data, :location), (co2_storage_edge_data, :end_vertex)],
+    )
     co2_storage_edge = Edge(
         Symbol(id, "_", co2_storage_edge_key),
         co2_storage_edge_data,
