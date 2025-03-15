@@ -117,3 +117,19 @@ macro process_data(name, data, get_from_tuples)
         $name = process_data($data)
     end)
 end
+
+macro start_vertex(name, data, commodity, get_from_tuples)
+    return esc(quote
+        local vertex = get_from($get_from_tuples, missing)
+        $data[:start_vertex] = vertex
+        $name = find_node(system.locations, Symbol(vertex), $commodity)
+    end)
+end
+
+macro end_vertex(name, data, commodity, get_from_tuples)
+    return esc(quote
+        local vertex = get_from($get_from_tuples, missing)
+        $data[:end_vertex] = vertex
+        $name = find_node(system.locations, Symbol(vertex), $commodity)
+    end)
+end
