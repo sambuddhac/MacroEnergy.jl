@@ -11,18 +11,18 @@
                 },
                 "edges" :{
                     "fuel_edge": {
-                        "type": "LiquidFuels",
+                        "commodity": "LiquidFuels",
                         "unidirectional": true,
                         "has_capacity": false
                     },
                     "co2_edge": {
-                        "type": "CO2",
+                        "commodity": "CO2",
                         "unidirectional": true,
                         "has_capacity": false,
                         "end_vertex": "co2_sink"
                     },
                     "fuel_demand_edge": {
-                        "type": "LiquidFuels",
+                        "commodity": "LiquidFuels",
                         "unidirectional": true,
                         "has_capacity": false
                     }
