@@ -12,9 +12,9 @@ function default_data(::Type{Battery}, id=missing,)
             :commodity => "Electricity",
             :can_retire => false,
             :constraints => Dict{Symbol,Bool}(
+                :BalanceConstraint => true,
                 :StorageCapacityConstraint => true,
                 :StorageSymmetricCapacityConstraint => true,
-                :BalanceConstraint => true
             )
         ),
         :edges => Dict{Symbol,Any}(

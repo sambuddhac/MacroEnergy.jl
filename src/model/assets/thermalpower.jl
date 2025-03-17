@@ -28,9 +28,6 @@ function default_data(::Type{ThermalPower}, id=missing)
                 :can_expand => true,
                 :constraints => Dict{Symbol, Bool}(
                     :CapacityConstraint => true,
-                    :RampingLimitConstraint => true,
-                    :MinUpTimeConstraint => true,
-                    :MinDownTimeConstraint => true,
                 ),
             ),
             :fuel_edge => @edge_data(

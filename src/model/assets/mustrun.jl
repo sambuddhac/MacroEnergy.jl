@@ -20,7 +20,7 @@ function default_data(::Type{MustRun}, id=missing)
                 :can_expand => true,
                 :can_retire => true,
                 :constraints => Dict{Symbol, Bool}(
-                    :CapacityConstraint => true,
+                    :MustRunConstraint => true,
                 ),
             ),
         ),
