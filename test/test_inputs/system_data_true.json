@@ -13,7 +13,7 @@
     },
     "nodes": [
         {
-            "commodity": "NaturalGas",
+            "type": "NaturalGas",
             "instance_data": {
                 "balance_data": {
                     "exogenous": {
@@ -546,7 +546,7 @@
             }
         },
         {
-            "commodity": "NaturalGas",
+            "type": "NaturalGas",
             "instance_data": {
                 "balance_data": {
                     "exogenous": {
@@ -1079,7 +1079,7 @@
             }
         },
         {
-            "commodity": "NaturalGas",
+            "type": "NaturalGas",
             "instance_data": {
                 "balance_data": {
                     "exogenous": {
@@ -1612,7 +1612,7 @@
             }
         },
         {
-            "commodity": "Hydrogen",
+            "type": "Hydrogen",
             "instance_data": {
                 "balance_data": {
                     "demand": {
@@ -2150,7 +2150,7 @@
             }
         },
         {
-            "commodity": "Hydrogen",
+            "type": "Hydrogen",
             "instance_data": {
                 "balance_data": {
                     "demand": {
@@ -2688,7 +2688,7 @@
             }
         },
         {
-            "commodity": "Hydrogen",
+            "type": "Hydrogen",
             "instance_data": {
                 "balance_data": {
                     "demand": {
@@ -3226,7 +3226,7 @@
             }
         },
         {
-            "commodity": "Electricity",
+            "type": "Electricity",
             "instance_data": {
                 "balance_data": {
                     "demand": {
@@ -3770,7 +3770,7 @@
             }
         },
         {
-            "commodity": "Electricity",
+            "type": "Electricity",
             "instance_data": {
                 "balance_data": {
                     "demand": {
@@ -4314,7 +4314,7 @@
             }
         },
         {
-            "commodity": "Electricity",
+            "type": "Electricity",
             "instance_data": {
                 "balance_data": {
                     "demand": {
@@ -4858,7 +4858,7 @@
             }
         },
         {
-            "commodity": "CO2",
+            "type": "CO2",
             "instance_data": {
                 "balance_data": {
                     "emissions": {
@@ -4891,7 +4891,7 @@
             }
         },
         {
-            "commodity": "CO2",
+            "type": "CO2",
             "instance_data": {
                 "balance_data": {
                     "emissions": {
@@ -4924,7 +4924,7 @@
             }
         },
         {
-            "commodity": "CO2",
+            "type": "CO2",
             "instance_data": {
                 "balance_data": {
                     "emissions": {
@@ -4957,7 +4957,7 @@
             }
         },
         {
-            "commodity": "CO2Captured",
+            "type": "CO2Captured",
             "instance_data": {
                 "balance_data": {
                     "exogenous": {
@@ -4984,7 +4984,7 @@
             }
         },
         {
-            "commodity": "Uranium",
+            "type": "Uranium",
             "instance_data": {
                 "balance_data": {
                     "exogenous": {
@@ -5517,7 +5517,7 @@
             }
         },
         {
-            "commodity": "Biomass",
+            "type": "Biomass",
             "instance_data": {
                 "balance_data": {
                     "demand": {
@@ -5552,7 +5552,7 @@
             }
         },
         {
-            "commodity": "Biomass",
+            "type": "Biomass",
             "instance_data": {
                 "balance_data": {
                     "demand": {
@@ -5587,7 +5587,7 @@
             }
         },
         {
-            "commodity": "Biomass",
+            "type": "Biomass",
             "instance_data": {
                 "balance_data": {
                     "demand": {
@@ -5622,7 +5622,7 @@
             }
         },
         {
-            "commodity": "Biomass",
+            "type": "Biomass",
             "instance_data": {
                 "balance_data": {
                     "demand": {
@@ -5657,7 +5657,7 @@
             }
         },
         {
-            "commodity": "Biomass",
+            "type": "Biomass",
             "instance_data": {
                 "balance_data": {
                     "demand": {
@@ -5692,7 +5692,7 @@
             }
         },
         {
-            "commodity": "Biomass",
+            "type": "Biomass",
             "instance_data": {
                 "balance_data": {
                     "demand": {
@@ -5727,7 +5727,7 @@
             }
         },
         {
-            "commodity": "Electricity",
+            "type": "Electricity",
             "instance_data": {
                 "balance_data": {
                     "exogenous": {
@@ -20693,7 +20693,7 @@
                         "distance": 0,
                         "retired_capacity": 0
                     },
-                    "ng_edge": {
+                    "natgas_edge": {
                         "new_capacity": 0,
                         "integer_decisions": false,
                         "can_retire": false,
@@ -20713,7 +20713,7 @@
                         "start_vertex": "natgas_MA",
                         "min_capacity": 0,
                         "loss_fraction": 0,
-                        "id": "MA_Sorbent_DAC_ng_edge",
+                        "id": "MA_Sorbent_DAC_natgas_edge",
                         "commodity": "NaturalGas",
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
@@ -21318,11 +21318,11 @@
                     },
                     "balance_data": {
                         "emissions": {
-                            "MA_Sorbent_DAC_ng_edge": 0.005516648,
+                            "MA_Sorbent_DAC_natgas_edge": 0.005516648,
                             "MA_Sorbent_DAC_co2_emission_edge": 1
                         },
                         "fuel_consumption": {
-                            "MA_Sorbent_DAC_ng_edge": -1,
+                            "MA_Sorbent_DAC_natgas_edge": -1,
                             "MA_Sorbent_DAC_co2_edge": 3.047059915
                         },
                         "elec_production": {
@@ -21330,7 +21330,7 @@
                             "MA_Sorbent_DAC_co2_edge": 0.125
                         },
                         "capture": {
-                            "MA_Sorbent_DAC_ng_edge": 0.546148172,
+                            "MA_Sorbent_DAC_natgas_edge": 0.546148172,
                             "MA_Sorbent_DAC_co2_edge": 1,
                             "MA_Sorbent_DAC_co2_captured_edge": 1
                         }
@@ -21374,7 +21374,7 @@
                         "distance": 0,
                         "retired_capacity": 0
                     },
-                    "ng_edge": {
+                    "natgas_edge": {
                         "new_capacity": 0,
                         "integer_decisions": false,
                         "can_retire": false,
@@ -21394,7 +21394,7 @@
                         "start_vertex": "natgas_CT",
                         "min_capacity": 0,
                         "loss_fraction": 0,
-                        "id": "CT_Sorbent_DAC_ng_edge",
+                        "id": "CT_Sorbent_DAC_natgas_edge",
                         "commodity": "NaturalGas",
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
@@ -21999,11 +21999,11 @@
                     },
                     "balance_data": {
                         "emissions": {
-                            "CT_Sorbent_DAC_ng_edge": 0.005516648,
+                            "CT_Sorbent_DAC_natgas_edge": 0.005516648,
                             "CT_Sorbent_DAC_co2_emission_edge": 1
                         },
                         "fuel_consumption": {
-                            "CT_Sorbent_DAC_ng_edge": -1,
+                            "CT_Sorbent_DAC_natgas_edge": -1,
                             "CT_Sorbent_DAC_co2_edge": 3.047059915
                         },
                         "elec_production": {
@@ -22011,7 +22011,7 @@
                             "CT_Sorbent_DAC_elec_edge": 1
                         },
                         "capture": {
-                            "CT_Sorbent_DAC_ng_edge": 0.546148172,
+                            "CT_Sorbent_DAC_natgas_edge": 0.546148172,
                             "CT_Sorbent_DAC_co2_edge": 1,
                             "CT_Sorbent_DAC_co2_captured_edge": 1
                         }
@@ -22055,7 +22055,7 @@
                         "distance": 0,
                         "retired_capacity": 0
                     },
-                    "ng_edge": {
+                    "natgas_edge": {
                         "new_capacity": 0,
                         "integer_decisions": false,
                         "can_retire": false,
@@ -22075,7 +22075,7 @@
                         "start_vertex": "natgas_ME",
                         "min_capacity": 0,
                         "loss_fraction": 0,
-                        "id": "ME_Sorbent_DAC_ng_edge",
+                        "id": "ME_Sorbent_DAC_natgas_edge",
                         "commodity": "NaturalGas",
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
@@ -22680,11 +22680,11 @@
                     },
                     "balance_data": {
                         "emissions": {
-                            "ME_Sorbent_DAC_ng_edge": 0.005516648,
+                            "ME_Sorbent_DAC_natgas_edge": 0.005516648,
                             "ME_Sorbent_DAC_co2_emission_edge": 1
                         },
                         "fuel_consumption": {
-                            "ME_Sorbent_DAC_ng_edge": -1,
+                            "ME_Sorbent_DAC_natgas_edge": -1,
                             "ME_Sorbent_DAC_co2_edge": 3.047059915
                         },
                         "elec_production": {
@@ -22692,7 +22692,7 @@
                             "ME_Sorbent_DAC_co2_edge": 0.125
                         },
                         "capture": {
-                            "ME_Sorbent_DAC_ng_edge": 0.546148172,
+                            "ME_Sorbent_DAC_natgas_edge": 0.546148172,
                             "ME_Sorbent_DAC_co2_edge": 1,
                             "ME_Sorbent_DAC_co2_captured_edge": 1
                         }

@@ -28,7 +28,7 @@
                         "unidirectional": true,
                         "has_capacity": false
                     },
-                    "ng_edge": {
+                    "natgas_edge": {
                         "commodity": "NaturalGas",
                         "unidirectional": true,
                         "has_capacity": false
@@ -71,7 +71,7 @@
                             "ramp_down_fraction": 1.0,
                             "start_vertex": "co2_MA"
                         },
-                        "ng_edge": {
+                        "natgas_edge": {
                             "start_vertex": "natgas_MA"
                         },
                         "elec_edge": {
@@ -106,7 +106,7 @@
                             "ramp_down_fraction": 1.0,
                             "start_vertex": "co2_CT"
                         },
-                        "ng_edge": {
+                        "natgas_edge": {
                             "start_vertex": "natgas_CT"
                         },
                         "elec_edge": {
@@ -141,7 +141,7 @@
                             "ramp_down_fraction": 1.0,
                             "start_vertex": "co2_ME"
                         },
-                        "ng_edge": {
+                        "natgas_edge": {
                             "start_vertex": "natgas_ME"
                         },
                         "elec_edge": {
