@@ -57,10 +57,10 @@ function make(::Type{ThermalPower}, data::AbstractDict{Symbol,Any}, system::Syst
         transform_data, 
         data[thermal_key], 
         [
-            (data, key),
-            (data, Symbol("transform_", key)),
             (data[thermal_key], key),
             (data[thermal_key], Symbol("transform_", key)),
+            (data, Symbol("transform_", key)),
+            (data, key),
         ]
     )
     thermal_transform = Transformation(;
@@ -74,10 +74,10 @@ function make(::Type{ThermalPower}, data::AbstractDict{Symbol,Any}, system::Syst
         elec_edge_data, 
         data[:edges][elec_edge_key], 
         [
-            (data, key),
-            (data, Symbol("edge_", key)),
             (data[:edges][elec_edge_key], key),
             (data[:edges][elec_edge_key], Symbol("edge_", key)),
+            (data, Symbol("edge_", key)),
+            (data, key),
         ]
     )
     elec_start_node = thermal_transform
@@ -85,7 +85,7 @@ function make(::Type{ThermalPower}, data::AbstractDict{Symbol,Any}, system::Syst
         elec_end_node,
         elec_edge_data,
         Electricity,
-        [(data, :location), (elec_edge_data, :end_vertex)],
+        [(elec_edge_data, :end_vertex), (data, :location)],
     )
     
     if elec_edge_data[:uc]==true
@@ -132,9 +132,9 @@ function make(::Type{ThermalPower}, data::AbstractDict{Symbol,Any}, system::Syst
         fuel_edge_data, 
         data[:edges][fuel_edge_key], 
         [
-            (data, Symbol("fuel_", key)),
             (data[:edges][fuel_edge_key], key),
             (data[:edges][fuel_edge_key], Symbol("fuel_", key)),
+            (data, Symbol("fuel_", key)),
         ]
     )
     commodity_symbol = Symbol(fuel_edge_data[:commodity])
@@ -143,7 +143,7 @@ function make(::Type{ThermalPower}, data::AbstractDict{Symbol,Any}, system::Syst
         fuel_start_node,
         fuel_edge_data,
         commodity,
-        [(data, :location), (fuel_edge_data, :start_vertex)],
+        [(fuel_edge_data, :start_vertex), (data, :location)],
     )
     fuel_end_node = thermal_transform
     fuel_edge = Edge(
@@ -161,9 +161,9 @@ function make(::Type{ThermalPower}, data::AbstractDict{Symbol,Any}, system::Syst
         co2_edge_data, 
         data[:edges][co2_edge_key], 
         [
-            (data, Symbol("co2_", key)),
             (data[:edges][co2_edge_key], key),
             (data[:edges][co2_edge_key], Symbol("co2_", key)),
+            (data, Symbol("co2_", key)),
         ]
     )
     co2_start_node = thermal_transform
@@ -171,7 +171,7 @@ function make(::Type{ThermalPower}, data::AbstractDict{Symbol,Any}, system::Syst
         co2_end_node,
         co2_edge_data,
         CO2,
-        [(data, :co2_sink), (co2_edge_data, :end_vertex)],
+        [(co2_edge_data, :end_vertex), (data, :co2_sink), (data, :location)],
     )
     co2_edge = Edge(
         Symbol(id, "_", co2_edge_key),

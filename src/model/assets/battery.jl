@@ -78,11 +78,15 @@ function make(::Type{Battery}, data::AbstractDict{Symbol,Any}, system::System)
 
     ## Storage component of the battery
     storage_key = :storage
-    @process_data(storage_data, data[storage_key], [
-        (data, Symbol("storage_", key)),
-        (data[storage_key], Symbol("storage_", key)),
-        (data[storage_key], key)
-    ])
+    @process_data(
+        storage_data,
+        data[storage_key],
+        [
+            (data[storage_key], key),
+            (data[storage_key], Symbol("storage_", key)),
+            (data[storage_key], Symbol("storage_", key)),
+        ]
+    )
     commodity_symbol = Symbol(storage_data[:commodity])
     commodity = commodity_types()[commodity_symbol]
     default_constraints = [
@@ -108,16 +112,20 @@ function make(::Type{Battery}, data::AbstractDict{Symbol,Any}, system::System)
 
     ## Charge data of the battery
     charge_edge_key = :charge_edge
-    @process_data(charge_edge_data, data[:edges][charge_edge_key], [
-        (data, Symbol("charge_", key)),
-        (data[:edges][charge_edge_key], Symbol("charge_", key)),
-        (data[:edges][charge_edge_key], key)
-    ])
+    @process_data(
+        charge_edge_data,
+        data[:edges][charge_edge_key],
+        [
+            (data[:edges][charge_edge_key], key),
+            (data[:edges][charge_edge_key], Symbol("charge_", key)),
+            (data, Symbol("charge_", key)),
+        ]
+    )
     @start_vertex(
         charge_start_node,
         charge_edge_data,
         commodity,
-        [(data, :location), (charge_edge_data, :start_vertex)],
+        [(charge_edge_data, :start_vertex), (data, :location)],
     )
     charge_end_node = battery_storage
     battery_charge = Edge(
@@ -132,17 +140,20 @@ function make(::Type{Battery}, data::AbstractDict{Symbol,Any}, system::System)
 
     ## Discharge output of the battery
     discharge_edge_key = :discharge_edge
-    @process_data(discharge_edge_data, data[:edges][discharge_edge_key], [
-        (data, Symbol("discharge_", key)),
-        (data[:edges][discharge_edge_key], Symbol("discharge_", key)),
-        (data[:edges][discharge_edge_key], key)
-    ])
+    @process_data(
+        discharge_edge_data, 
+        data[:edges][discharge_edge_key], 
+        [
+            (data[:edges][discharge_edge_key], key),
+            (data[:edges][discharge_edge_key], Symbol("discharge_", key)),
+            (data, Symbol("discharge_", key)),
+        ])
     discharge_start_node = battery_storage
     @end_vertex(
         discharge_end_node,
         discharge_edge_data,
         commodity,
-        [(data, :location), (discharge_edge_data, :end_vertex)],
+        [(discharge_edge_data, :end_vertex), (data, :location)],
     )
     battery_discharge = Edge(
         Symbol(id, "_", discharge_edge_key),

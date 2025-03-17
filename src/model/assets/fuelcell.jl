@@ -69,10 +69,10 @@ function make(::Type{FuelCell}, data::AbstractDict{Symbol,Any}, system::System)
         transform_data,
         data[fuelcell_key],
         [
-            (data, key),
-            (data, Symbol("transform_", key)),
             (data[fuelcell_key], key),
             (data[fuelcell_key], Symbol("transform_", key)),
+            (data, Symbol("transform_", key)),
+            (data, key),
         ]
     )
     fuelcell = Transformation(;
@@ -86,10 +86,10 @@ function make(::Type{FuelCell}, data::AbstractDict{Symbol,Any}, system::System)
         elec_edge_data,
         data[:edges][elec_edge_key],
         [
-            (data, key),
-            (data, Symbol("elec_", key)),
             (data[:edges][elec_edge_key], key),
             (data[:edges][elec_edge_key], Symbol("elec_", key)),
+            (data, Symbol("elec_", key)),
+            (data, key),
         ]
     )
     elec_start_node = fuelcell
@@ -97,7 +97,7 @@ function make(::Type{FuelCell}, data::AbstractDict{Symbol,Any}, system::System)
         elec_end_node,
         elec_edge_data,
         Electricity,
-        [(data, :location), (elec_edge_data, :end_vertex)],
+        [(elec_edge_data, :end_vertex), (data, :location)],
     )
     elec_edge = Edge(
         Symbol(id, "_", elec_edge_key),
@@ -115,16 +115,16 @@ function make(::Type{FuelCell}, data::AbstractDict{Symbol,Any}, system::System)
         h2_edge_data,
         data[:edges][h2_edge_key],
         [
-            (data, Symbol("h2_", key)),
             (data[:edges][h2_edge_key], key),
             (data[:edges][h2_edge_key], Symbol("h2_", key)),
+            (data, Symbol("h2_", key)),
         ]
     )
     @start_vertex(
         h2_start_node,
         h2_edge_data,
         Hydrogen,
-        [(data, :location), (h2_edge_data, :start_vertex)],
+        [(h2_edge_data, :start_vertex), (data, :location)],
     )
     h2_end_node = fuelcell
     h2_edge = Edge(

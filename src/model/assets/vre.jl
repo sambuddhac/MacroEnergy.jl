@@ -48,18 +48,16 @@ function make(asset_type::Type{<:VRE}, data::AbstractDict{Symbol,Any}, system::S
     data = recursive_merge(default_data(VRE, id), data)
 
     energy_key = :transforms
-    loaded_transform_data = Dict{Symbol,Any}(
-        key => get_from([
-                (data, Symbol("transform_", key)),
-                (data[energy_key], Symbol("transform_", key)),
-                (data[energy_key], key)],
-            missing)
-        for key in keys(data[energy_key])
+    @process_data(
+        transform_data, 
+        data[energy_key], 
+        [
+            (data[energy_key], key),
+            (data[energy_key], Symbol("transform_", key)),
+            (data, Symbol("transform_", key)),
+            (data, key),
+        ]
     )
-    remove_missing!(loaded_transform_data)
-    recursive_merge!(data[energy_key][:constraints], loaded_transform_data[:constraints])
-    merge!(data[energy_key], loaded_transform_data)
-    transform_data = process_data(data[energy_key])
     vre_transform = Transformation(;
         id = Symbol(id, "_", energy_key),
         timedata = system.time_data[Symbol(transform_data[:timedata])],
@@ -70,10 +68,10 @@ function make(asset_type::Type{<:VRE}, data::AbstractDict{Symbol,Any}, system::S
         elec_edge_data,
         data[:edges][elec_edge_key],
         [
-            (data, key),
-            (data, Symbol("elec_", key)),
             (data[:edges][elec_edge_key], key),
             (data[:edges][elec_edge_key], Symbol("elec_", key)),
+            (data, Symbol("elec_", key)),
+            (data, key),
         ],
     )
     elec_start_node = vre_transform
@@ -81,7 +79,7 @@ function make(asset_type::Type{<:VRE}, data::AbstractDict{Symbol,Any}, system::S
         elec_end_node,
         elec_edge_data,
         Electricity,
-        [(data, :location), (elec_edge_data, :end_vertex)]
+        [(elec_edge_data, :end_vertex), (data, :location)]
     )
     elec_edge = Edge(
         Symbol(id, "_", elec_edge_key),

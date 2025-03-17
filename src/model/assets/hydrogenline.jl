@@ -46,23 +46,23 @@ function make(::Type{<:HydrogenLine}, data::AbstractDict{Symbol,Any}, system::Sy
         h2_edge_data,
         data[:edges][h2_edge_key],
         [
-            (data, key), 
-            (data, Symbol("h2_", key)),
             (data[:edges][h2_edge_key], key),
             (data[:edges][h2_edge_key], Symbol("h2_", key)),
+            (data, Symbol("h2_", key)),
+            (data, key), 
         ]
     )
     @start_vertex(
         h2_start_node,
         h2_edge_data,
         Hydrogen,
-        [(data, :location), (h2_edge_data, :start_vertex)]
+        [(h2_edge_data, :start_vertex), (data, :location)]
     )
     @end_vertex(
         h2_end_node,
         h2_edge_data,
         Hydrogen,
-        [(data, :location), (h2_edge_data, :end_vertex)]
+        [(h2_edge_data, :end_vertex), (data, :location)]
     )
     h2_edge = Edge(
         Symbol(id, "_", h2_edge_key),

@@ -61,10 +61,10 @@ function make(::Type{SyntheticNaturalGas}, data::AbstractDict{Symbol,Any}, syste
         transform_data, 
         data[synthetic_natural_gas_transform_key], 
         [
-            (data, key),
-            (data, Symbol("transform_", key)),
             (data[synthetic_natural_gas_transform_key], key),
             (data[synthetic_natural_gas_transform_key], Symbol("transform_", key)),
+            (data, Symbol("transform_", key)),
+            (data, key),
         ]
     )
     synthetic_natural_gas_transform = Transformation(;
@@ -78,17 +78,17 @@ function make(::Type{SyntheticNaturalGas}, data::AbstractDict{Symbol,Any}, syste
         co2_captured_edge_data, 
         data[:edges][co2_captured_edge_key], 
         [
-            (data, key),
-            (data, Symbol("co2_captured_", key)),
             (data[:edges][co2_captured_edge_key], key),
-            (data[:edges][co2_captured_edge_key], Symbol("co2_captured_", key))
+            (data[:edges][co2_captured_edge_key], Symbol("co2_captured_", key)),
+            (data, Symbol("co2_captured_", key)),
+            (data, key),
         ]
     )
     @start_vertex(
         co2_captured_start_node,
         co2_captured_edge_data,
         CO2Captured,
-        [(data, :co2_captured_sink), (co2_captured_edge_data, :start_vertex)],
+        [(co2_captured_edge_data, :start_vertex), (data, :location)],
     )
     co2_captured_end_node = synthetic_natural_gas_transform
     co2_captured_edge = Edge(
@@ -107,9 +107,9 @@ function make(::Type{SyntheticNaturalGas}, data::AbstractDict{Symbol,Any}, syste
         natgas_edge_data, 
         data[:edges][natgas_edge_key], 
         [
-            (data, Symbol("natgas_", key)),
             (data[:edges][natgas_edge_key], key),
             (data[:edges][natgas_edge_key], Symbol("natgas_", key)),
+            (data, Symbol("natgas_", key)),
         ]
     )
     natgas_start_node = synthetic_natural_gas_transform
@@ -117,7 +117,7 @@ function make(::Type{SyntheticNaturalGas}, data::AbstractDict{Symbol,Any}, syste
         natgas_end_node,
         natgas_edge_data,
         NaturalGas,
-        [(data, :location), (natgas_edge_data, :end_vertex)],
+        [(natgas_edge_data, :end_vertex), (data, :location)],
     )
     natgas_edge = Edge(
         Symbol(id, "_", natgas_edge_key),
@@ -136,16 +136,16 @@ function make(::Type{SyntheticNaturalGas}, data::AbstractDict{Symbol,Any}, syste
         elec_edge_data, 
         data[:edges][elec_edge_key], 
         [
-            (data, Symbol("elec_", key)),
             (data[:edges][elec_edge_key], key),
             (data[:edges][elec_edge_key], Symbol("elec_", key)),
+            (data, Symbol("elec_", key)),
         ]
     )
     @start_vertex(
         elec_start_node,
         elec_edge_data,
         Electricity,
-        [(data, :location), (elec_edge_data, :start_vertex)],
+        [(elec_edge_data, :start_vertex), (data, :location)],
     )
     elec_end_node = synthetic_natural_gas_transform
     elec_edge = Edge(
@@ -165,16 +165,16 @@ function make(::Type{SyntheticNaturalGas}, data::AbstractDict{Symbol,Any}, syste
         h2_edge_data, 
         data[:edges][h2_edge_key], 
         [
-            (data, Symbol("h2_", key)),
             (data[:edges][h2_edge_key], key),
             (data[:edges][h2_edge_key], Symbol("h2_", key)),
+            (data, Symbol("h2_", key)),
         ]
     )
     @start_vertex(
         h2_start_node,
         h2_edge_data,
         Hydrogen,
-        [(data, :location), (h2_edge_data, :start_vertex)],
+        [(h2_edge_data, :start_vertex), (data, :location)],
     )
     h2_end_node = synthetic_natural_gas_transform
     h2_edge = Edge(
@@ -194,9 +194,9 @@ function make(::Type{SyntheticNaturalGas}, data::AbstractDict{Symbol,Any}, syste
         co2_emission_edge_data, 
         data[:edges][co2_emission_edge_key], 
         [
-            (data, Symbol("co2_emission_", key)),
             (data[:edges][co2_emission_edge_key], key),
             (data[:edges][co2_emission_edge_key], Symbol("co2_emission_", key)),
+            (data, Symbol("co2_emission_", key)),
         ]
     )
     co2_emission_start_node = synthetic_natural_gas_transform
@@ -204,7 +204,7 @@ function make(::Type{SyntheticNaturalGas}, data::AbstractDict{Symbol,Any}, syste
         co2_emission_end_node,
         co2_emission_edge_data,
         CO2,
-        [(data, :co2_sink), (co2_emission_edge_data, :end_vertex)],
+        [(co2_emission_edge_data, :end_vertex), (data, :co2_sink), (data, :location)],
     )
     co2_emission_edge = Edge(
         Symbol(id, "_", co2_emission_edge_key),

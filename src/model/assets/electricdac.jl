@@ -46,10 +46,10 @@ function make(::Type{ElectricDAC}, data::AbstractDict{Symbol,Any}, system::Syste
         transform_data,
         data[electricdac_key],
         [
-            (data, key),
-            (data, Symbol("transform_", key)),
             (data[electricdac_key], key),
-            (data[electricdac_key], Symbol("transform_", key))
+            (data[electricdac_key], Symbol("transform_", key)),
+            (data, Symbol("transform_", key)),
+            (data, key),            
         ]
     )
     electricdac_transform = Transformation(;
@@ -63,17 +63,17 @@ function make(::Type{ElectricDAC}, data::AbstractDict{Symbol,Any}, system::Syste
         co2_edge_data, 
         data[:edges][co2_edge_key], 
         [
-            (data, key),
-            (data, Symbol("co2_", key)),
             (data[:edges][co2_edge_key], key),
-            (data[:edges][co2_edge_key], Symbol("co2_", key))
+            (data[:edges][co2_edge_key], Symbol("co2_", key)),
+            (data, Symbol("co2_", key)),
+            (data, key),
         ]
     )
     @start_vertex(
         co2_start_node,
         co2_edge_data,
         CO2,
-        [(data, :co2_sink), (co2_edge_data, :start_vertex)],
+        [(co2_edge_data, :start_vertex), (data, :co2_sink), (data, :location)],
     )
     co2_end_node = electricdac_transform
     co2_edge = Edge(
@@ -92,16 +92,16 @@ function make(::Type{ElectricDAC}, data::AbstractDict{Symbol,Any}, system::Syste
         elec_edge_data, 
         data[:edges][elec_edge_key], 
         [
-            (data, Symbol("elec_", key)),
             (data[:edges][elec_edge_key], key),
-            (data[:edges][elec_edge_key], Symbol("elec_", key))
+            (data[:edges][elec_edge_key], Symbol("elec_", key)),
+            (data, Symbol("elec_", key)),
         ]
     )
     @start_vertex(
         elec_start_node,
         elec_edge_data,
         Electricity,
-        [(data, :location), (elec_edge_data, :start_vertex)],
+        [(elec_edge_data, :start_vertex), (data, :location)],
     )
     elec_end_node = electricdac_transform
     elec_edge = Edge(
@@ -120,9 +120,9 @@ function make(::Type{ElectricDAC}, data::AbstractDict{Symbol,Any}, system::Syste
         co2_captured_edge_data, 
         data[:edges][co2_captured_edge_key], 
         [
-            (data, Symbol("co2_captured_", key)),
             (data[:edges][co2_captured_edge_key], key),
-            (data[:edges][co2_captured_edge_key], Symbol("co2_captured_", key))
+            (data[:edges][co2_captured_edge_key], Symbol("co2_captured_", key)),
+            (data, Symbol("co2_captured_", key)),
         ]
     )
     co2_captured_start_node = electricdac_transform
@@ -130,7 +130,7 @@ function make(::Type{ElectricDAC}, data::AbstractDict{Symbol,Any}, system::Syste
         co2_captured_end_node,
         co2_captured_edge_data,
         CO2Captured,
-        [(data, :co2_captured_sink), (co2_captured_edge_data, :end_vertex)],
+        [(co2_captured_edge_data, :end_vertex), (data, :location)],
     )
     co2_captured_edge = Edge(
         Symbol(id, "_", co2_captured_edge_key),

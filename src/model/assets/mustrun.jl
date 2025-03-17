@@ -40,10 +40,10 @@ function make(asset_type::Type{MustRun}, data::AbstractDict{Symbol,Any}, system:
         transform_data, 
         data[energy_key], 
         [
-            (data, key),
-            (data, Symbol("transform_", key)),
             (data[energy_key], key),
             (data[energy_key], Symbol("transform_", key)),
+            (data, Symbol("transform_", key)),
+            (data, key),
         ]
     )
     mustrun_transform = Transformation(;
@@ -56,10 +56,10 @@ function make(asset_type::Type{MustRun}, data::AbstractDict{Symbol,Any}, system:
         elec_edge_data, 
         data[:edges][elec_edge_key], 
         [
-            (data, key),
-            (data, Symbol("elec_", key)),
             (data[:edges][elec_edge_key], key),
             (data[:edges][elec_edge_key], Symbol("elec_", key)),
+            (data, Symbol("elec_", key)),
+            (data, key),
         ]
     )
     elec_start_node = mustrun_transform
@@ -67,7 +67,7 @@ function make(asset_type::Type{MustRun}, data::AbstractDict{Symbol,Any}, system:
         elec_end_node,
         elec_edge_data,
         Electricity,
-        [(data, :location), (elec_edge_data, :end_vertex)],
+        [(elec_edge_data, :end_vertex), (data, :location)],
     )
     elec_edge = Edge(
         Symbol(id, "_", elec_edge_key),

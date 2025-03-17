@@ -44,10 +44,10 @@ function make(::Type{FuelsEndUse}, data::AbstractDict{Symbol,Any}, system::Syste
         transform_data, 
         data[FuelsEndUse_key], 
         [
-            (data, key),
-            (data, Symbol("transform_", key)),
             (data[FuelsEndUse_key], key),
-            (data[FuelsEndUse_key], Symbol("transform_", key))
+            (data[FuelsEndUse_key], Symbol("transform_", key)),
+            (data, Symbol("transform_", key)),
+            (data, key),
         ]
     )
     fuelsenduse_transform = Transformation(;
@@ -61,9 +61,9 @@ function make(::Type{FuelsEndUse}, data::AbstractDict{Symbol,Any}, system::Syste
         fuel_edge_data, 
         data[:edges][fuel_edge_key], 
         [
-            (data, Symbol("fuel_", key)),
             (data[:edges][fuel_edge_key], key),
-            (data[:edges][fuel_edge_key], Symbol("fuel_", key))
+            (data[:edges][fuel_edge_key], Symbol("fuel_", key)),
+            (data, Symbol("fuel_", key)),
         ]
     )
     commodity_symbol = Symbol(fuel_edge_data[:commodity])
@@ -72,7 +72,7 @@ function make(::Type{FuelsEndUse}, data::AbstractDict{Symbol,Any}, system::Syste
         fuel_start_node,
         fuel_edge_data,
         commodity,
-        [(data, :location), (fuel_edge_data, :start_vertex)],
+        [(fuel_edge_data, :start_vertex), (data, :location)],
     )
     fuel_end_node = fuelsenduse_transform
     fuel_edge = Edge(
@@ -90,9 +90,9 @@ function make(::Type{FuelsEndUse}, data::AbstractDict{Symbol,Any}, system::Syste
         fuel_demand_edge_data, 
         data[:edges][fuel_demand_edge_key], 
         [
-            (data, Symbol("fuel_demand_", key)),
             (data[:edges][fuel_demand_edge_key], key),
-            (data[:edges][fuel_demand_edge_key], Symbol("fuel_demand_", key))
+            (data[:edges][fuel_demand_edge_key], Symbol("fuel_demand_", key)),
+            (data, Symbol("fuel_demand_", key)),
         ]
     )
     fuel_demand_start_node = fuelsenduse_transform
@@ -100,7 +100,7 @@ function make(::Type{FuelsEndUse}, data::AbstractDict{Symbol,Any}, system::Syste
         fuel_demand_end_node,
         fuel_demand_edge_data,
         commodity,
-        [(data, :location), (fuel_demand_edge_data, :end_vertex)],
+        [(fuel_demand_edge_data, :end_vertex), (data, :location)],
     )
     fuel_demand_edge = Edge(
         Symbol(id, "_", fuel_demand_edge_key),
@@ -117,9 +117,9 @@ function make(::Type{FuelsEndUse}, data::AbstractDict{Symbol,Any}, system::Syste
         co2_edge_data, 
         data[:edges][co2_edge_key], 
         [
-            (data, Symbol("co2_", key)),
             (data[:edges][co2_edge_key], key),
-            (data[:edges][co2_edge_key], Symbol("co2_", key))
+            (data[:edges][co2_edge_key], Symbol("co2_", key)),
+            (data, Symbol("co2_", key)),
         ]
     )
     co2_start_node = fuelsenduse_transform
@@ -127,7 +127,7 @@ function make(::Type{FuelsEndUse}, data::AbstractDict{Symbol,Any}, system::Syste
         co2_end_node,
         co2_edge_data,
         CO2,
-        [(data, :co2_sink), (co2_edge_data, :end_vertex)],
+        [(co2_edge_data, :end_vertex), (data, :co2_sink), (data, :location)],
     )
     co2_edge = Edge(
         Symbol(id, "_", co2_edge_key),

@@ -34,23 +34,23 @@ function make(::Type{<:PowerLine}, data::AbstractDict{Symbol,Any}, system::Syste
         elec_edge_data,
         data[:edges][elec_edge_key],
         [
-            (data, key), 
-            (data, Symbol("elec_", key)),
             (data[:edges][elec_edge_key], key),
             (data[:edges][elec_edge_key], Symbol("elec_", key)),
+            (data, Symbol("elec_", key)),
+            (data, key), 
         ]
     )
     @start_vertex(
         elec_start_node,
         elec_edge_data,
         Electricity,
-        [(data, :location), (elec_edge_data, :start_vertex)],
+        [(elec_edge_data, :start_vertex), (data, :location)],
     )
     @end_vertex(
         elec_end_node,
         elec_edge_data,
         Electricity,
-        [(data, :location), (elec_edge_data, :end_vertex)],
+        [(elec_edge_data, :end_vertex), (data, :location)],
     )
     elec_edge = Edge(
         Symbol(id, "_", elec_edge_key),

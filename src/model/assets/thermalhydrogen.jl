@@ -102,10 +102,10 @@ function make(::Type{ThermalHydrogen}, data::AbstractDict{Symbol,Any}, system::S
         transform_data, 
         data[thermalhydrogen_key], 
         [
-            (data, key),
-            (data, Symbol("transform_", key)),
             (data[thermalhydrogen_key], key),
             (data[thermalhydrogen_key], Symbol("transform_", key)),
+            (data, Symbol("transform_", key)),
+            (data, key),
         ]
     )
     thermalhydrogen_transform = Transformation(;
@@ -119,16 +119,16 @@ function make(::Type{ThermalHydrogen}, data::AbstractDict{Symbol,Any}, system::S
         elec_edge_data, 
         data[:edges][elec_edge_key], 
         [
-            (data, Symbol("elec_", key)),
             (data[:edges][elec_edge_key], key),
             (data[:edges][elec_edge_key], Symbol("elec_", key)),
+            (data, Symbol("elec_", key)),
         ]
     )
     @start_vertex(
         elec_start_node,
         elec_edge_data,
         Electricity,
-        [(data, :location), (elec_edge_data, :start_vertex)]
+        [(elec_edge_data, :start_vertex), (data, :location)]
     )
     elec_end_node = thermalhydrogen_transform
     elec_edge = Edge(
@@ -148,10 +148,10 @@ function make(::Type{ThermalHydrogen}, data::AbstractDict{Symbol,Any}, system::S
         h2_edge_data, 
         data[:edges][h2_edge_key], 
         [
-            (data, key), 
-            (data, Symbol("h2_", key)),
             (data[:edges][h2_edge_key], key),
             (data[:edges][h2_edge_key], Symbol("h2_", key)),
+            (data, Symbol("h2_", key)),
+            (data, key), 
         ]
     )
     h2_start_node = thermalhydrogen_transform
@@ -159,7 +159,7 @@ function make(::Type{ThermalHydrogen}, data::AbstractDict{Symbol,Any}, system::S
         h2_end_node,
         h2_edge_data,
         Hydrogen,
-        [(data, :location), (h2_edge_data, :end_vertex)],
+        [(h2_edge_data, :end_vertex), (data, :location)],
     )
     if h2_edge_data[:uc]==true
         h2_edge = EdgeWithUC(
@@ -205,9 +205,9 @@ function make(::Type{ThermalHydrogen}, data::AbstractDict{Symbol,Any}, system::S
         fuel_edge_data, 
         data[:edges][fuel_edge_key], 
         [
-            (data, Symbol("fuel_", key)),
             (data[:edges][fuel_edge_key], key),
             (data[:edges][fuel_edge_key], Symbol("fuel_", key)),
+            (data, Symbol("fuel_", key)),
         ]
     )
     commodity_symbol = Symbol(fuel_edge_data[:commodity])
@@ -216,7 +216,7 @@ function make(::Type{ThermalHydrogen}, data::AbstractDict{Symbol,Any}, system::S
         fuel_start_node,
         fuel_edge_data,
         commodity,
-        [(data, :location), (fuel_edge_data, :start_vertex)],
+        [(fuel_edge_data, :start_vertex), (data, :location)],
     )
     fuel_end_node = thermalhydrogen_transform
     fuel_edge = Edge(
@@ -234,9 +234,9 @@ function make(::Type{ThermalHydrogen}, data::AbstractDict{Symbol,Any}, system::S
         co2_edge_data, 
         data[:edges][co2_edge_key], 
         [
-            (data, Symbol("co2_", key)),
             (data[:edges][co2_edge_key], key),
             (data[:edges][co2_edge_key], Symbol("co2_", key)),
+            (data, Symbol("co2_", key)),
         ]
     )
     co2_start_node = thermalhydrogen_transform
@@ -244,7 +244,7 @@ function make(::Type{ThermalHydrogen}, data::AbstractDict{Symbol,Any}, system::S
         co2_end_node,
         co2_edge_data,
         CO2,
-        [(data, :co2_sink), (co2_edge_data, :end_vertex)],
+        [(co2_edge_data, :end_vertex), (data, :co2_sink), (data, :location)],
     )
     co2_edge = Edge(
         Symbol(id, "_", co2_edge_key),

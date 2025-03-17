@@ -71,10 +71,10 @@ function make(::Type{SyntheticLiquidFuels}, data::AbstractDict{Symbol,Any}, syst
         transform_data,
         data[synthetic_liquid_fuels_transform_key],
         [
-            (data, key),
-            (data, Symbol("transform_", key)),
             (data[synthetic_liquid_fuels_transform_key], key),
             (data[synthetic_liquid_fuels_transform_key], Symbol("transform_", key)),
+            (data, Symbol("transform_", key)),
+            (data, key),
         ]
     )
     synthetic_liquid_fuels_transform = Transformation(;
@@ -88,17 +88,17 @@ function make(::Type{SyntheticLiquidFuels}, data::AbstractDict{Symbol,Any}, syst
         co2_captured_edge_data,
         data[:edges][co2_captured_edge_key],
         [
-            (data, key),
-            (data, Symbol("co2_captured_", key)),
             (data[:edges][co2_captured_edge_key], key),
             (data[:edges][co2_captured_edge_key], Symbol("co2_captured_", key)),
+            (data, Symbol("co2_captured_", key)),
+            (data, key),
         ]
     )
     @start_vertex(
         co2_captured_start_node,
         co2_captured_edge_data,
         CO2Captured,
-        [(data, :co2_captured_sink), (co2_captured_edge_data, :start_vertex)],
+        [(co2_captured_edge_data, :start_vertex), (data, :location)],
     )
     co2_captured_end_node = synthetic_liquid_fuels_transform
     co2_captured_edge = Edge(
@@ -117,9 +117,9 @@ function make(::Type{SyntheticLiquidFuels}, data::AbstractDict{Symbol,Any}, syst
         gasoline_edge_data,
         data[:edges][gasoline_edge_key],
         [
-            (data, Symbol("gasoline_", key)),
             (data[:edges][gasoline_edge_key], key),
             (data[:edges][gasoline_edge_key], Symbol("gasoline_", key)),
+            (data, Symbol("gasoline_", key)),
         ]
     )
     gasoline_start_node = synthetic_liquid_fuels_transform
@@ -127,7 +127,7 @@ function make(::Type{SyntheticLiquidFuels}, data::AbstractDict{Symbol,Any}, syst
         gasoline_end_node,
         gasoline_edge_data,
         LiquidFuels,
-        [(data, :location), (gasoline_edge_data, :end_vertex)],
+        [(gasoline_edge_data, :end_vertex), (data, :location)],
     )
     gasoline_edge = Edge(
         Symbol(id, "_", gasoline_edge_key),
@@ -146,9 +146,9 @@ function make(::Type{SyntheticLiquidFuels}, data::AbstractDict{Symbol,Any}, syst
         jetfuel_edge_data,
         data[:edges][jetfuel_edge_key],
         [
-            (data, Symbol("jetfuel_", key)),
             (data[:edges][jetfuel_edge_key], key),
             (data[:edges][jetfuel_edge_key], Symbol("jetfuel_", key)),
+            (data, Symbol("jetfuel_", key)),
         ]
     )
     jetfuel_start_node = synthetic_liquid_fuels_transform
@@ -156,7 +156,7 @@ function make(::Type{SyntheticLiquidFuels}, data::AbstractDict{Symbol,Any}, syst
         jetfuel_end_node,
         jetfuel_edge_data,
         LiquidFuels,
-        [(data, :location), (jetfuel_edge_data, :end_vertex)],
+        [(jetfuel_edge_data, :end_vertex), (data, :location)],
     )
     jetfuel_edge = Edge(
         Symbol(id, "_", jetfuel_edge_key),
@@ -175,9 +175,9 @@ function make(::Type{SyntheticLiquidFuels}, data::AbstractDict{Symbol,Any}, syst
         diesel_edge_data,
         data[:edges][diesel_edge_key],
         [
-            (data, Symbol("diesel_", key)),
             (data[:edges][diesel_edge_key], key),
             (data[:edges][diesel_edge_key], Symbol("diesel_", key)),
+            (data, Symbol("diesel_", key)),
         ]
     )
     diesel_start_node = synthetic_liquid_fuels_transform
@@ -185,7 +185,7 @@ function make(::Type{SyntheticLiquidFuels}, data::AbstractDict{Symbol,Any}, syst
         diesel_end_node,
         diesel_edge_data,
         LiquidFuels,
-        [(data, :location), (diesel_edge_data, :end_vertex)],
+        [(diesel_edge_data, :end_vertex), (data, :location)],
     )
     diesel_edge = Edge(
         Symbol(id, "_", diesel_edge_key),
@@ -204,16 +204,16 @@ function make(::Type{SyntheticLiquidFuels}, data::AbstractDict{Symbol,Any}, syst
         elec_edge_data,
         data[:edges][elec_edge_key],
         [
-            (data, Symbol("elec_", key)),
             (data[:edges][elec_edge_key], key),
             (data[:edges][elec_edge_key], Symbol("elec_", key)),
+            (data, Symbol("elec_", key)),
         ]
     )
     @start_vertex(
         elec_start_node,
         elec_edge_data,
         Electricity,
-        [(data, :location), (elec_edge_data, :start_vertex)],
+        [(elec_edge_data, :start_vertex), (data, :location)],
     )
     elec_end_node = synthetic_liquid_fuels_transform
     elec_edge = Edge(
@@ -233,16 +233,16 @@ function make(::Type{SyntheticLiquidFuels}, data::AbstractDict{Symbol,Any}, syst
         h2_edge_data,
         data[:edges][h2_edge_key],
         [
-            (data, Symbol("h2_", key)),
             (data[:edges][h2_edge_key], key),
             (data[:edges][h2_edge_key], Symbol("h2_", key)),
+            (data, Symbol("h2_", key)),
         ]
     )
     @start_vertex(
         h2_start_node,
         h2_edge_data,
         Hydrogen,
-        [(data, :location), (h2_edge_data, :start_vertex)],
+        [(h2_edge_data, :start_vertex), (data, :location)],
     )
     h2_end_node = synthetic_liquid_fuels_transform
     h2_edge = Edge(
@@ -262,9 +262,9 @@ function make(::Type{SyntheticLiquidFuels}, data::AbstractDict{Symbol,Any}, syst
         co2_emission_edge_data,
         data[:edges][co2_emission_edge_key],
         [
-            (data, Symbol("co2_emission_", key)),
             (data[:edges][co2_emission_edge_key], key),
             (data[:edges][co2_emission_edge_key], Symbol("co2_emission_", key)),
+            (data, Symbol("co2_emission_", key)),
         ]
     )
     co2_emission_start_node = synthetic_liquid_fuels_transform
@@ -272,7 +272,7 @@ function make(::Type{SyntheticLiquidFuels}, data::AbstractDict{Symbol,Any}, syst
         co2_emission_end_node,
         co2_emission_edge_data,
         CO2,
-        [(data, :co2_sink), (co2_emission_edge_data, :end_vertex)],
+        [(co2_emission_edge_data, :end_vertex), (data, :co2_sink), (data, :location)],
     )
     co2_emission_edge = Edge(
         Symbol(id, "_", co2_emission_edge_key),

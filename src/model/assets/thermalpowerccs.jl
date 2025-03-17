@@ -56,13 +56,13 @@ function make(::Type{ThermalPowerCCS}, data::AbstractDict{Symbol,Any}, system::S
 
     thermalccs_key = :transforms
     @process_data(
-        transform_data, 
-        data[thermalccs_key], 
+        transform_data,
+        data[thermalccs_key],
         [
-            (data, key),
-            (data, Symbol("transform_", key)),
             (data[thermalccs_key], key),
             (data[thermalccs_key], Symbol("transform_", key)),
+            (data, Symbol("transform_", key)),
+            (data, key),
         ],
     )
     thermalccs_transform = Transformation(;
@@ -76,10 +76,10 @@ function make(::Type{ThermalPowerCCS}, data::AbstractDict{Symbol,Any}, system::S
         elec_edge_data, 
         data[:edges][elec_edge_key], 
         [
-            (data, key),
-            (data, Symbol("elec_", key)),
             (data[:edges][elec_edge_key], key),
             (data[:edges][elec_edge_key], Symbol("elec_", key)),
+            (data, Symbol("elec_", key)),
+            (data, key),
         ],
     )
     elec_start_node = thermalccs_transform
@@ -87,7 +87,7 @@ function make(::Type{ThermalPowerCCS}, data::AbstractDict{Symbol,Any}, system::S
         elec_end_node,
         elec_edge_data,
         Electricity,
-        [(data, :location), (elec_edge_data, :end_vertex)],
+        [(elec_edge_data, :end_vertex), (data, :location)],
     )
     if elec_edge_data[:uc]==true
         elec_edge = EdgeWithUC(
@@ -134,9 +134,9 @@ function make(::Type{ThermalPowerCCS}, data::AbstractDict{Symbol,Any}, system::S
         fuel_edge_data, 
         data[:edges][fuel_edge_key], 
         [
-            (data, Symbol("fuel_", key)),
             (data[:edges][fuel_edge_key], key),
             (data[:edges][fuel_edge_key], Symbol("fuel_", key)),
+            (data, Symbol("fuel_", key)),
         ],
     )
     commodity_symbol = Symbol(fuel_edge_data[:commodity])
@@ -145,7 +145,7 @@ function make(::Type{ThermalPowerCCS}, data::AbstractDict{Symbol,Any}, system::S
         fuel_start_node,
         fuel_edge_data,
         commodity,
-        [(data, :location), (fuel_edge_data, :start_vertex)],
+        [(fuel_edge_data, :start_vertex), (data, :location)],
     )
     fuel_end_node = thermalccs_transform
     fuel_edge = Edge(
@@ -163,9 +163,9 @@ function make(::Type{ThermalPowerCCS}, data::AbstractDict{Symbol,Any}, system::S
         co2_edge_data, 
         data[:edges][co2_edge_key], 
         [
-            (data, Symbol("co2_", key)),
             (data[:edges][co2_edge_key], key),
             (data[:edges][co2_edge_key], Symbol("co2_", key)),
+            (data, Symbol("co2_", key)),
         ],
     )
     co2_start_node = thermalccs_transform
@@ -173,7 +173,7 @@ function make(::Type{ThermalPowerCCS}, data::AbstractDict{Symbol,Any}, system::S
         co2_end_node,
         co2_edge_data,
         CO2,
-        [(data, :co2_sink), (co2_edge_data, :end_vertex)],
+        [(co2_edge_data, :end_vertex), (data, :co2_sink), (data, :location)],
     )
     co2_edge = Edge(
         Symbol(id, "_", co2_edge_key),
@@ -192,9 +192,9 @@ function make(::Type{ThermalPowerCCS}, data::AbstractDict{Symbol,Any}, system::S
         co2_captured_edge_data, 
         data[:edges][co2_captured_edge_key], 
         [
-            (data, Symbol("co2_captured_", key)),
             (data[:edges][co2_captured_edge_key], key),
             (data[:edges][co2_captured_edge_key], Symbol("co2_captured_", key)),
+            (data, Symbol("co2_captured_", key)),
         ],
     )
     co2_captured_start_node = thermalccs_transform
@@ -202,7 +202,7 @@ function make(::Type{ThermalPowerCCS}, data::AbstractDict{Symbol,Any}, system::S
         co2_captured_end_node,
         co2_captured_edge_data,
         CO2Captured,
-        [(data, :co2_captured_sink), (co2_captured_edge_data, :end_vertex)],
+        [(co2_captured_edge_data, :end_vertex), (data, :location)],
     )
     co2_captured_edge = Edge(
         Symbol(id, "_", co2_captured_edge_key),

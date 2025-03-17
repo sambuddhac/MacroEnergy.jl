@@ -56,9 +56,9 @@ function make(::Type{HydroRes}, data::AbstractDict{Symbol,Any}, system::System)
         storage_data,
         data[storage_key],
         [
-            (data, Symbol("storage_", key)),
             (data[storage_key], key),
             (data[storage_key], Symbol("storage_", key)),
+            (data, Symbol("storage_", key)),
         ]
     )
     default_constraints = [BalanceConstraint()]
@@ -83,9 +83,9 @@ function make(::Type{HydroRes}, data::AbstractDict{Symbol,Any}, system::System)
         discharge_edge_data,
         data[:edges][discharge_edge_key],
         [
-            (data, Symbol("discharge_", key)),
             (data[:edges][discharge_edge_key], key),
             (data[:edges][discharge_edge_key], Symbol("discharge_", key)),
+            (data, Symbol("discharge_", key)),
         ]
     )
     discharge_start_node = hydrostor
@@ -93,7 +93,7 @@ function make(::Type{HydroRes}, data::AbstractDict{Symbol,Any}, system::System)
         discharge_end_node,
         discharge_edge_data,
         Electricity,
-        [(data, :location), (discharge_edge_data, :end_vertex)],
+        [(discharge_edge_data, :end_vertex), (data, :location)],
     )
     discharge_edge = Edge(
         Symbol(id, "_", discharge_edge_key),
@@ -112,16 +112,16 @@ function make(::Type{HydroRes}, data::AbstractDict{Symbol,Any}, system::System)
         inflow_edge_data,
         data[:edges][inflow_edge_key],
         [
-            (data, Symbol("inflow_", key)),
             (data[:edges][inflow_edge_key], key),
             (data[:edges][inflow_edge_key], Symbol("inflow_", key)),
+            (data, Symbol("inflow_", key)),
         ]
     )
     @start_vertex(
         inflow_start_node,
         inflow_edge_data,
         Electricity,
-        [(data, :hydro_source), (data, :location), (inflow_edge_data, :start_vertex)],
+        [(inflow_edge_data, :start_vertex), (data, :hydro_source), (data, :location),],
     )
     inflow_end_node = hydrostor
     inflow_edge = Edge(
@@ -145,9 +145,9 @@ function make(::Type{HydroRes}, data::AbstractDict{Symbol,Any}, system::System)
         spill_edge_data,
         data[:edges][spill_edge_key],
         [
-            (data, Symbol("spill_", key)),
             (data[:edges][spill_edge_key], key),
             (data[:edges][spill_edge_key], Symbol("spill_", key)),
+            (data, Symbol("spill_", key)),
         ]
     )
     spill_start_node = hydrostor
@@ -155,7 +155,7 @@ function make(::Type{HydroRes}, data::AbstractDict{Symbol,Any}, system::System)
         spill_end_node,
         spill_edge_data,
         Electricity,
-        [(data, :hydro_source), (data, :location), (spill_edge_data, :end_vertex)],
+        [(spill_edge_data, :end_vertex), (data, :hydro_source), (data, :location),],
     )
     spill_end_node = find_node(system.locations, Symbol(spill_edge_data[:end_vertex]))
     spill_edge = Edge(

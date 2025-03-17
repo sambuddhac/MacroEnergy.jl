@@ -58,12 +58,16 @@ function make(::Type{BECCSHydrogen}, data::AbstractDict{Symbol,Any}, system::Sys
     data = recursive_merge(default_data(BECCSHydrogen, id), data)
 
     beccs_transform_key = :transforms
-    @process_data(transform_data, data[beccs_transform_key], [
-        (data, key),
-        (data, Symbol("transform_", key)),
-        (data[beccs_transform_key], key),
-        (data[beccs_transform_key], Symbol("transform_", key))
-    ])
+    @process_data(
+        transform_data,
+        data[beccs_transform_key],
+        [
+            (data[beccs_transform_key], key),
+            (data[beccs_transform_key], Symbol("transform_", key)),
+            (data, Symbol("transform_", key)),
+            (data, key),
+        ]
+    )
     beccs_transform = Transformation(;
         id = Symbol(id, "_", beccs_transform_key),
         timedata = system.time_data[Symbol(transform_data[:timedata])],
@@ -71,19 +75,23 @@ function make(::Type{BECCSHydrogen}, data::AbstractDict{Symbol,Any}, system::Sys
     )
 
     biomass_edge_key = :biomass_edge
-    @process_data(biomass_edge_data, data[:edges][biomass_edge_key], [
-        (data, key),
-        (data, Symbol("biomass_", key)),
-        (data[:edges][biomass_edge_key], key),
-        (data[:edges][biomass_edge_key], Symbol("biomass_", key))
-    ])
+    @process_data(
+        biomass_edge_data, 
+        data[:edges][biomass_edge_key], 
+        [
+            (data[:edges][biomass_edge_key], key),
+            (data[:edges][biomass_edge_key], Symbol("biomass_", key)),
+            (data, Symbol("biomass_", key)),
+            (data, key),
+        ]
+    )
     commodity_symbol = Symbol(biomass_edge_data[:commodity])
     commodity = commodity_types()[commodity_symbol]
     @start_vertex(
         biomass_start_node,
         biomass_edge_data,
         commodity,
-        [(data, :location), (biomass_edge_data, :start_vertex)]
+        [(biomass_edge_data, :start_vertex), (data, :location)]
     )
     biomass_end_node = beccs_transform
     biomass_edge = Edge(
@@ -98,17 +106,21 @@ function make(::Type{BECCSHydrogen}, data::AbstractDict{Symbol,Any}, system::Sys
     biomass_edge.unidirectional = get(biomass_edge_data, :unidirectional, true)
 
     h2_edge_key = :h2_edge
-    @process_data(h2_edge_data, data[:edges][h2_edge_key], [
-        (data, Symbol("h2_", key)),
-        (data[:edges][h2_edge_key], key),
-        (data[:edges][h2_edge_key], Symbol("h2_", key))
-    ])
+    @process_data(
+        h2_edge_data, 
+        data[:edges][h2_edge_key],
+        [
+            (data[:edges][h2_edge_key], key),
+            (data[:edges][h2_edge_key], Symbol("h2_", key)),
+            (data, Symbol("h2_", key)),
+        ]
+    )
     h2_start_node = beccs_transform
     @end_vertex(
         h2_end_node,
         h2_edge_data,
         Hydrogen,
-        [(data, :location), (h2_edge_data, :end_vertex)]
+        [(h2_edge_data, :end_vertex), (data, :location)]
     )
     h2_edge = Edge(
         Symbol(id, "_", h2_edge_key),
@@ -123,16 +135,20 @@ function make(::Type{BECCSHydrogen}, data::AbstractDict{Symbol,Any}, system::Sys
     h2_edge.has_capacity = get(h2_edge_data, :has_capacity, false)
 
     co2_edge_key = :co2_edge
-    @process_data(co2_edge_data, data[:edges][co2_edge_key], [
-        (data, Symbol("co2_", key)),
-        (data[:edges][co2_edge_key], key),
-        (data[:edges][co2_edge_key], Symbol("co2_", key))
-    ])
+    @process_data(
+        co2_edge_data, 
+        data[:edges][co2_edge_key],
+        [
+            (data[:edges][co2_edge_key], key),
+            (data[:edges][co2_edge_key], Symbol("co2_", key)),
+            (data, Symbol("co2_", key)),
+        ]
+    )
     @start_vertex(
         co2_start_node,
         co2_edge_data,
         CO2,
-        [(data, :co2_sink), (co2_edge_data, :start_vertex)],
+        [(co2_edge_data, :start_vertex), (data, :co2_sink), (data, :location)],
     )
     co2_end_node = beccs_transform
     co2_edge = Edge(
@@ -148,17 +164,21 @@ function make(::Type{BECCSHydrogen}, data::AbstractDict{Symbol,Any}, system::Sys
     co2_edge.has_capacity = get(co2_edge_data, :has_capacity, false)
 
     co2_emission_edge_key = :co2_emission_edge
-    @process_data(co2_emission_edge_data, data[:edges][co2_emission_edge_key], [
-        (data, Symbol("co2_emission_", key)),
-        (data[:edges][co2_emission_edge_key], key),
-        (data[:edges][co2_emission_edge_key], Symbol("co2_emission_", key))
-    ])
+    @process_data(
+        co2_emission_edge_data, 
+        data[:edges][co2_emission_edge_key],
+        [
+            (data[:edges][co2_emission_edge_key], key),
+            (data[:edges][co2_emission_edge_key], Symbol("co2_emission_", key)),
+            (data, Symbol("co2_emission_", key)),
+        ]
+    )
     co2_emission_start_node = beccs_transform
     @end_vertex(
         co2_emission_end_node,
         co2_emission_edge_data,
         CO2,
-        [(data, :co2_sink), (co2_emission_edge_data, :end_vertex)],
+        [(co2_emission_edge_data, :end_vertex), (data, :co2_sink), (data, :location)],
     )
     co2_emission_edge = Edge(
         Symbol(id, "_", co2_emission_edge_key),
@@ -173,16 +193,20 @@ function make(::Type{BECCSHydrogen}, data::AbstractDict{Symbol,Any}, system::Sys
     co2_emission_edge.has_capacity = get(co2_emission_edge_data, :has_capacity, false)
 
     elec_edge_key = :elec_edge
-    @process_data(elec_edge_data, data[:edges][elec_edge_key], [
-        (data, Symbol("elec_", key)),
-        (data[:edges][elec_edge_key], key),
-        (data[:edges][elec_edge_key], Symbol("elec_", key))
-    ])
+    @process_data(
+        elec_edge_data, 
+        data[:edges][elec_edge_key],
+        [
+            (data[:edges][elec_edge_key], key),
+            (data[:edges][elec_edge_key], Symbol("elec_", key)),
+            (data, Symbol("elec_", key)),
+        ]
+    )
     @start_vertex(
         elec_start_node,
         elec_edge_data,
         Electricity,
-        [(data, :location), (elec_edge_data, :start_vertex)],
+        [(elec_edge_data, :start_vertex), (data, :location)],
     )
     elec_end_node = beccs_transform
     elec_edge = Edge(
@@ -198,17 +222,21 @@ function make(::Type{BECCSHydrogen}, data::AbstractDict{Symbol,Any}, system::Sys
     elec_edge.has_capacity = get(elec_edge_data, :has_capacity, false)
 
     co2_captured_edge_key = :co2_captured_edge
-    @process_data(co2_captured_edge_data, data[:edges][co2_captured_edge_key], [
-        (data, Symbol("co2_captured_", key)),
-        (data[:edges][co2_captured_edge_key], Symbol("co2_captured_", key)),
-        (data[:edges][co2_captured_edge_key], key)
-    ])
+    @process_data(
+        co2_captured_edge_data,
+        data[:edges][co2_captured_edge_key],
+        [
+            (data[:edges][co2_captured_edge_key], key),
+            (data[:edges][co2_captured_edge_key], Symbol("co2_captured_", key)),
+            (data, Symbol("co2_captured_", key)),
+        ]
+    )
     co2_captured_start_node = beccs_transform
     @end_vertex(
         co2_captured_end_node,
         co2_captured_edge_data,
         CO2Captured,
-        [(data, :co2_captured_sink), (co2_captured_edge_data, :end_vertex)],
+        [(co2_captured_edge_data, :end_vertex), (data, :location)],
     )
     co2_captured_edge = Edge(
         Symbol(id, "_", co2_captured_edge_key),

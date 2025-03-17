@@ -69,10 +69,10 @@ function make(::Type{Electrolyzer}, data::AbstractDict{Symbol,Any}, system::Syst
         transform_data, 
         data[electrolyzer_key], 
         [
-            (data, key),
-            (data, Symbol("transform_", key)),
             (data[electrolyzer_key], key),
-            (data[electrolyzer_key], Symbol("transform_", key))
+            (data[electrolyzer_key], Symbol("transform_", key)),
+            (data, Symbol("transform_", key)),
+            (data, key),
         ]
     )
     electrolyzer = Transformation(;
@@ -86,16 +86,16 @@ function make(::Type{Electrolyzer}, data::AbstractDict{Symbol,Any}, system::Syst
         elec_edge_data, 
         data[:edges][elec_edge_key], 
         [
-            (data, Symbol("elec_", key)),
             (data[:edges][elec_edge_key], key),
-            (data[:edges][elec_edge_key], Symbol("elec_", key))
+            (data[:edges][elec_edge_key], Symbol("elec_", key)),
+            (data, Symbol("elec_", key)),
         ]
     )
     @start_vertex(
         elec_start_node,
         elec_edge_data,
         Electricity,
-        [(data, :location), (elec_edge_data, :start_vertex)],
+        [(elec_edge_data, :start_vertex), (data, :location)],
     )
     elec_end_node = electrolyzer
     elec_edge = Edge(
@@ -113,10 +113,10 @@ function make(::Type{Electrolyzer}, data::AbstractDict{Symbol,Any}, system::Syst
         h2_edge_data, 
         data[:edges][h2_edge_key], 
         [
-            (data, key),
-            (data, Symbol("h2_", key)),
             (data[:edges][h2_edge_key], key),
-            (data[:edges][h2_edge_key], Symbol("h2_", key))
+            (data[:edges][h2_edge_key], Symbol("h2_", key)),
+            (data, Symbol("h2_", key)),
+            (data, key),
         ]
     )
     h2_start_node = electrolyzer
@@ -124,7 +124,7 @@ function make(::Type{Electrolyzer}, data::AbstractDict{Symbol,Any}, system::Syst
         h2_end_node,
         h2_edge_data,
         Hydrogen,
-        [(data, :h2_source), (h2_edge_data, :end_vertex)],
+        [(h2_edge_data, :end_vertex), (data, :h2_source)],
     )
     h2_edge = Edge(
         Symbol(id, "_", h2_edge_key),

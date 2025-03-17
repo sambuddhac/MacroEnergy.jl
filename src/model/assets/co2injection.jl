@@ -38,10 +38,10 @@ function make(::Type{CO2Injection}, data::AbstractDict{Symbol,Any}, system::Syst
         transform_data,
         data[co2injection_key],
         [
-            (data, key),
-            (data, Symbol("transform_", key)),
             (data[co2injection_key], key),
-            (data[co2injection_key], Symbol("transform_", key))
+            (data[co2injection_key], Symbol("transform_", key)),
+            (data, Symbol("transform_", key)),
+            (data, key),
         ]
     )
     co2injection_transform = Transformation(;
@@ -55,17 +55,17 @@ function make(::Type{CO2Injection}, data::AbstractDict{Symbol,Any}, system::Syst
         co2_captured_edge_data,
         data[:edges][co2_captured_edge_key],
         [
-            (data, key),
-            (data, Symbol("co2_captured_", key)),
             (data[:edges][co2_captured_edge_key], key),
-            (data[:edges][co2_captured_edge_key], Symbol("co2_captured_", key))
+            (data[:edges][co2_captured_edge_key], Symbol("co2_captured_", key)),
+            (data, Symbol("co2_captured_", key)),
+            (data, key),
         ]
     )
     @start_vertex(
         co2_captured_start_node,
         co2_captured_edge_data,
         CO2Captured,
-        [(data, :co2_sink), (data, :location), (co2_captured_edge_data, :start_vertex)]
+        [(co2_captured_edge_data, :start_vertex), (data, :location), (data, :co2_sink), (data, :location)]
     )
     co2_captured_end_node = co2injection_transform
     co2_captured_edge = Edge(
@@ -84,9 +84,9 @@ function make(::Type{CO2Injection}, data::AbstractDict{Symbol,Any}, system::Syst
         co2_storage_edge_data,
         data[:edges][co2_storage_edge_key],
         [
-            (data, Symbol("co2_storage_", key)),
             (data[:edges][co2_storage_edge_key], key),
-            (data[:edges][co2_storage_edge_key], Symbol("co2_storage_", key))
+            (data[:edges][co2_storage_edge_key], Symbol("co2_storage_", key)),
+            (data, Symbol("co2_storage_", key)),
         ]
     )
     co2_storage_start_node = co2injection_transform
@@ -94,7 +94,7 @@ function make(::Type{CO2Injection}, data::AbstractDict{Symbol,Any}, system::Syst
         co2_storage_end_node,
         co2_storage_edge_data,
         CO2Captured,
-        [(data, :co2_storage), (data, :location), (co2_storage_edge_data, :end_vertex)],
+        [(co2_storage_edge_data, :end_vertex), (data, :location), (data, :co2_storage),],
     )
     co2_storage_edge = Edge(
         Symbol(id, "_", co2_storage_edge_key),

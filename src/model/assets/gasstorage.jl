@@ -70,9 +70,9 @@ function make(::Type{GasStorage}, data::AbstractDict{Symbol,Any}, system::System
         storage_data,
         data[gas_storage_key],
         [
-            (data, Symbol("storage_", key)),
             (data[gas_storage_key], key),
             (data[gas_storage_key], Symbol("storage_", key)),
+            (data, Symbol("storage_", key)),
         ],
     )
     commodity_symbol = Symbol(storage_data[:commodity])
@@ -102,9 +102,9 @@ function make(::Type{GasStorage}, data::AbstractDict{Symbol,Any}, system::System
         transform_data,
         data[compressor_key],
         [
-            (data, Symbol("transform_", key)),
             (data[compressor_key], key),
             (data[compressor_key], Symbol("transform_", key)),
+            (data, Symbol("transform_", key)),
         ],
     )
     compressor_transform = Transformation(;
@@ -118,16 +118,16 @@ function make(::Type{GasStorage}, data::AbstractDict{Symbol,Any}, system::System
         compressor_elec_edge_data,
         data[:edges][compressor_elec_edge_key],
         [
-            (data, Symbol("elec_", key)),
             (data[:edges][compressor_elec_edge_key], key),
             (data[:edges][compressor_elec_edge_key], Symbol("elec_", key)),
+            (data, Symbol("elec_", key)),
         ],
     )
     @start_vertex(
         elec_start_node,
         compressor_elec_edge_data,
         Electricity,
-        [(data, :location), (compressor_elec_edge_data, :start_vertex)],
+        [(compressor_elec_edge_data, :start_vertex), (data, :location)],
     )
     elec_end_node = compressor_transform
     compressor_elec_edge = Edge(
@@ -145,16 +145,16 @@ function make(::Type{GasStorage}, data::AbstractDict{Symbol,Any}, system::System
         compressor_gas_edge_data,
         data[:edges][compressor_gas_edge_key],
         [
-            (data, Symbol("gas_", key)),
             (data[:edges][compressor_gas_edge_key], key),
             (data[:edges][compressor_gas_edge_key], Symbol("gas_", key)),
+            (data, Symbol("gas_", key)),
         ],
     )
     @start_vertex(
         gas_edge_start_node,
         compressor_gas_edge_data,
         commodity,
-        [(data, :location), (compressor_gas_edge_data, :start_vertex)],
+        [(compressor_gas_edge_data, :start_vertex), (data, :location)],
     )
     gas_edge_end_node = compressor_transform
     compressor_gas_edge = Edge(
@@ -172,9 +172,9 @@ function make(::Type{GasStorage}, data::AbstractDict{Symbol,Any}, system::System
         charge_edge_data,
         data[:edges][charge_edge_key],
         [
-            (data, Symbol("charge_", key)),
             (data[:edges][charge_edge_key], key),
             (data[:edges][charge_edge_key], Symbol("charge_", key)),
+            (data, Symbol("charge_", key)),
         ],
     )
     charge_start_node = compressor_transform
@@ -196,9 +196,9 @@ function make(::Type{GasStorage}, data::AbstractDict{Symbol,Any}, system::System
         discharge_edge_data,
         data[:edges][discharge_edge_key],
         [
-            (data, Symbol("discharge_", key)),
             (data[:edges][discharge_edge_key], key),
             (data[:edges][discharge_edge_key], Symbol("discharge_", key)),
+            (data, Symbol("discharge_", key)),
         ],
     )
     discharge_start_node = gas_storage
@@ -206,7 +206,7 @@ function make(::Type{GasStorage}, data::AbstractDict{Symbol,Any}, system::System
         discharge_end_node,
         discharge_edge_data,
         commodity,
-        [(data, :location), (discharge_edge_data, :end_vertex)],
+        [(discharge_edge_data, :end_vertex), (data, :location)],
     )
     gas_storage_discharge = Edge(
         Symbol(id, "_", discharge_edge_key),
@@ -231,7 +231,6 @@ function make(::Type{GasStorage}, data::AbstractDict{Symbol,Any}, system::System
             gas_storage_charge.id => get(charge_edge_data, :efficiency, 1.0),
         ),
     )
-
     compressor_transform.balance_data = Dict(
         :electricity => Dict(
             compressor_elec_edge.id => 1.0,
