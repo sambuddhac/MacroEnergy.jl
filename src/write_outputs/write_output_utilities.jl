@@ -68,17 +68,14 @@ end
 
 ## Helper functions to extract the optimal values of given fields from a list of MacroObjects at different time intervals ##
 # e.g., get_optimal_vars_timeseries(edges, flow)
-function get_optimal_vars_timeseries(objs, field_list, scaling, obj_asset_map)
-    return nothing
-end
 
 function get_optimal_vars_timeseries(
     objs::Vector{T},
     field_list::Tuple,
     scaling::Float64=1.0,
     obj_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}=Dict{Symbol,Base.RefValue{<:AbstractAsset}}()
-) where {T<:Union{AbstractEdge,Storage,Node}}
-    reduce(vcat, [get_optimal_vars_timeseries(o, field_list, scaling, obj_asset_map) for o in objs])
+) where {T<:Union{AbstractEdge,Storage,Node,Location}}
+    reduce(vcat, [get_optimal_vars_timeseries(o, field_list, scaling, obj_asset_map) for o in objs if !isa(o, Location)]) # filter out locations
 end
 
 function get_optimal_vars_timeseries(
@@ -86,8 +83,8 @@ function get_optimal_vars_timeseries(
     f::Function,
     scaling::Float64=1.0,
     obj_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}=Dict{Symbol,Base.RefValue{<:AbstractAsset}}()
-) where {T<:Union{AbstractEdge,Storage,Node}}
-    reduce(vcat, [get_optimal_vars_timeseries(o, f, scaling, obj_asset_map) for o in objs])
+) where {T<:Union{AbstractEdge,Storage,Node,Location}}
+    reduce(vcat, [get_optimal_vars_timeseries(o, f, scaling, obj_asset_map) for o in objs if !isa(o, Location)])
 end
 
 function get_optimal_vars_timeseries(
@@ -153,9 +150,9 @@ function get_optimal_vars_timeseries(
 end
 
 # Get the commodity type of a MacroObject
-get_commodity_name(obj::AbstractEdge) = Symbol(commodity_type(obj))
-get_commodity_name(obj::Node) = Symbol(commodity_type(obj))
-get_commodity_name(obj::Storage) = Symbol(commodity_type(obj))
+get_commodity_name(obj::AbstractEdge) = typesymbol(commodity_type(obj))
+get_commodity_name(obj::Node) = typesymbol(commodity_type(obj))
+get_commodity_name(obj::Storage) = typesymbol(commodity_type(obj))
 
 # The commodity subtype is an identifier for the field names
 # e.g., "capacity" for capacity variables, "flow" for flow variables, etc.
