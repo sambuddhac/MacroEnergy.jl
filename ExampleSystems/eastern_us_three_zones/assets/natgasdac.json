@@ -30,7 +30,7 @@
                         "has_capacity": false,
                         "end_vertex": "co2_sink"
                     },
-                    "ng_edge": {
+                    "natgas_edge": {
                         "commodity": "NaturalGas",
                         "unidirectional": true,
                         "has_capacity": false
@@ -71,7 +71,7 @@
                                 "ramp_up_fraction": 1.0,
                                 "ramp_down_fraction": 1.0
                             },
-                            "ng_edge": {
+                            "natgas_edge": {
                                 "start_vertex": "natgas_SE"
                             },
                             "elec_edge":{
@@ -106,7 +106,7 @@
                                 "ramp_up_fraction": 1.0,
                                 "ramp_down_fraction": 1.0
                             },
-                            "ng_edge": {
+                            "natgas_edge": {
                                 "start_vertex": "natgas_MIDAT"
                             },
                             "elec_edge":{
@@ -141,7 +141,7 @@
                                 "ramp_up_fraction": 1.0,
                                 "ramp_down_fraction": 1.0
                             },
-                            "ng_edge": {
+                            "natgas_edge": {
                                 "start_vertex": "natgas_NE"
                             },
                             "elec_edge":{
