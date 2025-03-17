@@ -77,6 +77,7 @@ function node_default_data()
         :id => missing,
         :timedata => missing,
         :location => missing,
+        :constraints => Dict{Symbol,Bool}(),
         :demand => missing,
         :max_nsd => [0.0],
         :min_nsd => [0.0],
