@@ -3,14 +3,67 @@ struct HydrogenLine <: AbstractAsset
     h2_edge::Edge{Hydrogen}
 end
 
+function default_data(::Type{HydrogenLine}, id=missing)
+    return Dict{Symbol,Any}(
+        :id => id,
+        :edges => Dict{Symbol,Any}(
+            :h2_edge => @edge_data(
+                :commodity => "Hydrogen",
+                :has_capacity => true,
+                :can_expand => true,
+                :can_retire => false,
+                :constraints => Dict{Symbol, Bool}(
+                    :CapacityConstraint => true,
+                ),
+            ),
+        ),
+    )
+end
+
+"""
+    make(::Type{HydrogenLine}, data::AbstractDict{Symbol, Any}, system::System) -> HydrogenLine
+
+    Necessary data fields:
+     - edges: Dict{Symbol, Any}
+         - h2_edge: Dict{Symbol, Any}
+             - id: String
+             - start_vertex: String
+             - end_vertex: String
+             - unidirectional: Bool
+             - has_capacity: Bool
+             - can_retire: Bool
+             - can_expand: Bool
+             - constraints: Vector{AbstractTypeConstraint}
+"""
+
 function make(::Type{<:HydrogenLine}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id]) 
 
-    h2_edge_key = :h2_edge
-    h2_edge_data = process_data(data[:edges][h2_edge_key])
-    h2_start_node = find_node(system.locations, Symbol(h2_edge_data[:start_vertex]))
-    h2_end_node = find_node(system.locations, Symbol(h2_edge_data[:end_vertex]))
+    data = recursive_merge(default_data(HydrogenLine, id), data)
 
+    h2_edge_key = :h2_edge
+    @process_data(
+        h2_edge_data,
+        data[:edges][h2_edge_key],
+        [
+            (data, key), 
+            (data, Symbol("h2_", key)),
+            (data[:edges][h2_edge_key], key),
+            (data[:edges][h2_edge_key], Symbol("h2_", key)),
+        ]
+    )
+    @start_vertex(
+        h2_start_node,
+        h2_edge_data,
+        Hydrogen,
+        [(data, :location), (h2_edge_data, :start_vertex)]
+    )
+    @end_vertex(
+        h2_end_node,
+        h2_edge_data,
+        Hydrogen,
+        [(data, :location), (h2_edge_data, :end_vertex)]
+    )
     h2_edge = Edge(
         Symbol(id, "_", h2_edge_key),
         h2_edge_data,

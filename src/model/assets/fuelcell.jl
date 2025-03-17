@@ -2,7 +2,34 @@ struct FuelCell <: AbstractAsset
     id::AssetId
     fuelcell_transform::Transformation
     h2_edge::Edge{Hydrogen}
-    e_edge::Edge{Electricity}
+    elec_edge::Edge{Electricity}
+end
+
+function default_data(::Type{FuelCell}, id=missing)
+    return Dict{Symbol,Any}(
+        :id => id,
+        :transforms => @transform_data(
+            :timedata => "Electricity",
+            :efficiency_rate => 1.0,
+            :constraints => Dict{Symbol, Bool}(
+                :BalanceConstraint => true,
+            ),
+        ),
+        :edges => Dict{Symbol,Any}(
+            :elec_edge => @edge_data(
+                :commodity => "Electricity",
+                :has_capacity => true,
+                :can_expand => true,
+                :can_retire => true,
+                :constraints => Dict{Symbol, Bool}(
+                    :CapacityConstraint => true,
+                ),
+            ),
+            :h2_edge => @edge_data(
+                :commodity => "Hydrogen",
+            ),
+        ),
+    )
 end
 
 """
@@ -23,7 +50,7 @@ end
             - can_retire: Bool
             - can_expand: Bool
             - constraints: Vector{AbstractTypeConstraint}
-        - e_edge: Dict{Symbol, Any}
+        - elec_edge: Dict{Symbol, Any}
             - id: String
             - start_vertex: String
             - unidirectional: Bool
@@ -35,18 +62,43 @@ end
 function make(::Type{FuelCell}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 
+    data = recursive_merge(default_data(FuelCell, id), data)
+
     fuelcell_key = :transforms
-    transform_data = process_data(data[fuelcell_key])
+    @process_data(
+        transform_data,
+        data[fuelcell_key],
+        [
+            (data, key),
+            (data, Symbol("transform_", key)),
+            (data[fuelcell_key], key),
+            (data[fuelcell_key], Symbol("transform_", key)),
+        ]
+    )
     fuelcell = Transformation(;
         id = Symbol(id, "_", fuelcell_key),
         timedata = system.time_data[Symbol(transform_data[:timedata])],
         constraints = get(transform_data, :constraints, [BalanceConstraint()]),
     )
 
-    elec_edge_key = :e_edge
-    elec_edge_data = process_data(data[:edges][elec_edge_key])
+    elec_edge_key = :elec_edge
+    @process_data(
+        elec_edge_data,
+        data[:edges][elec_edge_key],
+        [
+            (data, key),
+            (data, Symbol("elec_", key)),
+            (data[:edges][elec_edge_key], key),
+            (data[:edges][elec_edge_key], Symbol("elec_", key)),
+        ]
+    )
     elec_start_node = fuelcell
-    elec_end_node = find_node(system.locations, Symbol(elec_edge_data[:end_vertex]))
+    @end_vertex(
+        elec_end_node,
+        elec_edge_data,
+        Electricity,
+        [(data, :location), (elec_edge_data, :end_vertex)],
+    )
     elec_edge = Edge(
         Symbol(id, "_", elec_edge_key),
         elec_edge_data,
@@ -59,8 +111,21 @@ function make(::Type{FuelCell}, data::AbstractDict{Symbol,Any}, system::System)
     elec_edge.unidirectional = get(elec_edge_data, :unidirectional, true)
 
     h2_edge_key = :h2_edge
-    h2_edge_data = process_data(data[:edges][h2_edge_key])
-    h2_start_node = find_node(system.locations, Symbol(h2_edge_data[:start_vertex]))
+    @process_data(
+        h2_edge_data,
+        data[:edges][h2_edge_key],
+        [
+            (data, Symbol("h2_", key)),
+            (data[:edges][h2_edge_key], key),
+            (data[:edges][h2_edge_key], Symbol("h2_", key)),
+        ]
+    )
+    @start_vertex(
+        h2_start_node,
+        h2_edge_data,
+        Hydrogen,
+        [(data, :location), (h2_edge_data, :start_vertex)],
+    )
     h2_end_node = fuelcell
     h2_edge = Edge(
         Symbol(id, "_", h2_edge_key),

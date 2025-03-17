@@ -85,7 +85,7 @@ function make(::Type{BECCSElectricity}, data::AbstractDict{Symbol,Any}, system::
         Symbol(id, "_", biomass_edge_key),
         biomass_edge_data,
         system.time_data[commodity_symbol],
-        commodity_types()[commodity_symbol],
+        commodity,
         biomass_start_node,
         biomass_end_node,
     )

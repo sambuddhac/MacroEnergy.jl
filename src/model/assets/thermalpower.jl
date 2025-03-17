@@ -9,11 +9,60 @@ end
 ThermalPower(id::AssetId, thermal_transform::Transformation, elec_edge::Union{Edge{Electricity},EdgeWithUC{Electricity}}, fuel_edge::Edge{T}, co2_edge::Edge{CO2}) where T<:Commodity =
     ThermalPower{T}(id, thermal_transform, elec_edge, fuel_edge, co2_edge)
 
+function default_data(::Type{ThermalPower}, id=missing)
+    return Dict{Symbol,Any}(
+        :id => id,
+        :transforms => @transform_data(
+            :timedata => "Electricity",
+            :fuel_consumption => 1.0,
+            :emission_rate => 0.0,
+            :constraints => Dict{Symbol, Bool}(
+                :BalanceConstraint => true,
+            ),
+        ),
+        :edges => Dict{Symbol,Any}(
+            :elec_edge => @edge_data(
+                :commodity => "Electricity",
+                :has_capacity => true,
+                :can_retire => true,
+                :can_expand => true,
+                :constraints => Dict{Symbol, Bool}(
+                    :CapacityConstraint => true,
+                    :RampingLimitConstraint => true,
+                    :MinUpTimeConstraint => true,
+                    :MinDownTimeConstraint => true,
+                ),
+            ),
+            :fuel_edge => @edge_data(
+                :commodity => missing,
+            ),
+            :co2_edge => @edge_data(
+                :commodity=>"CO2",
+            ),
+        ),
+    )
+end
+
+"""
+    make(::Type{ThermalPower}, data::AbstractDict{Symbol, Any}, system::System) -> ThermalPower
+"""
+
 function make(::Type{ThermalPower}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 
+    data = recursive_merge(default_data(ThermalPower, id), data)
+
     thermal_key = :transforms
-    transform_data = process_data(data[thermal_key])
+    @process_data(
+        transform_data, 
+        data[thermal_key], 
+        [
+            (data, key),
+            (data, Symbol("transform_", key)),
+            (data[thermal_key], key),
+            (data[thermal_key], Symbol("transform_", key)),
+        ]
+    )
     thermal_transform = Transformation(;
         id = Symbol(id, "_", thermal_key),
         timedata = system.time_data[Symbol(transform_data[:timedata])],
@@ -21,9 +70,23 @@ function make(::Type{ThermalPower}, data::AbstractDict{Symbol,Any}, system::Syst
     )
 
     elec_edge_key = :elec_edge
-    elec_edge_data = process_data(data[:edges][elec_edge_key])
+    @process_data(
+        elec_edge_data, 
+        data[:edges][elec_edge_key], 
+        [
+            (data, key),
+            (data, Symbol("edge_", key)),
+            (data[:edges][elec_edge_key], key),
+            (data[:edges][elec_edge_key], Symbol("edge_", key)),
+        ]
+    )
     elec_start_node = thermal_transform
-    elec_end_node = find_node(system.locations, Symbol(elec_edge_data[:end_vertex]))
+    @end_vertex(
+        elec_end_node,
+        elec_edge_data,
+        Electricity,
+        [(data, :location), (elec_edge_data, :end_vertex)],
+    )
     
     if elec_edge_data[:uc]==true
         elec_edge = EdgeWithUC(
@@ -65,25 +128,51 @@ function make(::Type{ThermalPower}, data::AbstractDict{Symbol,Any}, system::Syst
     elec_edge.unidirectional = true;
     
     fuel_edge_key = :fuel_edge
-    fuel_edge_data = process_data(data[:edges][fuel_edge_key])
-    T = commodity_types()[Symbol(fuel_edge_data[:commodity])];
-
-    fuel_start_node = find_node(system.locations, Symbol(fuel_edge_data[:start_vertex]))
+    @process_data(
+        fuel_edge_data, 
+        data[:edges][fuel_edge_key], 
+        [
+            (data, Symbol("fuel_", key)),
+            (data[:edges][fuel_edge_key], key),
+            (data[:edges][fuel_edge_key], Symbol("fuel_", key)),
+        ]
+    )
+    commodity_symbol = Symbol(fuel_edge_data[:commodity])
+    commodity = commodity_types()[commodity_symbol]
+    @start_vertex(
+        fuel_start_node,
+        fuel_edge_data,
+        commodity,
+        [(data, :location), (fuel_edge_data, :start_vertex)],
+    )
     fuel_end_node = thermal_transform
     fuel_edge = Edge(
         Symbol(id, "_", fuel_edge_key),
         fuel_edge_data,
-        system.time_data[Symbol(T)],
-        T,
+        system.time_data[commodity_symbol],
+        commodity,
         fuel_start_node,
         fuel_end_node,
     )
     fuel_edge.unidirectional = true;
 
     co2_edge_key = :co2_edge
-    co2_edge_data = process_data(data[:edges][co2_edge_key])
+    @process_data(
+        co2_edge_data, 
+        data[:edges][co2_edge_key], 
+        [
+            (data, Symbol("co2_", key)),
+            (data[:edges][co2_edge_key], key),
+            (data[:edges][co2_edge_key], Symbol("co2_", key)),
+        ]
+    )
     co2_start_node = thermal_transform
-    co2_end_node = find_node(system.locations, Symbol(co2_edge_data[:end_vertex]))
+    @end_vertex(
+        co2_end_node,
+        co2_edge_data,
+        CO2,
+        [(data, :co2_sink), (co2_edge_data, :end_vertex)],
+    )
     co2_edge = Edge(
         Symbol(id, "_", co2_edge_key),
         co2_edge_data,

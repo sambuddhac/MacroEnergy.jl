@@ -11,6 +11,45 @@ ThermalHydrogenCCS(id::AssetId, thermalhydrogenccs_transform::Transformation,h2_
 fuel_edge::Edge{T},co2_edge::Edge{CO2},co2_captured_edge::Edge{CO2Captured}) where T<:Commodity =
     ThermalHydrogenCCS{T}(id, thermalhydrogenccs_transform, h2_edge, elec_edge, fuel_edge, co2_edge,co2_captured_edge)
 
+function default_data(::Type{ThermalHydrogenCCS}, id=missing)
+    return Dict{Symbol,Any}(
+        :id => id,
+        :transforms => @transform_data(
+            :timedata => "Electricity",
+            :electricity_consumption => 0.0,
+            :fuel_consumption => 1.0,
+            :emission_rate => 0.0,
+            :capture_rate => 1.0,
+            :constraints => Dict{Symbol, Bool}(
+                :BalanceConstraint => true,
+            ),
+        ),
+        :edges => Dict{Symbol,Any}(
+            :elec_edge => @edge_data(
+                :commodity => "Electricity",
+            ),
+            :h2_edge => @edge_data(
+                :commodity => "Hydrogen",
+                :has_capacity => true,
+                :can_retire => true,
+                :can_expand => true,
+                :constraints => Dict{Symbol, Bool}(
+                    :CapacityConstraint => true,
+                ),
+            ),
+            :fuel_edge => @edge_data(
+                :commodity => missing,
+            ),
+            :co2_edge => @edge_data(
+                :commodity=>"CO2",
+            ),
+            :co2_captured_edge=>@edge_data(
+                :commodity=>"CO2Captured",
+            ),
+        ),
+    )
+end
+
 """
     make(::Type{ThermalHydrogenCCS}, data::AbstractDict{Symbol, Any}, system::System) -> ThermalHydrogenCCS
 
@@ -68,8 +107,19 @@ fuel_edge::Edge{T},co2_edge::Edge{CO2},co2_captured_edge::Edge{CO2Captured}) whe
 function make(::Type{ThermalHydrogenCCS}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 
+    data = recursive_merge(default_data(ThermalHydrogenCCS, id), data)
+
     thermalhydrogenccs_key = :transforms
-    transform_data = process_data(data[thermalhydrogenccs_key])
+    @process_data(
+        transform_data, 
+        data[thermalhydrogenccs_key], 
+        [
+            (data, key),
+            (data, Symbol("transform_", key)),
+            (data[thermalhydrogenccs_key], key),
+            (data[thermalhydrogenccs_key], Symbol("transform_", key)),
+        ]
+    )
     thermalhydrogenccs_transform = Transformation(;
         id = Symbol(id, "_", thermalhydrogenccs_key),
         timedata = system.time_data[Symbol(transform_data[:timedata])],
@@ -77,8 +127,21 @@ function make(::Type{ThermalHydrogenCCS}, data::AbstractDict{Symbol,Any}, system
     )
 
     elec_edge_key = :elec_edge
-    elec_edge_data = process_data(data[:edges][elec_edge_key]);
-    elec_start_node = find_node(system.locations, Symbol(elec_edge_data[:start_vertex]))
+    @process_data(
+        elec_edge_data, 
+        data[:edges][elec_edge_key], 
+        [
+            (data, Symbol("elec_", key)),
+            (data[:edges][elec_edge_key], key),
+            (data[:edges][elec_edge_key], Symbol("elec_", key))
+        ]
+    )
+    @start_vertex(
+        elec_start_node,
+        elec_edge_data,
+        Electricity,
+        [(data, :location), (elec_edge_data, :start_vertex)],
+    )
     elec_end_node = thermalhydrogenccs_transform
     elec_edge = Edge(
         Symbol(id, "_", elec_edge_key),
@@ -93,9 +156,23 @@ function make(::Type{ThermalHydrogenCCS}, data::AbstractDict{Symbol,Any}, system
     elec_edge.constraints =  Vector{AbstractTypeConstraint}();
 
     h2_edge_key = :h2_edge
-    h2_edge_data = process_data(data[:edges][h2_edge_key])
+    @process_data(
+        h2_edge_data, 
+        data[:edges][h2_edge_key], 
+        [
+            (data, key),
+            (data, Symbol("h2_", key)),
+            (data[:edges][h2_edge_key], key),
+            (data[:edges][h2_edge_key], Symbol("h2_", key)),
+        ]
+    )
     h2_start_node = thermalhydrogenccs_transform
-    h2_end_node = find_node(system.locations, Symbol(h2_edge_data[:end_vertex]))
+    @end_vertex(
+        h2_end_node,
+        h2_edge_data,
+        Hydrogen,
+        [(data, :location), (h2_edge_data, :end_vertex)],
+    )
     if h2_edge_data[:uc]==true
         h2_edge = EdgeWithUC(
             Symbol(id, "_", h2_edge_key),
@@ -137,24 +214,51 @@ function make(::Type{ThermalHydrogenCCS}, data::AbstractDict{Symbol,Any}, system
     
 
     fuel_edge_key = :fuel_edge
-    fuel_edge_data = process_data(data[:edges][fuel_edge_key])
-    T = commodity_types()[Symbol(fuel_edge_data[:commodity])];
-    fuel_start_node = find_node(system.locations, Symbol(fuel_edge_data[:start_vertex]))
+    @process_data(
+        fuel_edge_data, 
+        data[:edges][fuel_edge_key], 
+        [
+            (data, Symbol("fuel_", key)),
+            (data[:edges][fuel_edge_key], key),
+            (data[:edges][fuel_edge_key], Symbol("fuel_", key)),
+        ]
+    )
+    commodity_symbol = Symbol(fuel_edge_data[:commodity])
+    commodity = commodity_types()[commodity_symbol]
+    @start_vertex(
+        fuel_start_node,
+        fuel_edge_data,
+        commodity,
+        [(data, :location), (fuel_edge_data, :start_vertex)],
+    )
     fuel_end_node = thermalhydrogenccs_transform
     fuel_edge = Edge(
         Symbol(id, "_", fuel_edge_key),
         fuel_edge_data,
-        system.time_data[Symbol(T)],
-        T,
+        system.time_data[commodity_symbol],
+        commodity,
         fuel_start_node,
         fuel_end_node,
     )
     fuel_edge.unidirectional = true;
 
     co2_edge_key = :co2_edge
-    co2_edge_data = process_data(data[:edges][co2_edge_key])
+    @process_data(
+        co2_edge_data, 
+        data[:edges][co2_edge_key], 
+        [
+            (data, Symbol("co2_", key)),
+            (data[:edges][co2_edge_key], key),
+            (data[:edges][co2_edge_key], Symbol("co2_", key)),
+        ]
+    )
     co2_start_node = thermalhydrogenccs_transform
-    co2_end_node = find_node(system.locations, Symbol(co2_edge_data[:end_vertex]))
+    @end_vertex(
+        co2_end_node,
+        co2_edge_data,
+        CO2,
+        [(data, :co2_sink), (co2_edge_data, :end_vertex)],
+    )
     co2_edge = Edge(
         Symbol(id, "_", co2_edge_key),
         co2_edge_data,
@@ -168,9 +272,22 @@ function make(::Type{ThermalHydrogenCCS}, data::AbstractDict{Symbol,Any}, system
     co2_edge.has_capacity = false;
 
     co2_captured_edge_key = :co2_captured_edge
-    co2_captured_edge_data = process_data(data[:edges][co2_captured_edge_key])
+    @process_data(
+        co2_captured_edge_data, 
+        data[:edges][co2_captured_edge_key], 
+        [
+            (data, Symbol("co2_captured_", key)),
+            (data[:edges][co2_captured_edge_key], key),
+            (data[:edges][co2_captured_edge_key], Symbol("co2_captured_", key)),
+        ]
+    )
     co2_captured_start_node = thermalhydrogenccs_transform
-    co2_captured_end_node = find_node(system.locations, Symbol(co2_captured_edge_data[:end_vertex]))
+    @end_vertex(
+        co2_captured_end_node,
+        co2_captured_edge_data,
+        CO2Captured,
+        [(data, :co2_captured_sink), (co2_captured_edge_data, :end_vertex)],
+    )
     co2_captured_edge = Edge(
         Symbol(id, "_", co2_captured_edge_key),
         co2_captured_edge_data,
