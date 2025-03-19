@@ -7,6 +7,8 @@ Base.@kwdef mutable struct Location <: MacroObject
     # My feeling is that symbols will be lighter and faster
 end
 
+id(loc::Location) = loc.id
+
 function add_node!(loc::Location, node::Node{T}, replace::Bool = false) where {T<:Commodity}
     node_commodity = typesymbol(commodity_type(node))
     # If a node of the same type exists then throw an error unless replace is true
