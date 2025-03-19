@@ -7,6 +7,9 @@
                 "biomass_constraints": {
                     "MinFlowConstraint": true
                 },
+                "gasoline_commodity": "Gasoline",
+                "jetfuel_commodity": "JetFuel",
+                "diesel_commodity": "Diesel",
                 "gasoline_production": 0.65997315,
                 "jetfuel_production": 0.68040409,
                 "diesel_production": 1.347904429,
@@ -96,6 +99,9 @@
                 "biomass_constraints": {
                     "MinFlowConstraint": true
                 },
+                "gasoline_commodity": "Gasoline",
+                "jetfuel_commodity": "JetFuel",
+                "diesel_commodity": "Diesel",
                 "gasoline_production": 0.414523432,
                 "jetfuel_production": 1.850784319,
                 "diesel_production": 0,

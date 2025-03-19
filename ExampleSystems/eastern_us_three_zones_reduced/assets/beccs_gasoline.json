@@ -6,6 +6,7 @@
                 "biomass_constraints": {
                     "MinFlowConstraint": true
                 },
+                "gasoline_commodity": "Gasoline",
                 "gasoline_production": 2.02155,
                 "electricity_consumption": 0.0,
                 "capture_rate": 0.0,

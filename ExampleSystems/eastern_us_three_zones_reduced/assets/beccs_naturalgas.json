@@ -6,6 +6,7 @@
                 "biomass_constraints": {
                     "MinFlowConstraint": true
                 },
+                "co2_sink": "co2_sink",
                 "natgas_production": 2.75229,
                 "electricity_consumption": 0.208,
                 "capture_rate": 0,
@@ -91,6 +92,7 @@
                 "biomass_constraints": {
                     "MinFlowConstraint": true
                 },
+                "co2_sink": "co2_sink",
                 "natgas_production": 2.73095,
                 "electricity_consumption": 0.253,
                 "capture_rate": 0.48304,

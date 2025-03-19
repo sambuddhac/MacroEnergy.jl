@@ -16,7 +16,7 @@
                         "has_capacity": false
                     },
                     "gasoline_edge":{
-                        "commodity": "LiquidFuels",
+                        "commodity": "Gasoline",
                         "unidirectional": true,
                         "has_capacity": false
                     },

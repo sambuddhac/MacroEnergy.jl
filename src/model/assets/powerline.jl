@@ -13,6 +13,7 @@ function default_data(::Type{PowerLine}, id=missing)
                 :has_capacity => true,
                 :can_expand => true,
                 :can_retire => false,
+                :line_loss_percentage => 0.0,
                 :constraints => Dict{Symbol, Bool}(
                     :CapacityConstraint => true,
                 ),

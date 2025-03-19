@@ -123,18 +123,20 @@ function make(asset_type::Type{SyntheticLiquidFuels}, data::AbstractDict{Symbol,
             (data, Symbol("gasoline_", key)),
         ]
     )
+    commodity_symbol = Symbol(gasoline_edge_data[:commodity])
+    commodity = commodity_types()[commodity_symbol]
     gasoline_start_node = synthetic_liquid_fuels_transform
     @end_vertex(
         gasoline_end_node,
         gasoline_edge_data,
-        LiquidFuels,
+        commodity,
         [(gasoline_edge_data, :end_vertex), (data, :location)],
     )
     gasoline_edge = Edge(
         Symbol(id, "_", gasoline_edge_key),
         gasoline_edge_data,
-        system.time_data[:LiquidFuels],
-        LiquidFuels,
+        system.time_data[commodity_symbol],
+        commodity,
         gasoline_start_node,
         gasoline_end_node,
     )
@@ -152,18 +154,20 @@ function make(asset_type::Type{SyntheticLiquidFuels}, data::AbstractDict{Symbol,
             (data, Symbol("jetfuel_", key)),
         ]
     )
+    commodity_symbol = Symbol(jetfuel_edge_data[:commodity])
+    commodity = commodity_types()[commodity_symbol]
     jetfuel_start_node = synthetic_liquid_fuels_transform
     @end_vertex(
         jetfuel_end_node,
         jetfuel_edge_data,
-        LiquidFuels,
+        commodity,
         [(jetfuel_edge_data, :end_vertex), (data, :location)],
     )
     jetfuel_edge = Edge(
         Symbol(id, "_", jetfuel_edge_key),
         jetfuel_edge_data,
-        system.time_data[:LiquidFuels],
-        LiquidFuels,
+        system.time_data[commodity_symbol],
+        commodity,
         jetfuel_start_node,
         jetfuel_end_node,
     )
@@ -181,18 +185,20 @@ function make(asset_type::Type{SyntheticLiquidFuels}, data::AbstractDict{Symbol,
             (data, Symbol("diesel_", key)),
         ]
     )
+    commodity_symbol = Symbol(diesel_edge_data[:commodity])
+    commodity = commodity_types()[commodity_symbol]
     diesel_start_node = synthetic_liquid_fuels_transform
     @end_vertex(
         diesel_end_node,
         diesel_edge_data,
-        LiquidFuels,
+        commodity,
         [(diesel_edge_data, :end_vertex), (data, :location)],
     )
     diesel_edge = Edge(
         Symbol(id, "_", diesel_edge_key),
         diesel_edge_data,
-        system.time_data[:LiquidFuels],
-        LiquidFuels,
+        system.time_data[commodity_symbol],
+        commodity,
         diesel_start_node,
         diesel_end_node,
     )
