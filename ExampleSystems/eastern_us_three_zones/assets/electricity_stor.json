@@ -66,7 +66,7 @@
                     "id": "battery_MIDAT",
                     "edges": {
                         "discharge_edge": {
-                            "end_vertex": "elec_SE",
+                            "end_vertex": "elec_MIDAT",
                             "existing_capacity" : 0.0,
                             "fixed_om_cost" : 7075.764437,
                             "investment_cost": 26406.76299,
@@ -74,7 +74,7 @@
                             "efficiency": 0.92
                         },
                         "charge_edge": {
-                            "start_vertex": "elec_SE",
+                            "start_vertex": "elec_MIDAT",
                             "efficiency": 0.92,
                             "variable_om_cost": 1
                         }
@@ -91,7 +91,7 @@
                     "id": "battery_NE",
                     "edges": {
                         "discharge_edge": {
-                            "end_vertex": "elec_SE",
+                            "end_vertex": "elec_NE",
                             "existing_capacity" : 0.0,
                             "fixed_om_cost" : 7075.764437,
                             "investment_cost": 26889.92066,
@@ -99,7 +99,7 @@
                             "efficiency": 0.92
                         },
                         "charge_edge": {
-                            "start_vertex": "elec_SE",
+                            "start_vertex": "elec_NE",
                             "efficiency": 0.92,
                             "variable_om_cost": 1
                         }

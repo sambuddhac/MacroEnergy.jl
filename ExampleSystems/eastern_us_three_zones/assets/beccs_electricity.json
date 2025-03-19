@@ -57,6 +57,7 @@
                     },
                     "edges": {
                         "biomass_edge": {
+                            "commodity": "Biomass_Herb",
                             "start_vertex": "bioherb_SE",
                             "availability": {
                                 "timeseries": {
@@ -88,6 +89,7 @@
                     },
                     "edges": {
                         "biomass_edge": {
+                            "commodity": "Biomass_Herb",
                             "start_vertex": "bioherb_MIDAT",
                             "availability": {
                                 "timeseries": {
@@ -119,6 +121,7 @@
                     },
                     "edges": {
                         "biomass_edge": {
+                            "commodity": "Biomass_Herb",
                             "start_vertex": "bioherb_NE",
                             "availability": {
                                 "timeseries": {
@@ -150,6 +153,7 @@
                     },
                     "edges": {
                         "biomass_edge": {
+                            "commodity": "Biomass_Wood",
                             "start_vertex": "biowood_SE",
                             "availability": {
                                 "timeseries": {
@@ -181,6 +185,7 @@
                     },
                     "edges": {
                         "biomass_edge": {
+                            "commodity": "Biomass_Wood",
                             "start_vertex": "biowood_MIDAT",
                             "availability": {
                                 "timeseries": {
@@ -212,6 +217,7 @@
                     },
                     "edges": {
                         "biomass_edge": {
+                            "commodity": "Biomass_Wood",
                             "start_vertex": "biowood_NE",
                             "availability": {
                                 "timeseries": {

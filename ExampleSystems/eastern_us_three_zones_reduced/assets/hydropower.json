@@ -3,68 +3,45 @@
         {
             "type": "HydroRes",
             "global_data": {
-                "nodes": {},
-                "transforms": {},
-                "edges": {
-                    "discharge_edge": {
-                        "commodity": "Electricity",
-                        "unidirectional": true,
-                        "has_capacity": true,
-                        "can_expand": false,
-                        "can_retire": false,
-                        "constraints": {
-                            "CapacityConstraint": true,
-                            "RampingLimitConstraint": true
-                        }
-                    },
-                    "inflow_edge": {
-                        "commodity": "Electricity",
-                        "unidirectional": true,
-                        "start_vertex": "hydro_source",
-                        "has_capacity": true,
-                        "can_expand": false,
-                        "can_retire": false,
-                        "constraints": {
-                            "MustRunConstraint": true
-                        }
-                    },
-                    "spill_edge": {
-                        "commodity": "Electricity",
-                        "unidirectional": true,
-                        "end_vertex": "hydro_source",
-                        "can_expand": false,
-                        "can_retire": false,
-                        "has_capacity": false
-                    }
+                "hydro_source": "hydro_source",
+                "discharge_constraints": {
+                    "CapacityConstraint": true,
+                    "RampingLimitConstraint": true
                 },
-                "storage": {
-                    "commodity": "Electricity",
-                    "can_expand": false,
-                    "can_retire": false,
-                    "long_duration": true,
-                    "constraints": {
-                        "MinStorageOutflowConstraint": true,
-                        "StorageChargeDischargeRatioConstraint": true,
-                        "BalanceConstraint": true,
-                        "LongDurationStorageImplicitMinMaxConstraint": true
-                    }
+                "discharge_can_expand": false,
+                "discharge_can_retire": false,
+                "inflow_can_expand": false,
+                "inflow_can_retire": false,
+                "storage_can_expand": false,
+                "storage_can_retire": false,
+                "storage_long_duration": true,
+                "storage_constraints": {
+                    "MinStorageOutflowConstraint": true,
+                    "StorageChargeDischargeRatioConstraint": true,
+                    "BalanceConstraint": true,
+                    "LongDurationStorageImplicitMinMaxConstraint": true
                 }
             },
             "instance_data": [
                 {
                     "id": "MIDAT_conventional_hydroelectric_1",
+                    "location": "MIDAT",
                     "edges": {
                         "discharge_edge": {
                             "end_vertex": "elec_MIDAT",
                             "capacity_size": 29.853,
-                            "existing_capacity" : 2806.182,
-                            "fixed_om_cost" : 45648,
+                            "existing_capacity": 2806.182,
+                            "fixed_om_cost": 45648,
                             "ramp_down_fraction": 0.83,
                             "ramp_up_fraction": 0.83,
-                            "efficiency": 1.0
+                            "efficiency": 1.0,
+                            "can_expand": false,
+                            "can_retire": false
                         },
                         "inflow_edge": {
                             "efficiency": 1.0,
+                            "can_expand": false,
+                            "can_retire": false,
                             "availability": {
                                 "timeseries": {
                                     "path": "system/availability.csv",
@@ -80,18 +57,23 @@
                 },
                 {
                     "id": "NE_conventional_hydroelectric_1",
+                    "location": "NE",
                     "edges": {
                         "discharge_edge": {
                             "end_vertex": "elec_NE",
                             "capacity_size": 24.13,
-                            "existing_capacity" : 4729.48,
-                            "fixed_om_cost" : 45648,
+                            "existing_capacity": 4729.48,
+                            "fixed_om_cost": 45648,
                             "ramp_down_fraction": 0.083,
                             "ramp_up_fraction": 0.083,
-                            "efficiency": 1.0
+                            "efficiency": 1.0,
+                            "can_expand": false,
+                            "can_retire": false
                         },
                         "inflow_edge": {
                             "efficiency": 1.0,
+                            "can_expand": false,
+                            "can_retire": false,
                             "availability": {
                                 "timeseries": {
                                     "path": "system/availability.csv",
@@ -107,18 +89,23 @@
                 },
                 {
                     "id": "SE_conventional_hydroelectric_1",
+                    "location": "SE",
                     "edges": {
                         "discharge_edge": {
                             "end_vertex": "elec_SE",
                             "capacity_size": 31.333,
-                            "existing_capacity" : 11123.215,
-                            "fixed_om_cost" : 45648,
+                            "existing_capacity": 11123.215,
+                            "fixed_om_cost": 45648,
                             "ramp_down_fraction": 0.083,
                             "ramp_up_fraction": 0.083,
-                            "efficiency": 1.0
+                            "efficiency": 1.0,
+                            "can_expand": false,
+                            "can_retire": false
                         },
                         "inflow_edge": {
                             "efficiency": 1.0,
+                            "can_expand": false,
+                            "can_retire": false,
                             "availability": {
                                 "timeseries": {
                                     "path": "system/availability.csv",
@@ -136,4 +123,3 @@
         }
     ]
 }
-

@@ -6,6 +6,7 @@
         "CO2": 168,
         "Electricity": 168,
         "Uranium": 168,
+        "LiquidFuels": 168,
         "CO2Captured": 168
     },
     "HoursPerTimeStep": {
@@ -15,9 +16,10 @@
         "CO2": 1,
         "Electricity": 1,
         "Uranium": 1,
+        "LiquidFuels": 1,
         "CO2Captured": 1
     },
-    "PeriodLength": 504,
+    "NumberOfSubperiods": 3,
     "PeriodMap": {
         "path": "system/Period_map.csv"
     },

@@ -11,7 +11,7 @@
                 },
                 "edges" :{
                     "co2_captured_edge": {
-                        "type": "CO2Captured",
+                        "commodity": "CO2Captured",
                         "unidirectional": true,
                         "has_capacity": true,
                         "can_retire": false,
@@ -23,7 +23,7 @@
                         }
                     },
                     "co2_storage_edge": {
-                        "type": "CO2Captured",
+                        "commodity": "CO2Captured",
                         "unidirectional": true,
                         "has_capacity": false
                     }

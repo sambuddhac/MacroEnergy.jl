@@ -11,17 +11,17 @@
                 },
                 "edges":{
                     "elec_edge":{
-                        "type": "Electricity",
+                        "commodity": "Electricity",
                         "unidirectional": true,
                         "has_capacity": false
                     },
                     "gasoline_edge":{
-                        "type": "LiquidFuels",
+                        "commodity": "LiquidFuels",
                         "unidirectional": true,
                         "has_capacity": false
                     },
                     "biomass_edge":{
-                        "type": "Biomass",
+                        "commodity": "Biomass",
                         "unidirectional": true,
                         "has_capacity": true,
                         "can_expand": true,
@@ -33,19 +33,19 @@
                         }
                     },
                     "co2_edge":{
-                        "type": "CO2",
+                        "commodity": "CO2",
                         "unidirectional": true,
                         "has_capacity": false,
                         "start_vertex": "co2_sink"
                     },
                     "co2_emission_edge": {
-                        "type": "CO2",
+                        "commodity": "CO2",
                         "unidirectional": true,
                         "has_capacity": false,
                         "end_vertex": "co2_sink"
                     },
                     "co2_captured_edge": {
-                        "type": "CO2Captured",
+                        "commodity": "CO2Captured",
                         "unidirectional": true,
                         "has_capacity": false
                     }
@@ -63,6 +63,7 @@
                     },
                     "edges": {
                         "biomass_edge": {
+                            "commodity": "Biomass_Herb",
                             "start_vertex": "bioherb_SE",
                             "availability": {
                                 "timeseries": {
@@ -79,6 +80,7 @@
                             "start_vertex": "elec_SE"
                         },
                         "gasoline_edge":{
+                            "commodity": "Gasoline",
                             "end_vertex": "gasoline_SE"
                         },
                         "co2_captured_edge": {
@@ -97,6 +99,7 @@
                     },
                     "edges": {
                         "biomass_edge": {
+                            "commodity": "Biomass_Herb",
                             "start_vertex": "bioherb_MIDAT",
                             "availability": {
                                 "timeseries": {
@@ -113,6 +116,7 @@
                             "start_vertex": "elec_MIDAT"
                         },
                         "gasoline_edge":{
+                            "commodity": "Gasoline",
                             "end_vertex": "gasoline_MIDAT"
                         },
                         "co2_captured_edge": {
@@ -131,6 +135,7 @@
                     },
                     "edges": {
                         "biomass_edge": {
+                            "commodity": "Biomass_Herb",
                             "start_vertex": "bioherb_NE",
                             "availability": {
                                 "timeseries": {
@@ -147,6 +152,7 @@
                             "start_vertex": "elec_NE"
                         },
                         "gasoline_edge":{
+                            "commodity": "Gasoline",
                             "end_vertex": "gasoline_NE"
                         },
                         "co2_captured_edge": {
@@ -165,6 +171,7 @@
                     },
                     "edges": {
                         "biomass_edge": {
+                            "commodity": "Biomass_Wood",
                             "start_vertex": "biowood_SE",
                             "availability": {
                                 "timeseries": {
@@ -181,6 +188,7 @@
                             "start_vertex": "elec_SE"
                         },
                         "gasoline_edge":{
+                            "commodity": "Gasoline",
                             "end_vertex": "gasoline_SE"
                         },
                         "co2_captured_edge": {
@@ -199,6 +207,7 @@
                     },
                     "edges": {
                         "biomass_edge": {
+                            "commodity": "Biomass_Wood",
                             "start_vertex": "biowood_MIDAT",
                             "availability": {
                                 "timeseries": {
@@ -215,6 +224,7 @@
                             "start_vertex": "elec_MIDAT"
                         },
                         "gasoline_edge":{
+                            "commodity": "Gasoline",
                             "end_vertex": "gasoline_MIDAT"
                         },
                         "co2_captured_edge": {
@@ -233,6 +243,7 @@
                     },
                     "edges": {
                         "biomass_edge": {
+                            "commodity": "Biomass_Wood",
                             "start_vertex": "biowood_NE",
                             "availability": {
                                 "timeseries": {
@@ -249,6 +260,7 @@
                             "start_vertex": "elec_NE"
                         },
                         "gasoline_edge":{
+                            "commodity": "Gasoline",
                             "end_vertex": "gasoline_NE"
                         },
                         "co2_captured_edge": {
