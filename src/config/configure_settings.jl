@@ -5,6 +5,8 @@ function default_settings()
         OverwriteResults = false,
         OutputDir = "results",
         OutputLayout = "long",
+        AutoCreateNodes = false,
+        AutoCreateLocations = true
     )
 end
 

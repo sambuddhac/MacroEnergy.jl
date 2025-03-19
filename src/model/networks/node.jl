@@ -206,15 +206,19 @@ function make(commodity::Type{<:Commodity}, data::AbstractDict{Symbol,Any}, syst
     end
 
     if haskey(data, :location)
-        @debug "Adding node $(node.id) to location $(data[:location])"
         location_id = data[:location]
+        @debug "Adding node $(node.id) to location $location_id"
         location = find_locations(system, Symbol(location_id))
-        if location === nothing
+        if isnothing(location) && system.settings.AutoCreateLocations
             @info(" ++ Creating new location: $(location_id)")
             location = Location(;id=Symbol(location_id), system=system)
             push!(system.locations, location)
         end
-        add_node!(location, node)
+        if isnothing(location)
+            @warn("Location $(location_id) not found and AutoCreateLocations = false.\nNot adding node $(node.id) to any location.")
+        else
+            add_node!(location, node)
+        end
     end
 
     return node

@@ -53,6 +53,7 @@ function find_locations(system::System, id::Symbol)
 end
 
 function find_node(nodes_list::Vector{Union{Node, Location}}, id::Symbol, commodity::Union{Missing,DataType}=missing)
+    @debug "Finding node $id of commodity $commodity"
     for node in nodes_list
         # Please reformat the code below
         candidate = find_node(node, id, commodity)
@@ -82,7 +83,7 @@ function find_node(location::Location, id::Symbol, commodity::Union{Missing,Data
             @debug "Found $commodity node called $id"
             # If the location has a node of the commodity we need, return it
             return location.nodes[commodity_symbol]
-        else
+        elseif location.system.settings.AutoCreateNodes
             # Otherwise, create a new node of the commodity and return it
             @debug "Making $commodity node called $id"
             new_node = Node{commodity}(;
@@ -91,6 +92,9 @@ function find_node(location::Location, id::Symbol, commodity::Union{Missing,Data
             )
             add_node!(location, new_node)
             push!(location.system.locations, new_node)
+            return new_node
+        else
+            @warn("Node $id not found\nNot creating a new Node as AutoCreateNodes = false")
         end
     end
     return nothing
