@@ -10,7 +10,7 @@ function default_data(::Type{Battery}, id=missing,)
         :id => id,
         :storage => @storage_data(
             :commodity => "Electricity",
-            :can_retire => false,
+            :can_retire => true,
             :constraints => Dict{Symbol,Bool}(
                 :BalanceConstraint => true,
                 :StorageCapacityConstraint => true,
@@ -25,6 +25,7 @@ function default_data(::Type{Battery}, id=missing,)
                 :commodity => "Electricity",
                 :has_capacity => true,
                 :can_expand => true,
+                :can_retire => true,
                 :constraints => Dict{Symbol,Bool}(
                     :CapacityConstraint => true,
                     :StorageDischargeLimitConstraint => true,
@@ -71,10 +72,10 @@ end
             - efficiency
             - constraints: Vector{AbstractTypeConstraint}
 """
-function make(::Type{Battery}, data::AbstractDict{Symbol,Any}, system::System)
+function make(asset_type::Type{Battery}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 
-    data = recursive_merge(default_data(Battery, id), data)
+    @setup_data(asset_type, data, id)
 
     ## Storage component of the battery
     storage_key = :storage
@@ -84,7 +85,7 @@ function make(::Type{Battery}, data::AbstractDict{Symbol,Any}, system::System)
         [
             (data[storage_key], key),
             (data[storage_key], Symbol("storage_", key)),
-            (data[storage_key], Symbol("storage_", key)),
+            (data, Symbol("storage_", key)),
         ]
     )
     commodity_symbol = Symbol(storage_data[:commodity])

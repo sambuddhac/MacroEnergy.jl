@@ -2,7 +2,7 @@ struct BECCSGasoline <: AbstractAsset
     id::AssetId
     beccs_transform::Transformation
     biomass_edge::Edge{Biomass}
-    gasoline_edge::Edge{LiquidFuels}
+    gasoline_edge::Edge{<:LiquidFuels}
     elec_edge::Edge{Electricity}
     co2_edge::Edge{CO2}
     co2_emission_edge::Edge{CO2}
@@ -38,9 +38,11 @@ function default_data(::Type{BECCSGasoline}, id=missing)
             ),
             :co2_edge => @edge_data(
                 :commodity => "CO2",
+                :co2_sink => missing,
             ),
             :co2_emission_edge => @edge_data(
                 :commodity => "CO2",
+                :co2_sink => missing,
             ),
             :elec_edge => @edge_data(
                 :commodity => "Electricity",
@@ -52,10 +54,10 @@ function default_data(::Type{BECCSGasoline}, id=missing)
     )
 end
 
-function make(::Type{BECCSGasoline}, data::AbstractDict{Symbol,Any}, system::System)
+function make(asset_type::Type{BECCSGasoline}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 
-    data = recursive_merge(default_data(BECCSGasoline, id), data)
+    @setup_data(asset_type, data, id)
 
     beccs_transform_key = :transforms
     @process_data(
@@ -114,18 +116,20 @@ function make(::Type{BECCSGasoline}, data::AbstractDict{Symbol,Any}, system::Sys
             (data, Symbol("gasoline_", key)),
         ]
     )
+    commodity_symbol = Symbol(gasoline_edge_data[:commodity])
+    commodity = commodity_types()[commodity_symbol]
     gasoline_start_node = beccs_transform
     @end_vertex(
         gasoline_end_node,
         gasoline_edge_data,
-        LiquidFuels,
+        commodity,
         [(gasoline_edge_data, :end_vertex), (data, :location)],
     )
     gasoline_edge = Edge(
         Symbol(id, "_", gasoline_edge_key),
         gasoline_edge_data,
-        system.time_data[:LiquidFuels],
-        LiquidFuels,
+        system.time_data[commodity_symbol],
+        commodity,
         gasoline_start_node,
         gasoline_end_node,
     )

@@ -1,12 +1,27 @@
 struct FossilFuelsUpstream{T} <: AbstractAsset
     id::AssetId
     fossilfuelsupstream_transform::Transformation
-    fossil_fuel_edge::Edge{T}
-    fuel_edge::Edge{T}
+    fossil_fuel_edge::Edge{<:T}
+    fuel_edge::Edge{<:T}
     co2_edge::Edge{CO2}
 end
 
-FossilFuelsUpstream(id::AssetId, fossilfuelsupstream_transform::Transformation, fossil_fuel_edge::Edge{T}, fuel_edge::Edge{T}, co2_edge::Edge{CO2}) where T<:Commodity =
+FossilFuelsUpstream(
+    id::AssetId,
+    fossilfuelsupstream_transform::Transformation,
+    fossil_fuel_edge::Edge{<:T},
+    fuel_edge::Edge{<:T},
+    co2_edge::Edge{CO2}
+) where {T<:LiquidFuels} =
+    FossilFuelsUpstream{LiquidFuels}(id, fossilfuelsupstream_transform, fossil_fuel_edge, fuel_edge, co2_edge)
+
+    FossilFuelsUpstream(
+    id::AssetId,
+    fossilfuelsupstream_transform::Transformation,
+    fossil_fuel_edge::Edge{<:T},
+    fuel_edge::Edge{T},
+    co2_edge::Edge{CO2}
+) where {T<:Commodity} =
     FossilFuelsUpstream{T}(id, fossilfuelsupstream_transform, fossil_fuel_edge, fuel_edge, co2_edge)
 
 function default_data(::Type{FossilFuelsUpstream}, id=missing)
@@ -28,15 +43,16 @@ function default_data(::Type{FossilFuelsUpstream}, id=missing)
             ),
             :co2_edge => @edge_data(
                 :commodity => "CO2",
+                :co2_sink => missing,
             ),
         ),
     )
 end
 
-function make(::Type{FossilFuelsUpstream}, data::AbstractDict{Symbol,Any}, system::System)
+function make(asset_type::Type{FossilFuelsUpstream}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 
-    data = recursive_merge(default_data(FossilFuelsUpstream, id), data)
+    @setup_data(asset_type, data, id)
 
     fuelfossilupstream_key = :transforms
     @process_data(
@@ -77,7 +93,7 @@ function make(::Type{FossilFuelsUpstream}, data::AbstractDict{Symbol,Any}, syste
     fossil_fuel_edge = Edge(
         Symbol(id, "_", fossil_fuel_edge_key),
         fossil_fuel_edge_data,
-        system.time_data[Symbol(commodity)],
+        system.time_data[commodity_symbol],
         commodity,
         fossil_fuel_start_node,
         fossil_fuel_end_node,
@@ -94,6 +110,8 @@ function make(::Type{FossilFuelsUpstream}, data::AbstractDict{Symbol,Any}, syste
             (data, Symbol("fuel_", key)),
         ]
     )
+    commodity_symbol = Symbol(fuel_edge_data[:commodity])
+    commodity = commodity_types()[commodity_symbol]
     fuel_start_node = fossilfuelsupstream_transform
     @end_vertex(
         fuel_end_node,
@@ -104,7 +122,7 @@ function make(::Type{FossilFuelsUpstream}, data::AbstractDict{Symbol,Any}, syste
     fuel_edge = Edge(
         Symbol(id, "_", fuel_edge_key),
         fuel_edge_data,
-        system.time_data[Symbol(commodity)],
+        system.time_data[commodity_symbol],
         commodity,
         fuel_start_node,
         fuel_end_node,

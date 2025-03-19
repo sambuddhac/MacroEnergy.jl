@@ -2,7 +2,7 @@ struct BECCSNaturalGas <: AbstractAsset
     id::AssetId
     beccs_transform::Transformation
     biomass_edge::Edge{Biomass}
-    natgas_edge::Edge{NaturalGas}
+    natgas_edge::Edge{<:NaturalGas}
     elec_edge::Edge{Electricity}
     co2_edge::Edge{CO2}
     co2_emission_edge::Edge{CO2}
@@ -38,9 +38,11 @@ function default_data(::Type{BECCSNaturalGas}, id=missing)
             ),
             :co2_edge => @edge_data(
                 :commodity => "CO2",
+                :co2_sink => missing,
             ),
             :co2_emission_edge => @edge_data(
                 :commodity => "CO2",
+                :co2_sink => missing,
             ),
             :elec_edge => @edge_data(
                 :commodity => "Electricity",
@@ -52,10 +54,10 @@ function default_data(::Type{BECCSNaturalGas}, id=missing)
     )
 end
 
-function make(::Type{BECCSNaturalGas}, data::AbstractDict{Symbol,Any}, system::System)
+function make(asset_type::Type{BECCSNaturalGas}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 
-    data = recursive_merge(default_data(BECCSNaturalGas, id), data)
+    @setup_data(asset_type, data, id)
 
     beccs_transform_key = :transforms
     @process_data(

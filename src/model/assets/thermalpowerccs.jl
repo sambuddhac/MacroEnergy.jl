@@ -28,6 +28,7 @@ function default_data(::Type{ThermalPowerCCS}, id=missing)
                 :has_capacity => true,
                 :can_retire => true,
                 :can_expand => true,
+                :can_retire => true,
                 :constraints => Dict{Symbol, Bool}(
                     :CapacityConstraint => true,
                 ),
@@ -37,6 +38,7 @@ function default_data(::Type{ThermalPowerCCS}, id=missing)
             ),
             :co2_edge => @edge_data(
                 :commodity=>"CO2",
+                :co2_sink => missing,
             ),
             :co2_captured_edge => @edge_data(
                 :commodity=>"CO2Captured",
@@ -49,10 +51,10 @@ end
     make(::Type{ThermalPowerCCS}, data::AbstractDict{Symbol, Any}, system::System) -> ThermalPowerCCS
 """
 
-function make(::Type{ThermalPowerCCS}, data::AbstractDict{Symbol,Any}, system::System)
+function make(asset_type::Type{ThermalPowerCCS}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 
-    data = recursive_merge(default_data(ThermalPowerCCS, id), data)
+    @setup_data(asset_type, data, id)
 
     thermalccs_key = :transforms
     @process_data(

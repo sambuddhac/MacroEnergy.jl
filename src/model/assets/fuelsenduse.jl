@@ -28,16 +28,17 @@ function default_data(::Type{FuelsEndUse}, id=missing)
             ),
             :co2_edge => @edge_data(
                 :commodity => "CO2",
+                :co2_sink => missing,
             ),
         ),
 
     )
 end
 
-function make(::Type{FuelsEndUse}, data::AbstractDict{Symbol,Any}, system::System)
+function make(asset_type::Type{FuelsEndUse}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 
-    data = recursive_merge(default_data(FuelsEndUse, id), data)
+    @setup_data(asset_type, data, id)
 
     FuelsEndUse_key = :transforms
     @process_data(

@@ -21,6 +21,7 @@ function default_data(::Type{Electrolyzer}, id=missing)
                 :has_capacity => true,
                 :can_retire => true,
                 :can_expand => true,
+                :can_retire => true,
                 :constraints => Dict{Symbol, Bool}(
                     :CapacityConstraint => true,
                 ),
@@ -59,10 +60,10 @@ end
             - can_expand: Bool
             - constraints: Vector{AbstractTypeConstraint}
 """
-function make(::Type{Electrolyzer}, data::AbstractDict{Symbol,Any}, system::System)
+function make(asset_type::Type{Electrolyzer}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 
-    data = recursive_merge(default_data(Electrolyzer, id), data)
+    @setup_data(asset_type, data, id)
 
     electrolyzer_key = :transforms
     @process_data(
@@ -124,7 +125,7 @@ function make(::Type{Electrolyzer}, data::AbstractDict{Symbol,Any}, system::Syst
         h2_end_node,
         h2_edge_data,
         Hydrogen,
-        [(h2_edge_data, :end_vertex), (data, :h2_source)],
+        [(h2_edge_data, :end_vertex), (data, :location)],
     )
     h2_edge = Edge(
         Symbol(id, "_", h2_edge_key),

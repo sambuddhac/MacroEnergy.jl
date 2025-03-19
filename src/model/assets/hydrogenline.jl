@@ -9,6 +9,7 @@ function default_data(::Type{HydrogenLine}, id=missing)
         :edges => Dict{Symbol,Any}(
             :h2_edge => @edge_data(
                 :commodity => "Hydrogen",
+                :unidirectional => false,
                 :has_capacity => true,
                 :can_expand => true,
                 :can_retire => false,
@@ -36,10 +37,10 @@ end
              - constraints: Vector{AbstractTypeConstraint}
 """
 
-function make(::Type{<:HydrogenLine}, data::AbstractDict{Symbol,Any}, system::System)
+function make(asset_type::Type{<:HydrogenLine}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id]) 
 
-    data = recursive_merge(default_data(HydrogenLine, id), data)
+    @setup_data(asset_type, data, id)
 
     h2_edge_key = :h2_edge
     @process_data(

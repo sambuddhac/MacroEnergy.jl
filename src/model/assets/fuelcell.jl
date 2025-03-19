@@ -59,10 +59,10 @@ end
             - can_expand: Bool
             - constraints: Vector{AbstractTypeConstraint}
 """
-function make(::Type{FuelCell}, data::AbstractDict{Symbol,Any}, system::System)
+function make(asset_type::Type{FuelCell}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 
-    data = recursive_merge(default_data(FuelCell, id), data)
+    @setup_data(asset_type, data, id)
 
     fuelcell_key = :transforms
     @process_data(

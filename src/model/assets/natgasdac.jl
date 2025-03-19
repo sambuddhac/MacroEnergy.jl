@@ -3,7 +3,7 @@ struct NaturalGasDAC <: AbstractAsset
     natgasdac_transform::Transformation
     co2_edge::Edge{CO2}
     co2_emission_edge::Edge{CO2}
-    natgas_edge::Edge{NaturalGas}
+    natgas_edge::Edge{<:NaturalGas}
     elec_edge::Edge{Electricity}
     co2_captured_edge::Edge{CO2Captured}
 end
@@ -26,9 +26,11 @@ function default_data(::Type{NaturalGasDAC}, id=missing)
                 :constraints => Dict{Symbol, Bool}(
                     :CapacityConstraint => true
                 ),
+                :co2_sink => missing,
             ),
             :co2_emission_edge => @edge_data(
                 :commodity => "CO2",
+                :co2_sink => missing,
             ),
             :natgas_edge => @edge_data(
                 :commodity => "NaturalGas",
@@ -46,10 +48,10 @@ end
 """
     make(::Type{NaturalGasDAC}, data::AbstractDict{Symbol, Any}, system::System) -> NaturalGasDAC
 """
-function make(::Type{NaturalGasDAC}, data::AbstractDict{Symbol,Any}, system::System)
+function make(asset_type::Type{NaturalGasDAC}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 
-    data = recursive_merge(default_data(NaturalGasDAC, id), data)
+    @setup_data(asset_type, data, id)
 
     natgasdac_key = :transforms
     @process_data(

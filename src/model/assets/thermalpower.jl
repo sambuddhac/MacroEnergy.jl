@@ -26,6 +26,7 @@ function default_data(::Type{ThermalPower}, id=missing)
                 :has_capacity => true,
                 :can_retire => true,
                 :can_expand => true,
+                :can_retire => true,
                 :constraints => Dict{Symbol, Bool}(
                     :CapacityConstraint => true,
                 ),
@@ -35,6 +36,7 @@ function default_data(::Type{ThermalPower}, id=missing)
             ),
             :co2_edge => @edge_data(
                 :commodity=>"CO2",
+                :co2_sink => missing,
             ),
         ),
     )
@@ -44,10 +46,10 @@ end
     make(::Type{ThermalPower}, data::AbstractDict{Symbol, Any}, system::System) -> ThermalPower
 """
 
-function make(::Type{ThermalPower}, data::AbstractDict{Symbol,Any}, system::System)
+function make(asset_type::Type{ThermalPower}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 
-    data = recursive_merge(default_data(ThermalPower, id), data)
+    @setup_data(asset_type, data, id)
 
     thermal_key = :transforms
     @process_data(
@@ -72,8 +74,8 @@ function make(::Type{ThermalPower}, data::AbstractDict{Symbol,Any}, system::Syst
         data[:edges][elec_edge_key], 
         [
             (data[:edges][elec_edge_key], key),
-            (data[:edges][elec_edge_key], Symbol("edge_", key)),
-            (data, Symbol("edge_", key)),
+            (data[:edges][elec_edge_key], Symbol("elec_", key)),
+            (data, Symbol("elec_", key)),
             (data, key),
         ]
     )

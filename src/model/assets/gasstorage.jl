@@ -59,10 +59,10 @@ function default_data(::Type{GasStorage}, id=missing)
     )
 end
 
-function make(::Type{GasStorage}, data::AbstractDict{Symbol,Any}, system::System)
+function make(asset_type::Type{GasStorage}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 
-    data = recursive_merge(default_data(GasStorage, id), data)
+    @setup_data(asset_type, data, id)
 
     ## Storage component of the gas storage
     gas_storage_key = :storage
@@ -75,6 +75,7 @@ function make(::Type{GasStorage}, data::AbstractDict{Symbol,Any}, system::System
             (data, Symbol("storage_", key)),
         ],
     )
+
     commodity_symbol = Symbol(storage_data[:commodity])
     commodity = commodity_types()[commodity_symbol]
 

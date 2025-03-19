@@ -2,7 +2,7 @@ struct SyntheticNaturalGas <: AbstractAsset
     id::AssetId
     synthetic_natural_gas_transform::Transformation
     co2_captured_edge::Edge{CO2Captured}
-    natgas_edge::Edge{NaturalGas}
+    natgas_edge::Edge{<:NaturalGas}
     elec_edge::Edge{Electricity}
     h2_edge::Edge{Hydrogen}
     co2_emission_edge::Edge{CO2}
@@ -42,6 +42,7 @@ function default_data(::Type{SyntheticNaturalGas}, id=missing)
             ),
             :co2_emission_edge => @edge_data(
                 :commodity => "CO2",
+                :co2_sink => missing,
             ),
         ),
     )
@@ -51,10 +52,10 @@ end
     make(::Type{SyntheticNaturalGas}, data::AbstractDict{Symbol, Any}, system::System) -> SyntheticNaturalGas
 """
 
-function make(::Type{SyntheticNaturalGas}, data::AbstractDict{Symbol,Any}, system::System)
+function make(asset_type::Type{SyntheticNaturalGas}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 
-    data = recursive_merge(default_data(SyntheticNaturalGas, id), data)
+    @setup_data(asset_type, data, id)
 
     synthetic_natural_gas_transform_key = :transforms
     @process_data(

@@ -25,6 +25,7 @@ function default_data(::Type{ElectricDAC}, id=missing)
                 :has_capacity => true,
                 :can_expand => true,
                 :can_retire => true,
+                :co2_sink => missing,
             ),
             :elec_edge => @edge_data(
                 :commodity => "Electricity",
@@ -36,10 +37,10 @@ function default_data(::Type{ElectricDAC}, id=missing)
     )
 end
 
-function make(::Type{ElectricDAC}, data::AbstractDict{Symbol,Any}, system::System)
+function make(asset_type::Type{ElectricDAC}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 
-    data = recursive_merge(default_data(ElectricDAC, id), data)
+    @setup_data(asset_type, data, id)
 
     electricdac_key = :transforms
     @process_data(

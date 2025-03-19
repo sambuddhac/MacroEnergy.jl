@@ -13,6 +13,7 @@ function default_data(::Type{HydroRes}, id=missing)
             :commodity => Electricity,
             :constraints => Dict{Symbol, Bool}(
                 :BalanceConstraint => true,
+                :StorageChargeDischargeRatioConstraint => true,
             ),
         ),
         :edges => Dict{Symbol,Any}(
@@ -45,10 +46,10 @@ end
     make(::Type{HydroRes}, data::AbstractDict{Symbol, Any}, system::System) -> HydroRes
 """
 
-function make(::Type{HydroRes}, data::AbstractDict{Symbol,Any}, system::System)
+function make(asset_type::Type{HydroRes}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 
-    data = recursive_merge(default_data(HydroRes, id), data)
+    @setup_data(asset_type, data, id)
 
     ## Storage component of the hydro reservoir
     storage_key = :storage
@@ -61,13 +62,13 @@ function make(::Type{HydroRes}, data::AbstractDict{Symbol,Any}, system::System)
             (data, Symbol("storage_", key)),
         ]
     )
-    default_constraints = [BalanceConstraint()]
+    default_constraints = [BalanceConstraint(), StorageChargeDischargeRatioConstraint()]
     # check if the storage is a long duration storage
     long_duration = get(storage_data, :long_duration, false)
     StorageType = long_duration ? LongDurationStorage : Storage
     # if storage is long duration, add the corresponding constraint
     if long_duration
-        default_constraints = [BalanceConstraint(), LongDurationStorageImplicitMinMaxConstraint()]
+        default_constraints = [BalanceConstraint(), StorageChargeDischargeRatioConstraint(), LongDurationStorageImplicitMinMaxConstraint()]
     end
     # create the storage component of the hydro reservoir
     hydrostor = StorageType(
@@ -105,7 +106,7 @@ function make(::Type{HydroRes}, data::AbstractDict{Symbol,Any}, system::System)
     )
     discharge_edge.unidirectional = true;
     discharge_edge.has_capacity = true;
-    discharge_edge.constraints = get(discharge_edge_data, :constraints,Vector{AbstractTypeConstraint}());
+    discharge_edge.constraints = get(discharge_edge_data, :constraints, Vector{AbstractTypeConstraint}());
 
     inflow_edge_key = :inflow_edge
     @process_data(
@@ -138,7 +139,7 @@ function make(::Type{HydroRes}, data::AbstractDict{Symbol,Any}, system::System)
     inflow_edge.can_expand = discharge_edge.can_expand;
     inflow_edge.existing_capacity = discharge_edge.existing_capacity;
     inflow_edge.capacity_size = discharge_edge.capacity_size;
-    inflow_edge.constraints = get(discharge_edge_data, :constraints,[StorageChargeDischargeRatioConstraint();MustRunConstraint()]); 
+    inflow_edge.constraints = get(discharge_edge_data, :constraints,[MustRunConstraint()]); 
 
     spill_edge_key = :spill_edge
     @process_data(
@@ -168,7 +169,7 @@ function make(::Type{HydroRes}, data::AbstractDict{Symbol,Any}, system::System)
     )
     spill_edge.unidirectional = true;
     spill_edge.has_capacity = false;
-    spill_edge.constraints = get(spill_edge_data, :constraints,Vector{AbstractTypeConstraint}());
+    spill_edge.constraints = get(spill_edge_data, :constraints, Vector{AbstractTypeConstraint}());
 
     hydrostor.discharge_edge = discharge_edge
     hydrostor.charge_edge = inflow_edge

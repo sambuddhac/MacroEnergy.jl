@@ -9,9 +9,10 @@ function default_data(::Type{PowerLine}, id=missing)
         :edges => Dict{Symbol,Any}(
             :elec_edge => @edge_data(
                 :commodity => "Electricity",
+                :unidirectional => false,
                 :has_capacity => true,
                 :can_expand => true,
-                :can_retire => true,
+                :can_retire => false,
                 :constraints => Dict{Symbol, Bool}(
                     :CapacityConstraint => true,
                 ),
@@ -24,10 +25,10 @@ end
     make(::Type{PowerLine}, data::AbstractDict{Symbol, Any}, system::System) -> PowerLine
 """
 
-function make(::Type{<:PowerLine}, data::AbstractDict{Symbol,Any}, system::System)
+function make(asset_type::Type{<:PowerLine}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id]) 
 
-    data = recursive_merge(default_data(PowerLine, id), data)
+    @setup_data(asset_type, data, id)
 
     elec_edge_key = :elec_edge
     @process_data(
@@ -44,13 +45,13 @@ function make(::Type{<:PowerLine}, data::AbstractDict{Symbol,Any}, system::Syste
         elec_start_node,
         elec_edge_data,
         Electricity,
-        [(elec_edge_data, :start_vertex), (data, :location)],
+        [(elec_edge_data, :start_vertex), (data, :line_origin), (data, :location)],
     )
     @end_vertex(
         elec_end_node,
         elec_edge_data,
         Electricity,
-        [(elec_edge_data, :end_vertex), (data, :location)],
+        [(elec_edge_data, :end_vertex), (data, :line_dest), (data, :location)],
     )
     elec_edge = Edge(
         Symbol(id, "_", elec_edge_key),

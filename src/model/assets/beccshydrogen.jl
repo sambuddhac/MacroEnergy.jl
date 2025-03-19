@@ -41,9 +41,11 @@ function default_data(::Type{BECCSHydrogen}, id=missing)
             ),
             :co2_edge => @edge_data(
                 :commodity => "CO2",
+                :co2_sink => missing,
             ),
             :co2_emission_edge => @edge_data(
                 :commodity => "CO2",
+                :co2_sink => missing,
             ),
             :co2_captured_edge => @edge_data(
                 :commodity => "CO2Captured",
@@ -52,10 +54,10 @@ function default_data(::Type{BECCSHydrogen}, id=missing)
     )
 end
 
-function make(::Type{BECCSHydrogen}, data::AbstractDict{Symbol,Any}, system::System)
+function make(asset_type::Type{BECCSHydrogen}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 
-    data = recursive_merge(default_data(BECCSHydrogen, id), data)
+    @setup_data(asset_type, data, id)
 
     beccs_transform_key = :transforms
     @process_data(

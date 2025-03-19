@@ -15,7 +15,7 @@ function default_data(::Type{ThermalHydrogen}, id=missing)
     return Dict{Symbol,Any}(
         :id => id,
         :transforms => @transform_data(
-            :timedata => "Electricity",
+            :timedata => "Hydrogen",
             :electricity_consumption => 0.0,
             :fuel_consumption => 1.0,
             :emission_rate => 0.0,
@@ -32,6 +32,7 @@ function default_data(::Type{ThermalHydrogen}, id=missing)
                 :has_capacity => true,
                 :can_retire => true,
                 :can_expand => true,
+                :can_retire => true,
                 :constraints => Dict{Symbol, Bool}(
                     :CapacityConstraint => true,
                 ),
@@ -41,6 +42,7 @@ function default_data(::Type{ThermalHydrogen}, id=missing)
             ),
             :co2_edge => @edge_data(
                 :commodity=>"CO2",
+                :co2_sink => missing,
             ),
         ),
     )
@@ -92,10 +94,10 @@ end
             - can_expand: Bool
             - constraints: Vector{AbstractTypeConstraint}
 """
-function make(::Type{ThermalHydrogen}, data::AbstractDict{Symbol,Any}, system::System)
+function make(asset_type::Type{ThermalHydrogen}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 
-    data = recursive_merge(default_data(ThermalHydrogen, id), data)
+    @setup_data(asset_type, data, id)
 
     thermalhydrogen_key = :transforms
     @process_data(
