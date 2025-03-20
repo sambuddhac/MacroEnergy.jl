@@ -150,15 +150,6 @@ end
 
 ###### ###### ###### ###### ###### ######
 
-# macro process_data(name, data, loaded_data)
-#     return esc(quote
-#         remove_missing!($loaded_data)
-#         recursive_merge!($loaded_data[:constraints], $data[:constraints])
-#         merge!($data, $loaded_data)
-#         $name = process_data($data)
-#     end)
-# end
-
 function replace_first_arg(expr::Expr, new_arg::Symbol)
     return Expr(expr.head, replace_first_arg(expr.args[1], new_arg), expr.args[2:end]...)
 end
@@ -175,24 +166,6 @@ macro setup_data(type, data, id)
 end
 
 macro process_data(name, data, get_from_tuples)
-    # local cleaned_tuples = []
-    # if get_from_tuples.head == :vect
-    #     for tuple in get_from_tuples.args
-    #         local temp = tuple.args[1]
-    #         local keys = []
-    #         if isa(tuple.args[1], Symbol)
-    #             push!(cleaned_tuples, tuple)
-    #             continue
-    #         end
-    #         while isa(temp, Expr)
-    #             append!(keys, temp.args[2:end])
-    #             temp = temp.args[1]
-    #         end
-    #         push!(keys, tuple.args[2])
-    #         keys = Tuple(keys)
-    #         push!(cleaned_tuples, (temp, keys))
-    #     end
-    # end
     if isa(data, Symbol)
         defaults_name = :defaults
     elseif isa(data, Expr)
