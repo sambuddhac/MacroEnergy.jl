@@ -194,7 +194,7 @@ function make(asset_type::Type{BECCSLiquidFuels}, data::AbstractDict{Symbol,Any}
             (data, Symbol("diesel_", key)),
         ]
     )
-    commodity_symbol = Symbol(jetfuel_edge_data[:commodity])
+    commodity_symbol = Symbol(diesel_edge_data[:commodity])
     commodity = commodity_types()[commodity_symbol]
     diesel_start_node = beccs_transform
     @end_vertex(

@@ -5,7 +5,7 @@
             "global_data":{
                 "nodes": {},
                 "transforms": {
-                    "timedata": "NaturalGas",
+                    "timedata": "Hydrogen",
                     "constraints": {
                             "BalanceConstraint": true
                     }

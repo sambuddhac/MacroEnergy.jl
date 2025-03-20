@@ -19,9 +19,11 @@ function default_data(::Type{Battery}, id=missing,)
         ),
         :edges => Dict{Symbol,Any}(
             :charge_edge => @edge_data(
+                :efficiency => 1.0,
                 :commodity => "Electricity",
             ),
             :discharge_edge => @edge_data(
+                :efficiency => 1.0,
                 :commodity => "Electricity",
                 :has_capacity => true,
                 :can_expand => true,
@@ -29,7 +31,7 @@ function default_data(::Type{Battery}, id=missing,)
                 :constraints => Dict{Symbol,Bool}(
                     :CapacityConstraint => true,
                     :StorageDischargeLimitConstraint => true,
-                    :RampingLimitConstraint => true
+                    :RampingLimitConstraint => false
                 )
             )
         )
@@ -176,11 +178,11 @@ function make(asset_type::Type{Battery}, data::AbstractDict{Symbol,Any}, system:
     discharge_efficiency = get_from([
             (discharge_edge_data, :discharge_efficiency),
             (discharge_edge_data, :efficiency)
-        ], 0.9)
+        ], 1.0)
     charge_efficiency = get_from([
             (charge_edge_data, :charge_efficiency),
             (charge_edge_data, :efficiency)
-        ], 0.9)
+        ], 1.0)
     battery_storage.balance_data = Dict(
         :storage => Dict(
             battery_discharge.id => 1 / discharge_efficiency,

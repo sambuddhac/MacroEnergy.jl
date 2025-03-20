@@ -3,6 +3,7 @@
         {
             "type": "ThermalPowerCCS",
             "global_data": {
+                "transform_timedata": "NaturalGas",
                 "fuel_commodity": "NaturalGas",
                 "co2_sink": "co2_sink",
                 "uc": true,

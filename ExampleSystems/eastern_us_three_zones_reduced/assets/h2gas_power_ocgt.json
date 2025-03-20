@@ -4,7 +4,7 @@
             "type": "ThermalPower",
             "global_data": {
                 "fuel_commodity": "Hydrogen",
-                "time_data": "Hydrogen",
+                "timedata": "Hydrogen",
                 "uc": true,
                 "elec_constraints": {
                     "CapacityConstraint": true,

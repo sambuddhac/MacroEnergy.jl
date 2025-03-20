@@ -19,6 +19,7 @@
                 },
                 "edges": {
                     "discharge_edge": {
+                        "can_retire": false,
                         "existing_capacity": 0,
                         "investment_cost": 0.0,
                         "fixed_om_cost": 0.0,
@@ -28,6 +29,7 @@
                         "ramp_down_fraction": 1
                     },
                     "charge_edge": {
+                        "can_retire": false,
                         "existing_capacity": 0,
                         "investment_cost": 3218.419297,
                         "fixed_om_cost": 0.0,
@@ -36,6 +38,7 @@
                     }
                 },
                 "storage": {
+                    "can_retire": false,
                     "investment_cost": 872.7916738,
                     "fixed_om_cost": 28.7507997,
                     "loss_fraction": 0.0,

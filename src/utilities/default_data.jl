@@ -18,6 +18,8 @@ function edge_default_data()
         :max_capacity => Inf,
         :integer_decisions => false,
         :loss_fraction => 0.0,
+        :line_loss_percentage => 0.0,
+        :efficiency => 1.0,
         :min_flow_fraction => 0.0,
         :ramp_up_fraction => 1.0,
         :ramp_down_fraction => 1.0,
@@ -29,7 +31,8 @@ function edge_default_data()
         :min_down_time => 0.0,
         :min_up_time => 0.0,
         :startup_cost => 0.0,
-        :startup_fuel => 0.0
+        :startup_fuel => 0.0,
+        :startup_fuel_consumption => 0.0,
     )
 end
 

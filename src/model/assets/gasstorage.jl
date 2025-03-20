@@ -24,7 +24,7 @@ function default_data(::Type{GasStorage}, id=missing)
             ),
         ),
         :transforms => @transform_data(
-            :timedata => "Electricity",
+            :timedata => missing,
             :electricity_consumption => 0.0,
             :constraints => Dict{Symbol, Bool}(
                 :BalanceConstraint => true,
@@ -38,6 +38,7 @@ function default_data(::Type{GasStorage}, id=missing)
                 :commodity => missing,
             ),
             :charge_edge => @edge_data(
+                :efficiency => 1.0,
                 :commodity => missing,
                 :has_capacity => true,
                 :can_expand => true,
@@ -47,6 +48,7 @@ function default_data(::Type{GasStorage}, id=missing)
                 ),
             ),
             :discharge_edge => @edge_data(
+                :efficiency => 1.0,
                 :commodity => missing,
                 :has_capacity => true,
                 :can_expand => true,
@@ -104,13 +106,18 @@ function make(asset_type::Type{GasStorage}, data::AbstractDict{Symbol,Any}, syst
         data[compressor_key],
         [
             (data[compressor_key], key),
-            (data[compressor_key], Symbol("transform_", key)),
-            (data, Symbol("transform_", key)),
+            (data[compressor_key], Symbol("compressor_", key)),
+            (data, Symbol("compressor_", key)),
         ],
     )
+    if haskey(transform_data, :timedata)
+        compressor_transform_timedata = system.time_data[Symbol(transform_data[:timedata])]
+    else
+        compressor_transform_timedata = system.time_data[commodity_symbol]
+    end
     compressor_transform = Transformation(;
         id = Symbol(id, "_", compressor_key),
-        timedata = system.time_data[Symbol(transform_data[:timedata])],
+        timedata = compressor_transform_timedata,
         constraints = get(transform_data, :constraints, [BalanceConstraint()]),
     )
 

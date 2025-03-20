@@ -11,7 +11,10 @@
                     "StorageMaxDurationConstraint": true,
                     "StorageChargeDischargeRatioConstraint": true,
                     "LongDurationStorageImplicitMinMaxConstraint": true
-                }
+                },
+                "storage_can_retire": false,
+                "charge_can_retire": false,
+                "discharge_can_retire": false
             },
             "instance_data": [
                 {

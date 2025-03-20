@@ -16,6 +16,10 @@ function default_data(::Type{NaturalGasDAC}, id=missing)
             :constraints => Dict{Symbol, Bool}(
                 :BalanceConstraint => true,
             ),
+            :electricity_production => 0.0,
+            :fuel_consumption => 0.0,
+            :emission_rate => 1.0,
+            :capture_rate => 1.0,
         ),
         :edges => Dict{Symbol,Any}(
             :co2_edge => @edge_data(

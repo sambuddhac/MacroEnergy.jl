@@ -16,6 +16,7 @@ function default_data(::Type{ThermalPowerCCS}, id=missing)
         :transforms => @transform_data(
             :timedata => "Electricity",
             :fuel_consumption => 1.0,
+            :startup_fuel_consumption => 0.0,
             :emission_rate => 0.0,
             :capture_rate => 1.0,
             :constraints => Dict{Symbol, Bool}(

@@ -86,7 +86,9 @@
                     "RampingLimitConstraint": false
                 },
                 "discharge_can_expand": false,
-                "discharge_can_retire": false
+                "discharge_can_retire": false,
+                "storage_can_retire": false
+
             },
             "instance_data": [
                 {
