@@ -76,7 +76,11 @@ function load_commodities(commodities::AbstractVector{<:Any}, rel_path::Abstract
     macro_commodities = commodity_types()
     sub_commodities = Vector{Dict{Symbol,Any}}()
     for commodity in commodities
-        if isa(commodity,AbstractString)
+        if isa(commodity, Symbol)
+            if commodity ∉ keys(macro_commodities)
+                error("Unknown commodity: $commodity")
+            end
+        elseif isa(commodity,AbstractString)
             if Symbol(commodity) ∉ keys(macro_commodities)
                 error("Unknown commodity: $commodity")
             end
