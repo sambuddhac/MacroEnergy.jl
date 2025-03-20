@@ -1,12 +1,14 @@
 {
     "commodities": [
-        "Uranium",
-        "Hydrogen",
-        "NaturalGas",
-        "Biomass",
-        "CO2",
         "Electricity",
-        "CO2Captured"
+        "LiquidFuels",
+        "NaturalGas",
+        "CO2",
+        "Hydrogen",
+        "CO2Captured",
+        "Biomass",
+        "Uranium",
+        "Coal"
     ],
     "settings": {
         "ConstraintScaling": false

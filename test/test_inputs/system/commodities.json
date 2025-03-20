@@ -2,10 +2,12 @@
     "commodities": [
         "Electricity",
         "NaturalGas",
+        "LiquidFuels",
         "CO2",
         "Hydrogen",
         "CO2Captured",
         "Biomass",
-        "Uranium"
+        "Uranium",
+        "Coal"
     ]
 }
