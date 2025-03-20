@@ -97,7 +97,7 @@ get_optimal_new_capacity(asset::AbstractAsset; scaling::Float64=1.0) = get_optim
 get_optimal_retired_capacity(asset::AbstractAsset; scaling::Float64=1.0) = get_optimal_capacity_by_field(asset, retired_capacity, scaling)
 
 """
-    write_capacity(file_path::AbstractString, system::System; scaling::Float64=1.0, wide::Bool=true, drop_cols::Vector{Symbol}=Symbol[])
+    write_capacity(file_path::AbstractString, system::System; scaling::Float64=1.0, drop_cols::Vector{Symbol}=Symbol[])
 
 Write the optimal capacity results for all assets/edges in a system to a file. 
 The extension of the file determines the format of the file.
@@ -105,9 +105,8 @@ The extension of the file determines the format of the file.
 
 # Arguments
 - `file_path::AbstractString`: The path to the file where the results will be written
-- `system::System`: The system containing the assets/edges to analyze
+- `system::System`: The system containing the assets/edges to analyze as well as the settings for the output
 - `scaling::Float64`: The scaling factor for the results
-- `wide::Bool`: Whether to write the results in wide format
 - `drop_cols::Vector{Symbol}`: Columns to drop from the DataFrame
 
 # Returns
@@ -118,7 +117,7 @@ The extension of the file determines the format of the file.
 write_capacity(joinpath(results_dir, "all_capacity.csv"), system)
 ```
 """
-function write_capacity(file_path::AbstractString, system::System; scaling::Float64=1.0, wide::Bool=true, drop_cols::Vector{Symbol}=Symbol[])
+function write_capacity(file_path::AbstractString, system::System; scaling::Float64=1.0, drop_cols::Vector{Symbol}=Symbol[])
     @info "Writing capacity results to $file_path"
     capacity_results = get_optimal_capacity(system; scaling)
     new_capacity_results = get_optimal_new_capacity(system; scaling)
@@ -126,7 +125,8 @@ function write_capacity(file_path::AbstractString, system::System; scaling::Floa
     all_capacity_results = vcat(capacity_results, new_capacity_results, retired_capacity_results)
     
     # Reshape the dataframe based on the requested format
-    all_capacity_results = wide ? reshape_wide(all_capacity_results) : all_capacity_results
+    layout = get_output_layout(system, :Capacity)
+    all_capacity_results = layout == "wide" ? reshape_wide(all_capacity_results) : all_capacity_results
     
     write_dataframe(file_path, all_capacity_results, drop_cols)
     return nothing
