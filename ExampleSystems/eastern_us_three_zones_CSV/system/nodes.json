@@ -8,15 +8,15 @@
             "instance_data": [
                 {
                     "id": "natgas_SE",
-                    "price": [12.55668122]
+                    "price": 12.55668122
                 },
                 {
                     "id": "natgas_MIDAT",
-                    "price": [12.21546705]
+                    "price": 12.21546705
                 },
                 {
                     "id": "natgas_NE",
-                    "price": [15.01342319]
+                    "price": 15.01342319
                 }
             ]
         },
@@ -28,7 +28,7 @@
             "instance_data": [
                 {
                     "id": "uranium_source",
-                    "price": [2.490863394]
+                    "price": 2.490863394
                 }
             ]
         },
