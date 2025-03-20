@@ -489,35 +489,6 @@ function update_balance_end!(e::AbstractEdge, model::Model)
     
 end
 
-function update_startup_fuel_balance_start!(e::EdgeWithUC)
-
-    v = start_vertex(e);
-
-    i = startup_fuel_balance_id(e)
-
-    if i ∈ balance_ids(v)
-        add_to_expression!.(get_balance(v, i), -1 * startup_fuel(e) * capacity_size(e) * ustart(e))
-    end
-
-    return nothing
-
-end
-
-
-function update_startup_fuel_balance_end!(e::EdgeWithUC)
-    
-    v = end_vertex(e);
-
-    i = startup_fuel_balance_id(e)
-
-    if i ∈ balance_ids(v)
-        add_to_expression!.(get_balance(v, i), startup_fuel(e) * capacity_size(e) * ustart(e))
-    end
-
-    return nothing
-
-end
-
 ###### Templates ######
 
 macro edge_template_args()
