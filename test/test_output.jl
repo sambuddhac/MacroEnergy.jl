@@ -32,7 +32,9 @@ import MacroEnergy:
     create_output_path,
     find_available_path,
     add!, 
-    get_output_layout
+    get_output_layout,
+    filter_edges_by_commodity!,
+    filter_edges_by_asset_type!
 
 
 function test_writing_output()
@@ -512,6 +514,45 @@ function test_writing_output()
         transformations = get_transformations(system)
         @test length(transformations) == 1
         @test transformations[1] == transformation
+    end
+
+    # Test filtering of edges by commodity
+    @testset "filter_edges_by_commodity Tests" begin
+        filtered_edges = get_edges(system)
+        filter_edges_by_commodity!(filtered_edges, :Electricity)
+
+        @test length(filtered_edges) == 3
+        @test filtered_edges[1] == edge_to_transformation
+        @test filtered_edges[2] == edge_to_storage
+        @test filtered_edges[3] == edge_from_storage
+
+        filtered_edges, filtered_edge_asset_map = get_edges(system, return_ids_map=true)
+        filter_edges_by_commodity!(filtered_edges, :Electricity, filtered_edge_asset_map)
+        @test length(filtered_edges) == 3
+        @test filtered_edges[1] == edge_to_transformation
+        @test filtered_edges[2] == edge_to_storage
+        @test filtered_edges[3] == edge_from_storage
+        @test filtered_edge_asset_map[:edge3][] == asset1
+        @test filtered_edge_asset_map[:edge2][] == asset2
+        @test filtered_edge_asset_map[:edge4][] == asset2
+    end
+
+    # Test filtering of edges by asset type
+    @testset "filter_edges_by_asset_type Tests" begin
+        filtered_edges, filtered_edge_asset_map = get_edges(system, return_ids_map=true)
+        filter_edges_by_asset_type!(filtered_edges, :Battery, filtered_edge_asset_map)
+        @test length(filtered_edges) == 2
+        @test filtered_edges[1] == edge_to_storage
+        @test filtered_edges[2] == edge_from_storage
+        @test filtered_edge_asset_map[:edge2][] == asset2
+        @test filtered_edge_asset_map[:edge4][] == asset2
+    end
+
+    # Test filtering with wrong commodity or asset type
+    @testset "filter_edges_by_commodity_and_asset_type Tests" begin
+        filtered_edges, filtered_edge_asset_map = get_edges(system, return_ids_map=true)
+        @test_throws ArgumentError filter_edges_by_commodity!(filtered_edges, :UnknownCommodity)
+        @test_throws ArgumentError filter_edges_by_asset_type!(filtered_edges, :UnknownAssetType, filtered_edge_asset_map)
     end
 
     # Test edges_with_capacity_variables
