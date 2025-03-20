@@ -1,6 +1,7 @@
 module TestOutput
 
 using Test
+using Random
 using MacroEnergy
 import MacroEnergy:
     OutputRow,
@@ -30,7 +31,8 @@ import MacroEnergy:
     empty_system, 
     create_output_path,
     find_available_path,
-    add!
+    add!, 
+    get_output_layout
 
 
 function test_writing_output()
@@ -652,6 +654,48 @@ function test_writing_output()
             
             # Cleanup
             rm(test_dir, recursive=true)
+        end
+    end
+
+    @testset "get_output_layout" begin
+        # Helper to create a minimal System struct with settings
+        function make_test_system(layout)
+            system = empty_system("random_path_$(randstring(8))")
+            system.settings = (OutputLayout=layout,)
+            return system
+        end
+    
+        @testset "String layouts" begin
+            # Test valid string inputs
+            @test get_output_layout(make_test_system("wide")) == "wide"
+            @test get_output_layout(make_test_system("long")) == "long"
+        end
+    
+        @testset "NamedTuple layouts" begin
+            ## Test NamedTuple
+            layout_settings = (capacity="wide", storage="long")
+            system = make_test_system(layout_settings)
+            # no variable
+            @test_logs (:warn, "OutputLayout in settings does not have a variable key. Using 'long' as default.") begin
+                @test get_output_layout(system) == "long"
+            end
+
+            # with existing keys
+            @test get_output_layout(system, :capacity) == "wide"
+            @test get_output_layout(system, :storage) == "long"
+    
+            # Test missing key falls back to "long" with warning
+            @test_logs (:warn, "OutputLayout in settings does not have a missing_var key. Using 'long' as default.") begin
+                @test get_output_layout(system, :missing_var) == "long"
+            end
+        end
+    
+        @testset "Invalid layout types" begin
+            # Test unexpected type with warning
+            invalid_system = make_test_system(42)  # Integer is not a valid layout type
+            @test_logs (:warn, "OutputLayout type Int64 not supported. Using 'long' as default.") begin
+                @test get_output_layout(invalid_system, :any_variable) == "long"
+            end
         end
     end
 end
