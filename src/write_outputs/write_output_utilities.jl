@@ -524,3 +524,32 @@ function find_available_path(path::String, basename::String="results"; max_attem
     
     error("Could not find available directory after $max_attempts attempts")
 end
+
+function get_output_layout(system::System, variable::Union{Nothing,Symbol}=nothing)::String
+    output_layout = system.settings.OutputLayout
+    
+    # String layouts supported are "wide" and "long"
+    if isa(output_layout, String)
+        @debug "Using output layout $output_layout"
+        return output_layout
+    end
+    
+    if isnothing(variable)
+        @warn "OutputLayout in settings does not have a variable key. Using 'long' as default."
+        return "long"
+    end
+
+    # Handle NamedTuple case (per-file settings)
+    if isa(output_layout, NamedTuple)
+        if !haskey(output_layout, variable)
+            @warn "OutputLayout in settings does not have a $variable key. Using 'long' as default."
+        end
+        layout = get(output_layout, variable, "long")
+        @debug "Using output layout $layout for variable $variable"
+        return layout
+    end
+    
+    # Handle unknown types
+    @warn "OutputLayout type $(typeof(output_layout)) not supported. Using 'long' as default."
+    return "long"
+end
