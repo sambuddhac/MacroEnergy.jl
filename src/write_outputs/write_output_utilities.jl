@@ -329,11 +329,18 @@ df_long = DataFrame(id=[1,1,2,2], variable=[:a,:b,:a,:b], value=[10,30,20,40])
 df_wide = reshape_wide(df_long)
 ```
 """
-function reshape_wide(df::DataFrame; variable_col::Symbol=:variable, value_col::Symbol=:value)
+function reshape_wide(df::DataFrame, variable_col::Symbol=:variable, value_col::Symbol=:value)
     if !all(col -> col ∈ propertynames(df), [variable_col, value_col])
         throw(ArgumentError("DataFrame must contain '$variable_col' and '$value_col' columns for wide format"))
     end
     return unstack(df, variable_col, value_col)
+end
+
+function reshape_wide(df::DataFrame, id_cols::Union{Vector{Symbol},Symbol}, variable_col::Symbol, value_col::Symbol)
+    if !all(col -> col ∈ propertynames(df), [variable_col, value_col])
+        throw(ArgumentError("DataFrame must contain '$variable_col' and '$value_col' columns for wide format"))
+    end
+    return unstack(df, id_cols, variable_col, value_col)
 end
 
 """
