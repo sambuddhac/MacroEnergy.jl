@@ -6,7 +6,7 @@
 function load!(system::System, file_path::AbstractString)::Nothing
     file_path = rel_or_abs_path(file_path, system.data_dirpath)
     if isfile(file_path)
-        load!(system, load_json_inputs(file_path))
+        load!(system, load_inputs(file_path))
     elseif isdir(file_path)
         for file in get_json_files(file_path)
             load!(system, joinpath(file_path, file))

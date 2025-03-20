@@ -33,31 +33,41 @@ end
 # Nested properties in a dict, will be denoted by
 # the <top_property>--<sub_property> notation.>
 
-function load_csv_inputs(file_path::AbstractString; rel_path::AbstractString=dirname(file_path), lazy_load::Bool = true)::Dict{Symbol,Any}
+function load_csv_inputs(file_path::AbstractString; rel_path::AbstractString=dirname(file_path), lazy_load::Bool = true)::Dict{Symbol, Any}
     @debug("Loading CSV data from $file_path")
     json_data = csv_to_json(file_path)
+    # if isempty(json_data)
+    #     return Dict{Symbol, Any}(:path => file_path)
+    # end
     if !lazy_load
         json_data = eager_load_json_inputs(json_data, rel_path)
-        json_data = clean_up_keys(json_data)
+        # if isempty(json_data)
+        #     return Dict{Symbol, Any}(:path => file_path)
+        # end
+        json_data = clean_up_keys.(json_data)
     end
-    return json_data
+    typename = splitext(basename(file_path))[1]
+    return Dict{Symbol, Any}(Symbol(typename) => json_data)
 end
 
-function validate_csv_data(loaded_csv)::Nothing
+function validate_csv_data(loaded_csv)::Bool
     headers = loaded_csv.names
     # headers must be at least 2 columns
     if length(headers) < 2
-        error("CSV file must have at least 2 columns: type and id")
+        @debug("CSV file must have at least 2 columns: type and id")
+        return false
     end
     # The first column must be "type"
     if headers[1] != :Type
-        error("The first column of the CSV file must be 'Type'")
+        @debug("The first column of the CSV file must be 'Type'")
+        return false
     end
     # The second column must be "id"
     if headers[2] != :id
-        error("The second column of the CSV file must be 'id'")
+        @debug("The second column of the CSV file must be 'id'")
+        return false
     end
-    return nothing
+    return true
 end
 
 function insert_data(dict::Dict{Symbol, Any}, keys::Vector{Symbol}, data::Any)
@@ -77,7 +87,9 @@ end
 
 function csv_to_json(file_path::AbstractString, nesting_str::AbstractString="--")::Vector{Dict{Symbol,Any}}
     data = duckdb_read(file_path)
-    validate_csv_data(data)
+    if !validate_csv_data(data)
+        return Vector{Dict{Symbol,Any}}()
+    end
 
     column_map = Dict{Symbol, Any}()
     for header in data.names

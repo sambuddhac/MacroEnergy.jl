@@ -29,3 +29,7 @@ macro CSV_EXT()
 end
 
 iscsv(path::AbstractString) = any(endswith.(path, @CSV_EXT))
+
+function get_csv_files(path::AbstractString)
+    return filter(x -> any(endswith.(x, @CSV_EXT)), readdir(path))
+end

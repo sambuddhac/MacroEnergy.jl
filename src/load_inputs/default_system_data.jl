@@ -27,7 +27,7 @@ function add_default_system_data!(
     # Load a hard-coded set of default locations for the system data
     # This could be moved to the settings defaults later
     default_system_data = load_default_system_data(default_file_path)
-    merge!(default_system_data, system_data)
+    Base.merge!(default_system_data, system_data)
     return nothing
 end
 
