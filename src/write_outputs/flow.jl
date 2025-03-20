@@ -92,14 +92,24 @@ The extension of the file determines the format of the file.
 
 # Arguments
 - `file_path::AbstractString`: The path to the file where the results will be written
-- `system::System`: The system containing the edges to analyze
+- `system::System`: The system containing the edges to analyze as well as the settings for the output
+- `scaling::Float64`: The scaling factor for the results
+- `drop_cols::Vector{Symbol}`: Columns to drop from the DataFrame
 
 # Returns
 - `nothing`: The function returns nothing, but writes the results to the file
 """
 function write_flow(file_path::AbstractString, system::System; scaling::Float64=1.0, drop_cols::Vector{Symbol}=Symbol[])
     @info "Writing flow results to $file_path"
+
+    # Get flow results and determine layout (wide or long)
     flow_results = get_optimal_flow(system; scaling)
+    layout = get_output_layout(system, :Flow)
+
+    if layout == "wide"
+        # df will be of size (time_steps, component_ids)
+        flow_results = reshape_wide(flow_results, :time, :component_id, :value)
+    end
     write_dataframe(file_path, flow_results, drop_cols)
     return nothing
 end
