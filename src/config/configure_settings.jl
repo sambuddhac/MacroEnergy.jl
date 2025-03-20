@@ -4,10 +4,14 @@ function default_settings()
         WriteSubcommodities = false,
         OverwriteResults = false,
         OutputDir = "results",
+        OutputLayout = "long",
     )
 end
 
-namedtuple(d::T) where {T<:AbstractDict} = (; (Symbol(k) => v for (k, v) in d)...)
+namedtuple(x) = x   # default case
+function namedtuple(d::T) where {T<:AbstractDict}
+    return (; (Symbol(k) => (v isa AbstractDict ? namedtuple(v) : v) for (k, v) in d)...)
+end
 
 function configure_settings(path::AbstractString, rel_path::AbstractString)
     path = rel_or_abs_path(path, rel_path)
@@ -45,6 +49,14 @@ end
 
 function validate_settings(settings::NamedTuple)
     @assert settings[:ConstraintScaling] ∈ (false, true)
+    @assert settings[:OutputLayout] isa Union{String, NamedTuple}
+    if settings[:OutputLayout] isa String
+        @assert settings[:OutputLayout] ∈ ("long", "wide")
+    else
+        # Note: we currently support these output files
+        @assert all(keys(settings[:OutputLayout]) .∈ Ref((:Capacity, :Costs, :Flow)))
+        @assert all(values(settings[:OutputLayout]) .∈ Ref(("long", "wide")))
+    end
 end
 
 function validate_names(settings::NamedTuple)
