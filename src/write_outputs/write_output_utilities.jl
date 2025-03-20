@@ -560,3 +560,104 @@ function get_output_layout(system::System, variable::Union{Nothing,Symbol}=nothi
     @warn "OutputLayout type $(typeof(output_layout)) not supported. Using 'long' as default."
     return "long"
 end
+
+"""
+    filter_edges_by_commodity!(edges::Vector{AbstractEdge}, commodity::Union{Symbol,Vector{Symbol}}, edge_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}=Dict{Symbol,Base.RefValue{<:AbstractAsset}}())
+
+Filter the edges by commodity and update the edge_asset_map to match the filtered edges (optional).
+
+# Arguments
+- `edges::Vector{AbstractEdge}`: The edges to filter
+- `commodity::Union{Symbol,Vector{Symbol}}`: The commodity to filter by
+- `edge_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}`: The edge_asset_map to update (optional)
+
+# Effects
+- Modifies `edges` in-place to keep only edges matching the commodity type
+- If `edge_asset_map` is provided, filters it to match remaining edges
+
+# Example
+```julia
+filter_edges_by_commodity!(edges, :Electricity)
+filter_edges_by_commodity!(edges, [:Electricity, :NaturalGas], edge_asset_map)
+```
+
+"""
+function filter_edges_by_commodity!(
+    edges::Vector{AbstractEdge}, 
+    commodity::Union{Symbol,Vector{Symbol}}, 
+    edge_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}=Dict{Symbol,Base.RefValue{<:AbstractAsset}}()
+)
+    @debug "Filtering edges by commodity $commodity"
+
+    # convert commodity to vector if it is a symbol
+    commodity = isa(commodity, Symbol) ? [commodity] : commodity
+    
+    # convert commodity from a Vector{Symbol} to a Vector{DataType}
+    macro_commodities = commodity_types()
+    if !all(c -> c ∈ keys(macro_commodities), commodity)
+        throw(ArgumentError("Commodity $commodity not found in the system.\n" *
+            "Available commodities are $macro_commodities"))
+    end
+    commodities = Set(macro_commodities[c] for c in commodity)
+
+    # filter edges by commodity
+    filter!(e -> commodity_type(e) in commodities, edges)
+
+    # filter edge_asset_map to match the filtered edges
+    if !isempty(edge_asset_map)
+        edge_ids = Set(id.(edges)) # caching for performance
+        filter!(pair -> pair[1] in edge_ids, edge_asset_map)
+    end
+
+    return nothing
+end
+
+"""
+    filter_edges_by_asset_type!(edges::Vector{AbstractEdge}, asset_type::Union{Symbol,Vector{Symbol}}, edge_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}})
+
+Filter edges and their associated assets by asset type.
+
+# Arguments
+- `edges::Vector{AbstractEdge}`: Edges to filter
+- `asset_type::Union{Symbol,Vector{Symbol}}`: Target asset type(s)
+- `edge_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}`: Mapping of edges to assets
+
+# Effects
+- Modifies `edges` in-place to keep only edges matching the asset type
+- Modifies `edge_asset_map` to keep only matching assets
+
+# Throws
+- `ArgumentError`: If none of the requested asset types are found in the system
+
+# Example
+```julia
+filter_edges_by_asset_type!(edges, :Battery, edge_asset_map)
+```
+"""
+function filter_edges_by_asset_type!(
+    edges::Vector{AbstractEdge}, 
+    asset_type::Union{Symbol,Vector{Symbol}}, 
+    edge_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}
+)
+    @debug "Filtering edges by asset type $asset_type"
+
+    # convert asset_type to vector if it is a symbol
+    asset_type = isa(asset_type, Symbol) ? [asset_type] : asset_type
+
+    # check if the asset_type is available in the system
+    available_types = unique(get_type(asset) for asset in values(edge_asset_map))
+    if !any(t -> t ∈ available_types, asset_type)
+        throw(ArgumentError(
+            "Asset type(s) $asset_type not found in the system.\n" *
+            "Available types are $available_types"
+        ))
+    end
+
+    # filter asset map by type (done first as it's used for edge filtering)
+    filter!(pair -> get_type(pair[2]) in asset_type, edge_asset_map)
+
+    # filter edges according to new edge_asset_map
+    filter!(e -> id(e) in keys(edge_asset_map), edges)
+
+    return nothing
+end
