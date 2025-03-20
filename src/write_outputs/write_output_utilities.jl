@@ -336,6 +336,28 @@ function reshape_wide(df::DataFrame, variable_col::Symbol=:variable, value_col::
     return unstack(df, variable_col, value_col)
 end
 
+"""
+    reshape_wide(df::DataFrame, id_cols::Union{Vector{Symbol},Symbol}, variable_col::Symbol, value_col::Symbol)
+
+Reshape a DataFrame from long to wide format.
+
+# Arguments
+- `df::DataFrame`: DataFrame in long format to be reshaped
+- `id_cols::Union{Vector{Symbol},Symbol}`: Column(s) to use as identifiers
+- `variable_col::Symbol`: Column containing variable names that will become new columns
+- `value_col::Symbol`: Column containing values that will fill the new columns
+
+# Returns
+- `DataFrame`: Reshaped DataFrame in wide format
+
+# Throws
+- `ArgumentError`: If required columns are not present in the DataFrame
+
+# Examples
+```julia
+df_wide = reshape_wide(df, :year, :variable, :value)
+```
+"""
 function reshape_wide(df::DataFrame, id_cols::Union{Vector{Symbol},Symbol}, variable_col::Symbol, value_col::Symbol)
     if !all(col -> col ∈ propertynames(df), [variable_col, value_col])
         throw(ArgumentError("DataFrame must contain '$variable_col' and '$value_col' columns for wide format"))
@@ -356,7 +378,7 @@ Reshape a DataFrame from wide to long format.
 # Examples
 ```julia
 df_wide = DataFrame(id=[1,2], a=[10,20], b=[30,40])
-df_long = reshape_long(df_wide, id_cols=[:id])
+df_long = reshape_long(df_wide, :time, :component_id, :value)
 ```
 """
 function reshape_long(df::DataFrame; id_cols::Vector{Symbol}=Symbol[], view::Bool=true)

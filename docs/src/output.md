@@ -9,6 +9,72 @@ Currently, Macro supports the following types of outputs:
 - **Flow results**: flow for each commodity through each edge
 - **Combined results**: all results (capacity, costs, flows, non-served demand, storage level) in a single DataFrame
 
+The default column names for the results in *long* format are:
+- `commodity`: commodity type
+- `commodity_subtype`: group identifier for the variables, i.e. `capacity`, `cost`, `flow`
+- `zone`: zone id
+- `resource_id`: resource id
+- `component_id`: component id (e.g, edge id, storage id, etc.)
+- `type`: type of the asset
+- `variable`: unique identifier for the variable output (e.g, `capacity`, `new_capacity`, `retired_capacity`, `VariableCost`, `FixedCost`, `flow`)
+- `value`: the value of the variable
+
+!!! warning "Output Layout"
+    When writing **capacity**, **costs**, and **flow** results, the user has the option to choose between two different layouts using the `OutputLayout` setting in the `macro_settings.json` file. The options are:
+    - `"OutputLayout": "long"` (applies to all the three outputs)
+    - `"OutputLayout": "wide"` (applies to all the three outputs)
+    - `"OutputLayout": {"Capacity": "wide", "Costs": "long", "Flow": "long"}` (set the layout for each output individually)
+
+    #### Capacity Results
+    ##### Long Format
+    ```julia
+    commodity  commodity_subtype  zone    resource_id  component_id  type    variable  value
+    Symbol     Symbol             Symbol  Symbol       Symbol        Symbol  Symbol    Float64
+    ```
+    Each **row** contains a single result specified by the `variable` column.
+
+    ##### Wide Format
+    ```julia
+    commodity  commodity_subtype  zone    resource_id  component_id  type    variable  capacity  new_capacity  retired_capacity
+    Symbol     Symbol             Symbol  Symbol       Symbol        Symbol  Symbol    Float64   Float64       Float64
+    ```
+    
+    Each **row** contains a single `component_id`.
+
+    #### Costs
+    ##### Long Format
+    ```julia
+    commodity  commodity_subtype  zone    resource_id  component_id  type    variable  value
+    Symbol     Symbol             Symbol  Symbol       Symbol        Symbol  Symbol    Float64
+    ```
+
+    Each **row** contains a single result specified by the `variable` column (e.g, `FixedCost`, `VariableCost`, `TotalCost`).
+    
+    ##### Wide Format
+    ```julia
+    FixedCost  VariableCost  TotalCost
+    Float64    Float64       Float64
+    ```
+    Single row for each system.
+
+    #### Flow Results
+    ##### Long Format
+    ```julia
+    commodity  commodity_subtype  zone    resource_id  component_id  type    variable  value
+    Symbol     Symbol             Symbol  Symbol       Symbol        Symbol  Symbol    Float64
+    ```
+    Each **row** contains a single result specified by the `variable` column (e.g, `flow`).
+
+    ##### Wide Format
+    ```julia
+    time  component_id_1  component_id_2  ...
+    Int64 Float64         Float64         ...
+    1     100            200             ...
+    2     101            201             ...
+    ...
+    ```
+    Each **row** contains a single `time` step for each `component_id`.
+
 ## Quick Start
 
 To collect and save all results at once, users can use the [`collect_results`](@ref) and [`write_results`](@ref) functions:
@@ -64,15 +130,13 @@ To write system-level capacity results directly to a file, users can use the [`w
 
 ```julia
 write_capacity("capacity.csv", system)
+write_capacity("capacity.csv", system, commodity=:Electricity)
+write_capacity("capacity.csv", system, asset_type=:VRE)
+write_capacity("capacity.csv", system, commodity=:Electricity, asset_type=[:VRE, :Battery])
 write_capacity("capacity.csv", system, drop_cols=[:commodity, :commodity_subtype, :zone])
 ```
 
-By default, the results are written in wide format. Users can also write the results in long format by setting the `wide` argument to `false`:
-
-```julia
-write_capacity("capacity.csv", system, wide=false)
-```
-
+By default, the results are written in *long* format. Users can also write the results in *wide* format by using the `OutputLayout` setting in the `macro_settings.json` file.
 ## Costs
 
 System-wide cost results can be obtained as DataFrames using the [`get_optimal_costs`](@ref) function:
@@ -84,9 +148,11 @@ cost_results = get_optimal_costs(model)
 To write the costs results directly to a file, users can use the [`write_costs`](@ref) function:
 
 ```julia
-write_costs("costs.csv", model)
-write_costs("costs.csv", model, drop_cols=[:commodity, :commodity_subtype, :zone])
+write_costs("costs.csv", system, model)
+write_costs("costs.csv", system, model, drop_cols=[:commodity, :commodity_subtype, :zone])
 ```
+
+By default, the results are written in *long* format. Users can also write the results in *wide* format by using the `OutputLayout` setting in the `macro_settings.json` file.
 
 ## Flow Results
 
@@ -104,5 +170,10 @@ To write system-level flow results directly to a file, users can use the [`write
 
 ```julia
 write_flow("flows.csv", system)
+write_flow("flows.csv", system, commodity=:Electricity)
+write_flow("flows.csv", system, asset_type=:VRE)
+write_flow("flows.csv", system, commodity=:Electricity, asset_type=[:VRE, :Battery])
 write_flow("flows.csv", system, drop_cols=[:commodity, :commodity_subtype, :zone])
 ```
+
+By default, the results are written in *long* format. Users can also write the results in *wide* format by using the `OutputLayout` setting in the `macro_settings.json` file.
