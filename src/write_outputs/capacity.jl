@@ -97,7 +97,7 @@ get_optimal_new_capacity(asset::AbstractAsset; scaling::Float64=1.0) = get_optim
 get_optimal_retired_capacity(asset::AbstractAsset; scaling::Float64=1.0) = get_optimal_capacity_by_field(asset, retired_capacity, scaling)
 
 """
-    write_capacity(file_path::AbstractString, system::System; scaling::Float64=1.0, drop_cols::Vector{Symbol}=Symbol[])
+    write_capacity(file_path::AbstractString, system::System; scaling::Float64=1.0, drop_cols::Vector{Symbol}=Symbol[], commodity::Union{Symbol,Vector{Symbol},Nothing}=nothing, asset_type::Union{Symbol,Vector{Symbol},Nothing}=nothing)
 
 Write the optimal capacity results for all assets/edges in a system to a file. 
 The extension of the file determines the format of the file.
@@ -108,6 +108,8 @@ The extension of the file determines the format of the file.
 - `system::System`: The system containing the assets/edges to analyze as well as the settings for the output
 - `scaling::Float64`: The scaling factor for the results
 - `drop_cols::Vector{Symbol}`: Columns to drop from the DataFrame
+- `commodity::Union{Symbol,Vector{Symbol},Nothing}`: The commodity to filter by
+- `asset_type::Union{Symbol,Vector{Symbol},Nothing}`: The asset type to filter by
 
 # Returns
 - `nothing`: The function returns nothing, but writes the results to the file
@@ -115,9 +117,19 @@ The extension of the file determines the format of the file.
 # Example
 ```julia
 write_capacity(joinpath(results_dir, "all_capacity.csv"), system)
+write_capacity(joinpath(results_dir, "all_capacity.csv"), system, commodity=:Electricity)
+write_capacity(joinpath(results_dir, "all_capacity.csv"), system, asset_type=:VRE)
+write_capacity(joinpath(results_dir, "all_capacity.csv"), system, commodity=:Electricity, asset_type=[:VRE, :Battery])
 ```
 """
-function write_capacity(file_path::AbstractString, system::System; scaling::Float64=1.0, drop_cols::Vector{Symbol}=Symbol[])
+function write_capacity(
+    file_path::AbstractString, 
+    system::System; 
+    scaling::Float64=1.0, 
+    drop_cols::Vector{Symbol}=Symbol[],
+    commodity::Union{Symbol,Vector{Symbol},Nothing}=nothing,
+    asset_type::Union{Symbol,Vector{Symbol},Nothing}=nothing
+)
     @info "Writing capacity results to $file_path"
     capacity_results = get_optimal_capacity(system; scaling)
     new_capacity_results = get_optimal_new_capacity(system; scaling)
@@ -128,6 +140,31 @@ function write_capacity(file_path::AbstractString, system::System; scaling::Floa
     layout = get_output_layout(system, :Capacity)
     all_capacity_results = layout == "wide" ? reshape_wide(all_capacity_results) : all_capacity_results
     
+    ## filter the dataframe based on the requested commodity and asset type
+    # filter by commodity if specified
+    if !isnothing(commodity)
+        @debug "Filtering by commodity $commodity"
+        commodity = isa(commodity, Symbol) ? [commodity] : commodity
+        # check if the commodity is in the dataframe
+        if !all(c -> c in all_capacity_results.commodity, commodity)
+            commodities_in_df = collect(Set(all_capacity_results.commodity))
+            throw(ArgumentError("Some commodities in $commodity not found in the dataframe.\nCommodities present in the dataframe are $commodities_in_df"))
+        end
+        filter!(:commodity => in(commodity), all_capacity_results)
+    end
+    
+    # filter by asset type if specified
+    if !isnothing(asset_type)
+        @debug "Filtering by asset type $asset_type"
+        asset_type = isa(asset_type, Symbol) ? [asset_type] : asset_type
+        # check if the asset type is in the dataframe
+        if !all(t -> t in all_capacity_results.type, asset_type)
+            asset_types_in_df = collect(Set(all_capacity_results.type))
+            throw(ArgumentError("Some asset types in $asset_type not found in the dataframe.\nAsset types present in the dataframe are $asset_types_in_df"))
+        end
+        filter!(:type => in(asset_type), all_capacity_results)
+    end
+
     write_dataframe(file_path, all_capacity_results, drop_cols)
     return nothing
 end
