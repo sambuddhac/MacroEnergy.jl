@@ -1,14 +1,14 @@
 # Utility function to get the optimal capacity by macro object field
 """
-    get_optimal_flow(system::System; scaling::Float64=1.0, commodity::Union{Symbol,Vector{Symbol},Nothing}=nothing, asset_type::Union{Symbol,Vector{Symbol},Nothing}=nothing)
+    get_optimal_flow(system::System; scaling::Float64=1.0, commodity::Union{AbstractString,Vector{AbstractString},Nothing}=nothing, asset_type::Union{AbstractString,Vector{AbstractString},Nothing}=nothing)
 
 Get the optimal flow values for all edges in a system.
 
 # Arguments
 - `system::System`: The system containing the all edges to output
 - `scaling::Float64`: The scaling factor for the results.
-- `commodity::Union{Symbol,Vector{Symbol},Nothing}`: The commodity to filter by
-- `asset_type::Union{Symbol,Vector{Symbol},Nothing}`: The asset type to filter by
+- `commodity::Union{AbstractString,Vector{AbstractString},Nothing}`: The commodity to filter by
+- `asset_type::Union{AbstractString,Vector{AbstractString},Nothing}`: The asset type to filter by
 
 # Returns
 - `DataFrame`: A dataframe containing the optimal flow values for all edges, with missing columns removed
@@ -30,17 +30,26 @@ get_optimal_flow(system, commodity=:Electricity, asset_type=:VRE)
 function get_optimal_flow(
     system::System; 
     scaling::Float64=1.0, 
-    commodity::Union{Symbol,Vector{Symbol},Nothing}=nothing,
-    asset_type::Union{Symbol,Vector{Symbol},Nothing}=nothing
+    commodity::Union{AbstractString,Vector{<:AbstractString},Nothing}=nothing,
+    asset_type::Union{AbstractString,Vector{<:AbstractString},Nothing}=nothing
 )
     @debug " -- Getting optimal flow values for the system"
     edges, edge_asset_map = get_edges(system, return_ids_map=true)
+
     # filter edges by commodity
     if !isnothing(commodity)
+        (commodity, missed_commodites) = search_commodities(commodity, string.(collect(Set(MacroEnergy.commodity_type.(edges)))))
+        if !isempty(missed_commodites)
+            @warn "Commodities not found: $(missed_commodites) when printing flow results"
+        end
         filter_edges_by_commodity!(edges, commodity, edge_asset_map)
     end
     # filter edges by asset type
     if !isnothing(asset_type)
+        (asset_type, missed_asset_type) = search_asset_types(asset_type, string.(collect(Set([edge_asset_map[x.id] for x in edges]))))
+        if !isempty(missed_asset_type)
+            @warn "Asset type(s) not found: $(missed_asset_type) when printing flow results"
+        end
         filter_edges_by_asset_type!(edges, asset_type, edge_asset_map)
     end
     if isempty(edges)
@@ -123,8 +132,8 @@ function write_flow(
     system::System; 
     scaling::Float64=1.0, 
     drop_cols::Vector{Symbol}=Symbol[],
-    commodity::Union{Symbol,Vector{Symbol},Nothing}=nothing,
-    asset_type::Union{Symbol,Vector{Symbol},Nothing}=nothing
+    commodity::Union{AbstractString,Vector{<:AbstractString},Nothing}=nothing,
+    asset_type::Union{AbstractString,Vector{<:AbstractString},Nothing}=nothing
 )
     @info "Writing flow results to $file_path"
 
@@ -140,4 +149,16 @@ function write_flow(
     return nothing
 end
 
-
+# function write_flow(
+#     file_path::AbstractString,
+#     system::System;
+#     scaling::Float64=1.0,
+#     drop_cols::Vector{Symbol}=Symbol[],
+#     commodity::Union{Symbol,Vector{<:Symbol},Nothing}=nothing,
+#     asset_type::Union{Symbol,Vector{<:Symbol},Nothing}=nothing
+# )
+#     commodity = isnothing(commodity) ? nothing : string.(commodity)
+#     asset_type = isnothing(asset_type) ? nothing : string.(asset_type)
+#     write_flow(file_path, system; scaling, drop_cols, commodity=commodity, asset_type=asset_type)
+#     return nothing
+# end

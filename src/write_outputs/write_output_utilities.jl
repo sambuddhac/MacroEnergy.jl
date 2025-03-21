@@ -683,3 +683,68 @@ function filter_edges_by_asset_type!(
 
     return nothing
 end
+
+function has_wildcard(s::AbstractString)
+    return endswith(s,"*")
+end
+
+function has_wildcard(s::Symbol)
+    return endswith(string(s),"*")
+end
+
+function search_commodities(
+    commodities::Union{AbstractString,Vector{<:AbstractString}},
+    df_commodities::Vector{<:AbstractString}
+    )
+    commodities = isa(commodities, AbstractString) ? [commodities] : commodities
+    macro_commodity_types = commodity_types()
+    final_commodities = Set{Symbol}()
+    missed_commodites = Set{Symbol}()
+    for c in commodities
+        wildcard_search = has_wildcard(c)
+        if wildcard_search
+            c = c[1:end-1]
+            c_sym = Symbol(c)
+            if !haskey(macro_commodity_types, c_sym)
+                continue
+            end
+            c_datatype = macro_commodity_types[c_sym]
+            # Find all commodities which start with the part before the wildcard
+            union!(final_commodities, typesymbol.(Set{DataType}([c_datatype, subtypes(c_datatype)...])))
+        end
+        # Add the commodity itself, if it's in the dataframe
+        if c in df_commodities
+            push!(final_commodities, Symbol(c))
+        elseif !wildcard_search
+            push!(missed_commodites, Symbol(c))
+        end
+    end
+    return collect(final_commodities), collect(missed_commodites)
+end
+
+function search_assets(
+    asset_type::Union{AbstractString,Vector{<:AbstractString}},
+    df_assets::Vector{<:AbstractString}
+)
+    asset_type = isa(asset_type, AbstractString) ? [asset_type] : asset_type
+    final_asset_types = Set{Symbol}()
+    missed_asset_types = Set{Symbol}()
+    for a in asset_type
+        wildcard_search = has_wildcard(a)
+        if wildcard_search
+            a = a[1:end-1]
+            # Find all asset types which start with the part before the wildcard
+            union!(final_asset_types, Symbol.(df_assets[startswith.(df_assets, Ref(a))]))
+        end
+        # Add the asset types, accounting for parametric commodities
+        union!(final_asset_types, Symbol.(df_assets[startswith.(df_assets, Ref(a * "{"))]))
+        # Add the asset types itself, if they're in the dataframe
+        if a in df_assets
+            push!(final_asset_types, Symbol(a))
+        elseif !wildcard_search
+            push!(missed_asset_types, Symbol(a))
+        end
+    end
+    return collect(final_asset_types), collect(missed_asset_types)
+end
+
