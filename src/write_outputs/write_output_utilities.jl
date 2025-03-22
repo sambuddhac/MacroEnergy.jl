@@ -432,7 +432,11 @@ Supported formats: .csv, .csv.gz, .parquet
 - `df::AbstractDataFrame`: DataFrame to write
 - `drop_cols::Vector{Symbol}`: Columns to drop from the DataFrame
 """
-function write_dataframe(file_path::AbstractString, df::AbstractDataFrame, drop_cols::Vector{Symbol}=Symbol[])
+function write_dataframe(
+    file_path::AbstractString,
+    df::AbstractDataFrame,
+    drop_cols::Vector{<:AbstractString}=String[]
+)
     # Extract file extension and check if supported in Macro
     extension = lowercase(splitext(file_path)[2])
     # Create a map (supported_formats => write functions)
@@ -451,7 +455,7 @@ function write_dataframe(file_path::AbstractString, df::AbstractDataFrame, drop_
     writer = first(writer for (ext, writer) in supported_formats if endswith(file_path, ext))
 
     # Drop the columns specified by the user
-    select!(df, Not(drop_cols))
+    select!(df, Not(Symbol.(drop_cols)))
 
     # Write the DataFrame using the appropriate writer function
     writer(file_path, df)

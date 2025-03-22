@@ -131,7 +131,7 @@ function write_flow(
     file_path::AbstractString, 
     system::System; 
     scaling::Float64=1.0, 
-    drop_cols::Vector{Symbol}=Symbol[],
+    drop_cols::Vector{<:AbstractString}=String[],
     commodity::Union{AbstractString,Vector{<:AbstractString},Nothing}=nothing,
     asset_type::Union{AbstractString,Vector{<:AbstractString},Nothing}=nothing
 )

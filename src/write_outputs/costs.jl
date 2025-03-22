@@ -29,7 +29,13 @@ function get_optimal_costs(model::Model; scaling::Float64=1.0)
 end
 
 """
-    write_costs(file_path::AbstractString, system::System, model::Model; scaling::Float64=1.0, drop_cols::Vector{Symbol}=Symbol[])
+    write_costs(
+        file_path::AbstractString, 
+        system::System, 
+        model::Model; 
+        scaling::Float64=1.0, 
+        drop_cols::Vector{<:AbstractString}=String[]
+    )
 
 Write the optimal costs for the system to a file.
 The extension of the file determines the format of the file.
@@ -39,12 +45,18 @@ The extension of the file determines the format of the file.
 - `system::System`: The system containing the assets/edges to analyze as well as the settings for the output
 - `model::Model`: The optimal model after the optimization
 - `scaling::Float64`: The scaling factor for the results
-- `drop_cols::Vector{Symbol}`: Columns to drop from the DataFrame
+- `drop_cols::Vector{<:AbstractString}`: Columns to drop from the DataFrame
 
 # Returns
 - `nothing`: The function returns nothing, but writes the results to the file
 """
-function write_costs(file_path::AbstractString, system::System, model::Model; scaling::Float64=1.0, drop_cols::Vector{Symbol}=Symbol[])
+function write_costs(
+    file_path::AbstractString, 
+    system::System, 
+    model::Model; 
+    scaling::Float64=1.0, 
+    drop_cols::Vector{<:AbstractString}=String[]
+)
     @info "Writing costs to $file_path"
 
     # Get costs and determine layout (wide or long)
@@ -52,7 +64,7 @@ function write_costs(file_path::AbstractString, system::System, model::Model; sc
     layout = get_output_layout(system, :Costs)
 
     if layout == "wide"
-        default_drop_cols = [:commodity, :commodity_subtype, :zone, :resource_id, :component_id, :type]
+        default_drop_cols = ["commodity", "commodity_subtype", "zone", "resource_id", "component_id", "type"]
         # Only use default_drop_cols if user didn't specify any
         drop_cols = isempty(drop_cols) ? default_drop_cols : drop_cols
         costs = reshape_wide(costs)
