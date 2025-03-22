@@ -422,7 +422,11 @@ function write_results(file_path::AbstractString, system::System, model::Model)
 end
 
 """
-    write_dataframe(file_path::AbstractString, df::AbstractDataFrame, drop_cols::Vector{Symbol}=Symbol[])
+    write_dataframe(
+        file_path::AbstractString, 
+        df::AbstractDataFrame, 
+        drop_cols::Vector{<:AbstractString}=String[]
+    )
 
 Write a DataFrame to a file in the appropriate format based on file extension.
 Supported formats: .csv, .csv.gz, .parquet
@@ -430,7 +434,7 @@ Supported formats: .csv, .csv.gz, .parquet
 # Arguments
 - `file_path::AbstractString`: Path where to save the file
 - `df::AbstractDataFrame`: DataFrame to write
-- `drop_cols::Vector{Symbol}`: Columns to drop from the DataFrame
+- `drop_cols::Vector{<:AbstractString}`: Columns to drop from the DataFrame
 """
 function write_dataframe(
     file_path::AbstractString,
@@ -445,7 +449,7 @@ function write_dataframe(
         ".csv.gz" => (path, data) -> write_csv(path, data, true),
         ".parquet" => write_parquet
     )
-    
+
     # Validate file extension
     if !any(ext -> endswith(file_path, ext), keys(supported_formats))
         throw(ArgumentError("Unsupported file extension: $extension. Supported formats: $(join(keys(supported_formats), ", "))"))
@@ -558,6 +562,48 @@ function find_available_path(path::String, basename::String="results"; max_attem
     error("Could not find available directory after $max_attempts attempts")
 end
 
+"""
+    get_output_layout(system::System, variable::Union{Nothing,Symbol}=nothing)::String
+
+Get the output layout ("wide" or "long") for a specific variable from system settings.
+
+# Arguments
+- `system::System`: System containing output layout settings
+- `variable::Union{Nothing,Symbol}=nothing`: Variable to get layout for (e.g., :Cost, :Flow)
+
+# Returns
+String indicating layout format: "wide" or "long"
+
+# Settings Format
+The `OutputLayout` setting can be specified in three ways:
+
+1. Global string setting:
+   ```julia
+   settings = (OutputLayout="wide",)  # Same layout for all variables
+   ```
+
+2. Per-variable settings using NamedTuple:
+   ```julia
+   settings = (OutputLayout=(Cost="wide", Flow="long"),)
+   ```
+
+3. Default behavior:
+   - Returns "long" if setting is missing or invalid
+   - Logs warning for unsupported types or missing variables
+
+# Examples
+```julia
+# Global layout
+system = System(settings=(OutputLayout="wide",))
+get_output_layout(system, :Cost)  # Returns "wide"
+
+# Per-variable layout
+system = System(settings=(OutputLayout=(Cost="wide", Flow="long"),))
+get_output_layout(system, :Cost)  # Returns "wide"
+get_output_layout(system, :Flow)  # Returns "long"
+get_output_layout(system, :Other) # Returns "long" with warning
+```
+"""
 function get_output_layout(system::System, variable::Union{Nothing,Symbol}=nothing)::String
     output_layout = system.settings.OutputLayout
     
@@ -696,6 +742,46 @@ function has_wildcard(s::Symbol)
     return endswith(string(s),"*")
 end
 
+"""
+    search_commodities(commodities, available_commodities)
+
+Search for commodity types in a list of available commodities, supporting wildcards and subtypes.
+
+# Arguments
+- `commodities::Union{AbstractString,Vector{<:AbstractString}}`: Commodity type(s) to search for
+- `available_commodities::Vector{<:AbstractString}`: Available commodity types to search from
+
+# Returns
+Tuple of two vectors:
+1. `Vector{Symbol}`: Found commodity types
+2. `Vector{Symbol}`: Missing commodity types (only if no matches found)
+
+# Pattern Matching
+Supports two types of matches:
+1. Exact match: `"Electricity"` matches only `"Electricity"`
+2. Wildcard match: `"CO2*"` matches both `CO2` and its subtypes (e.g., `CO2Captured`)
+
+# Examples
+```julia
+# Available commodities
+commodities = ["Electricity", "CO2", "CO2Captured"]
+
+# Exact match
+found, missing = search_commodities("Electricity", commodities)
+# found = [:Electricity], missing = []
+
+# Wildcard match
+found, missing = search_commodities("CO2*", commodities)
+# found = [:CO2, :CO2Captured], missing = []
+
+# Multiple types
+found, missing = search_commodities(["Electricity", "Heat"], commodities)
+# found = [:Electricity], missing = [:Heat]
+```
+
+!!! note 
+    Wildcard searches check against registered commodity types in MacroEnergy.jl.
+"""
 function search_commodities(
     commodities::Union{AbstractString,Vector{<:AbstractString}},
     df_commodities::Vector{<:AbstractString}
@@ -726,6 +812,48 @@ function search_commodities(
     return collect(final_commodities), collect(missed_commodites)
 end
 
+"""
+    search_assets(asset_type, available_types)
+
+Search for asset types in a list of available assets, supporting wildcards and parametric types.
+
+# Arguments
+- `asset_type::Union{AbstractString,Vector{<:AbstractString}}`: Type(s) to search for
+- `available_types::Vector{<:AbstractString}`: Available asset types to search from
+
+# Returns
+Tuple of two vectors:
+1. `Vector{Symbol}`: Found asset types
+2. `Vector{Symbol}`: Missing asset types (only if no matches found)
+
+# Pattern Matching
+Supports three types of matches:
+1. Exact match: `"Battery"` matches `"Battery"`
+2. Parametric match: `"ThermalPower"` matches `"ThermalPower{Fuel}"`
+3. Wildcard match: `"ThermalPower*"` matches both `"ThermalPower{Fuel}"` and `"ThermalPowerCCS{Fuel}"`
+
+# Examples
+```julia
+# Available assets
+assets = ["Battery", "ThermalPower{Coal}", "ThermalPower{Gas}"]
+
+# Exact match
+found, missing = search_assets("Battery", assets)
+# found = [:Battery], missing = []
+
+# Parametric match
+found, missing = search_assets("ThermalPower", assets)
+# found = [:ThermalPower{Coal}, :ThermalPower{Gas}], missing = []
+
+# Wildcard match
+found, missing = search_assets("ThermalPower*", assets)
+# found = [:ThermalPower{Coal}, :ThermalPower{Gas}], missing = []
+
+# Multiple types
+found, missing = search_assets(["Battery", "Solar"], assets)
+# found = [:Battery], missing = [:Solar]
+```
+"""
 function search_assets(
     asset_type::Union{AbstractString,Vector{<:AbstractString}},
     df_assets::Vector{<:AbstractString}

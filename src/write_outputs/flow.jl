@@ -1,14 +1,34 @@
 # Utility function to get the optimal capacity by macro object field
 """
-    get_optimal_flow(system::System; scaling::Float64=1.0, commodity::Union{AbstractString,Vector{AbstractString},Nothing}=nothing, asset_type::Union{AbstractString,Vector{AbstractString},Nothing}=nothing)
+    get_optimal_flow(
+        system::System; 
+        scaling::Float64=1.0, 
+        commodity::Union{AbstractString,Vector{<:AbstractString},Nothing}=nothing, 
+        asset_type::Union{AbstractString,Vector{<:AbstractString},Nothing}=nothing
+    )
 
 Get the optimal flow values for all edges in a system.
 
+## Filtering
+Results can be filtered by:
+- `commodity`: Specific commodity type(s)
+- `asset_type`: Specific asset type(s)
+
+## Pattern Matching
+Two types of pattern matching are supported:
+
+1. Parameter-free matching:
+   - `"ThermalPower"` matches any `ThermalPower{...}` type (i.e. no need to specify parameters inside `{}`)
+
+2. Wildcards using "*":
+   - `"ThermalPower*"` matches `ThermalPower{Fuel}`, `ThermalPowerCCS{Fuel}`, etc.
+   - `"CO2*"` matches `CO2`, `CO2Captured`, etc.
+
 # Arguments
-- `system::System`: The system containing the all edges to output
+- `system::System`: The system containing the all edges to output   
 - `scaling::Float64`: The scaling factor for the results.
-- `commodity::Union{AbstractString,Vector{AbstractString},Nothing}`: The commodity to filter by
-- `asset_type::Union{AbstractString,Vector{AbstractString},Nothing}`: The asset type to filter by
+- `commodity::Union{AbstractString,Vector{<:AbstractString},Nothing}`: The commodity to filter by
+- `asset_type::Union{AbstractString,Vector{<:AbstractString},Nothing}`: The asset type to filter by
 
 # Returns
 - `DataFrame`: A dataframe containing the optimal flow values for all edges, with missing columns removed
@@ -24,7 +44,12 @@ get_optimal_flow(system)
       2 │ Biomass      flow               bioherb_SE  SE_BECCS_Electricity_Herb  SE_BECCS_Electricity_Herb_biomas…  BECCSElectricity  flow            1      2  0.0    
       3 │ Biomass      flow               bioherb_SE  SE_BECCS_Electricity_Herb  SE_BECCS_Electricity_Herb_biomas…  BECCSElectricity  flow            1      3  0.0    
       ...
-get_optimal_flow(system, commodity=:Electricity, asset_type=:VRE)
+# Filter by commodity
+get_optimal_flow(system, commodity="Electricity")
+# Filter by commodity and asset type using parameter-free matching
+get_optimal_flow(system, commodity="Electricity", asset_type="ThermalPower") # only ThermalPower{Fuel} will be returned
+# Filter by commodity and asset type using wildcard matching
+get_optimal_flow(system, commodity="Electricity", asset_type="ThermalPower*") # all types starting with ThermalPower (e.g., ThermalPower{Fuel}, ThermalPowerCCS{Fuel}) will be returned)
 ```
 """
 function get_optimal_flow(
@@ -113,19 +138,54 @@ function get_optimal_flow(edge::AbstractEdge; scaling::Float64=1.0)
 end
 
 """
-    write_flow(file_path::AbstractString, system::System; scaling::Float64=1.0, drop_cols::Vector{Symbol}=Symbol[])
+    write_flow(
+        file_path::AbstractString, 
+        system::System; 
+        scaling::Float64=1.0, 
+        drop_cols::Vector{<:AbstractString}=String[],
+        commodity::Union{AbstractString,Vector{<:AbstractString},Nothing}=nothing,
+        asset_type::Union{AbstractString,Vector{<:AbstractString},Nothing}=nothing
+    )
 
 Write the optimal flow results for the system to a file.
 The extension of the file determines the format of the file.
+
+## Filtering
+Results can be filtered by:
+- `commodity`: Specific commodity type(s)
+- `asset_type`: Specific asset type(s)
+
+## Pattern Matching
+Two types of pattern matching are supported:
+
+1. Parameter-free matching:
+   - `"ThermalPower"` matches any `ThermalPower{...}` type (i.e. no need to specify parameters inside `{}`)
+
+2. Wildcards using "*":
+   - `"ThermalPower*"` matches `ThermalPower{Fuel}`, `ThermalPowerCCS{Fuel}`, etc.
+   - `"CO2*"` matches `CO2`, `CO2Captured`, etc.
 
 # Arguments
 - `file_path::AbstractString`: The path to the file where the results will be written
 - `system::System`: The system containing the edges to analyze as well as the settings for the output
 - `scaling::Float64`: The scaling factor for the results
-- `drop_cols::Vector{Symbol}`: Columns to drop from the DataFrame
+- `drop_cols::Vector{<:AbstractString}`: Columns to drop from the DataFrame
+- `commodity::Union{AbstractString,Vector{<:AbstractString},Nothing}`: The commodity to filter by
+- `asset_type::Union{AbstractString,Vector{<:AbstractString},Nothing}`: The asset type to filter by
 
 # Returns
 - `nothing`: The function returns nothing, but writes the results to the file
+
+# Example
+```julia
+write_flow("flow.csv", system)
+# Filter by commodity
+write_flow("flow.csv", system, commodity="Electricity")
+# Filter by commodity and asset type using parameter-free matching
+write_flow("flow.csv", system, commodity="Electricity", asset_type="ThermalPower")
+# Filter by commodity and asset type using wildcard matching
+write_flow("flow.csv", system, commodity="Electricity", asset_type="ThermalPower*")
+```
 """
 function write_flow(
     file_path::AbstractString, 

@@ -105,7 +105,7 @@ The function [`write_dataframe`](@ref) can be used to write a generic DataFrame 
 ```julia
 write_dataframe("results.csv", results) # Write the dataframe to a CSV file
 write_dataframe("results.parquet", results) # Write the dataframe to a Parquet file
-write_dataframe("results.csv", results, drop_cols=[:commodity, :commodity_subtype]) # Drop the commodity and commodity_subtype columns before writing to CSV
+write_dataframe("results.csv", results, drop_cols=["commodity", "commodity_subtype"]) # Drop the commodity and commodity_subtype columns before writing to CSV
 ```
 
 As can be seen in the example above, users have the option to drop columns from the DataFrame before writing the results to a file.
@@ -130,10 +130,16 @@ To write system-level capacity results directly to a file, users can use the [`w
 
 ```julia
 write_capacity("capacity.csv", system)
-write_capacity("capacity.csv", system, commodity=:Electricity)
-write_capacity("capacity.csv", system, asset_type=:VRE)
-write_capacity("capacity.csv", system, commodity=:Electricity, asset_type=[:VRE, :Battery])
-write_capacity("capacity.csv", system, drop_cols=[:commodity, :commodity_subtype, :zone])
+# Filter by commodity
+write_capacity("capacity.csv", system, commodity="Electricity")
+# Filter by asset type
+write_capacity("capacity.csv", system, asset_type="ThermalPower")
+# Filter by commodity and asset type
+write_capacity("capacity.csv", system, commodity="Electricity", asset_type=["VRE", "Battery"])
+# Filter by commodity and asset type using wildcard matching
+write_capacity("capacity.csv", system, commodity="Electricity", asset_type="ThermalPower*")
+# Drop columns
+write_capacity("capacity.csv", system, drop_cols=["commodity", "commodity_subtype", "zone"])
 ```
 
 By default, the results are written in *long* format. Users can also write the results in *wide* format by using the `OutputLayout` setting in the `macro_settings.json` file.
@@ -149,7 +155,7 @@ To write the costs results directly to a file, users can use the [`write_costs`]
 
 ```julia
 write_costs("costs.csv", system, model)
-write_costs("costs.csv", system, model, drop_cols=[:commodity, :commodity_subtype, :zone])
+write_costs("costs.csv", system, model, drop_cols=["commodity", "commodity_subtype", "zone"])
 ```
 
 By default, the results are written in *long* format. Users can also write the results in *wide* format by using the `OutputLayout` setting in the `macro_settings.json` file.
@@ -170,10 +176,14 @@ To write system-level flow results directly to a file, users can use the [`write
 
 ```julia
 write_flow("flows.csv", system)
-write_flow("flows.csv", system, commodity=:Electricity)
-write_flow("flows.csv", system, asset_type=:VRE)
-write_flow("flows.csv", system, commodity=:Electricity, asset_type=[:VRE, :Battery])
-write_flow("flows.csv", system, drop_cols=[:commodity, :commodity_subtype, :zone])
+# Filter by commodity
+write_flow("flows.csv", system, commodity="Electricity")
+# Filter by asset type using parameter-free matching (ThermalPower{Fuel})
+write_flow("flows.csv", system, asset_type="ThermalPower")
+# Filter by asset type using wildcard matching (ThermalPower{Fuel} or ThermalPowerCCS{Fuel})
+write_flow("flows.csv", system, asset_type="ThermalPower*")
+# Drop columns
+write_flow("flows.csv", system, drop_cols=["commodity", "commodity_subtype", "zone"])
 ```
 
 By default, the results are written in *long* format. Users can also write the results in *wide* format by using the `OutputLayout` setting in the `macro_settings.json` file.

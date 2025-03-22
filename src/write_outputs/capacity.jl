@@ -97,17 +97,39 @@ get_optimal_new_capacity(asset::AbstractAsset; scaling::Float64=1.0) = get_optim
 get_optimal_retired_capacity(asset::AbstractAsset; scaling::Float64=1.0) = get_optimal_capacity_by_field(asset, retired_capacity, scaling)
 
 """
-    write_capacity(file_path::AbstractString, system::System; scaling::Float64=1.0, drop_cols::Vector{Symbol}=Symbol[], commodity::Union{AbstractString,Vector{AbstractString},Nothing}=nothing, asset_type::Union{AbstractString,Vector{Symbol},AbstractString}=nothing)
+    write_capacity(
+        file_path::AbstractString, 
+        system::System; 
+        scaling::Float64=1.0, 
+        drop_cols::Vector{AbstractString}=String[], 
+        commodity::Union{AbstractString,Vector{AbstractString},Nothing}=nothing, 
+        asset_type::Union{AbstractString,Vector{AbstractString},Nothing}=nothing
+    )
 
 Write the optimal capacity results for all assets/edges in a system to a file. 
 The extension of the file determines the format of the file.
 `Capacity`, `NewCapacity`, and `RetiredCapacity` are first concatenated and then written to the file.
 
+## Filtering
+Results can be filtered by:
+- `commodity`: Specific commodity type(s)
+- `asset_type`: Specific asset type(s)
+
+## Pattern Matching
+Two types of pattern matching are supported:
+
+1. Parameter-free matching:
+   - `"ThermalPower"` matches any `ThermalPower{...}` type (i.e. no need to specify parameters inside `{}`)
+
+2. Wildcards using "*":
+   - `"ThermalPower*"` matches `ThermalPower{Fuel}`, `ThermalPowerCCS{Fuel}`, etc.
+   - `"CO2*"` matches `CO2`, `CO2Captured`, etc.
+
 # Arguments
 - `file_path::AbstractString`: The path to the file where the results will be written
 - `system::System`: The system containing the assets/edges to analyze as well as the settings for the output
 - `scaling::Float64`: The scaling factor for the results
-- `drop_cols::Vector{Symbol}`: Columns to drop from the DataFrame
+- `drop_cols::Vector{AbstractString}`: Columns to drop from the DataFrame
 - `commodity::Union{AbstractString,Vector{AbstractString},Nothing}`: The commodity to filter by
 - `asset_type::Union{AbstractString,Vector{AbstractString},Nothing}`: The asset type to filter by
 
@@ -116,10 +138,15 @@ The extension of the file determines the format of the file.
 
 # Example
 ```julia
-write_capacity(joinpath(results_dir, "all_capacity.csv"), system)
-write_capacity(joinpath(results_dir, "all_capacity.csv"), system, commodity="Electricity")
-write_capacity(joinpath(results_dir, "all_capacity.csv"), system, asset_type="VRE")
-write_capacity(joinpath(results_dir, "all_capacity.csv"), system, commodity="Electricity", asset_type=["Electricity", "Battery"])
+write_capacity("capacity.csv", system)
+# Filter by commodity
+write_capacity("capacity.csv", system, commodity="Electricity")
+# Filter by commodity and asset type using parameter-free matching
+write_capacity("capacity.csv", system, asset_type="ThermalPower")
+# Filter by asset type using wildcard matching
+write_capacity("capacity.csv", system, asset_type="ThermalPower*")
+# Filter by commodity and asset type
+write_capacity("capacity.csv", system, commodity="Electricity", asset_type=["ThermalPower", "Battery"])
 ```
 """
 function write_capacity(
