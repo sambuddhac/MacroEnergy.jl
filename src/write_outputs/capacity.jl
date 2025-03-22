@@ -195,23 +195,10 @@ function write_capacity(
             asset_types_in_df = collect(Set(all_capacity_results.type))
             @warn("The following assets were not found in your results: $missed_asset_types\nThe missed outputs will omitted from the output file\nYour results include the following assets $asset_types_in_df.")
         end
+        @debug "Writing capacity results for asset type $asset_type"
         filter!(:type => in(asset_type), all_capacity_results)
     end
 
     write_dataframe(file_path, all_capacity_results, drop_cols)
     return nothing
 end
-
-# function write_capacity(
-#     file_path::AbstractString,
-#     system::System;
-#     scaling::Float64=1.0,
-#     drop_cols::Vector{Symbol}=Symbol[],
-#     commodity::Union{Symbol,Vector{Symbol},Nothing}=nothing,
-#     asset_type::Union{Symbol,Vector{Symbol},Nothing}=nothing
-# )
-#     commodity = isnothing(commodity) ? nothing : string.(commodity)
-#     asset_type = isnothing(asset_type) ? nothing : string.(asset_type)
-#     write_capacity(file_path, system, scaling=scaling, drop_cols=drop_cols, commodity=commodity, asset_type=asset_type)
-#     return nothing
-# end

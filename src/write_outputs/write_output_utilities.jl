@@ -463,7 +463,7 @@ function write_dataframe(
 
     # Write the DataFrame using the appropriate writer function
     writer(file_path, df)
-    
+
     return nothing
 end
 
@@ -549,16 +549,16 @@ julia> output_path = find_available_path(path)
 """
 function find_available_path(path::String, basename::String="results"; max_attempts::Int=999)
     path = abspath(path) # expand path to the full path
-    
+
     for i in 1:max_attempts
         dir_name = "$(basename)_$(lpad(i, 3, '0'))"
         full_path = joinpath(path, dir_name)
-        
+
         if !isdir(full_path)
             return full_path
         end
     end
-    
+
     error("Could not find available directory after $max_attempts attempts")
 end
 
@@ -606,13 +606,13 @@ get_output_layout(system, :Other) # Returns "long" with warning
 """
 function get_output_layout(system::System, variable::Union{Nothing,Symbol}=nothing)::String
     output_layout = system.settings.OutputLayout
-    
+
     # String layouts supported are "wide" and "long"
     if isa(output_layout, String)
         @debug "Using output layout $output_layout"
         return output_layout
     end
-    
+
     if isnothing(variable)
         @warn "OutputLayout in settings does not have a variable key. Using 'long' as default."
         return "long"
@@ -627,7 +627,7 @@ function get_output_layout(system::System, variable::Union{Nothing,Symbol}=nothi
         @debug "Using output layout $layout for variable $variable"
         return layout
     end
-    
+
     # Handle unknown types
     @warn "OutputLayout type $(typeof(output_layout)) not supported. Using 'long' as default."
     return "long"
@@ -655,20 +655,20 @@ filter_edges_by_commodity!(edges, [:Electricity, :NaturalGas], edge_asset_map)
 
 """
 function filter_edges_by_commodity!(
-    edges::Vector{AbstractEdge}, 
-    commodity::Union{Symbol,Vector{Symbol}}, 
+    edges::Vector{AbstractEdge},
+    commodity::Union{Symbol,Vector{Symbol}},
     edge_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}=Dict{Symbol,Base.RefValue{<:AbstractAsset}}()
 )
     @debug "Filtering edges by commodity $commodity"
 
     # convert commodity to vector if it is a symbol
     commodity = isa(commodity, Symbol) ? [commodity] : commodity
-    
+
     # convert commodity from a Vector{Symbol} to a Vector{DataType}
     macro_commodities = commodity_types()
     if !all(c -> c ∈ keys(macro_commodities), commodity)
         throw(ArgumentError("Commodity $commodity not found in the system.\n" *
-            "Available commodities are $macro_commodities"))
+                            "Available commodities are $macro_commodities"))
     end
     commodities = Set(macro_commodities[c] for c in commodity)
 
@@ -707,8 +707,8 @@ filter_edges_by_asset_type!(edges, :Battery, edge_asset_map)
 ```
 """
 function filter_edges_by_asset_type!(
-    edges::Vector{AbstractEdge}, 
-    asset_type::Union{Symbol,Vector{Symbol}}, 
+    edges::Vector{AbstractEdge},
+    asset_type::Union{Symbol,Vector{Symbol}},
     edge_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}
 )
     @debug "Filtering edges by asset type $asset_type"
@@ -735,11 +735,11 @@ function filter_edges_by_asset_type!(
 end
 
 function has_wildcard(s::AbstractString)
-    return endswith(s,"*")
+    return endswith(s, "*")
 end
 
 function has_wildcard(s::Symbol)
-    return endswith(string(s),"*")
+    return endswith(string(s), "*")
 end
 
 """
@@ -784,8 +784,8 @@ found, missing = search_commodities(["Electricity", "Heat"], commodities)
 """
 function search_commodities(
     commodities::Union{AbstractString,Vector{<:AbstractString}},
-    df_commodities::Vector{<:AbstractString}
-    )
+    available_commodities::Vector{<:AbstractString}
+)
     commodities = isa(commodities, AbstractString) ? [commodities] : commodities
     macro_commodity_types = commodity_types()
     final_commodities = Set{Symbol}()
@@ -803,7 +803,7 @@ function search_commodities(
             union!(final_commodities, typesymbol.(Set{DataType}([c_datatype, subtypes(c_datatype)...])))
         end
         # Add the commodity itself, if it's in the dataframe
-        if c in df_commodities
+        if c in available_commodities
             push!(final_commodities, Symbol(c))
         elseif !wildcard_search
             push!(missed_commodites, Symbol(c))

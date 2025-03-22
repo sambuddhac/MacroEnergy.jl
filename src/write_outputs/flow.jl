@@ -75,10 +75,12 @@ function get_optimal_flow(
         if !isempty(missed_asset_type)
             @warn "Asset type(s) not found: $(missed_asset_type) when printing flow results"
         end
+        @debug("Writing flow results for asset type $asset_type")
         filter_edges_by_asset_type!(edges, asset_type, edge_asset_map)
     end
     if isempty(edges)
-        throw(ArgumentError("No edges found after filtering in `get_optimal_flow`"))
+        @warn "No edges found after filtering"
+        return DataFrame()
     end
     eflow = get_optimal_vars_timeseries(edges, flow, scaling, edge_asset_map)
     df = convert_to_dataframe(eflow)
@@ -208,17 +210,3 @@ function write_flow(
     write_dataframe(file_path, flow_results, drop_cols)
     return nothing
 end
-
-# function write_flow(
-#     file_path::AbstractString,
-#     system::System;
-#     scaling::Float64=1.0,
-#     drop_cols::Vector{Symbol}=Symbol[],
-#     commodity::Union{Symbol,Vector{<:Symbol},Nothing}=nothing,
-#     asset_type::Union{Symbol,Vector{<:Symbol},Nothing}=nothing
-# )
-#     commodity = isnothing(commodity) ? nothing : string.(commodity)
-#     asset_type = isnothing(asset_type) ? nothing : string.(asset_type)
-#     write_flow(file_path, system; scaling, drop_cols, commodity=commodity, asset_type=asset_type)
-#     return nothing
-# end
