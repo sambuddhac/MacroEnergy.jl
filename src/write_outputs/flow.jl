@@ -71,7 +71,7 @@ function get_optimal_flow(
     end
     # filter edges by asset type
     if !isnothing(asset_type)
-        (asset_type, missed_asset_type) = search_asset_types(asset_type, string.(collect(Set([edge_asset_map[x.id] for x in edges]))))
+        (asset_type, missed_asset_type) = search_assets(asset_type, string.(unique(get_type(asset) for asset in values(edge_asset_map))))
         if !isempty(missed_asset_type)
             @warn "Asset type(s) not found: $(missed_asset_type) when printing flow results"
         end
