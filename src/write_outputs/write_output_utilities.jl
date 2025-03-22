@@ -856,27 +856,41 @@ found, missing = search_assets(["Battery", "Solar"], assets)
 """
 function search_assets(
     asset_type::Union{AbstractString,Vector{<:AbstractString}},
-    df_assets::Vector{<:AbstractString}
+    available_types::Vector{<:AbstractString}
 )
     asset_type = isa(asset_type, AbstractString) ? [asset_type] : asset_type
     final_asset_types = Set{Symbol}()
     missed_asset_types = Set{Symbol}()
+    
     for a in asset_type
+        found_any = false
         wildcard_search = has_wildcard(a)
+        
         if wildcard_search
             a = a[1:end-1]
             # Find all asset types which start with the part before the wildcard
-            union!(final_asset_types, Symbol.(df_assets[startswith.(df_assets, Ref(a))]))
+            matches = Symbol.(available_types[startswith.(available_types, Ref(a))])
+            # Add the asset types, accounting for parametric commodities
+            union!(final_asset_types, matches)
+            found_any = !isempty(matches)
         end
-        # Add the asset types, accounting for parametric commodities
-        union!(final_asset_types, Symbol.(df_assets[startswith.(df_assets, Ref(a * "{"))]))
+        
+        # Add the parametric types
+        parametric_matches = Symbol.(available_types[startswith.(available_types, Ref(a * "{"))])
+        union!(final_asset_types, parametric_matches)
+        found_any = found_any || !isempty(parametric_matches)
+        
         # Add the asset types itself, if they're in the dataframe
-        if a in df_assets
+        if a in available_types
             push!(final_asset_types, Symbol(a))
-        elseif !wildcard_search
+            found_any = true
+        end
+        
+        # Only add to missed if we found no matches at all
+        if !found_any && !wildcard_search
             push!(missed_asset_types, Symbol(a))
         end
     end
+    
     return collect(final_asset_types), collect(missed_asset_types)
 end
-
