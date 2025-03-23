@@ -167,36 +167,51 @@ function write_capacity(
     layout = get_output_layout(system, :Capacity)
     all_capacity_results = layout == "wide" ? reshape_wide(all_capacity_results) : all_capacity_results
     
+    commodities_in_df = string.(collect(Set(all_capacity_results.commodity)))
+    asset_types_in_df = string.(collect(Set(all_capacity_results.type)))
     ## filter the dataframe based on the requested commodity and asset type
     # filter by commodity if specified
     if !isnothing(commodity)
         @debug "Filtering by commodity $commodity"
-        df_commodities = string.(collect(Set(all_capacity_results.commodity)))
-        (commodity, missed_commodites) = search_commodities(commodity, df_commodities)
+        (matched_commodity, missed_commodites) = search_commodities(commodity, commodities_in_df)
 
         # Report any commodities that were not found
         if !isempty(missed_commodites)
-            commodities_in_df = collect(Set(all_capacity_results.commodity))
             @warn("The following commodities were not found in your results: $missed_commodites\nThe missed outputs will omitted from the output file\nYour results include the following commodities $commodities_in_df.")
         end
-        filter!(:commodity => in(commodity), all_capacity_results)
+        filter!(:commodity => in(matched_commodity), all_capacity_results)
+        if isempty(all_capacity_results)
+            @warn "No results found after filtering by commodity $commodity"
+            return write_dataframe(file_path, all_capacity_results, drop_cols)
+        end
     end
     
     # filter by asset type if specified
     if !isnothing(asset_type)
         @debug "Filtering by asset type $asset_type"
+        # Get the asset types after filtering by commodity
         all_assets = string.(collect(Set(all_capacity_results.type)))
-        (asset_type, missed_asset_types) = search_assets(asset_type, all_assets)
+        (matched_asset_type, missed_asset_types) = search_assets(asset_type, all_assets)
         
         # Report any asset types that were not found
         # If no assets were found, the output will be empty,
         # but it shouldn't crash
         if !isempty(missed_asset_types)
-            asset_types_in_df = collect(Set(all_capacity_results.type))
-            @warn("The following assets were not found in your results: $missed_asset_types\nThe missed outputs will omitted from the output file\nYour results include the following assets $asset_types_in_df.")
+            s = "The following assets were not found in your results: $missed_asset_types.\n" *
+                "The missed outputs will omitted from the output file.\n" *
+                "Your results include the following assets $asset_types_in_df."
+            @warn(s)
+            # Warn the user that the specified asset type may be absent after filtering by commodity
+            if !isnothing(commodity)
+                s = "Please check also your commodity filter ($commodity) to ensure that it is correct."
+                @warn(s)
+            end
         end
         @debug "Writing capacity results for asset type $asset_type"
-        filter!(:type => in(asset_type), all_capacity_results)
+        filter!(:type => in(matched_asset_type), all_capacity_results)
+        if isempty(all_capacity_results)
+            @warn "No results found after filtering by asset type $asset_type"
+        end
     end
 
     write_dataframe(file_path, all_capacity_results, drop_cols)
