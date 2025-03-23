@@ -809,6 +809,8 @@ function search_commodities(
             push!(missed_commodites, Symbol(c))
         end
     end
+    # Final check to make sure the commodities are in the system
+    final_commodities = intersect(final_commodities, Set(Symbol.(available_commodities)))
     return collect(final_commodities), collect(missed_commodites)
 end
 
