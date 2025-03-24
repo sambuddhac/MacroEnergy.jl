@@ -1,34 +1,40 @@
 macro AbstractEdgeBaseAttributes()
+    edge_defaults = edge_default_data()
     esc(quote
         id::Symbol
         timedata::TimeData{T}
         start_vertex::AbstractVertex
         end_vertex::AbstractVertex
         availability::Vector{Float64} = Float64[]
-        can_expand::Bool = false
-        can_retire::Bool = false
+        can_expand::Bool = $edge_defaults[:can_expand]
+        can_retire::Bool = $edge_defaults[:can_retire]
         capacity::AffExpr = AffExpr(0.0)
-        capacity_size::Float64 = 1.0
+        capacity_size::Float64 = $edge_defaults[:capacity_size]
         constraints::Vector{AbstractTypeConstraint} = Vector{AbstractTypeConstraint}()
-        distance::Float64 = 0.0
-        existing_capacity::Float64 = 0.0
-        fixed_om_cost::Float64 = 0.0
+        distance::Float64 = $edge_defaults[:distance]
+        existing_capacity::Float64 = $edge_defaults[:existing_capacity]
+        fixed_om_cost::Float64 = $edge_defaults[:fixed_om_cost]
         flow::JuMPVariable = Vector{VariableRef}()
-        has_capacity::Bool = false
-        integer_decisions::Bool = false
-        investment_cost::Float64 = 0.0
-        loss_fraction::Float64 = 0.0
-        max_capacity::Float64 = Inf
-        min_capacity::Float64 = 0.0
-        min_flow_fraction::Float64 = 0.0
+        has_capacity::Bool = $edge_defaults[:has_capacity]
+        integer_decisions::Bool = $edge_defaults[:integer_decisions]
+        investment_cost::Float64 = $edge_defaults[:investment_cost]
+        loss_fraction::Float64 = $edge_defaults[:loss_fraction]
+        max_capacity::Float64 = $edge_defaults[:max_capacity]
+        min_capacity::Float64 = $edge_defaults[:min_capacity]
+        min_flow_fraction::Float64 = $edge_defaults[:min_flow_fraction]
         new_capacity::AffExpr = AffExpr(0.0)
         new_units::Union{JuMPVariable,Float64} = 0.0
-        ramp_down_fraction::Float64 = 1.0
-        ramp_up_fraction::Float64 = 1.0
+        ramp_down_fraction::Float64 = $edge_defaults[:ramp_down_fraction]
+        ramp_up_fraction::Float64 = $edge_defaults[:ramp_up_fraction]
         retired_capacity::AffExpr = AffExpr(0.0)
         retired_units::Union{JuMPVariable,Float64} = 0.0
-        unidirectional::Bool = false
-        variable_om_cost::Float64 = 0.0
+        unidirectional::Bool = $edge_defaults[:unidirectional]
+        variable_om_cost::Float64 = $edge_defaults[:variable_om_cost]
+        min_down_time::Int64 = $edge_defaults[:min_down_time]
+        min_up_time::Int64 = $edge_defaults[:min_up_time]
+        startup_cost::Float64 = $edge_defaults[:startup_cost]
+        startup_fuel_consumption::Float64 = $edge_defaults[:startup_fuel_consumption]
+        startup_fuel_balance_id::Symbol = $edge_defaults[:startup_fuel_balance_id]
     end)
 end
 Base.@kwdef mutable struct Edge{T} <: AbstractEdge{T}
@@ -43,29 +49,23 @@ function make_edge(
     start_vertex::AbstractVertex,
     end_vertex::AbstractVertex,
 )
+
+    edge_kwargs = Base.fieldnames(Edge)
+    filtered_data = Dict{Symbol, Any}(
+        k => v for (k,v) in data if k in edge_kwargs
+    )
+    remove_keys = [:id, :start_vertex, :end_vertex, :timedata]
+    for key in remove_keys
+        if haskey(filtered_data, key)
+            delete!(filtered_data, key)
+        end
+    end
     _edge = Edge{commodity}(;
         id = id,
         timedata = time_data,
         start_vertex = start_vertex,
         end_vertex = end_vertex,
-        availability = get(data, :availability, Float64[]),
-        can_expand = get(data, :can_expand, false),
-        can_retire = get(data, :can_retire, false),
-        capacity_size = get(data, :capacity_size, 1.0),
-        distance = get(data, :distance, 0.0),
-        existing_capacity = get(data, :existing_capacity, 0.0),
-        fixed_om_cost = get(data, :fixed_om_cost, 0.0),
-        has_capacity = get(data, :has_capacity, false),
-        integer_decisions = get(data, :integer_decisions, false),
-        investment_cost = get(data, :investment_cost, 0.0),
-        loss_fraction = get(data,:loss_fraction,0.0),
-        max_capacity = get(data, :max_capacity, Inf),
-        min_capacity = get(data, :min_capacity, 0.0),
-        min_flow_fraction = get(data, :min_flow_fraction, 0.0),
-        ramp_down_fraction = get(data, :ramp_down_fraction, 1.0),
-        ramp_up_fraction = get(data, :ramp_up_fraction, 1.0),
-        unidirectional = get(data, :unidirectional, false),
-        variable_om_cost = get(data, :variable_om_cost, 0.0),
+        filtered_data...
     )
     return _edge
 end
@@ -233,11 +233,6 @@ end
 
 Base.@kwdef mutable struct EdgeWithUC{T} <: AbstractEdge{T}
     @AbstractEdgeBaseAttributes()
-    min_down_time::Int64 = 0.0
-    min_up_time::Int64 = 0.0
-    startup_cost::Float64 = 0.0
-    startup_fuel_consumption::Float64 = 0.0
-    startup_fuel_balance_id::Symbol = :none
     ucommit::JuMPVariable = Vector{VariableRef}()
     ushut::JuMPVariable = Vector{VariableRef}()
     ustart::JuMPVariable = Vector{VariableRef}()
@@ -251,32 +246,22 @@ function make_edge_UC(
     start_vertex::AbstractVertex,
     end_vertex::AbstractVertex,
 )
+    edge_kwargs = Base.fieldnames(EdgeWithUC)
+    filtered_data = Dict{Symbol, Any}(
+        k => v for (k,v) in data if k in edge_kwargs
+    )
+    remove_keys = [:id, :start_vertex, :end_vertex, :timedata]
+    for key in remove_keys
+        if haskey(filtered_data, key)
+            delete!(filtered_data, key)
+        end
+    end
     _edge = EdgeWithUC{commodity}(;
         id = id,
         timedata = time_data,
         start_vertex = start_vertex,
         end_vertex = end_vertex,
-        availability = get(data, :availability, Float64[]),
-        can_expand = get(data, :can_expand, false),
-        can_retire = get(data, :can_retire, false),
-        capacity_size = get(data, :capacity_size, 1.0),
-        distance = get(data, :distance, 0.0),
-        existing_capacity = get(data, :existing_capacity, 0.0),
-        fixed_om_cost = get(data, :fixed_om_cost, 0.0),
-        has_capacity = get(data, :has_capacity, false),
-        investment_cost = get(data, :investment_cost, 0.0),
-        max_capacity = get(data, :max_capacity, Inf),
-        min_capacity = get(data, :min_capacity, 0.0),
-        min_flow_fraction = get(data, :min_flow_fraction, 0.0),
-        ramp_down_fraction = get(data, :ramp_down_fraction, 1.0),
-        ramp_up_fraction = get(data, :ramp_up_fraction, 1.0),
-        unidirectional = get(data, :unidirectional, false),
-        variable_om_cost = get(data, :variable_om_cost, 0.0),
-        min_down_time = get(data, :min_down_time, 0.0),
-        min_up_time = get(data, :min_up_time, 0.0),
-        startup_cost = get(data, :startup_cost, 0.0),
-        startup_fuel_consumption = get(data, :startup_fuel_consumption, 0.0),
-        startup_fuel_balance_id = get(data, :startup_fuel_balance_id, :none),
+        filtered_data...,
     )
     return _edge
 end

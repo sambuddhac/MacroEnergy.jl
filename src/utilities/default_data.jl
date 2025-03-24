@@ -33,6 +33,7 @@ function edge_default_data()
         :startup_cost => 0.0,
         :startup_fuel => 0.0,
         :startup_fuel_consumption => 0.0,
+        :startup_fuel_balance_id => :none
     )
 end
 
@@ -54,7 +55,7 @@ function storage_default_data()
         :commodity => missing,
         :charge_edge => missing,
         :discharge_edge => missing,
-        :charge_discharge_ratio => false,
+        :charge_discharge_ratio => 1.0,
         :spillage_edge => missing,
         :long_duration => false,
         :can_expand => true,
@@ -81,12 +82,13 @@ function node_default_data()
         :timedata => missing,
         :location => missing,
         :constraints => Dict{Symbol,Bool}(),
-        :demand => missing,
+        :demand => Float64[],
         :max_nsd => [0.0],
         :min_nsd => [0.0],
-        :price => missing,
+        :price => Float64[],
         :price_nsd => [0.0],
         :price_supply => [0.0],
+        :max_supply => [0.0],
         :price_unmet_policy => Dict{Symbol,Any}(),
         :rhs_policy => Dict{Symbol,Any}(),
     )

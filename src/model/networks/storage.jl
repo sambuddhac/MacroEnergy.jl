@@ -1,29 +1,31 @@
 macro AbstractStorageBaseAttributes()
+    storage_defaults = storage_default_data()
     esc(quote
-    can_expand::Bool = false
-    capacity::AffExpr = AffExpr(0.0)
-    capacity_size::Float64 = 1.0
-    can_retire::Bool = false
     charge_edge::Union{Nothing,AbstractEdge} = nothing
-    charge_discharge_ratio::Float64 = 1.0
     discharge_edge::Union{Nothing,AbstractEdge} = nothing
-    existing_capacity::Float64 = 0.0
-    fixed_om_cost::Float64 = 0.0
-    investment_cost::Float64 = 0.0
-    loss_fraction::Float64 = 0.0
-    max_capacity::Float64 = Inf
-    max_duration::Float64 = 0.0
-    max_storage_level::Float64 = 0.0
-    min_capacity::Float64 = 0.0
-    min_duration::Float64 = 0.0
-    min_outflow_fraction::Float64 = 0.0
-    min_storage_level::Float64 = 0.0
+    spillage_edge::Union{Nothing, AbstractEdge} = nothing
     new_capacity::AffExpr = AffExpr(0.0)
     new_units::Union{Missing, JuMPVariable} = missing
     retired_capacity::AffExpr = AffExpr(0.0)
     retired_units::Union{Missing, JuMPVariable} = missing
-    spillage_edge::Union{Nothing, AbstractEdge} = nothing
     storage_level::JuMPVariable = Vector{VariableRef}()
+    can_expand::Bool = $storage_defaults[:can_expand]
+    capacity::AffExpr = AffExpr(0.0)
+    capacity_size::Float64 = $storage_defaults[:capacity_size]
+    can_retire::Bool = $storage_defaults[:can_retire]
+    charge_discharge_ratio::Float64 = $storage_defaults[:charge_discharge_ratio]
+    existing_capacity::Float64 = $storage_defaults[:existing_capacity]
+    fixed_om_cost::Float64 = $storage_defaults[:fixed_om_cost]
+    investment_cost::Float64 = $storage_defaults[:investment_cost]
+    loss_fraction::Float64 = $storage_defaults[:loss_fraction]
+    max_capacity::Float64 = $storage_defaults[:max_capacity]
+    max_duration::Float64 = $storage_defaults[:max_duration]
+    max_storage_level::Float64 = $storage_defaults[:max_storage_level]
+    min_capacity::Float64 = $storage_defaults[:min_capacity]
+    min_duration::Float64 = $storage_defaults[:min_duration]
+    min_outflow_fraction::Float64 = $storage_defaults[:min_outflow_fraction]
+    min_storage_level::Float64 = $storage_defaults[:min_storage_level]
+    long_duration::Bool = $storage_defaults[:long_duration]
     end)
 end
 
@@ -38,27 +40,23 @@ function make_storage(
     time_data::TimeData,
     commodity::DataType,
 )
+    # We could instead filter on an explicit list of keys
+    # As it is, this will add configure several additional
+    # attributes than we had before, e.g. :constraints 
+    storage_kwargs = Base.fieldnames(Storage)
+    filtered_data = Dict{Symbol, Any}(
+        k => v for (k,v) in data if k in storage_kwargs
+    )
+    remove_keys = [:id, :timedata]
+    for key in remove_keys
+        if haskey(filtered_data, key)
+            delete!(filtered_data, key)
+        end
+    end
     _storage = Storage{commodity}(;
         id = id,
         timedata = time_data,
-        can_expand = get(data, :can_expand, false),
-        capacity_size = get(data, :capacity_size, 1.0),
-        can_retire = get(data, :can_retire, false),
-        charge_edge =  get(data, :charge_edge, nothing),
-        charge_discharge_ratio = get(data, :charge_discharge_ratio, false),
-        discharge_edge =  get(data, :discharge_edge, nothing),
-        existing_capacity = get(data, :existing_capacity, 0.0),
-        fixed_om_cost = get(data, :fixed_om_cost, 0.0),
-        investment_cost = get(data, :investment_cost, 0.0),
-        loss_fraction = get(data, :loss_fraction, 0.0),
-        max_capacity = get(data, :max_capacity, Inf),
-        max_duration = get(data, :max_duration, 0.0),
-        max_storage_level = get(data, :max_storage_level, 0.0),
-        min_capacity = get(data, :min_capacity, 0.0),
-        min_duration = get(data, :min_duration, 0.0),
-        min_outflow_fraction = get(data, :min_outflow_fraction, 0.0),
-        min_storage_level = get(data, :min_storage_level, 0.0),
-        spillage_edge = get(data, :spillage_edge, nothing),
+        filtered_data...
     )
     return _storage
 end
@@ -187,27 +185,21 @@ function make_long_duration_storage(
     time_data::TimeData,
     commodity::DataType,
 )
+
+    storage_kwargs = Base.fieldnames(LongDurationStorage)
+    filtered_data = Dict{Symbol,Any}(
+        k => v for (k, v) in data if k in storage_kwargs
+    )
+    remove_keys = [:id, :timedata]
+    for key in remove_keys
+        if haskey(filtered_data, key)
+            delete!(filtered_data, key)
+        end
+    end
     _storage = LongDurationStorage{commodity}(;
-        id = id,
-        timedata = time_data,
-        can_expand = get(data, :can_expand, false),
-        capacity_size = get(data, :capacity_size, 1.0),
-        can_retire = get(data, :can_retire, false),
-        charge_edge =  get(data, :charge_edge, nothing),
-        charge_discharge_ratio = get(data, :charge_discharge_ratio, false),
-        discharge_edge =  get(data, :discharge_edge, nothing),
-        existing_capacity = get(data, :existing_capacity, 0.0),
-        fixed_om_cost = get(data, :fixed_om_cost, 0.0),
-        investment_cost = get(data, :investment_cost, 0.0),
-        loss_fraction = get(data, :loss_fraction, 0.0),
-        max_capacity = get(data, :max_capacity, Inf),
-        max_duration = get(data, :max_duration, 0.0),
-        max_storage_level = get(data, :max_storage_level, 0.0),
-        min_capacity = get(data, :min_capacity, 0.0),
-        min_duration = get(data, :min_duration, 0.0),
-        min_outflow_fraction = get(data, :min_outflow_fraction, 0.0),
-        min_storage_level = get(data, :min_storage_level, 0.0),
-        spillage_edge = get(data, :spillage_edge, nothing),
+        id=id,
+        timedata=time_data,
+        filtered_data...
     )
     return _storage
 end
