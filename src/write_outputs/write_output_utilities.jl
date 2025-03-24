@@ -313,6 +313,82 @@ function convert_to_dataframe(data::Vector{<:Tuple}, header::Vector)
     DataFrame(data, header)
 end
 
+"""
+    reshape_wide(df::DataFrame; variable_col::Symbol=:variable, value_col::Symbol=:value)
+
+Reshape a DataFrame from long to wide format.
+
+# Arguments
+- `df::DataFrame`: Input DataFrame
+- `variable_col::Symbol`: Column name containing variable names
+- `value_col::Symbol`: Column name containing values
+
+# Examples
+```julia
+df_long = DataFrame(id=[1,1,2,2], variable=[:a,:b,:a,:b], value=[10,30,20,40])
+df_wide = reshape_wide(df_long)
+```
+"""
+function reshape_wide(df::DataFrame, variable_col::Symbol=:variable, value_col::Symbol=:value)
+    if !all(col -> col ∈ propertynames(df), [variable_col, value_col])
+        throw(ArgumentError("DataFrame must contain '$variable_col' and '$value_col' columns for wide format"))
+    end
+    return unstack(df, variable_col, value_col)
+end
+
+"""
+    reshape_wide(df::DataFrame, id_cols::Union{Vector{Symbol},Symbol}, variable_col::Symbol, value_col::Symbol)
+
+Reshape a DataFrame from long to wide format.
+
+# Arguments
+- `df::DataFrame`: DataFrame in long format to be reshaped
+- `id_cols::Union{Vector{Symbol},Symbol}`: Column(s) to use as identifiers
+- `variable_col::Symbol`: Column containing variable names that will become new columns
+- `value_col::Symbol`: Column containing values that will fill the new columns
+
+# Returns
+- `DataFrame`: Reshaped DataFrame in wide format
+
+# Throws
+- `ArgumentError`: If required columns are not present in the DataFrame
+
+# Examples
+```julia
+df_wide = reshape_wide(df, :year, :variable, :value)
+```
+"""
+function reshape_wide(df::DataFrame, id_cols::Union{Vector{Symbol},Symbol}, variable_col::Symbol, value_col::Symbol)
+    if !all(col -> col ∈ propertynames(df), [variable_col, value_col])
+        throw(ArgumentError("DataFrame must contain '$variable_col' and '$value_col' columns for wide format"))
+    end
+    return unstack(df, id_cols, variable_col, value_col)
+end
+
+"""
+    reshape_long(df::DataFrame; id_cols::Vector{Symbol}=Symbol[], view::Bool=true)
+
+Reshape a DataFrame from wide to long format.
+
+# Arguments
+- `df::DataFrame`: Input DataFrame
+- `id_cols::Vector{Symbol}`: Columns to use as identifiers when stacking
+- `view::Bool`: Whether to return a view of the DataFrame instead of a copy
+
+# Examples
+```julia
+df_wide = DataFrame(id=[1,2], a=[10,20], b=[30,40])
+df_long = reshape_long(df_wide, :time, :component_id, :value)
+```
+"""
+function reshape_long(df::DataFrame; id_cols::Vector{Symbol}=Symbol[], view::Bool=true)
+    if isempty(id_cols)
+        return stack(df, view=view)
+    else
+        return stack(df, Not(id_cols), view=view)
+    end
+end
+
 # Function to collect the results from a system and write them to a CSV file
 """
     write_results(file_path::AbstractString, system::System, model::Model)
@@ -346,7 +422,11 @@ function write_results(file_path::AbstractString, system::System, model::Model)
 end
 
 """
-    write_dataframe(file_path::AbstractString, df::AbstractDataFrame)
+    write_dataframe(
+        file_path::AbstractString, 
+        df::AbstractDataFrame, 
+        drop_cols::Vector{<:AbstractString}=String[]
+    )
 
 Write a DataFrame to a file in the appropriate format based on file extension.
 Supported formats: .csv, .csv.gz, .parquet
@@ -354,8 +434,13 @@ Supported formats: .csv, .csv.gz, .parquet
 # Arguments
 - `file_path::AbstractString`: Path where to save the file
 - `df::AbstractDataFrame`: DataFrame to write
+- `drop_cols::Vector{<:AbstractString}`: Columns to drop from the DataFrame
 """
-function write_dataframe(file_path::AbstractString, df::AbstractDataFrame)
+function write_dataframe(
+    file_path::AbstractString,
+    df::AbstractDataFrame,
+    drop_cols::Vector{<:AbstractString}=String[]
+)
     # Extract file extension and check if supported in Macro
     extension = lowercase(splitext(file_path)[2])
     # Create a map (supported_formats => write functions)
@@ -364,7 +449,7 @@ function write_dataframe(file_path::AbstractString, df::AbstractDataFrame)
         ".csv.gz" => (path, data) -> write_csv(path, data, true),
         ".parquet" => write_parquet
     )
-    
+
     # Validate file extension
     if !any(ext -> endswith(file_path, ext), keys(supported_formats))
         throw(ArgumentError("Unsupported file extension: $extension. Supported formats: $(join(keys(supported_formats), ", "))"))
@@ -372,9 +457,13 @@ function write_dataframe(file_path::AbstractString, df::AbstractDataFrame)
 
     # Get the appropriate writer function
     writer = first(writer for (ext, writer) in supported_formats if endswith(file_path, ext))
+
+    # Drop the columns specified by the user
+    select!(df, Not(Symbol.(drop_cols)))
+
     # Write the DataFrame using the appropriate writer function
     writer(file_path, df)
-    
+
     return nothing
 end
 
@@ -460,15 +549,350 @@ julia> output_path = find_available_path(path)
 """
 function find_available_path(path::String, basename::String="results"; max_attempts::Int=999)
     path = abspath(path) # expand path to the full path
-    
+
     for i in 1:max_attempts
         dir_name = "$(basename)_$(lpad(i, 3, '0'))"
         full_path = joinpath(path, dir_name)
-        
+
         if !isdir(full_path)
             return full_path
         end
     end
-    
+
     error("Could not find available directory after $max_attempts attempts")
+end
+
+"""
+    get_output_layout(system::System, variable::Union{Nothing,Symbol}=nothing)::String
+
+Get the output layout ("wide" or "long") for a specific variable from system settings.
+
+# Arguments
+- `system::System`: System containing output layout settings
+- `variable::Union{Nothing,Symbol}=nothing`: Variable to get layout for (e.g., :Cost, :Flow)
+
+# Returns
+String indicating layout format: "wide" or "long"
+
+# Settings Format
+The `OutputLayout` setting can be specified in three ways:
+
+1. Global string setting:
+   ```julia
+   settings = (OutputLayout="wide",)  # Same layout for all variables
+   ```
+
+2. Per-variable settings using NamedTuple:
+   ```julia
+   settings = (OutputLayout=(Cost="wide", Flow="long"),)
+   ```
+
+3. Default behavior:
+   - Returns "long" if setting is missing or invalid
+   - Logs warning for unsupported types or missing variables
+
+# Examples
+```julia
+# Global layout
+system = System(settings=(OutputLayout="wide",))
+get_output_layout(system, :Cost)  # Returns "wide"
+
+# Per-variable layout
+system = System(settings=(OutputLayout=(Cost="wide", Flow="long"),))
+get_output_layout(system, :Cost)  # Returns "wide"
+get_output_layout(system, :Flow)  # Returns "long"
+get_output_layout(system, :Other) # Returns "long" with warning
+```
+"""
+function get_output_layout(system::System, variable::Union{Nothing,Symbol}=nothing)::String
+    output_layout = system.settings.OutputLayout
+
+    # String layouts supported are "wide" and "long"
+    if isa(output_layout, String)
+        @debug "Using output layout $output_layout"
+        return output_layout
+    end
+
+    if isnothing(variable)
+        @warn "OutputLayout in settings does not have a variable key. Using 'long' as default."
+        return "long"
+    end
+
+    # Handle NamedTuple case (per-file settings)
+    if isa(output_layout, NamedTuple)
+        if !haskey(output_layout, variable)
+            @warn "OutputLayout in settings does not have a $variable key. Using 'long' as default."
+        end
+        layout = get(output_layout, variable, "long")
+        @debug "Using output layout $layout for variable $variable"
+        return layout
+    end
+
+    # Handle unknown types
+    @warn "OutputLayout type $(typeof(output_layout)) not supported. Using 'long' as default."
+    return "long"
+end
+
+"""
+    filter_edges_by_commodity!(edges::Vector{AbstractEdge}, commodity::Union{Symbol,Vector{Symbol}}, edge_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}=Dict{Symbol,Base.RefValue{<:AbstractAsset}}())
+
+Filter the edges by commodity and update the edge_asset_map to match the filtered edges (optional).
+
+# Arguments
+- `edges::Vector{AbstractEdge}`: The edges to filter
+- `commodity::Union{Symbol,Vector{Symbol}}`: The commodity to filter by
+- `edge_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}`: The edge_asset_map to update (optional)
+
+# Effects
+- Modifies `edges` in-place to keep only edges matching the commodity type
+- If `edge_asset_map` is provided, filters it to match remaining edges
+
+# Example
+```julia
+filter_edges_by_commodity!(edges, :Electricity)
+filter_edges_by_commodity!(edges, [:Electricity, :NaturalGas], edge_asset_map)
+```
+
+"""
+function filter_edges_by_commodity!(
+    edges::Vector{AbstractEdge},
+    commodity::Union{Symbol,Vector{Symbol}},
+    edge_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}=Dict{Symbol,Base.RefValue{<:AbstractAsset}}()
+)
+    @debug "Filtering edges by commodity $commodity"
+
+    # convert commodity to vector if it is a symbol
+    commodity = isa(commodity, Symbol) ? [commodity] : commodity
+
+    # convert commodity from a Vector{Symbol} to a Vector{DataType}
+    macro_commodities = commodity_types()
+    if !all(c -> c ∈ keys(macro_commodities), commodity)
+        throw(ArgumentError("Commodity $commodity not found in the system.\n" *
+                            "Available commodities are $macro_commodities"))
+    end
+    commodities = Set(macro_commodities[c] for c in commodity)
+
+    # filter edges by commodity
+    filter!(e -> commodity_type(e) in commodities, edges)
+
+    # filter edge_asset_map to match the filtered edges
+    if !isempty(edge_asset_map)
+        edge_ids = Set(id.(edges)) # caching for performance
+        filter!(pair -> pair[1] in edge_ids, edge_asset_map)
+    end
+
+    return nothing
+end
+
+"""
+    filter_edges_by_asset_type!(edges::Vector{AbstractEdge}, asset_type::Union{Symbol,Vector{Symbol}}, edge_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}})
+
+Filter edges and their associated assets by asset type.
+
+# Arguments
+- `edges::Vector{AbstractEdge}`: Edges to filter
+- `asset_type::Union{Symbol,Vector{Symbol}}`: Target asset type(s)
+- `edge_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}`: Mapping of edges to assets
+
+# Effects
+- Modifies `edges` in-place to keep only edges matching the asset type
+- Modifies `edge_asset_map` to keep only matching assets
+
+# Throws
+- `ArgumentError`: If none of the requested asset types are found in the system
+
+# Example
+```julia
+filter_edges_by_asset_type!(edges, :Battery, edge_asset_map)
+```
+"""
+function filter_edges_by_asset_type!(
+    edges::Vector{AbstractEdge},
+    asset_type::Union{Symbol,Vector{Symbol}},
+    edge_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}
+)
+    @debug "Filtering edges by asset type $asset_type"
+
+    # convert asset_type to vector if it is a symbol
+    asset_type = isa(asset_type, Symbol) ? [asset_type] : asset_type
+
+    # check if the asset_type is available in the system
+    available_types = unique(get_type(asset) for asset in values(edge_asset_map))
+    if !any(t -> t ∈ available_types, asset_type)
+        throw(ArgumentError(
+            "Asset type(s) $asset_type not found in the system.\n" *
+            "Available types are $available_types"
+        ))
+    end
+
+    # filter asset map by type (done first as it's used for edge filtering)
+    filter!(pair -> get_type(pair[2]) in asset_type, edge_asset_map)
+
+    # filter edges according to new edge_asset_map
+    filter!(e -> id(e) in keys(edge_asset_map), edges)
+
+    return nothing
+end
+
+function has_wildcard(s::AbstractString)
+    return endswith(s, "*")
+end
+
+function has_wildcard(s::Symbol)
+    return endswith(string(s), "*")
+end
+
+"""
+    search_commodities(commodities, available_commodities)
+
+Search for commodity types in a list of available commodities, supporting wildcards and subtypes.
+
+# Arguments
+- `commodities::Union{AbstractString,Vector{<:AbstractString}}`: Commodity type(s) to search for
+- `available_commodities::Vector{<:AbstractString}`: Available commodity types to search from
+
+# Returns
+Tuple of two vectors:
+1. `Vector{Symbol}`: Found commodity types
+2. `Vector{Symbol}`: Missing commodity types (only if no matches found)
+
+# Pattern Matching
+Supports two types of matches:
+1. Exact match: `"Electricity"` matches only `"Electricity"`
+2. Wildcard match: `"CO2*"` matches both `CO2` and its subtypes (e.g., `CO2Captured`)
+
+# Examples
+```julia
+# Available commodities
+commodities = ["Electricity", "CO2", "CO2Captured"]
+
+# Exact match
+found, missing = search_commodities("Electricity", commodities)
+# found = [:Electricity], missing = []
+
+# Wildcard match
+found, missing = search_commodities("CO2*", commodities)
+# found = [:CO2, :CO2Captured], missing = []
+
+# Multiple types
+found, missing = search_commodities(["Electricity", "Heat"], commodities)
+# found = [:Electricity], missing = [:Heat]
+```
+
+!!! note 
+    Wildcard searches check against registered commodity types in MacroEnergy.jl.
+"""
+function search_commodities(
+    commodities::Union{AbstractString,Vector{<:AbstractString}},
+    available_commodities::Vector{<:AbstractString}
+)
+    commodities = isa(commodities, AbstractString) ? [commodities] : commodities
+    macro_commodity_types = commodity_types()
+    final_commodities = Set{Symbol}()
+    missed_commodites = Set{Symbol}()
+    for c in commodities
+        wildcard_search = has_wildcard(c)
+        if wildcard_search
+            c = c[1:end-1]
+            c_sym = Symbol(c)
+            if !haskey(macro_commodity_types, c_sym)
+                continue
+            end
+            c_datatype = macro_commodity_types[c_sym]
+            # Find all commodities which start with the part before the wildcard
+            union!(final_commodities, typesymbol.(Set{DataType}([c_datatype, subtypes(c_datatype)...])))
+        end
+        # Add the commodity itself, if it's in the dataframe
+        if c in available_commodities
+            push!(final_commodities, Symbol(c))
+        elseif !wildcard_search
+            push!(missed_commodites, Symbol(c))
+        end
+    end
+    # Final check to make sure the commodities are in the system
+    final_commodities = intersect(final_commodities, Set(Symbol.(available_commodities)))
+    return collect(final_commodities), collect(missed_commodites)
+end
+
+"""
+    search_assets(asset_type, available_types)
+
+Search for asset types in a list of available assets, supporting wildcards and parametric types.
+
+# Arguments
+- `asset_type::Union{AbstractString,Vector{<:AbstractString}}`: Type(s) to search for
+- `available_types::Vector{<:AbstractString}`: Available asset types to search from
+
+# Returns
+Tuple of two vectors:
+1. `Vector{Symbol}`: Found asset types
+2. `Vector{Symbol}`: Missing asset types (only if no matches found)
+
+# Pattern Matching
+Supports three types of matches:
+1. Exact match: `"Battery"` matches `"Battery"`
+2. Parametric match: `"ThermalPower"` matches `"ThermalPower{Fuel}"`
+3. Wildcard match: `"ThermalPower*"` matches both `"ThermalPower{Fuel}"` and `"ThermalPowerCCS{Fuel}"`
+
+# Examples
+```julia
+# Available assets
+assets = ["Battery", "ThermalPower{Coal}", "ThermalPower{Gas}"]
+
+# Exact match
+found, missing = search_assets("Battery", assets)
+# found = [:Battery], missing = []
+
+# Parametric match
+found, missing = search_assets("ThermalPower", assets)
+# found = [:ThermalPower{Coal}, :ThermalPower{Gas}], missing = []
+
+# Wildcard match
+found, missing = search_assets("ThermalPower*", assets)
+# found = [:ThermalPower{Coal}, :ThermalPower{Gas}], missing = []
+
+# Multiple types
+found, missing = search_assets(["Battery", "Solar"], assets)
+# found = [:Battery], missing = [:Solar]
+```
+"""
+function search_assets(
+    asset_type::Union{AbstractString,Vector{<:AbstractString}},
+    available_types::Vector{<:AbstractString}
+)
+    asset_type = isa(asset_type, AbstractString) ? [asset_type] : asset_type
+    final_asset_types = Set{Symbol}()
+    missed_asset_types = Set{Symbol}()
+    
+    for a in asset_type
+        found_any = false
+        wildcard_search = has_wildcard(a)
+        
+        if wildcard_search
+            a = a[1:end-1]
+            # Find all asset types which start with the part before the wildcard
+            matches = Symbol.(available_types[startswith.(available_types, Ref(a))])
+            # Add the asset types, accounting for parametric commodities
+            union!(final_asset_types, matches)
+            found_any = !isempty(matches)
+        end
+        
+        # Add the parametric types
+        parametric_matches = Symbol.(available_types[startswith.(available_types, Ref(a * "{"))])
+        union!(final_asset_types, parametric_matches)
+        found_any = found_any || !isempty(parametric_matches)
+        
+        # Add the asset types itself, if they're in the dataframe
+        if a in available_types
+            push!(final_asset_types, Symbol(a))
+            found_any = true
+        end
+        
+        # Only add to missed if we found no matches at all
+        if !found_any && !wildcard_search
+            push!(missed_asset_types, Symbol(a))
+        end
+    end
+    
+    return collect(final_asset_types), collect(missed_asset_types)
 end

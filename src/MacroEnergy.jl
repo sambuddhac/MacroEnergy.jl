@@ -209,10 +209,10 @@ export AbstractAsset,
     Transformation,
     Uranium,
     VRE,
-    write_capacity_results,
+    write_capacity,
     write_costs,
     write_dataframe,
-    write_flow_results,
+    write_flow,
     write_results
     
 end # module MacroEnergy
