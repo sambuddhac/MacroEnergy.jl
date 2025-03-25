@@ -77,8 +77,6 @@ function make(asset_type::Type{MustRun}, data::AbstractDict{Symbol,Any}, system:
         elec_start_node,
         elec_end_node,
     )
-    elec_edge.constraints = get(elec_edge_data, :constraints, [MustRunConstraint()])
-    elec_edge.unidirectional = get(elec_edge_data, :unidirectional, true)
 
     return asset_type(id, mustrun_transform, elec_edge)
 end

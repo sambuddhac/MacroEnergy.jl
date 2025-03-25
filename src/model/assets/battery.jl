@@ -10,6 +10,7 @@ function default_data(::Type{Battery}, id=missing,)
         :id => id,
         :storage => @storage_data(
             :commodity => "Electricity",
+            :can_expand => true,
             :can_retire => true,
             :constraints => Dict{Symbol,Bool}(
                 :BalanceConstraint => true,
@@ -30,8 +31,7 @@ function default_data(::Type{Battery}, id=missing,)
                 :can_retire => true,
                 :constraints => Dict{Symbol,Bool}(
                     :CapacityConstraint => true,
-                    :StorageDischargeLimitConstraint => true,
-                    :RampingLimitConstraint => false
+                    :StorageDischargeLimitConstraint => true
                 )
             )
         )
@@ -92,18 +92,11 @@ function make(asset_type::Type{Battery}, data::AbstractDict{Symbol,Any}, system:
     )
     commodity_symbol = Symbol(storage_data[:commodity])
     commodity = commodity_types()[commodity_symbol]
-    default_constraints = [
-        BalanceConstraint(),
-        StorageCapacityConstraint(),
-        StorageSymmetricCapacityConstraint(),
-    ]
+
     # Check if the storage is a long duration storage
     long_duration = get(storage_data, :long_duration, false)
     StorageType = long_duration ? LongDurationStorage : Storage
-    # If storage is long duration, add the corresponding constraint
-    if long_duration
-        push!(default_constraints, LongDurationStorageImplicitMinMaxConstraint())
-    end
+    
     # Create the storage component of the battery
     battery_storage = StorageType(
         Symbol(id, "_", storage_key),
@@ -111,7 +104,11 @@ function make(asset_type::Type{Battery}, data::AbstractDict{Symbol,Any}, system:
         system.time_data[commodity_symbol],
         commodity,
     )
-    battery_storage.constraints = get(storage_data, :constraints, default_constraints)
+
+    # If storage is long duration, add the implicit min-max constraint
+    if long_duration
+        push!(battery_storage.constraints, LongDurationStorageImplicitMinMaxConstraint())
+    end
 
     ## Charge data of the battery
     charge_edge_key = :charge_edge
@@ -139,7 +136,6 @@ function make(asset_type::Type{Battery}, data::AbstractDict{Symbol,Any}, system:
         charge_start_node,
         charge_end_node,
     )
-    battery_charge.unidirectional = get(charge_edge_data, :unidirectional, true)
 
     ## Discharge output of the battery
     discharge_edge_key = :discharge_edge
@@ -166,15 +162,10 @@ function make(asset_type::Type{Battery}, data::AbstractDict{Symbol,Any}, system:
         discharge_start_node,
         discharge_end_node,
     )
-    battery_discharge.constraints = get(
-        discharge_edge_data,
-        :constraints,
-        [CapacityConstraint(), StorageDischargeLimitConstraint(), RampingLimitConstraint()],
-    )
-    battery_discharge.unidirectional = get(discharge_edge_data, :unidirectional, true)
 
     battery_storage.discharge_edge = battery_discharge
     battery_storage.charge_edge = battery_charge
+    
     discharge_efficiency = get_from([
             (discharge_edge_data, :discharge_efficiency),
             (discharge_edge_data, :efficiency)

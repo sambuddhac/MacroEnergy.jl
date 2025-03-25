@@ -73,7 +73,7 @@ function make(asset_type::Type{BECCSNaturalGas}, data::AbstractDict{Symbol,Any},
     beccs_transform = Transformation(;
         id = Symbol(id, "_", beccs_transform_key),
         timedata = system.time_data[Symbol(transform_data[:timedata])],
-        constraints = get(transform_data, :constraints, [BalanceConstraint()]),
+        constraints = transform_data[:constraints],
     )
 
     biomass_edge_key = :biomass_edge
@@ -104,8 +104,6 @@ function make(asset_type::Type{BECCSNaturalGas}, data::AbstractDict{Symbol,Any},
         biomass_start_node,
         biomass_end_node,
     )
-    biomass_edge.constraints = get(biomass_edge_data, :constraints, [CapacityConstraint()])
-    biomass_edge.unidirectional = get(biomass_edge_data, :unidirectional, true)
 
     natgas_edge_key = :natgas_edge
     @process_data(
@@ -132,9 +130,6 @@ function make(asset_type::Type{BECCSNaturalGas}, data::AbstractDict{Symbol,Any},
         natgas_start_node,
         natgas_end_node,
     )
-    natgas_edge.constraints = Vector{AbstractTypeConstraint}()
-    natgas_edge.unidirectional = true;
-    natgas_edge.has_capacity = false;
 
     elec_edge_key = :elec_edge
     @process_data(
@@ -161,9 +156,6 @@ function make(asset_type::Type{BECCSNaturalGas}, data::AbstractDict{Symbol,Any},
         elec_start_node,
         elec_end_node,
     )
-    elec_edge.constraints = Vector{AbstractTypeConstraint}()
-    elec_edge.unidirectional = true;
-    elec_edge.has_capacity = false;
 
     co2_edge_key = :co2_edge
     @process_data(
@@ -190,9 +182,6 @@ function make(asset_type::Type{BECCSNaturalGas}, data::AbstractDict{Symbol,Any},
         co2_start_node,
         co2_end_node,
     )
-    co2_edge.constraints = Vector{AbstractTypeConstraint}()
-    co2_edge.unidirectional = true;
-    co2_edge.has_capacity = false;
 
     co2_emission_edge_key = :co2_emission_edge
     @process_data(
@@ -219,9 +208,6 @@ function make(asset_type::Type{BECCSNaturalGas}, data::AbstractDict{Symbol,Any},
         co2_emission_start_node,
         co2_emission_end_node,
     )
-    co2_emission_edge.constraints = Vector{AbstractTypeConstraint}()
-    co2_emission_edge.unidirectional = true;
-    co2_emission_edge.has_capacity = false;
 
     co2_captured_edge_key = :co2_captured_edge
     @process_data(
@@ -248,9 +234,6 @@ function make(asset_type::Type{BECCSNaturalGas}, data::AbstractDict{Symbol,Any},
         co2_captured_start_node,
         co2_captured_end_node,
     )
-    co2_captured_edge.constraints = Vector{AbstractTypeConstraint}()
-    co2_captured_edge.unidirectional = true;
-    co2_captured_edge.has_capacity = false;
 
     beccs_transform.balance_data = Dict(
         :natgas_production => Dict(

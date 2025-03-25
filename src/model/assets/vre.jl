@@ -111,8 +111,6 @@ function make(asset_type::Type{<:VRE}, data::AbstractDict{Symbol,Any}, system::S
         elec_start_node,
         elec_end_node,
     )
-    elec_edge.constraints = get(elec_edge_data, :constraints, [CapacityConstraint()])
-    elec_edge.unidirectional = get(elec_edge_data, :unidirectional, true)
 
     return asset_type(id, vre_transform, elec_edge)
 end

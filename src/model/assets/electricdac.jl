@@ -56,7 +56,7 @@ function make(asset_type::Type{ElectricDAC}, data::AbstractDict{Symbol,Any}, sys
     electricdac_transform = Transformation(;
         id=Symbol(id, "_", electricdac_key),
         timedata=system.time_data[Symbol(transform_data[:timedata])],
-        constraints=get(transform_data, :constraints, [BalanceConstraint()]),
+        constraints=transform_data[:constraints],
     )
 
     co2_edge_key = :co2_edge
@@ -85,8 +85,6 @@ function make(asset_type::Type{ElectricDAC}, data::AbstractDict{Symbol,Any}, sys
         co2_start_node,
         co2_end_node,
     )
-    co2_edge.constraints = get(co2_edge_data, :constraints, [CapacityConstraint()])
-    co2_edge.unidirectional = get(co2_edge_data, :unidirectional, true)
 
     elec_edge_key = :elec_edge
     @process_data(
@@ -113,8 +111,6 @@ function make(asset_type::Type{ElectricDAC}, data::AbstractDict{Symbol,Any}, sys
         elec_start_node,
         elec_end_node,
     )
-    elec_edge.constraints = get(elec_edge_data, :constraints, Vector{AbstractTypeConstraint}())
-    elec_edge.unidirectional = get(elec_edge_data, :unidirectional, true)
 
     co2_captured_edge_key = :co2_captured_edge
     @process_data(
@@ -141,8 +137,6 @@ function make(asset_type::Type{ElectricDAC}, data::AbstractDict{Symbol,Any}, sys
         co2_captured_start_node,
         co2_captured_end_node,
     )
-    co2_captured_edge.constraints = get(co2_captured_edge_data, :constraints, Vector{AbstractTypeConstraint}())
-    co2_captured_edge.unidirectional = get(co2_captured_edge_data, :unidirectional, true)
 
     electricdac_transform.balance_data = Dict(
         :energy => Dict(

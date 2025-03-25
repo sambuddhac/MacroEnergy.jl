@@ -100,8 +100,6 @@ function make(asset_type::Type{NaturalGasDAC}, data::AbstractDict{Symbol,Any}, s
         co2_start_node,
         co2_end_node,
     )
-    co2_edge.constraints = get(co2_edge_data, :constraints, [CapacityConstraint()])
-    co2_edge.unidirectional = get(co2_edge_data, :unidirectional, true)
 
     co2_emission_edge_key = :co2_emission_edge
     @process_data(
@@ -128,9 +126,6 @@ function make(asset_type::Type{NaturalGasDAC}, data::AbstractDict{Symbol,Any}, s
         co2_emission_start_node,
         co2_emission_end_node,
     )
-    co2_emission_edge.constraints = Vector{AbstractTypeConstraint}()
-    co2_emission_edge.unidirectional = true;
-    co2_emission_edge.has_capacity = false;
 
     natgas_edge_key = :natgas_edge
     @process_data(
@@ -157,9 +152,6 @@ function make(asset_type::Type{NaturalGasDAC}, data::AbstractDict{Symbol,Any}, s
         natgas_start_node,
         natgas_end_node,
     )
-    natgas_edge.constraints = get(natgas_edge_data, :constraints, Vector{AbstractTypeConstraint}())
-    natgas_edge.unidirectional = true;
-    natgas_edge.has_capacity = false;
 
     elec_edge_key = :elec_edge
     @process_data(
@@ -186,9 +178,6 @@ function make(asset_type::Type{NaturalGasDAC}, data::AbstractDict{Symbol,Any}, s
         elec_start_node,
         elec_end_node,
     )
-    elec_edge.constraints = Vector{AbstractTypeConstraint}()
-    elec_edge.unidirectional = true;
-    elec_edge.has_capacity = false;
 
     co2_captured_edge_key = :co2_captured_edge
     @process_data(
@@ -215,9 +204,6 @@ function make(asset_type::Type{NaturalGasDAC}, data::AbstractDict{Symbol,Any}, s
         co2_captured_start_node,
         co2_captured_end_node,
     )
-    co2_captured_edge.constraints = Vector{AbstractTypeConstraint}()
-    co2_captured_edge.unidirectional = true;
-    co2_captured_edge.has_capacity = false;
 
     natgasdac_transform.balance_data = Dict(
         :elec_production => Dict(

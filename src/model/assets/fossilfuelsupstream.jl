@@ -68,7 +68,7 @@ function make(asset_type::Type{FossilFuelsUpstream}, data::AbstractDict{Symbol,A
     fossilfuelsupstream_transform = Transformation(;
         id = Symbol(id, "_", fuelfossilupstream_key),
         timedata = system.time_data[Symbol(transform_data[:timedata])],
-        constraints = get(transform_data, :constraints, [BalanceConstraint()]),
+        constraints = transform_data[:constraints],
     )
 
     fossil_fuel_edge_key = :fossil_fuel_edge
@@ -98,7 +98,6 @@ function make(asset_type::Type{FossilFuelsUpstream}, data::AbstractDict{Symbol,A
         fossil_fuel_start_node,
         fossil_fuel_end_node,
     )
-    fossil_fuel_edge.unidirectional = true;
 
     fuel_edge_key = :fuel_edge
     @process_data(
@@ -127,7 +126,6 @@ function make(asset_type::Type{FossilFuelsUpstream}, data::AbstractDict{Symbol,A
         fuel_start_node,
         fuel_end_node,
     )
-    fuel_edge.unidirectional = true;
 
     co2_edge_key = :co2_edge
     @process_data(
@@ -154,9 +152,6 @@ function make(asset_type::Type{FossilFuelsUpstream}, data::AbstractDict{Symbol,A
         co2_start_node,
         co2_end_node,
     )
-    co2_edge.constraints = Vector{AbstractTypeConstraint}()
-    co2_edge.unidirectional = true;
-    co2_edge.has_capacity = false;
 
     fossilfuelsupstream_transform.balance_data = Dict(
         :fuel => Dict(

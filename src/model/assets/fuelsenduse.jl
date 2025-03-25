@@ -54,7 +54,7 @@ function make(asset_type::Type{FuelsEndUse}, data::AbstractDict{Symbol,Any}, sys
     fuelsenduse_transform = Transformation(;
         id = Symbol(id, "_", FuelsEndUse_key),
         timedata = system.time_data[Symbol(transform_data[:timedata])],
-        constraints = get(transform_data, :constraints, [BalanceConstraint()]),
+        constraints = transform_data[:constraints],
     )
 
     fuel_edge_key = :fuel_edge
@@ -84,7 +84,6 @@ function make(asset_type::Type{FuelsEndUse}, data::AbstractDict{Symbol,Any}, sys
         fuel_start_node,
         fuel_end_node,
     )
-    fuel_edge.unidirectional = true;
 
     fuel_demand_edge_key = :fuel_demand_edge
     @process_data(
@@ -111,7 +110,6 @@ function make(asset_type::Type{FuelsEndUse}, data::AbstractDict{Symbol,Any}, sys
         fuel_demand_start_node,
         fuel_demand_end_node,
     )
-    fuel_demand_edge.unidirectional = true;
 
     co2_edge_key = :co2_edge
     @process_data(
@@ -138,9 +136,6 @@ function make(asset_type::Type{FuelsEndUse}, data::AbstractDict{Symbol,Any}, sys
         co2_start_node,
         co2_end_node,
     )
-    co2_edge.constraints = Vector{AbstractTypeConstraint}()
-    co2_edge.unidirectional = true;
-    co2_edge.has_capacity = false;
 
     fuelsenduse_transform.balance_data = Dict(
         :fuel_demand => Dict(

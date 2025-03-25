@@ -51,7 +51,7 @@ function make(asset_type::Type{CO2Injection}, data::AbstractDict{Symbol,Any}, sy
     co2injection_transform = Transformation(;
         id = Symbol(id, "_", co2injection_key),
         timedata = system.time_data[Symbol(transform_data[:timedata])],
-        constraints = get(transform_data, :constraints, [BalanceConstraint()]),
+        constraints = transform_data[:constraints],
     )
 
     co2_captured_edge_key = :co2_captured_edge
@@ -80,8 +80,6 @@ function make(asset_type::Type{CO2Injection}, data::AbstractDict{Symbol,Any}, sy
         co2_captured_start_node,
         co2_captured_end_node,
     )
-    co2_captured_edge.constraints = get(co2_captured_edge_data, :constraints, [CapacityConstraint()])
-    co2_captured_edge.unidirectional = get(co2_captured_edge_data, :unidirectional, true)
 
     co2_storage_edge_key = :co2_storage_edge
     @process_data(
@@ -108,9 +106,6 @@ function make(asset_type::Type{CO2Injection}, data::AbstractDict{Symbol,Any}, sy
         co2_storage_start_node,
         co2_storage_end_node,
     )
-    co2_storage_edge.constraints = Vector{AbstractTypeConstraint}()
-    co2_storage_edge.unidirectional = true;
-    co2_storage_edge.has_capacity = false;
 
     co2injection_transform.balance_data = Dict(
         :co2_injection_to_storage => Dict(

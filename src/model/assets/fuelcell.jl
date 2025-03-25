@@ -78,7 +78,7 @@ function make(asset_type::Type{FuelCell}, data::AbstractDict{Symbol,Any}, system
     fuelcell = Transformation(;
         id = Symbol(id, "_", fuelcell_key),
         timedata = system.time_data[Symbol(transform_data[:timedata])],
-        constraints = get(transform_data, :constraints, [BalanceConstraint()]),
+        constraints = transform_data[:constraints],
     )
 
     elec_edge_key = :elec_edge
@@ -107,8 +107,6 @@ function make(asset_type::Type{FuelCell}, data::AbstractDict{Symbol,Any}, system
         elec_start_node,
         elec_end_node,
     )
-    elec_edge.constraints = get(elec_edge_data, :constraints, [CapacityConstraint()])
-    elec_edge.unidirectional = get(elec_edge_data, :unidirectional, true)
 
     h2_edge_key = :h2_edge
     @process_data(
@@ -135,7 +133,6 @@ function make(asset_type::Type{FuelCell}, data::AbstractDict{Symbol,Any}, system
         h2_start_node,
         h2_end_node,
     )
-    h2_edge.unidirectional = get(h2_edge_data, :unidirectional, true)
 
     fuelcell.balance_data = Dict(
         :energy => Dict(

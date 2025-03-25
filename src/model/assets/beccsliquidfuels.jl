@@ -88,7 +88,7 @@ function make(asset_type::Type{BECCSLiquidFuels}, data::AbstractDict{Symbol,Any}
     beccs_transform = Transformation(;
         id = Symbol(id, "_", beccs_transform_key),
         timedata = system.time_data[Symbol(transform_data[:timedata])],
-        constraints = get(transform_data, :constraints, [BalanceConstraint()]),
+        constraints = transform_data[:constraints],
     )
 
     biomass_edge_key = :biomass_edge
@@ -119,8 +119,6 @@ function make(asset_type::Type{BECCSLiquidFuels}, data::AbstractDict{Symbol,Any}
         biomass_start_node,
         biomass_end_node,
     )
-    biomass_edge.constraints = get(biomass_edge_data, :constraints, [CapacityConstraint()])
-    biomass_edge.unidirectional = get(biomass_edge_data, :unidirectional, true)
 
     gasoline_edge_key = :gasoline_edge
     @process_data(
@@ -149,9 +147,6 @@ function make(asset_type::Type{BECCSLiquidFuels}, data::AbstractDict{Symbol,Any}
         gasoline_start_node,
         gasoline_end_node,
     )
-    gasoline_edge.constraints = Vector{AbstractTypeConstraint}()
-    gasoline_edge.unidirectional = true;
-    gasoline_edge.has_capacity = false;
 
     jetfuel_edge_key = :jetfuel_edge
     @process_data(
@@ -180,9 +175,6 @@ function make(asset_type::Type{BECCSLiquidFuels}, data::AbstractDict{Symbol,Any}
         jetfuel_start_node,
         jetfuel_end_node,
     )
-    jetfuel_edge.constraints = Vector{AbstractTypeConstraint}()
-    jetfuel_edge.unidirectional = true;
-    jetfuel_edge.has_capacity = false;
 
     diesel_edge_key = :diesel_edge
     @process_data(
@@ -211,9 +203,6 @@ function make(asset_type::Type{BECCSLiquidFuels}, data::AbstractDict{Symbol,Any}
         diesel_start_node,
         diesel_end_node,
     )
-    diesel_edge.constraints = Vector{AbstractTypeConstraint}()
-    diesel_edge.unidirectional = true;
-    diesel_edge.has_capacity = false;
 
     elec_consumption_edge_key = :elec_consumption_edge
     @process_data(
@@ -240,9 +229,6 @@ function make(asset_type::Type{BECCSLiquidFuels}, data::AbstractDict{Symbol,Any}
         elec_start_node,
         elec_end_node,
     )
-    elec_consumption_edge.constraints = Vector{AbstractTypeConstraint}()
-    elec_consumption_edge.unidirectional = true;
-    elec_consumption_edge.has_capacity = false;
 
     elec_production_edge_key = :elec_production_edge
     @process_data(
@@ -269,9 +255,6 @@ function make(asset_type::Type{BECCSLiquidFuels}, data::AbstractDict{Symbol,Any}
         elec_start_node,
         elec_end_node,
     )
-    elec_production_edge.constraints = Vector{AbstractTypeConstraint}()
-    elec_production_edge.unidirectional = true;
-    elec_production_edge.has_capacity = false;
 
     co2_edge_key = :co2_edge
     @process_data(
@@ -298,9 +281,6 @@ function make(asset_type::Type{BECCSLiquidFuels}, data::AbstractDict{Symbol,Any}
         co2_start_node,
         co2_end_node,
     )
-    co2_edge.constraints = Vector{AbstractTypeConstraint}()
-    co2_edge.unidirectional = true;
-    co2_edge.has_capacity = false;
 
     co2_emission_edge_key = :co2_emission_edge
     @process_data(
@@ -327,9 +307,6 @@ function make(asset_type::Type{BECCSLiquidFuels}, data::AbstractDict{Symbol,Any}
         co2_emission_start_node,
         co2_emission_end_node,
     )
-    co2_emission_edge.constraints = Vector{AbstractTypeConstraint}()
-    co2_emission_edge.unidirectional = true;
-    co2_emission_edge.has_capacity = false;
 
     co2_captured_edge_key = :co2_captured_edge
     @process_data(
@@ -356,9 +333,6 @@ function make(asset_type::Type{BECCSLiquidFuels}, data::AbstractDict{Symbol,Any}
         co2_captured_start_node,
         co2_captured_end_node,
     )
-    co2_captured_edge.constraints = Vector{AbstractTypeConstraint}()
-    co2_captured_edge.unidirectional = true;
-    co2_captured_edge.has_capacity = false;
 
     beccs_transform.balance_data = Dict(
         :gasoline_production => Dict(

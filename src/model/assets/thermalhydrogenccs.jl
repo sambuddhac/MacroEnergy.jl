@@ -36,6 +36,7 @@ function default_data(::Type{ThermalHydrogenCCS}, id=missing)
                 :can_retire => true,
                 :constraints => Dict{Symbol, Bool}(
                     :CapacityConstraint => true,
+                    :RampingLimitConstraint => true
                 ),
             ),
             :fuel_edge => @edge_data(
@@ -153,9 +154,6 @@ function make(asset_type::Type{ThermalHydrogenCCS}, data::AbstractDict{Symbol,An
         elec_start_node,
         elec_end_node,
     )
-    elec_edge.has_capacity = false;
-    elec_edge.unidirectional = true;
-    elec_edge.constraints =  Vector{AbstractTypeConstraint}();
 
     h2_edge_key = :h2_edge
     @process_data(
@@ -175,44 +173,23 @@ function make(asset_type::Type{ThermalHydrogenCCS}, data::AbstractDict{Symbol,An
         Hydrogen,
         [(h2_edge_data, :end_vertex), (data, :location)],
     )
-    if h2_edge_data[:uc]==true
-        h2_edge = EdgeWithUC(
-            Symbol(id, "_", h2_edge_key),
-            h2_edge_data,
-            system.time_data[:Hydrogen],
-            Hydrogen,
-            h2_start_node,
-            h2_end_node,
-        )
-        h2_edge.constraints = get(
-            h2_edge_data,
-            :constraints,
-            [
-                CapacityConstraint(),
-                RampingLimitConstraint(),
-                MinUpTimeConstraint(),
-                MinDownTimeConstraint(),
-            ],
-        )
+    # Check if the edge has unit commitment constraints
+    has_uc = get(h2_edge_data, :uc, false)
+    EdgeType = has_uc ? EdgeWithUC : Edge
+    # Create the h2 edge with the appropriate type
+    h2_edge = EdgeType(
+        Symbol(id, "_", h2_edge_key),
+        h2_edge_data,
+        system.time_data[:Hydrogen],
+        Hydrogen,
+        h2_start_node,
+        h2_end_node,
+    )
+    if has_uc
+        push!(h2_edge.constraints, MinUpTimeConstraint())
+        push!(h2_edge.constraints, MinDownTimeConstraint())
         h2_edge.startup_fuel_balance_id = :energy
-    else
-        h2_edge = Edge(
-            Symbol(id, "_", h2_edge_key),
-            h2_edge_data,
-            system.time_data[:Hydrogen],
-            Hydrogen,
-            h2_start_node,
-            h2_end_node,
-        )
-        h2_edge.constraints = get(
-            h2_edge_data,
-            :constraints,
-            [
-                CapacityConstraint()
-            ],
-        )
     end
-    h2_edge.unidirectional = true;
     
 
     fuel_edge_key = :fuel_edge
@@ -242,7 +219,6 @@ function make(asset_type::Type{ThermalHydrogenCCS}, data::AbstractDict{Symbol,An
         fuel_start_node,
         fuel_end_node,
     )
-    fuel_edge.unidirectional = true;
 
     co2_edge_key = :co2_edge
     @process_data(
@@ -269,9 +245,6 @@ function make(asset_type::Type{ThermalHydrogenCCS}, data::AbstractDict{Symbol,An
         co2_start_node,
         co2_end_node,
     )
-    co2_edge.constraints = Vector{AbstractTypeConstraint}()
-    co2_edge.unidirectional = true;
-    co2_edge.has_capacity = false;
 
     co2_captured_edge_key = :co2_captured_edge
     @process_data(
@@ -298,9 +271,6 @@ function make(asset_type::Type{ThermalHydrogenCCS}, data::AbstractDict{Symbol,An
         co2_captured_start_node,
         co2_captured_end_node,
     )
-    co2_captured_edge.constraints = Vector{AbstractTypeConstraint}()
-    co2_captured_edge.unidirectional = true;
-    co2_captured_edge.has_capacity = false;
 
     thermalhydrogenccs_transform.balance_data = Dict(
         :energy => Dict(

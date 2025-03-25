@@ -11,6 +11,7 @@ function default_data(::Type{HydroRes}, id=missing)
         :id => id,
         :storage => @storage_data(
             :commodity => Electricity,
+            :charge_discharge_ratio => 1.0,
             :constraints => Dict{Symbol, Bool}(
                 :BalanceConstraint => true,
                 :StorageChargeDischargeRatioConstraint => true,
@@ -62,14 +63,9 @@ function make(asset_type::Type{HydroRes}, data::AbstractDict{Symbol,Any}, system
             (data, Symbol("storage_", key)),
         ]
     )
-    default_constraints = [BalanceConstraint(), StorageChargeDischargeRatioConstraint()]
     # check if the storage is a long duration storage
     long_duration = get(storage_data, :long_duration, false)
     StorageType = long_duration ? LongDurationStorage : Storage
-    # if storage is long duration, add the corresponding constraint
-    if long_duration
-        default_constraints = [BalanceConstraint(), StorageChargeDischargeRatioConstraint(), LongDurationStorageImplicitMinMaxConstraint()]
-    end
     # create the storage component of the hydro reservoir
     hydrostor = StorageType(
         Symbol(id, "_", storage_key),
@@ -77,7 +73,9 @@ function make(asset_type::Type{HydroRes}, data::AbstractDict{Symbol,Any}, system
         system.time_data[:Electricity],
         Electricity,
     )
-    hydrostor.constraints = get(storage_data, :constraints, default_constraints)
+    if long_duration
+        push!(hydrostor.constraints, LongDurationStorageImplicitMinMaxConstraint())
+    end
 
     discharge_edge_key = :discharge_edge
     @process_data(
@@ -104,9 +102,6 @@ function make(asset_type::Type{HydroRes}, data::AbstractDict{Symbol,Any}, system
         discharge_start_node,
         discharge_end_node,
     )
-    discharge_edge.unidirectional = true;
-    discharge_edge.has_capacity = true;
-    discharge_edge.constraints = get(discharge_edge_data, :constraints, Vector{AbstractTypeConstraint}());
 
     inflow_edge_key = :inflow_edge
     @process_data(
@@ -133,13 +128,10 @@ function make(asset_type::Type{HydroRes}, data::AbstractDict{Symbol,Any}, system
         inflow_start_node,
         inflow_end_node,
     )
-    inflow_edge.unidirectional = true;
-    inflow_edge.has_capacity = true;
     inflow_edge.can_retire = discharge_edge.can_retire;
     inflow_edge.can_expand = discharge_edge.can_expand;
     inflow_edge.existing_capacity = discharge_edge.existing_capacity;
     inflow_edge.capacity_size = discharge_edge.capacity_size;
-    inflow_edge.constraints = get(discharge_edge_data, :constraints,[MustRunConstraint()]); 
 
     spill_edge_key = :spill_edge
     @process_data(
@@ -167,9 +159,6 @@ function make(asset_type::Type{HydroRes}, data::AbstractDict{Symbol,Any}, system
         spill_start_node,
         spill_end_node,
     )
-    spill_edge.unidirectional = true;
-    spill_edge.has_capacity = false;
-    spill_edge.constraints = get(spill_edge_data, :constraints, Vector{AbstractTypeConstraint}());
 
     hydrostor.discharge_edge = discharge_edge
     hydrostor.charge_edge = inflow_edge

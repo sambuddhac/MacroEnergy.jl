@@ -30,6 +30,7 @@ function default_data(::Type{ThermalPower}, id=missing)
                 :can_retire => true,
                 :constraints => Dict{Symbol, Bool}(
                     :CapacityConstraint => true,
+                    :RampingLimitConstraint => true
                 ),
             ),
             :fuel_edge => @edge_data(
@@ -87,45 +88,24 @@ function make(asset_type::Type{ThermalPower}, data::AbstractDict{Symbol,Any}, sy
         Electricity,
         [(elec_edge_data, :end_vertex), (data, :location)],
     )
-    
-    if elec_edge_data[:uc]==true
-        elec_edge = EdgeWithUC(
-            Symbol(id, "_", elec_edge_key),
-            elec_edge_data,
-            system.time_data[:Electricity],
-            Electricity,
-            elec_start_node,
-            elec_end_node,
-        )
-        elec_edge.constraints = get(
-            elec_edge_data,
-            :constraints,
-            [
-                CapacityConstraint(),
-                RampingLimitConstraint(),
-                MinUpTimeConstraint(),
-                MinDownTimeConstraint(),
-            ],
-        )
+    # Check if the edge has unit commitment constraints
+    has_uc = get(elec_edge_data, :uc, false)
+    EdgeType = has_uc ? EdgeWithUC : Edge
+    # Create the elec edge with the appropriate type
+    elec_edge = EdgeType(
+        Symbol(id, "_", elec_edge_key),
+        elec_edge_data,
+        system.time_data[:Electricity],
+        Electricity,
+        elec_start_node,
+        elec_end_node,
+    )
+    if has_uc
+        push!(elec_edge.constraints, MinUpTimeConstraint())
+        push!(elec_edge.constraints, MinDownTimeConstraint())
         elec_edge.startup_fuel_balance_id = :energy
-    else
-        elec_edge = Edge(
-            Symbol(id, "_", elec_edge_key),
-            elec_edge_data,
-            system.time_data[:Electricity],
-            Electricity,
-            elec_start_node,
-            elec_end_node,
-        )
-        elec_edge.constraints = get(
-            elec_edge_data,
-            :constraints,
-            [
-                CapacityConstraint()
-            ],
-        )
     end
-    elec_edge.unidirectional = true;
+
     
     fuel_edge_key = :fuel_edge
     @process_data(
@@ -154,7 +134,6 @@ function make(asset_type::Type{ThermalPower}, data::AbstractDict{Symbol,Any}, sy
         fuel_start_node,
         fuel_end_node,
     )
-    fuel_edge.unidirectional = true;
 
     co2_edge_key = :co2_edge
     @process_data(
@@ -181,9 +160,6 @@ function make(asset_type::Type{ThermalPower}, data::AbstractDict{Symbol,Any}, sy
         co2_start_node,
         co2_end_node,
     )
-    co2_edge.constraints = Vector{AbstractTypeConstraint}()
-    co2_edge.unidirectional = true;
-    co2_edge.has_capacity = false;
 
     thermal_transform.balance_data = Dict(
         :energy => Dict(

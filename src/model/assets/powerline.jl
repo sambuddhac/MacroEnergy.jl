@@ -13,7 +13,7 @@ function default_data(::Type{PowerLine}, id=missing)
                 :has_capacity => true,
                 :can_expand => true,
                 :can_retire => false,
-                :line_loss_percentage => 0.0,
+                :loss_fraction => 0.0,
                 :constraints => Dict{Symbol, Bool}(
                     :CapacityConstraint => true,
                 ),
@@ -62,9 +62,5 @@ function make(asset_type::Type{<:PowerLine}, data::AbstractDict{Symbol,Any}, sys
         elec_start_node,
         elec_end_node,
     )
-    elec_edge.constraints = get(elec_edge_data, :constraints, [CapacityConstraint()])
-
-    elec_edge.loss_fraction = get(elec_edge_data,:line_loss_percentage,0.0)
-
     return PowerLine(id, elec_edge)
 end

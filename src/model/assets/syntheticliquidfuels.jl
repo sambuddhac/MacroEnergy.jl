@@ -110,8 +110,6 @@ function make(asset_type::Type{SyntheticLiquidFuels}, data::AbstractDict{Symbol,
         co2_captured_start_node,
         co2_captured_end_node,
     )
-    co2_captured_edge.constraints = get(co2_captured_edge_data, :constraints, [CapacityConstraint()])
-    co2_captured_edge.unidirectional = get(co2_captured_edge_data, :unidirectional, true)
 
     gasoline_edge_key = :gasoline_edge
     @process_data(
@@ -140,9 +138,6 @@ function make(asset_type::Type{SyntheticLiquidFuels}, data::AbstractDict{Symbol,
         gasoline_start_node,
         gasoline_end_node,
     )
-    gasoline_edge.constraints = Vector{AbstractTypeConstraint}()
-    gasoline_edge.unidirectional = true;
-    gasoline_edge.has_capacity = false;
 
     jetfuel_edge_key = :jetfuel_edge
     @process_data(
@@ -171,9 +166,6 @@ function make(asset_type::Type{SyntheticLiquidFuels}, data::AbstractDict{Symbol,
         jetfuel_start_node,
         jetfuel_end_node,
     )
-    jetfuel_edge.constraints = Vector{AbstractTypeConstraint}()
-    jetfuel_edge.unidirectional = true;
-    jetfuel_edge.has_capacity = false;
 
     diesel_edge_key = :diesel_edge
     @process_data(
@@ -202,9 +194,6 @@ function make(asset_type::Type{SyntheticLiquidFuels}, data::AbstractDict{Symbol,
         diesel_start_node,
         diesel_end_node,
     )
-    diesel_edge.constraints = Vector{AbstractTypeConstraint}()
-    diesel_edge.unidirectional = true;
-    diesel_edge.has_capacity = false;
 
     elec_edge_key = :elec_edge
     @process_data(
@@ -231,9 +220,6 @@ function make(asset_type::Type{SyntheticLiquidFuels}, data::AbstractDict{Symbol,
         elec_start_node,
         elec_end_node,
     )
-    elec_edge.constraints = Vector{AbstractTypeConstraint}()
-    elec_edge.unidirectional = true;
-    elec_edge.has_capacity = false;
 
     h2_edge_key = :h2_edge
     @process_data(
@@ -260,9 +246,6 @@ function make(asset_type::Type{SyntheticLiquidFuels}, data::AbstractDict{Symbol,
         h2_start_node,
         h2_end_node,
     )
-    h2_edge.constraints = Vector{AbstractTypeConstraint}()
-    h2_edge.unidirectional = true;
-    h2_edge.has_capacity = false;
 
     co2_emission_edge_key = :co2_emission_edge
     @process_data(
@@ -289,9 +272,6 @@ function make(asset_type::Type{SyntheticLiquidFuels}, data::AbstractDict{Symbol,
         co2_emission_start_node,
         co2_emission_end_node,
     )
-    co2_emission_edge.constraints = Vector{AbstractTypeConstraint}()
-    co2_emission_edge.unidirectional = true;
-    co2_emission_edge.has_capacity = false;
 
     synthetic_liquid_fuels_transform.balance_data = Dict(
         :gasoline_production => Dict(

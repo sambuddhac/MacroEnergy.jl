@@ -18,7 +18,6 @@ function edge_default_data()
         :max_capacity => Inf,
         :integer_decisions => false,
         :loss_fraction => 0.0,
-        :line_loss_percentage => 0.0,
         :efficiency => 1.0,
         :min_flow_fraction => 0.0,
         :ramp_up_fraction => 1.0,
