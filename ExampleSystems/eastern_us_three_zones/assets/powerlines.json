@@ -29,7 +29,7 @@
                             "existing_capacity": 5552,
                             "max_capacity": 27760,
                             "investment_cost": 40219,
-                            "line_loss_percentage": 0.04914512
+                            "loss_fraction": 0.04914512
                         }
                     }
                 },
@@ -43,7 +43,7 @@
                             "existing_capacity": 1915,
                             "max_capacity": 9575,
                             "investment_cost": 62316,
-                            "line_loss_percentage": 0.047366255
+                            "loss_fraction": 0.047366255
                         }
                     }
                 }
