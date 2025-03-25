@@ -14,8 +14,7 @@
                         "can_retire": false,
                         "constraints": {
                             "CapacityConstraint": true,
-                            "StorageDischargeLimitConstraint": true,
-                            "RampingLimitConstraint": false
+                            "StorageDischargeLimitConstraint": true
                         }
                     },
                     "charge_edge": {
