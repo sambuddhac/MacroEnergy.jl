@@ -14,8 +14,7 @@
                 },
                 "discharge_constraints": {
                     "CapacityConstraint": true,
-                    "StorageDischargeLimitConstraint": true,
-                    "RampingLimitConstraint": false
+                    "StorageDischargeLimitConstraint": true
                 }
             },
             "instance_data": [
@@ -82,9 +81,6 @@
         {
             "type": "Battery",
             "global_data": {
-                "discharge_constraints": {
-                    "RampingLimitConstraint": false
-                },
                 "discharge_can_expand": false,
                 "discharge_can_retire": false,
                 "storage_can_retire": false
