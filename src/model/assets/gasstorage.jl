@@ -1,42 +1,29 @@
 struct GasStorage{T} <: AbstractAsset
     id::AssetId
     gas_storage::AbstractStorage{T}
-    compressor_transform::Transformation
-    discharge_edge::Edge{T}
     charge_edge::Edge{T}
-    compressor_elec_edge::Edge{Electricity}
-    compressor_gas_edge::Edge{T}
+    discharge_edge::Edge{T}
+    charge_elec_edge::Edge{Electricity}
+    discharge_elec_edge::Edge{Electricity}
 end
 
-GasStorage(id::AssetId,gas_storage::AbstractStorage{T},compressor_transform::Transformation,discharge_edge::Edge{T},charge_edge::Edge{T},compressor_elec_edge::Edge{Electricity},
-compressor_gas_edge::Edge{T}) where T<:Commodity =
-    GasStorage{T}(id,gas_storage,compressor_transform,discharge_edge,charge_edge,compressor_elec_edge,
-    compressor_gas_edge)
+GasStorage(id::AssetId,gas_storage::AbstractStorage{T},charge_edge::Edge{T},discharge_edge::Edge{T},
+charge_elec_edge::Edge{Electricity},discharge_elec_edge::Edge{Electricity}) where T<:Commodity =
+    GasStorage{T}(id,gas_storage,charge_edge,discharge_edge,charge_elec_edge,discharge_elec_edge)
 
 function default_data(::Type{GasStorage}, id=missing)
     return Dict{Symbol,Any}(
         :id => id,
         :storage => @storage_data(
             :commodity => missing,
+            :charge_electricity_consumption => 0.0,
+            :discharge_electricity_consumption => 0.0,
             :constraints => Dict{Symbol, Bool}(
                 :BalanceConstraint => true,
                 :StorageCapacityConstraint => true,
             ),
         ),
-        :transforms => @transform_data(
-            :timedata => missing,
-            :electricity_consumption => 0.0,
-            :constraints => Dict{Symbol, Bool}(
-                :BalanceConstraint => true,
-            ),
-        ),
         :edges => Dict{Symbol,Any}(
-            :compressor_elec_edge => @edge_data(
-                :commodity => "Electricity",
-            ),
-            :compressor_gas_edge => @edge_data(
-                :commodity => missing,
-            ),
             :charge_edge => @edge_data(
                 :efficiency => 1.0,
                 :commodity => missing,
@@ -56,6 +43,12 @@ function default_data(::Type{GasStorage}, id=missing)
                 :constraints => Dict{Symbol, Bool}(
                     :CapacityConstraint => true,
                 ),
+            ),
+            :charge_elec_edge => @edge_data(
+                :commodity => "Electricity",
+            ),
+            :discharge_elec_edge => @edge_data(
+                :commodity => "Electricity",
             ),
         ),
     )
@@ -81,15 +74,8 @@ function make(asset_type::Type{GasStorage}, data::AbstractDict{Symbol,Any}, syst
     commodity_symbol = Symbol(storage_data[:commodity])
     commodity = commodity_types()[commodity_symbol]
 
-    default_constraints = [
-        BalanceConstraint(),
-        StorageCapacityConstraint(),
-    ]
     long_duration = get(storage_data, :long_duration, false)
     StorageType = long_duration ? LongDurationStorage : Storage
-    if long_duration
-        push!(default_constraints, LongDurationStorageImplicitMinMaxConstraint())
-    end
     # create the storage component of the gas storage
     gas_storage = StorageType(
         Symbol(id, "_", gas_storage_key),
@@ -97,83 +83,64 @@ function make(asset_type::Type{GasStorage}, data::AbstractDict{Symbol,Any}, syst
         system.time_data[commodity_symbol],
         commodity,
     )
-    gas_storage.constraints = get(storage_data, :constraints, default_constraints)
 
-    ## Compressor component of the gas storage
-    compressor_key = :transforms
-    @process_data(
-        transform_data,
-        data[compressor_key],
-        [
-            (data[compressor_key], key),
-            (data[compressor_key], Symbol("compressor_", key)),
-            (data, Symbol("compressor_", key)),
-        ],
-    )
-    if haskey(transform_data, :timedata)
-        compressor_transform_timedata = system.time_data[Symbol(transform_data[:timedata])]
-    else
-        compressor_transform_timedata = system.time_data[commodity_symbol]
+    if long_duration
+        push!(gas_storage.constraints, LongDurationStorageImplicitMinMaxConstraint())
     end
-    compressor_transform = Transformation(;
-        id = Symbol(id, "_", compressor_key),
-        timedata = compressor_transform_timedata,
-        constraints = get(transform_data, :constraints, [BalanceConstraint()]),
-    )
 
-    compressor_elec_edge_key = :compressor_elec_edge
+    ## Electricity consumption of the gas storage
+
+    charge_elec_edge_key = :charge_elec_edge
     @process_data(
-        compressor_elec_edge_data,
-        data[:edges][compressor_elec_edge_key],
+        charge_elec_edge_data,
+        data[:edges][charge_elec_edge_key],
         [
-            (data[:edges][compressor_elec_edge_key], key),
-            (data[:edges][compressor_elec_edge_key], Symbol("elec_", key)),
+            (data[:edges][charge_elec_edge_key], key),
+            (data[:edges][charge_elec_edge_key], Symbol("elec_", key)),
             (data, Symbol("elec_", key)),
         ],
     )
     @start_vertex(
-        elec_start_node,
-        compressor_elec_edge_data,
+        charge_elec_start_node,
+        charge_elec_edge_data,
         Electricity,
-        [(compressor_elec_edge_data, :start_vertex), (data, :location)],
+        [(charge_elec_edge_data, :start_vertex), (data, :location)],
     )
-    elec_end_node = compressor_transform
-    compressor_elec_edge = Edge(
-        Symbol(id, "_", compressor_elec_edge_key),
-        compressor_elec_edge_data,
+    charge_elec_end_node = gas_storage
+    charge_elec_edge = Edge(
+        Symbol(id, "_", charge_elec_edge_key),
+        charge_elec_edge_data,
         system.time_data[:Electricity],
         Electricity,
-        elec_start_node,
-        elec_end_node,
+        charge_elec_start_node,
+        charge_elec_end_node,
     )
-    compressor_elec_edge.unidirectional = true;
 
-    compressor_gas_edge_key = :compressor_gas_edge
+    discharge_elec_edge_key = :discharge_elec_edge
     @process_data(
-        compressor_gas_edge_data,
-        data[:edges][compressor_gas_edge_key],
+        discharge_elec_edge_data,
+        data[:edges][discharge_elec_edge_key],
         [
-            (data[:edges][compressor_gas_edge_key], key),
-            (data[:edges][compressor_gas_edge_key], Symbol("gas_", key)),
-            (data, Symbol("gas_", key)),
+            (data[:edges][discharge_elec_edge_key], key),
+            (data[:edges][discharge_elec_edge_key], Symbol("elec_", key)),
+            (data, Symbol("elec_", key)),
         ],
     )
     @start_vertex(
-        gas_edge_start_node,
-        compressor_gas_edge_data,
-        commodity,
-        [(compressor_gas_edge_data, :start_vertex), (data, :location)],
+        discharge_elec_start_node,
+        discharge_elec_edge_data,
+        Electricity,
+        [(discharge_elec_edge_data, :start_vertex), (data, :location)],
     )
-    gas_edge_end_node = compressor_transform
-    compressor_gas_edge = Edge(
-        Symbol(id, "_", compressor_gas_edge_key),
-        compressor_gas_edge_data,
-        system.time_data[commodity_symbol],
-        commodity,
-        gas_edge_start_node,
-        gas_edge_end_node,
+    discharge_elec_end_node = gas_storage
+    discharge_elec_edge = Edge(
+        Symbol(id, "_", discharge_elec_edge_key),
+        discharge_elec_edge_data,
+        system.time_data[:Electricity],
+        Electricity,
+        discharge_elec_start_node,
+        discharge_elec_end_node,
     )
-    compressor_gas_edge.unidirectional = true;
 
     charge_edge_key = :charge_edge
     @process_data(
@@ -185,7 +152,12 @@ function make(asset_type::Type{GasStorage}, data::AbstractDict{Symbol,Any}, syst
             (data, Symbol("charge_", key)),
         ],
     )
-    charge_start_node = compressor_transform
+    @start_vertex(
+        charge_start_node,
+        charge_edge_data,
+        commodity,
+        [(charge_edge_data, :start_vertex), (data, :location)],
+    )
     charge_end_node = gas_storage
     gas_storage_charge = Edge(
         Symbol(id, "_", charge_edge_key),
@@ -195,9 +167,6 @@ function make(asset_type::Type{GasStorage}, data::AbstractDict{Symbol,Any}, syst
         charge_start_node,
         charge_end_node,
     )
-    gas_storage_charge.unidirectional = true;
-    gas_storage_charge.constraints =
-        get(charge_edge_data, :constraints, [CapacityConstraint()])
 
     discharge_edge_key = :discharge_edge
     @process_data(
@@ -224,39 +193,34 @@ function make(asset_type::Type{GasStorage}, data::AbstractDict{Symbol,Any}, syst
         discharge_start_node,
         discharge_end_node,
     )
-    gas_storage_discharge.constraints = get(
-        discharge_edge_data,
-        :constraints,
-        [CapacityConstraint()],
-    )
-    gas_storage_discharge.unidirectional = true;
+
     gas_storage.discharge_edge = gas_storage_discharge
     gas_storage.charge_edge = gas_storage_charge
-
+    
     gas_storage.balance_data = Dict(
         :storage => Dict(
             gas_storage_discharge.id => 1 / get(discharge_edge_data, :efficiency, 1.0),
             gas_storage_charge.id => get(charge_edge_data, :efficiency, 1.0),
         ),
-    )
-    compressor_transform.balance_data = Dict(
-        :electricity => Dict(
-            compressor_elec_edge.id => 1.0,
-            gas_storage_charge.id => get(transform_data, :electricity_consumption, 0.0),
+        :charge_electricity_consumption => Dict(
+            #This is multiplied by -1 because they are both edges that enters storage, 
+            #so we need to get one of them on the right side of the equality balance constraint    
+            charge_elec_edge.id => -1.0,
+            gas_storage_charge.id => get(storage_data, :charge_electricity_consumption, 0.0), 
         ),
-        :hydrogen => Dict(
-            gas_storage_charge.id => 1.0,
-            compressor_gas_edge.id => 1.0
+        :discharge_electricity_consumption => Dict(
+            discharge_elec_edge.id => 1.0,
+            gas_storage_discharge.id => get(storage_data, :discharge_electricity_consumption, 0.0),
         ),
     )
+
 
     return GasStorage(
         id,
         gas_storage,
-        compressor_transform,
-        gas_storage_discharge,
         gas_storage_charge,
-        compressor_elec_edge,
-        compressor_gas_edge,
+        gas_storage_discharge,
+        charge_elec_edge,
+        discharge_elec_edge
     )
 end
