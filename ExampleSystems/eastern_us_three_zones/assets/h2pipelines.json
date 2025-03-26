@@ -73,7 +73,7 @@
                             "start_vertex": "h2_SE"
                         },
                         "discharge_elec_edge": {
-                            "start_vertex": "h2_MIDAT"
+                            "start_vertex": "elec_MIDAT"
                         },
                         "charge_elec_edge": {
                             "start_vertex": "elec_SE"
@@ -95,7 +95,7 @@
                             "start_vertex": "h2_MIDAT"
                         },
                         "discharge_elec_edge": {
-                            "start_vertex": "h2_SE"
+                            "start_vertex": "elec_SE"
                         },
                         "charge_elec_edge": {
                             "start_vertex": "elec_MIDAT"
@@ -117,7 +117,7 @@
                             "start_vertex": "h2_MIDAT"
                         },
                         "discharge_elec_edge": {
-                            "start_vertex": "h2_NE"
+                            "start_vertex": "elec_NE"
                         },
                         "charge_elec_edge": {
                             "start_vertex": "elec_MIDAT"
@@ -139,7 +139,7 @@
                             "start_vertex": "h2_NE"
                         },
                         "discharge_elec_edge": {
-                            "start_vertex": "h2_MIDAT"
+                            "start_vertex": "elec_MIDAT"
                         },
                         "charge_elec_edge": {
                             "start_vertex": "elec_NE"
