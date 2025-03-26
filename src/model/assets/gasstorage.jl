@@ -96,10 +96,13 @@ function make(asset_type::Type{GasStorage}, data::AbstractDict{Symbol,Any}, syst
         data[:edges][charge_elec_edge_key],
         [
             (data[:edges][charge_elec_edge_key], key),
-            (data[:edges][charge_elec_edge_key], Symbol("elec_", key)),
-            (data, Symbol("elec_", key)),
+            (data[:edges][charge_elec_edge_key], Symbol("charge_elec_", key)),
+            (data, Symbol("charge_elec_", key)),
         ],
     )
+    println(id)
+    println(charge_elec_edge_data[:start_vertex])
+    println.(MacroEnergy.id.(system.locations))
     @start_vertex(
         charge_elec_start_node,
         charge_elec_edge_data,
@@ -122,8 +125,8 @@ function make(asset_type::Type{GasStorage}, data::AbstractDict{Symbol,Any}, syst
         data[:edges][discharge_elec_edge_key],
         [
             (data[:edges][discharge_elec_edge_key], key),
-            (data[:edges][discharge_elec_edge_key], Symbol("elec_", key)),
-            (data, Symbol("elec_", key)),
+            (data[:edges][discharge_elec_edge_key], Symbol("discharge_elec_", key)),
+            (data, Symbol("discharge_elec_", key)),
         ],
     )
     @start_vertex(
