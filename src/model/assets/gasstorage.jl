@@ -100,9 +100,6 @@ function make(asset_type::Type{GasStorage}, data::AbstractDict{Symbol,Any}, syst
             (data, Symbol("charge_elec_", key)),
         ],
     )
-    println(id)
-    println(charge_elec_edge_data[:start_vertex])
-    println.(MacroEnergy.id.(system.locations))
     @start_vertex(
         charge_elec_start_node,
         charge_elec_edge_data,
