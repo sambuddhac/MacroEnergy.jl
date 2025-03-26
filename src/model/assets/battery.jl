@@ -107,7 +107,12 @@ function make(asset_type::Type{Battery}, data::AbstractDict{Symbol,Any}, system:
 
     # If storage is long duration, add the implicit min-max constraint
     if long_duration
-        push!(battery_storage.constraints, LongDurationStorageImplicitMinMaxConstraint())
+        lds_constraints = [LongDurationStorageImplicitMinMaxConstraint()]
+        for c in lds_constraints
+            if !(c in battery_storage.constraints)
+                push!(battery_storage.constraints, c)
+            end
+        end
     end
 
     ## Charge data of the battery

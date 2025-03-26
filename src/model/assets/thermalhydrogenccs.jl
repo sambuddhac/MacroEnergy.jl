@@ -186,11 +186,14 @@ function make(asset_type::Type{ThermalHydrogenCCS}, data::AbstractDict{Symbol,An
         h2_end_node,
     )
     if has_uc
-        push!(h2_edge.constraints, MinUpTimeConstraint())
-        push!(h2_edge.constraints, MinDownTimeConstraint())
+        uc_constraints = [MinUpTimeConstraint(), MinDownTimeConstraint()]
+        for c in uc_constraints
+            if !(c in h2_edge.constraints)
+                push!(h2_edge.constraints, c)
+            end
+        end
         h2_edge.startup_fuel_balance_id = :energy
     end
-    
 
     fuel_edge_key = :fuel_edge
     @process_data(

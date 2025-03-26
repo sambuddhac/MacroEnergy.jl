@@ -74,7 +74,12 @@ function make(asset_type::Type{HydroRes}, data::AbstractDict{Symbol,Any}, system
         Electricity,
     )
     if long_duration
-        push!(hydrostor.constraints, LongDurationStorageImplicitMinMaxConstraint())
+        lds_constraints = [LongDurationStorageImplicitMinMaxConstraint()]
+        for c in lds_constraints
+            if !(c in hydrostor.constraints)
+                push!(hydrostor.constraints, c)
+            end
+        end
     end
 
     discharge_edge_key = :discharge_edge

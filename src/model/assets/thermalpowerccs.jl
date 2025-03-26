@@ -106,8 +106,12 @@ function make(asset_type::Type{ThermalPowerCCS}, data::AbstractDict{Symbol,Any},
         elec_end_node,
     )
     if has_uc
-        push!(elec_edge.constraints, MinUpTimeConstraint())
-        push!(elec_edge.constraints, MinDownTimeConstraint())
+        uc_constraints = [MinUpTimeConstraint(), MinDownTimeConstraint()]
+        for c in uc_constraints
+            if !(c in elec_edge.constraints)
+                push!(elec_edge.constraints, c)
+            end
+        end
         elec_edge.startup_fuel_balance_id = :energy
     end
 

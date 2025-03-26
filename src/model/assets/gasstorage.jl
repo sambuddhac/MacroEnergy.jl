@@ -83,9 +83,13 @@ function make(asset_type::Type{GasStorage}, data::AbstractDict{Symbol,Any}, syst
         system.time_data[commodity_symbol],
         commodity,
     )
-
     if long_duration
-        push!(gas_storage.constraints, LongDurationStorageImplicitMinMaxConstraint())
+        lds_constraints = [LongDurationStorageImplicitMinMaxConstraint()]
+        for c in lds_constraints
+            if !(c in gas_storage.constraints)
+                push!(gas_storage.constraints, c)
+            end
+        end
     end
 
     ## Electricity consumption of the gas storage
