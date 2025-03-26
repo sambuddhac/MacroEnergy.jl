@@ -25,16 +25,15 @@ function refresh_commodities_list!(loc::Location)
         Set{Symbol}(typesymbol(commodity_type(node)) for node in values(loc.nodes))
 end
 
-function load_locations!(system::AbstractSystem, rel_or_abs_path::String, data)
+function load_locations!(system::AbstractSystem, rel_or_abs_path::String, data::AbstractString)
+    return load_locations!(system, rel_or_abs_path, [data])
+end
+
+function load_locations!(system::AbstractSystem, rel_or_abs_path::String, data::Vector{<:AbstractString})
     locations = Location[]
-    # Using this check instead of multiple dispatch
-    # to allow for single strings or Vector{String},
-    # and handle other incorrect data
-    if all(isa.(data, String))
-        for loc_id in data
-            # In the future, we could pre-emptively find the relevant nodes
-            push!(locations, Location(;id=Symbol(loc_id), system=system))
-        end
+    for loc_id in data
+        # In the future, we could pre-emptively find the relevant nodes
+        push!(locations, Location(;id=Symbol(loc_id), system=system))
     end
     system.locations = locations
     return nothing
