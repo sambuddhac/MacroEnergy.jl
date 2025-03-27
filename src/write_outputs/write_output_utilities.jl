@@ -896,4 +896,19 @@ function search_assets(
     end
     
     return collect(final_asset_types), collect(missed_asset_types)
+function find_available_filepath(path::AbstractString, filename::AbstractString; max_attempts::Int=999)
+    path = abspath(path) # expand path to the full path
+
+    # Split filename on the last "."
+    basename, ext = splitext(filename) 
+    
+    for i in 1:max_attempts
+        full_path = joinpath(path, filename)
+        if !isfile(full_path)
+            return full_path
+        end
+        filename = "$(basename)_$(lpad(i, 3, '0'))$(ext)"
+    end
+    
+    error("Could not find available file after $max_attempts attempts")
 end
