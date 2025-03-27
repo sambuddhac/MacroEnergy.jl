@@ -7,7 +7,7 @@ function all_subtypes(m::Module, type::Symbol)::Dict{Symbol,DataType}
 end
 
 function all_subtypes!(types::Dict{Symbol,DataType}, type::DataType)
-    types[Symbol(type)] = type
+    types[typesymbol(type)] = type
     if !isempty(subtypes(type))
         for subtype in subtypes(type)
             all_subtypes!(types, subtype)

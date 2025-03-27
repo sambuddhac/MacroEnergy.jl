@@ -69,23 +69,26 @@ end
 function load_commodities(commodities::AbstractVector{<:Any}, rel_path::AbstractString=""; write_subcommodities::Bool=false)
     subcommodities_path = joinpath(rel_path, "tmp", "subcommodities.jl")
     if isfile(subcommodities_path)
+        @info(" ++ Loading pre-defined user commodities")
+        @debug(" -- Loading subcommodities from file $(subcommodities_path)")
         include(subcommodities_path)
     end
     register_commodity_types!()
 
     macro_commodities = commodity_types()
     sub_commodities = Vector{Dict{Symbol,Any}}()
+    commodity_keys = unique!([MacroEnergy.typesymbol(commodity) for commodity in values(macro_commodities)])
     for commodity in commodities
         if isa(commodity, Symbol)
             if commodity ∉ keys(macro_commodities)
                 error("Unknown commodity: $commodity")
             end
-        elseif isa(commodity,AbstractString)
+        elseif isa(commodity, AbstractString)
             if Symbol(commodity) ∉ keys(macro_commodities)
                 error("Unknown commodity: $commodity")
             end
         elseif isa(commodity, Dict) && haskey(commodity, :name) && haskey(commodity, :acts_like)
-            if commodity[:name] ∉ keys(commodity_types())
+            if Symbol(commodity[:name]) ∉ commodity_keys
                 @debug("Adding commodity $(commodity[:name]) to list of subcommodities to be added")
                 push!(sub_commodities, commodity)
             else
