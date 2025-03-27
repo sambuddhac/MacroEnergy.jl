@@ -896,6 +896,8 @@ function search_assets(
     end
     
     return collect(final_asset_types), collect(missed_asset_types)
+end
+
 function find_available_filepath(path::AbstractString, filename::AbstractString; max_attempts::Int=999)
     path = abspath(path) # expand path to the full path
 
