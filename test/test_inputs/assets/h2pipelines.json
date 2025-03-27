@@ -4,10 +4,20 @@
             "type": "GasStorage",
             "global_data": {
                 "nodes": {},
-                "transforms": {
-                    "timedata": "Hydrogen",
+                "transforms": {},
+                "storage": {
+                    "commodity": "Hydrogen",
+                    "can_expand": true,
+                    "can_retire": false,
+                    "min_duration": 1.0,
+                    "max_duration": 1.0,
+                    "charge_discharge_ratio": 1.0,
                     "constraints": {
-                        "BalanceConstraint": true
+                        "StorageCapacityConstraint": true,
+                        "BalanceConstraint": true,
+                        "StorageMinDurationConstraint": true,
+                        "StorageMaxDurationConstraint": true,
+                        "StorageChargeDischargeRatioConstraint": true
                     }
                 },
                 "edges": {
@@ -32,38 +42,26 @@
                             "CapacityConstraint": true
                         }
                     },
-                    "compressor_elec_edge": {
+                    "charge_elec_edge": {
                         "commodity": "Electricity",
                         "unidirectional": true,
                         "has_capacity": false
                     },
-                    "compressor_gas_edge": {
-                        "commodity": "Hydrogen",
+                    "discharge_elec_edge": {
+                        "commodity": "Electricity",
                         "unidirectional": true,
                         "has_capacity": false
-                    }
-                },
-                "storage": {
-                    "commodity": "Hydrogen",
-                    "can_expand": true,
-                    "can_retire": false,
-                    "constraints": {
-                        "StorageCapacityConstraint": true,
-                        "BalanceConstraint": true,
-                        "StorageMaxDurationConstraint": true,
-                        "StorageChargeDischargeRatioConstraint": true
                     }
                 }
             },
             "instance_data": [
                 {
                     "id": "h2pipe_MA_to_CT",
-                    "transforms": {
-                    "electricity_consumption": 0.067724471
-                    },
                     "storage":{
                         "max_duration": 8.846121602,
-                        "charge_discharge_ratio": 1.0
+                        "charge_discharge_ratio": 1.0,
+                        "charge_electricity_consumption": 0.067740938,
+                        "discharge_electricity_consumption": 0.0
                     },
                     "edges": {
                         "discharge_edge": {
@@ -72,22 +70,24 @@
                             "capacity_size": 787.6,
                             "investment_cost": 82682.23402
                         },
-                        "compressor_gas_edge": {
+                        "charge_edge": {
                             "start_vertex": "h2_MA"
                         },
-                        "compressor_elec_edge": {
+                        "discharge_elec_edge": {
+                            "start_vertex": "elec_MA"
+                        },
+                        "charge_elec_edge": {
                             "start_vertex": "elec_MA"
                         }
                     }
                 },
                 {
                     "id": "h2pipe_CT_to_MA",
-                    "transforms": {
-                    "electricity_consumption": 0.067724471
-                    },
                     "storage":{
                         "max_duration": 8.846121602,
-                        "charge_discharge_ratio": 1.0
+                        "charge_discharge_ratio": 1.0,
+                        "charge_electricity_consumption": 0.067740938,
+                        "discharge_electricity_consumption": 0.0
                     },
                     "edges": {
                         "discharge_edge": {
@@ -96,22 +96,24 @@
                             "capacity_size": 787.6,
                             "investment_cost": 82682.23402
                         },
-                        "compressor_gas_edge": {
+                        "charge_edge": {
                             "start_vertex": "h2_CT"
                         },
-                        "compressor_elec_edge": {
+                        "discharge_elec_edge": {
+                            "start_vertex": "elec_MA"
+                        },
+                        "charge_elec_edge": {
                             "start_vertex": "elec_CT"
                         }
                     }
                 },
                 {
                     "id": "h2pipe_ME_to_MA",
-                    "transforms": {
-                    "electricity_consumption": 0.06553874
-                    },
                     "storage":{
                         "max_duration": 8.525925965,
-                        "charge_discharge_ratio": 1.0
+                        "charge_discharge_ratio": 1.0,
+                        "charge_electricity_consumption": 0.06553874,
+                        "discharge_electricity_consumption": 0.0
                     },
                     "edges": {
                         "discharge_edge": {
@@ -120,10 +122,13 @@
                             "capacity_size": 787.6,
                             "investment_cost": 79896.9841
                         },
-                        "compressor_gas_edge": {
+                        "charge_edge": {
                             "start_vertex": "h2_ME"
                         },
-                        "compressor_elec_edge": {
+                        "discharge_elec_edge": {
+                            "start_vertex": "elec_MA"
+                        },
+                        "charge_elec_edge": {
                             "start_vertex": "elec_ME"
                         }
                     }
@@ -144,10 +149,13 @@
                             "capacity_size": 787.6,
                             "investment_cost": 79896.9841
                         },
-                        "compressor_gas_edge": {
+                        "charge_edge": {
                             "start_vertex": "h2_MA"
                         },
-                        "compressor_elec_edge": {
+                        "discharge_elec_edge": {
+                            "start_vertex": "elec_ME"
+                        },
+                        "charge_elec_edge": {
                             "start_vertex": "elec_MA"
                         }
                     }
