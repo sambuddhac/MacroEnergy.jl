@@ -4,6 +4,25 @@ struct VRE <: AbstractAsset
     edge::Edge{Electricity}
 end
 
+function default_data(::Type{VRE}, id=missing)
+    return Dict{Symbol, Any}(
+        :id => id,
+        :transforms => @transform_data(
+            :timedata => "Electricity",
+        ),
+        :edges => Dict{Symbol, Any}(
+            :edge => @edge_data(
+                :commodity => "Electricity",
+                :has_capacity => true,
+                :can_expand => true,
+                :can_return => true,
+                :constraints => Dict{Symbol,Bool}(
+                    :CapacityConstraint => true,
+                )
+            ),
+        ),
+    )
+end
 
 """
     make(::Type{<:VRE}, data::AbstractDict{Symbol, Any}, system::System) -> VRE
@@ -27,17 +46,63 @@ end
 function make(asset_type::Type{<:VRE}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 
+    # if id == :SE_utilitypv_class1_moderate_70_0_2_1
+    #     @info data
+    # end
+
+    @setup_data(asset_type, data, id)
+
+    # if id == :SE_utilitypv_class1_moderate_70_0_2_1
+    #     @info data
+    # end
+
+    # if id == :SE_utilitypv_class1_moderate_70_0_2_1
+    #     @info defaults
+    # end
+
     energy_key = :transforms
-    transform_data = process_data(data[energy_key])
+    @process_data(
+        transform_data, 
+        data[energy_key], 
+        [
+            (data[energy_key], key),
+            (data[energy_key], Symbol("transform_", key)),
+            (data, Symbol("transform_", key)),
+            (data, key),
+        ]
+    )
     vre_transform = Transformation(;
         id = Symbol(id, "_", energy_key),
         timedata = system.time_data[Symbol(transform_data[:timedata])],
     )
 
     elec_edge_key = :edge
-    elec_edge_data = process_data(data[:edges][elec_edge_key])
+    @process_data(
+        elec_edge_data,
+        data[:edges][elec_edge_key],
+        [
+            (data[:edges][elec_edge_key], key),
+            (data[:edges][elec_edge_key], Symbol("elec_", key)),
+            (data, Symbol("elec_", key)),
+            (data, key),
+        ],
+    )
+
+    # if id == :SE_utilitypv_class1_moderate_70_0_2_1
+    #     @info data
+    # end
+
+    # if id == :SE_utilitypv_class1_moderate_70_0_2_1
+    #     @info elec_edge_data
+    # end
+
     elec_start_node = vre_transform
-    elec_end_node = find_node(system.locations, Symbol(elec_edge_data[:end_vertex]))
+    @end_vertex(
+        elec_end_node,
+        elec_edge_data,
+        Electricity,
+        [(elec_edge_data, :end_vertex), (data, :location)]
+    )
     elec_edge = Edge(
         Symbol(id, "_", elec_edge_key),
         elec_edge_data,
@@ -46,8 +111,6 @@ function make(asset_type::Type{<:VRE}, data::AbstractDict{Symbol,Any}, system::S
         elec_start_node,
         elec_end_node,
     )
-    elec_edge.constraints = get(elec_edge_data, :constraints, [CapacityConstraint()])
-    elec_edge.unidirectional = get(elec_edge_data, :unidirectional, true)
 
     return asset_type(id, vre_transform, elec_edge)
 end

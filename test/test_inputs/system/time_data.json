@@ -17,5 +17,6 @@
         "Biomass": 1,
         "Uranium": 1
     },
-    "NumberOfSubperiods" : 3
+    "NumberOfSubperiods" : 3,
+    "TotalHoursModeled": 8760
 }

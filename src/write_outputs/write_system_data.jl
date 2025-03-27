@@ -4,12 +4,13 @@
 # TODO: For now, I commented out the function that prints the system data to a JSON file
 #       because we first need to fix the issue with in-place modification of the edge ids.
 #       We can uncomment it once we have a solution for that.
-# function print_to_json(system::System, file_path::AbstractString="")::Nothing
-#     # Note: right now System does not have a node field, so we're using locations
-#     system_data = prepare_to_json(system)
-#     print_to_json(system_data, file_path)
-#     return nothing
-# end
+function print_to_json(system::System, file_path::AbstractString="")::Nothing
+    # Note: right now System does not have a node field, so we're using locations
+    system_data = prepare_to_json(system)
+    write_json(file_path, system_data)
+    return nothing
+end
+
 function write_system_data(
     system_data::AbstractDict{Symbol,Any},
     file_path::AbstractString="",
@@ -33,6 +34,8 @@ function prepare_to_json(system::System)
             data = keys(data)
         elseif field == :locations  #TODO: Remove this once we have locations
             field = :nodes
+        elseif ismissing(data)
+            continue    # Skip missing data
         end
         system_data[field] = prepare_to_json(data)
     end
@@ -71,7 +74,7 @@ function prepare_to_json(asset::AbstractAsset)
         data = getfield(asset, f)
         if isa(data, AbstractEdge)
             asset_data[:instance_data][:edges][f] = prepare_to_json(data)
-            asset_data[:instance_data][:edges][f][:type] = commodity_type(data)
+            asset_data[:instance_data][:edges][f][:commodity] = commodity_type(data)
             if isa(data, EdgeWithUC)
                 asset_data[:instance_data][:edges][f][:uc] = true
             end
@@ -147,6 +150,18 @@ function prepare_to_json(data::Dict{Symbol,TimeData})
     end
 
     return time_data
+end
+
+function prepare_to_json(data::Missing)
+    return ""
+end
+
+function prepare_to_json(data::AbstractJuMPScalar)
+    return value(data)
+end
+
+function prepare_to_json(data::AbstractArray{<:AbstractJuMPScalar})
+    return value.(data)
 end
 
 # In general, for all attributes (Floats, Strings, etc), `prepare_to_json` simply returns the data as it is

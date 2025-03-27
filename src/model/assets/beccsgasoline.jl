@@ -2,27 +2,98 @@ struct BECCSGasoline <: AbstractAsset
     id::AssetId
     beccs_transform::Transformation
     biomass_edge::Edge{Biomass}
-    gasoline_edge::Edge{LiquidFuels}
+    gasoline_edge::Edge{<:LiquidFuels}
     elec_edge::Edge{Electricity}
     co2_edge::Edge{CO2}
     co2_emission_edge::Edge{CO2}
     co2_captured_edge::Edge{CO2Captured}
 end
 
-function make(::Type{BECCSGasoline}, data::AbstractDict{Symbol,Any}, system::System)
+function default_data(::Type{BECCSGasoline}, id=missing)
+    return Dict{Symbol,Any}(
+        :id => id,
+        :transforms => @transform_data(
+            :timedata => "Biomass",
+            :constraints => Dict{Symbol,Bool}(
+                :BalanceConstraint => true
+            ),
+            :gasoline_production => 0.0,
+            :electricity_consumption => 0.0,
+            :co2_content => 0.0,
+            :emission_rate => 1.0,
+            :capture_rate => 1.0
+        ),
+        :edges => Dict{Symbol,Any}(
+            :biomass_edge => @edge_data(
+                :commodity => "Biomass",
+                :has_capacity => true,
+                :can_expand => true,
+                :can_retire => true,
+                :constraints => Dict{Symbol,Bool}(
+                    :CapacityConstraint => true,
+                )
+            ),
+            :gasoline_edge => @edge_data(
+                :commodity => "LiquidFuels",
+            ),
+            :co2_edge => @edge_data(
+                :commodity => "CO2",
+                :co2_sink => missing,
+            ),
+            :co2_emission_edge => @edge_data(
+                :commodity => "CO2",
+                :co2_sink => missing,
+            ),
+            :elec_edge => @edge_data(
+                :commodity => "Electricity",
+            ),
+            :co2_captured_edge => @edge_data(
+                :commodity => "CO2Captured",
+            ),
+        )
+    )
+end
+
+function make(asset_type::Type{BECCSGasoline}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 
+    @setup_data(asset_type, data, id)
+
     beccs_transform_key = :transforms
-    transform_data = process_data(data[beccs_transform_key])
+    @process_data(
+        transform_data,
+        data[beccs_transform_key],
+        [
+            (data[beccs_transform_key], key),
+            (data[beccs_transform_key], Symbol("transform_", key)),
+            (data, Symbol("transform_", key)),
+            (data, key),
+        ]
+    )
     beccs_transform = Transformation(;
         id = Symbol(id, "_", beccs_transform_key),
         timedata = system.time_data[Symbol(transform_data[:timedata])],
-        constraints = get(transform_data, :constraints, [BalanceConstraint()]),
+        constraints = transform_data[:constraints],
     )
 
     biomass_edge_key = :biomass_edge
-    biomass_edge_data = process_data(data[:edges][biomass_edge_key])
-    biomass_start_node = find_node(system.locations, Symbol(biomass_edge_data[:start_vertex]))
+    @process_data(
+        biomass_edge_data,
+        data[:edges][biomass_edge_key],
+        [
+            (data[:edges][biomass_edge_key], key),
+            (data[:edges][biomass_edge_key], Symbol("biomass_", key)),
+            (data, Symbol("biomass_", key)),
+            (data, key),
+        ])
+    commodity_symbol = Symbol(biomass_edge_data[:commodity])
+    commodity = commodity_types()[commodity_symbol]
+    @start_vertex(
+        biomass_start_node,
+        biomass_edge_data,
+        commodity,
+        [(biomass_edge_data, :start_vertex), (data, :location)],
+    )
     biomass_end_node = beccs_transform
     biomass_edge = Edge(
         Symbol(id, "_", biomass_edge_key),
@@ -32,29 +103,52 @@ function make(::Type{BECCSGasoline}, data::AbstractDict{Symbol,Any}, system::Sys
         biomass_start_node,
         biomass_end_node,
     )
-    biomass_edge.constraints = get(biomass_edge_data, :constraints, [CapacityConstraint()])
-    biomass_edge.unidirectional = get(biomass_edge_data, :unidirectional, true)
 
     gasoline_edge_key = :gasoline_edge
-    gasoline_edge_data = process_data(data[:edges][gasoline_edge_key])
+    @process_data(
+        gasoline_edge_data,
+        data[:edges][gasoline_edge_key],
+        [
+            (data[:edges][gasoline_edge_key], key),
+            (data[:edges][gasoline_edge_key], Symbol("gasoline_", key)),
+            (data, Symbol("gasoline_", key)),
+        ]
+    )
+    commodity_symbol = Symbol(gasoline_edge_data[:commodity])
+    commodity = commodity_types()[commodity_symbol]
     gasoline_start_node = beccs_transform
-    gasoline_end_node = find_node(system.locations, Symbol(gasoline_edge_data[:end_vertex]))
+    @end_vertex(
+        gasoline_end_node,
+        gasoline_edge_data,
+        commodity,
+        [(gasoline_edge_data, :end_vertex), (data, :location)],
+    )
     gasoline_edge = Edge(
         Symbol(id, "_", gasoline_edge_key),
         gasoline_edge_data,
-        system.time_data[:LiquidFuels],
-        LiquidFuels,
+        system.time_data[commodity_symbol],
+        commodity,
         gasoline_start_node,
         gasoline_end_node,
     )
-    gasoline_edge.constraints = Vector{AbstractTypeConstraint}()
-    gasoline_edge.unidirectional = true;
-    gasoline_edge.has_capacity = false;
 
     elec_edge_key = :elec_edge
-    elec_edge_data = process_data(data[:edges][elec_edge_key])
+    @process_data(
+        elec_edge_data,
+        data[:edges][elec_edge_key],
+        [
+            (data[:edges][elec_edge_key], key),
+            (data[:edges][elec_edge_key], Symbol("elec_", key)),
+            (data, Symbol("elec_", key)),
+        ]
+    )
+    @start_vertex(
+        elec_start_node,
+        elec_edge_data,
+        Electricity,
+        [(elec_edge_data, :start_vertex), (data, :location)],
+    )
     elec_end_node = beccs_transform
-    elec_start_node = find_node(system.locations, Symbol(elec_edge_data[:start_vertex]))
     elec_edge = Edge(
         Symbol(id, "_", elec_edge_key),
         elec_edge_data,
@@ -63,13 +157,23 @@ function make(::Type{BECCSGasoline}, data::AbstractDict{Symbol,Any}, system::Sys
         elec_start_node,
         elec_end_node,
     )
-    elec_edge.constraints = Vector{AbstractTypeConstraint}()
-    elec_edge.unidirectional = true;
-    elec_edge.has_capacity = false;
 
     co2_edge_key = :co2_edge
-    co2_edge_data = process_data(data[:edges][co2_edge_key])
-    co2_start_node = find_node(system.locations, Symbol(co2_edge_data[:start_vertex]))
+    @process_data(
+        co2_edge_data, 
+        data[:edges][co2_edge_key],
+        [
+            (data[:edges][co2_edge_key], key),
+            (data[:edges][co2_edge_key], Symbol("co2_", key)),
+            (data, Symbol("co2_", key)),
+        ]
+    )
+    @start_vertex(
+        co2_start_node,
+        co2_edge_data,
+        CO2,
+        [(co2_edge_data, :start_vertex), (data, :co2_sink), (data, :location)],
+    )
     co2_end_node = beccs_transform
     co2_edge = Edge(
         Symbol(id, "_", co2_edge_key),
@@ -79,14 +183,24 @@ function make(::Type{BECCSGasoline}, data::AbstractDict{Symbol,Any}, system::Sys
         co2_start_node,
         co2_end_node,
     )
-    co2_edge.constraints = Vector{AbstractTypeConstraint}()
-    co2_edge.unidirectional = true;
-    co2_edge.has_capacity = false;
 
     co2_emission_edge_key = :co2_emission_edge
-    co2_emission_edge_data = process_data(data[:edges][co2_emission_edge_key])
+    @process_data(
+        co2_emission_edge_data,
+        data[:edges][co2_emission_edge_key],
+        [
+            (data[:edges][co2_emission_edge_key], key),
+            (data[:edges][co2_emission_edge_key], Symbol("co2_emission_", key)),
+            (data, Symbol("co2_emission_", key)),
+        ]
+    )
     co2_emission_start_node = beccs_transform
-    co2_emission_end_node = find_node(system.locations, Symbol(co2_emission_edge_data[:end_vertex]))
+    @end_vertex(
+        co2_emission_end_node,
+        co2_emission_edge_data,
+        CO2,
+        [(co2_emission_edge_data, :end_vertex), (data, :co2_sink), (data, :location)],
+    )
     co2_emission_edge = Edge(
         Symbol(id, "_", co2_emission_edge_key),
         co2_emission_edge_data,
@@ -95,14 +209,24 @@ function make(::Type{BECCSGasoline}, data::AbstractDict{Symbol,Any}, system::Sys
         co2_emission_start_node,
         co2_emission_end_node,
     )
-    co2_emission_edge.constraints = Vector{AbstractTypeConstraint}()
-    co2_emission_edge.unidirectional = true;
-    co2_emission_edge.has_capacity = false;
 
     co2_captured_edge_key = :co2_captured_edge
-    co2_captured_edge_data = process_data(data[:edges][co2_captured_edge_key])
+    @process_data(
+        co2_captured_edge_data, 
+        data[:edges][co2_captured_edge_key],
+        [
+            (data[:edges][co2_captured_edge_key], key),
+            (data[:edges][co2_captured_edge_key], Symbol("co2_captured_", key)),
+            (data, Symbol("co2_captured_", key)),
+        ]
+    )
     co2_captured_start_node = beccs_transform
-    co2_captured_end_node = find_node(system.locations, Symbol(co2_captured_edge_data[:end_vertex]))
+    @end_vertex(
+        co2_captured_end_node,
+        co2_captured_edge_data,
+        CO2Captured,
+        [(co2_captured_edge_data, :end_vertex), (data, :location)],
+    )
     co2_captured_edge = Edge(
         Symbol(id, "_", co2_captured_edge_key),
         co2_captured_edge_data,
@@ -111,9 +235,6 @@ function make(::Type{BECCSGasoline}, data::AbstractDict{Symbol,Any}, system::Sys
         co2_captured_start_node,
         co2_captured_end_node,
     )
-    co2_captured_edge.constraints = Vector{AbstractTypeConstraint}()
-    co2_captured_edge.unidirectional = true;
-    co2_captured_edge.has_capacity = false;
 
     beccs_transform.balance_data = Dict(
         :gasoline_production => Dict(

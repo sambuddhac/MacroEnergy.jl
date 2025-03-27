@@ -5,6 +5,34 @@ struct Electrolyzer <: AbstractAsset
     elec_edge::Edge{Electricity}
 end
 
+function default_data(::Type{Electrolyzer}, id=missing)
+    return Dict{Symbol,Any}(
+        :id => id,
+        :transforms => @transform_data(
+            :timedata => "Electricity",
+            :constraints => Dict{Symbol, Bool}(
+                :BalanceConstraint => true,
+            ),
+            :efficiency_rate => 0.0
+        ),
+        :edges => Dict{Symbol,Any}(
+            :h2_edge => @edge_data(
+                :commodity => "Hydrogen",
+                :has_capacity => true,
+                :can_retire => true,
+                :can_expand => true,
+                :can_retire => true,
+                :constraints => Dict{Symbol, Bool}(
+                    :CapacityConstraint => true,
+                ),
+            ),
+            :elec_edge => @edge_data(
+                :commodity => "Electricity",
+            ),
+        ),
+    )
+end
+
 """
     make(::Type{Electrolyzer}, data::AbstractDict{Symbol, Any}, system::System) -> Electrolyzer
 
@@ -32,20 +60,44 @@ end
             - can_expand: Bool
             - constraints: Vector{AbstractTypeConstraint}
 """
-function make(::Type{Electrolyzer}, data::AbstractDict{Symbol,Any}, system::System)
+function make(asset_type::Type{Electrolyzer}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 
-    electrolyzer_key = :transforms 
-    transform_data = process_data(data[electrolyzer_key])
+    @setup_data(asset_type, data, id)
+
+    electrolyzer_key = :transforms
+    @process_data(
+        transform_data, 
+        data[electrolyzer_key], 
+        [
+            (data[electrolyzer_key], key),
+            (data[electrolyzer_key], Symbol("transform_", key)),
+            (data, Symbol("transform_", key)),
+            (data, key),
+        ]
+    )
     electrolyzer = Transformation(;
         id = Symbol(id, "_", electrolyzer_key),
         timedata = system.time_data[Symbol(transform_data[:timedata])],
-        constraints = get(transform_data, :constraints, [BalanceConstraint()]),
+        constraints = transform_data[:constraints],
     )
 
     elec_edge_key = :elec_edge
-    elec_edge_data = process_data(data[:edges][elec_edge_key])
-    elec_start_node = find_node(system.locations, Symbol(elec_edge_data[:start_vertex]))
+    @process_data(
+        elec_edge_data, 
+        data[:edges][elec_edge_key], 
+        [
+            (data[:edges][elec_edge_key], key),
+            (data[:edges][elec_edge_key], Symbol("elec_", key)),
+            (data, Symbol("elec_", key)),
+        ]
+    )
+    @start_vertex(
+        elec_start_node,
+        elec_edge_data,
+        Electricity,
+        [(elec_edge_data, :start_vertex), (data, :location)],
+    )
     elec_end_node = electrolyzer
     elec_edge = Edge(
         Symbol(id, "_", elec_edge_key),
@@ -55,12 +107,25 @@ function make(::Type{Electrolyzer}, data::AbstractDict{Symbol,Any}, system::Syst
         elec_start_node,
         elec_end_node,
     )
-    elec_edge.unidirectional = get(elec_edge_data, :unidirectional, true)
 
     h2_edge_key = :h2_edge
-    h2_edge_data = process_data(data[:edges][h2_edge_key])
+    @process_data(
+        h2_edge_data, 
+        data[:edges][h2_edge_key], 
+        [
+            (data[:edges][h2_edge_key], key),
+            (data[:edges][h2_edge_key], Symbol("h2_", key)),
+            (data, Symbol("h2_", key)),
+            (data, key),
+        ]
+    )
     h2_start_node = electrolyzer
-    h2_end_node = find_node(system.locations, Symbol(h2_edge_data[:end_vertex]))
+    @end_vertex(
+        h2_end_node,
+        h2_edge_data,
+        Hydrogen,
+        [(h2_edge_data, :end_vertex), (data, :location)],
+    )
     h2_edge = Edge(
         Symbol(id, "_", h2_edge_key),
         h2_edge_data,
@@ -69,8 +134,6 @@ function make(::Type{Electrolyzer}, data::AbstractDict{Symbol,Any}, system::Syst
         h2_start_node,
         h2_end_node,
     )
-    h2_edge.constraints = get(h2_edge_data, :constraints, [CapacityConstraint()])
-    h2_edge.unidirectional = get(h2_edge_data, :unidirectional, true)
 
     electrolyzer.balance_data = Dict(
         :energy => Dict(

@@ -1,22 +1,41 @@
+macro AbstractNodeBaseAttributes()
+    node_defaults = node_default_data()
+    esc(quote
+        demand::Vector{Float64} = Vector{Float64}()
+        min_nsd::Vector{Float64} = $node_defaults[:min_nsd]
+        max_nsd::Vector{Float64} = $node_defaults[:max_nsd]
+        max_supply::Vector{Float64} = $node_defaults[:max_supply]
+        non_served_demand::JuMPVariable = Matrix{VariableRef}(undef, 0, 0)
+        policy_budgeting_vars::Dict = Dict()
+        policy_slack_vars::Dict = Dict()
+        price::Vector{Float64} = Vector{Float64}()
+        price_nsd::Vector{Float64} = $node_defaults[:price_nsd]
+        price_supply::Vector{Float64} = $node_defaults[:price_supply]
+        price_unmet_policy::Dict{DataType,Float64} = Dict{DataType,Float64}()
+        rhs_policy::Dict{DataType,Float64} = Dict{DataType,Float64}()
+        supply_flow::JuMPVariable = Matrix{VariableRef}(undef, 0, 0)
+    end)
+end
+
 Base.@kwdef mutable struct Node{T} <: AbstractVertex
     @AbstractVertexBaseAttributes()
-    demand::Vector{Float64} = Vector{Float64}()
-    max_nsd::Vector{Float64} = [0.0]
-    max_supply::Vector{Float64} = [0.0]
-    non_served_demand::JuMPVariable = Matrix{VariableRef}(undef, 0, 0)
-    policy_budgeting_vars::Dict = Dict()
-    policy_slack_vars::Dict = Dict()
-    price::Vector{Float64} = Vector{Float64}()
-    price_nsd::Vector{Float64} = [0.0]
-    price_supply::Vector{Float64} = [0.0]
-    price_unmet_policy::Dict{DataType,Float64} = Dict{DataType,Float64}()
-    rhs_policy::Dict{DataType,Float64} = Dict{DataType,Float64}()
-    supply_flow::JuMPVariable = Matrix{VariableRef}(undef, 0, 0)
+    @AbstractNodeBaseAttributes()
 end
 
 function make_node(data::AbstractDict{Symbol,Any}, time_data::TimeData, commodity::DataType)
+    node_kwargs = Base.fieldnames(Node)
+    filtered_data = Dict{Symbol, Any}(
+        k => v for (k,v) in data if k in node_kwargs
+    )
+    id = Symbol(data[:id])
+    remove_keys = [:id, :timedata]
+    for key in remove_keys
+        if haskey(filtered_data, key)
+            delete!(filtered_data, key)
+        end
+    end
     _node = Node{commodity}(;
-        id = Symbol(data[:id]),
+        id = id,
         timedata = time_data,
         demand = get(data, :demand, Vector{Float64}()),
         max_nsd = get(data, :max_nsd, [0.0]),
@@ -26,7 +45,9 @@ function make_node(data::AbstractDict{Symbol,Any}, time_data::TimeData, commodit
         price_supply = get(data, :price_supply, [0.0]),
         price_unmet_policy = get(data, :price_unmet_policy, Dict{DataType,Float64}()),
         rhs_policy = get(data, :rhs_policy, Dict{DataType,Float64}())
+        # filtered_data...
     )
+    
     # add_constraints!(_node, data)
     return _node
 end
@@ -182,9 +203,12 @@ end
 # We can do:
 #   Commodity -> Node{Commodity}
 
-function make(commodity::Type{<:Commodity}, data::AbstractDict{Symbol,Any}, system)
+function make(commodity::Type{<:Commodity}, input_data::AbstractDict{Symbol,Any}, system)
 
-    data = process_data(data)
+    input_data = recursive_merge(clear_dict(node_default_data()), input_data)
+    defaults = node_default_data()
+
+    @process_data(data, input_data, [(input_data, key)])
 
     node = Node(data, system.time_data[typesymbol(commodity)], commodity)
 
@@ -203,6 +227,22 @@ function make(commodity::Type{<:Commodity}, data::AbstractDict{Symbol,Any}, syst
     else
         node.balance_data =
             get(data, :balance_data, Dict(:exogenous => Dict{Symbol,Float64}()))
+    end
+
+    if haskey(data, :location)
+        location_id = data[:location]
+        @debug "Adding node $(node.id) to location $location_id"
+        location = find_locations(system, Symbol(location_id))
+        if isnothing(location) && system.settings.AutoCreateLocations
+            @info(" ++ Creating new location: $(location_id)")
+            location = Location(;id=Symbol(location_id), system=system)
+            push!(system.locations, location)
+        end
+        if isnothing(location)
+            @warn("Location $(location_id) not found and AutoCreateLocations = false.\nNot adding node $(node.id) to any location.")
+        else
+            add_node!(location, node)
+        end
     end
 
     return node

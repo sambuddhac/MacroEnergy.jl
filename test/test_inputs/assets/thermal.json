@@ -11,7 +11,7 @@
                 },
                 "edges": {
                     "elec_edge": {
-                        "type": "Electricity",
+                        "commodity": "Electricity",
                         "uc": true,
                         "unidirectional": true,
                         "has_capacity": true,
@@ -35,12 +35,12 @@
                         }
                     },
                     "fuel_edge": {
-                        "type": "NaturalGas",
+                        "commodity": "NaturalGas",
                         "unidirectional": true,
                         "has_capacity": false
                     },
                     "co2_edge": {
-                        "type": "CO2",
+                        "commodity": "CO2",
                         "unidirectional": true,
                         "has_capacity": false
                     }

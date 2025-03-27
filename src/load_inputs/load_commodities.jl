@@ -32,63 +32,63 @@ end
 
 ###### ###### ###### ######
 
-function load_commodities(path::AbstractString, rel_path::AbstractString, write_subcommodities::Bool=false)
+function load_commodities_from_file(path::AbstractString, rel_path::AbstractString; write_subcommodities::Bool=false)
     path = rel_or_abs_path(path, rel_path)
     if isdir(path)
         path = joinpath(path, "commodities.json")
     end
     # read in the list of commodities from the data directory
     isfile(path) || error("Commodity data not found at $(abspath(path))")
-    return load_commodities(copy(read_json(path)))
+    return load_commodities(copy(read_json(path)), rel_path; write_subcommodities=write_subcommodities)
 end
 
-function load_commodities(data::AbstractDict{Symbol,Any}, rel_path::AbstractString, write_subcommodities::Bool=false)
+function load_commodities(data::AbstractDict{Symbol,Any}, rel_path::AbstractString; write_subcommodities::Bool=false)
     if haskey(data, :path)
         path = rel_or_abs_path(data[:path], rel_path)
-        return load_commodities(path, rel_path, write_subcommodities)
-    else
-        return load_commodities(data)
+        return load_commodities_from_file(path, rel_path; write_subcommodities=write_subcommodities)
+    elseif haskey(data, :commodities)
+        return load_commodities(data[:commodities], rel_path; write_subcommodities=write_subcommodities)
     end
+    return nothing
 end
 
-function load_commodities(data::AbstractVector{Dict{Symbol,Any}}, rel_path::AbstractString, write_subcommodities::Bool=false)
+function load_commodities(data::AbstractVector{Dict{Symbol,Any}}, rel_path::AbstractString; write_subcommodities::Bool=false)
     for item in data
         if isa(item, AbstractDict{Symbol,Any}) && haskey(item, :commodities)
-            return load_commodities(item, rel_path, write_subcommodities)
+            return load_commodities(item, rel_path; write_subcommodities=write_subcommodities)
         end
     end
     error("Commodity data not found or incorrectly formatted in system_data")
 end
 
-function load_commodities(data::AbstractVector{<:AbstractString}, rel_path::AbstractString, write_subcommodities::Bool=false)
+function load_commodities(data::AbstractVector{<:AbstractString}, rel_path::AbstractString; write_subcommodities::Bool=false)
     # Probably means we have a vector of commdity types
-    return load_commodities(Symbol.(data))
+    return load_commodities(Symbol.(data); write_subcommodities=write_subcommodities)
 end
 
-function load_commodities(data::AbstractDict{Symbol,Any})
-    # make sure the commodities are valid
-    if haskey(data, :commodities)
-        return load_commodities(data[:commodities])
-    end
-    return load_commodities(data[:commodities])
-end
-
-function load_commodities(commodities::AbstractVector{<:Any}, rel_path::AbstractString="", write_subcommodities::Bool=false)
+function load_commodities(commodities::AbstractVector{<:Any}, rel_path::AbstractString=""; write_subcommodities::Bool=false)
     subcommodities_path = joinpath(rel_path, "tmp", "subcommodities.jl")
     if isfile(subcommodities_path)
+        @info(" ++ Loading pre-defined user commodities")
+        @debug(" -- Loading subcommodities from file $(subcommodities_path)")
         include(subcommodities_path)
     end
     register_commodity_types!()
 
     macro_commodities = commodity_types()
     sub_commodities = Vector{Dict{Symbol,Any}}()
+    commodity_keys = unique!([MacroEnergy.typesymbol(commodity) for commodity in values(macro_commodities)])
     for commodity in commodities
-        if commodity isa AbstractString
+        if isa(commodity, Symbol)
+            if commodity ∉ keys(macro_commodities)
+                error("Unknown commodity: $commodity")
+            end
+        elseif isa(commodity, AbstractString)
             if Symbol(commodity) ∉ keys(macro_commodities)
                 error("Unknown commodity: $commodity")
             end
-        elseif commodity isa Dict && haskey(commodity, :name) && haskey(commodity, :acts_like)
-            if commodity[:name] ∉ keys(commodity_types())
+        elseif isa(commodity, Dict) && haskey(commodity, :name) && haskey(commodity, :acts_like)
+            if Symbol(commodity[:name]) ∉ commodity_keys
                 @debug("Adding commodity $(commodity[:name]) to list of subcommodities to be added")
                 push!(sub_commodities, commodity)
             else

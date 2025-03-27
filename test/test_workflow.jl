@@ -9,6 +9,7 @@ import MacroEnergy:
     Edge,
     EdgeWithUC,
     Node,
+    Location,
     Transformation,
     AbstractStorage,
     Storage,
@@ -75,6 +76,29 @@ function test_load(obj_in::Dict{DataType,Float64}, data_true::T) where {T<:JSON3
     return nothing
 end
 
+function find_by_id(id::Symbol, data_true::AbstractVector)
+    for instance in data_true
+        true_id = string(instance[:instance_data][:id])
+        if true_id == id
+            return instance
+        end
+    end
+    return nothing
+end
+
+function test_load(obj_in::Vector{<:T}, data_true::JSON3.Array) where T <: Union{Node, Location, AbstractAsset}
+    @test length(obj_in) == length(data_true)
+    for i = 1:length(obj_in)
+            true_instance = find_by_id(obj_in[i].id, data_true)
+            if true_instance === nothing
+                test_load(obj_in[i], data_true[i])
+            else
+                test_load(obj_in[i], true_instance)
+            end
+    end
+    return nothing
+end
+
 function test_load(obj_in::Vector, data_true::JSON3.Array)
     @test length(obj_in) == length(data_true)
     for i = 1:length(obj_in)
@@ -90,6 +114,9 @@ function test_load(
     @test length(obj_in) == length(data_true)
     for c in obj_in
         name = Symbol(typeof(c))
+        if !(name in propertynames(data_true))
+            println("Constraint $name not found in JSON file")
+        end
         @test name in propertynames(data_true)
         @test data_true[name]   # check that the constraint is set to true in the JSON file
     end

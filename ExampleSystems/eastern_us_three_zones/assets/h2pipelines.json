@@ -1,13 +1,23 @@
 {
-    "h2pipeline": [
+    "h2pipe": [
         {
             "type": "GasStorage",
             "global_data": {
-                "nodes": {},
-                "transforms": {
-                    "timedata": "Hydrogen",
+                "storage": {
+                    "commodity": "Hydrogen",
+                    "can_expand": true,
+                    "can_retire": false,
+                    "long_duration": true,
+                    "capacity_size": 787.8,
+                    "min_duration": 1.0,
+                    "max_duration": 1.0,
+                    "charge_discharge_ratio": 1.0,
                     "constraints": {
-                        "BalanceConstraint": true
+                        "StorageCapacityConstraint": true,
+                        "BalanceConstraint": true,
+                        "StorageMinDurationConstraint": true,
+                        "StorageMaxDurationConstraint": true,
+                        "StorageChargeDischargeRatioConstraint": true
                     }
                 },
                 "edges": {
@@ -17,9 +27,11 @@
                         "can_expand": true,
                         "can_retire": false,
                         "has_capacity": true,
-                        "integer_decisions": false,
+                        "capacity_size": 787.8,
+                        "max_capacity": 787800,
                         "constraints": {
-                            "CapacityConstraint": true
+                            "CapacityConstraint": true,
+                            "MaxCapacityConstraint": true
                         }
                     },
                     "charge_edge": {
@@ -28,132 +40,113 @@
                         "has_capacity": true,
                         "can_expand": true,
                         "can_retire": false,
+                        "capacity_size": 787.8,
                         "constraints": {
                             "CapacityConstraint": true
                         }
                     },
-                    "compressor_elec_edge": {
+                    "charge_elec_edge": {
                         "type": "Electricity",
                         "unidirectional": true,
                         "has_capacity": false
                     },
-                    "compressor_gas_edge": {
-                        "type": "Hydrogen",
+                    "discharge_elec_edge": {
+                        "type": "Electricity",
                         "unidirectional": true,
                         "has_capacity": false
-                    }
-                },
-                "storage": {
-                    "commodity": "Hydrogen",
-                    "can_expand": true,
-                    "can_retire": false,
-                    "long_duration": true,
-                    "constraints": {
-                        "StorageCapacityConstraint": true,
-                        "BalanceConstraint": true,
-                        "StorageMaxDurationConstraint": true,
-                        "StorageChargeDischargeRatioConstraint": true,
-                        "LongDurationStorageImplicitMinMaxConstraint": true
                     }
                 }
             },
             "instance_data": [
                 {
-                    "id": "h2pipe_SE_to_MIDAT",
-                    "transforms": {
-                    "electricity_consumption": 0.0683
-                    },
-                    "storage":{
-                        "max_duration": 8.846121602,
-                        "charge_discharge_ratio": 1.0
+                    "id": "h2_SE_to_MIDAT",
+                    "storage": {
+                        "charge_electricity_consumption": 0.067740938,
+                        "discharge_electricity_consumption": 0.0
                     },
                     "edges": {
                         "discharge_edge": {
-                            "end_vertex": "h2_MIDAT",
-                            "distance":491.4512001,
-                            "capacity_size": 787.6,
-                            "investment_cost": 92792.12407
+                            "investment_cost": 92580.5925294,
+                            "end_vertex": "h2_MIDAT"
                         },
-                        "compressor_gas_edge": {
+                        "charge_edge":{
                             "start_vertex": "h2_SE"
                         },
-                        "compressor_elec_edge": {
+                        "discharge_elec_edge": {
+                            "start_vertex": "elec_MIDAT"
+                        },
+                        "charge_elec_edge": {
                             "start_vertex": "elec_SE"
                         }
                     }
                 },
                 {
-                    "id": "h2pipe_MIDAT_to_SE",
-                    "transforms": {
-                    "electricity_consumption": 0.0683
-                    },
-                    "storage":{
-                        "max_duration": 8.846121602,
-                        "charge_discharge_ratio": 1.0
+                    "id": "h2_MIDAT_to_SE",
+                    "storage": {
+                        "charge_electricity_consumption": 0.067740938,
+                        "discharge_electricity_consumption": 0.0
                     },
                     "edges": {
                         "discharge_edge": {
-                            "end_vertex": "h2_SE",
-                            "distance":491.4512001,
-                            "capacity_size": 787.6,
-                            "investment_cost": 92792.12407
+                            "investment_cost": 92580.5925294,
+                            "end_vertex": "h2_SE"
                         },
-                        "compressor_gas_edge": {
+                        "charge_edge":{
                             "start_vertex": "h2_MIDAT"
                         },
-                        "compressor_elec_edge": {
+                        "discharge_elec_edge": {
+                            "start_vertex": "elec_SE"
+                        },
+                        "charge_elec_edge": {
                             "start_vertex": "elec_MIDAT"
                         }
                     }
                 },
                 {
-                    "id": "h2pipe_NE_to_MIDAT",
-                    "transforms": {
-                    "electricity_consumption": 0.06449
-                    },
-                    "storage":{
-                        "max_duration": 8.525925965,
-                        "charge_discharge_ratio": 1.0
+                    "id": "h2_MIDAT_to_NE",
+                    "storage": {
+                        "charge_electricity_consumption": 0.065554656,
+                        "discharge_electricity_consumption": 0.0
                     },
                     "edges": {
                         "discharge_edge": {
-                            "end_vertex": "h2_MIDAT",
-                            "distance":473.6625536,
-                            "capacity_size": 787.6,
-                            "investment_cost": 89059.0723
+                            "investment_cost": 89461.90456,
+                            "end_vertex": "h2_NE"
                         },
-                        "compressor_gas_edge": {
+                        "charge_edge":{
+                            "start_vertex": "h2_MIDAT"
+                        },
+                        "discharge_elec_edge": {
+                            "start_vertex": "elec_NE"
+                        },
+                        "charge_elec_edge": {
+                            "start_vertex": "elec_MIDAT"
+                        }
+                    }
+                },
+                {
+                    "id": "h2_NE_to_MIDAT",
+                    "storage": {
+                        "charge_electricity_consumption": 0.065554656,
+                        "discharge_electricity_consumption": 0.0
+                    },
+                    "edges": {
+                        "discharge_edge": {
+                            "investment_cost": 89461.90456,
+                            "end_vertex": "h2_MIDAT"
+                        },
+                        "charge_edge":{
                             "start_vertex": "h2_NE"
                         },
-                        "compressor_elec_edge": {
+                        "discharge_elec_edge": {
+                            "start_vertex": "elec_MIDAT"
+                        },
+                        "charge_elec_edge": {
                             "start_vertex": "elec_NE"
                         }
                     }
-                },
-                {
-                    "id": "h2pipe_MIDAT_to_NE",
-                    "transforms": {
-                    "electricity_consumption": 0.06449
-                    },
-                    "storage":{
-                        "max_duration": 8.525925965,
-                        "charge_discharge_ratio": 1.0
-                    },
-                    "edges": {
-                        "discharge_edge": {
-                            "end_vertex": "h2_NE",
-                            "distance":473.6625536,
-                            "capacity_size": 787.6,
-                            "investment_cost": 89059.0723
-                        },
-                        "compressor_gas_edge": {
-                            "start_vertex": "h2_MIDAT"
-                        },
-                        "compressor_elec_edge": {
-                            "start_vertex": "elec_MIDAT"
-                        }
-                    }
                 }
+
             ]
         }
     ]

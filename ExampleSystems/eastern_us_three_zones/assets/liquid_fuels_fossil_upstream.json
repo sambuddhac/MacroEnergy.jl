@@ -12,18 +12,18 @@
                 },
                 "edges" :{
                     "fossil_fuel_edge": {
-                        "type": "LiquidFuels",
+                        "commodity": "LiquidFuels",
                         "unidirectional": true,
                         "has_capacity": false
                     },
                     "co2_edge": {
-                        "type": "CO2",
+                        "commodity": "CO2",
                         "unidirectional": true,
                         "has_capacity": false,
                         "end_vertex": "co2_sink"
                     },
                     "fuel_edge": {
-                        "type": "LiquidFuels",
+                        "commodity": "LiquidFuels",
                         "unidirectional": true,
                         "has_capacity": false
                     }
@@ -34,9 +34,11 @@
                     "id": "SE_Gasoline_Fossil_Upstream",
                     "edges":{
                             "fossil_fuel_edge": {
+                                "commodity": "Fossil_Gasoline",
                                 "start_vertex": "gasoline_fossil_SE"
                             },
                             "fuel_edge": {
+                                "commodity": "Gasoline",
                                 "end_vertex": "gasoline_SE"
                             }
                         }
@@ -46,9 +48,11 @@
                     "id": "MIDAT_Gasoline_Fossil_Upstream",
                     "edges":{
                             "fossil_fuel_edge": {
+                                "commodity": "Fossil_Gasoline",
                                 "start_vertex": "gasoline_fossil_MIDAT"
                             },
                             "fuel_edge": {
+                                "commodity": "Gasoline",
                                 "end_vertex": "gasoline_MIDAT"
                             }
                         }
@@ -58,9 +62,11 @@
                     "id": "NE_Gasoline_Fossil_Upstream",
                     "edges":{
                             "fossil_fuel_edge": {
+                                "commodity": "Fossil_Gasoline",
                                 "start_vertex": "gasoline_fossil_NE"
                             },
                             "fuel_edge": {
+                                "commodity": "Gasoline",
                                 "end_vertex": "gasoline_NE"
                             }
                         }
@@ -70,9 +76,11 @@
                     "id": "SE_JetFuel_Fossil_Upstream",
                     "edges":{
                             "fossil_fuel_edge": {
+                                "commodity": "Fossil_JetFuel",
                                 "start_vertex": "jetfuel_fossil_SE"
                             },
                             "fuel_edge": {
+                                "commodity": "JetFuel",
                                 "end_vertex": "jetfuel_SE"
                             }
                         }
@@ -82,9 +90,11 @@
                     "id": "MIDAT_JetFuel_Fossil_Upstream",
                     "edges":{
                             "fossil_fuel_edge": {
+                                "commodity": "Fossil_JetFuel",
                                 "start_vertex": "jetfuel_fossil_MIDAT"
                             },
                             "fuel_edge": {
+                                "commodity": "JetFuel",
                                 "end_vertex": "jetfuel_MIDAT"
                             }
                         }
@@ -94,9 +104,11 @@
                     "id": "NE_JetFuel_Fossil_Upstream",
                     "edges":{
                             "fossil_fuel_edge": {
+                                "commodity": "Fossil_JetFuel",
                                 "start_vertex": "jetfuel_fossil_NE"
                             },
                             "fuel_edge": {
+                                "commodity": "JetFuel",
                                 "end_vertex": "jetfuel_NE"
                             }
                         }
@@ -106,9 +118,11 @@
                     "id": "SE_Diesel_Fossil_Upstream",
                     "edges":{
                             "fossil_fuel_edge": {
+                                "commodity": "Fossil_Diesel",
                                 "start_vertex": "diesel_fossil_SE"
                             },
                             "fuel_edge": {
+                                "commodity": "Diesel",
                                 "end_vertex": "diesel_SE"
                             }
                         }
@@ -118,9 +132,11 @@
                     "id": "MIDAT_Diesel_Fossil_Upstream",
                     "edges":{
                             "fossil_fuel_edge": {
+                                "commodity": "Fossil_Diesel",
                                 "start_vertex": "diesel_fossil_MIDAT"
                             },
                             "fuel_edge": {
+                                "commodity": "Diesel",
                                 "end_vertex": "diesel_MIDAT"
                             }
                         }
@@ -130,9 +146,11 @@
                     "id": "NE_Diesel_Fossil_Upstream",
                     "edges":{
                             "fossil_fuel_edge": {
+                                "commodity": "Fossil_Diesel",
                                 "start_vertex": "diesel_fossil_NE"
                             },
                             "fuel_edge": {
+                                "commodity": "Diesel",
                                 "end_vertex": "diesel_NE"
                             }
                         }

@@ -11,7 +11,7 @@
                 },
                 "edges": {
                     "co2_edge": {
-                        "type": "CO2",
+                        "commodity": "CO2",
                         "unidirectional": true,
                         "has_capacity": true,
                         "can_retire": true,
@@ -24,12 +24,12 @@
                         "integer_decisions": false
                     },
                     "elec_edge": {
-                        "type": "Electricity",
+                        "commodity": "Electricity",
                         "unidirectional": true,
                         "has_capacity": false
                     },
                     "co2_captured_edge": {
-                        "type": "CO2Captured",
+                        "commodity": "CO2Captured",
                         "unidirectional": true,
                         "has_capacity": false,
                         "end_vertex": "co2_captured_sink"

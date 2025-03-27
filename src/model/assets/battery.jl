@@ -5,6 +5,39 @@ struct Battery <: AbstractAsset
     charge_edge::Edge{Electricity}
 end
 
+function default_data(::Type{Battery}, id=missing,)
+    return Dict{Symbol,Any}(
+        :id => id,
+        :storage => @storage_data(
+            :commodity => "Electricity",
+            :can_expand => true,
+            :can_retire => true,
+            :constraints => Dict{Symbol,Bool}(
+                :BalanceConstraint => true,
+                :StorageCapacityConstraint => true,
+                :StorageSymmetricCapacityConstraint => true,
+            )
+        ),
+        :edges => Dict{Symbol,Any}(
+            :charge_edge => @edge_data(
+                :efficiency => 1.0,
+                :commodity => "Electricity",
+            ),
+            :discharge_edge => @edge_data(
+                :efficiency => 1.0,
+                :commodity => "Electricity",
+                :has_capacity => true,
+                :can_expand => true,
+                :can_retire => true,
+                :constraints => Dict{Symbol,Bool}(
+                    :CapacityConstraint => true,
+                    :StorageDischargeLimitConstraint => true
+                )
+            )
+        )
+    )
+end
+
 """
     make(::Type{Battery}, data::AbstractDict{Symbol, Any}, system::System) -> Battery
 
@@ -41,39 +74,64 @@ end
             - efficiency
             - constraints: Vector{AbstractTypeConstraint}
 """
-function make(::Type{Battery}, data::AbstractDict{Symbol,Any}, system::System)
+function make(asset_type::Type{Battery}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
+
+    @setup_data(asset_type, data, id)
 
     ## Storage component of the battery
     storage_key = :storage
-    storage_data = process_data(data[storage_key])
+    @process_data(
+        storage_data,
+        data[storage_key],
+        [
+            (data[storage_key], key),
+            (data[storage_key], Symbol("storage_", key)),
+            (data, Symbol("storage_", key)),
+        ]
+    )
     commodity_symbol = Symbol(storage_data[:commodity])
     commodity = commodity_types()[commodity_symbol]
-    default_constraints = [
-        BalanceConstraint(),
-        StorageCapacityConstraint(),
-        StorageSymmetricCapacityConstraint(),
-    ]
-        
-    # check if the storage is a long duration storage
+
+    # Check if the storage is a long duration storage
     long_duration = get(storage_data, :long_duration, false)
     StorageType = long_duration ? LongDurationStorage : Storage
-    # if storage is long duration, add the corresponding constraint
-    if long_duration
-        push!(default_constraints, LongDurationStorageImplicitMinMaxConstraint())
-    end
-    # create the storage component of the battery
+    
+    # Create the storage component of the battery
     battery_storage = StorageType(
         Symbol(id, "_", storage_key),
         storage_data,
         system.time_data[commodity_symbol],
         commodity,
     )
-    battery_storage.constraints = get(storage_data, :constraints, default_constraints)
 
+    # If storage is long duration, add the implicit min-max constraint
+    if long_duration
+        lds_constraints = [LongDurationStorageImplicitMinMaxConstraint()]
+        for c in lds_constraints
+            if !(c in battery_storage.constraints)
+                push!(battery_storage.constraints, c)
+            end
+        end
+    end
+
+    ## Charge data of the battery
     charge_edge_key = :charge_edge
-    charge_edge_data = process_data(data[:edges][charge_edge_key])
-    charge_start_node = find_node(system.locations, Symbol(charge_edge_data[:start_vertex]))
+    @process_data(
+        charge_edge_data,
+        data[:edges][charge_edge_key],
+        [
+            (data[:edges][charge_edge_key], key),
+            (data[:edges][charge_edge_key], Symbol("charge_", key)),
+            (data, Symbol("charge_", key)),
+        ]
+    )
+    @start_vertex(
+        charge_start_node,
+        charge_edge_data,
+        commodity,
+        [(charge_edge_data, :start_vertex), (data, :location)],
+    )
     charge_end_node = battery_storage
     battery_charge = Edge(
         Symbol(id, "_", charge_edge_key),
@@ -83,13 +141,24 @@ function make(::Type{Battery}, data::AbstractDict{Symbol,Any}, system::System)
         charge_start_node,
         charge_end_node,
     )
-    battery_charge.unidirectional = get(charge_edge_data, :unidirectional, true)
 
+    ## Discharge output of the battery
     discharge_edge_key = :discharge_edge
-    discharge_edge_data = process_data(data[:edges][discharge_edge_key])
+    @process_data(
+        discharge_edge_data, 
+        data[:edges][discharge_edge_key], 
+        [
+            (data[:edges][discharge_edge_key], key),
+            (data[:edges][discharge_edge_key], Symbol("discharge_", key)),
+            (data, Symbol("discharge_", key)),
+        ])
     discharge_start_node = battery_storage
-    discharge_end_node =
-        find_node(system.locations, Symbol(discharge_edge_data[:end_vertex]))
+    @end_vertex(
+        discharge_end_node,
+        discharge_edge_data,
+        commodity,
+        [(discharge_edge_data, :end_vertex), (data, :location)],
+    )
     battery_discharge = Edge(
         Symbol(id, "_", discharge_edge_key),
         discharge_edge_data,
@@ -98,19 +167,22 @@ function make(::Type{Battery}, data::AbstractDict{Symbol,Any}, system::System)
         discharge_start_node,
         discharge_end_node,
     )
-    battery_discharge.constraints = get(
-        discharge_edge_data,
-        :constraints,
-        [CapacityConstraint(), StorageDischargeLimitConstraint(),RampingLimitConstraint()],
-    )
-    battery_discharge.unidirectional = get(discharge_edge_data, :unidirectional, true)
 
     battery_storage.discharge_edge = battery_discharge
     battery_storage.charge_edge = battery_charge
+    
+    discharge_efficiency = get_from([
+            (discharge_edge_data, :discharge_efficiency),
+            (discharge_edge_data, :efficiency)
+        ], 1.0)
+    charge_efficiency = get_from([
+            (charge_edge_data, :charge_efficiency),
+            (charge_edge_data, :efficiency)
+        ], 1.0)
     battery_storage.balance_data = Dict(
         :storage => Dict(
-            battery_discharge.id => 1 / get(discharge_edge_data, :efficiency, 0.9),
-            battery_charge.id => get(charge_edge_data, :efficiency, 0.9),
+            battery_discharge.id => 1 / discharge_efficiency,
+            battery_charge.id => charge_efficiency,
         ),
     )
 

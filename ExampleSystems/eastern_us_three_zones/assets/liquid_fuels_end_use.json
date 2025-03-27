@@ -11,18 +11,18 @@
                 },
                 "edges" :{
                     "fuel_edge": {
-                        "type": "LiquidFuels",
+                        "commodity": "LiquidFuels",
                         "unidirectional": true,
                         "has_capacity": false
                     },
                     "co2_edge": {
-                        "type": "CO2",
+                        "commodity": "CO2",
                         "unidirectional": true,
                         "has_capacity": false,
                         "end_vertex": "co2_sink"
                     },
                     "fuel_demand_edge": {
-                        "type": "LiquidFuels",
+                        "commodity": "LiquidFuels",
                         "unidirectional": true,
                         "has_capacity": false
                     }
@@ -36,9 +36,11 @@
                     },
                     "edges":{
                             "fuel_edge": {
+                                "commodity": "Gasoline",
                                 "start_vertex": "gasoline_SE"
                             },
                             "fuel_demand_edge": {
+                                "commodity": "Gasoline",
                                 "end_vertex": "gasoline_demand_SE"
                             }
                         }
@@ -51,9 +53,11 @@
                     },
                     "edges":{
                             "fuel_edge": {
+                                "commodity": "Gasoline",
                                 "start_vertex": "gasoline_MIDAT"
                             },
                             "fuel_demand_edge": {
+                                "commodity": "Gasoline",
                                 "end_vertex": "gasoline_demand_MIDAT"
                             }
                         }
@@ -66,9 +70,11 @@
                     },
                     "edges":{
                             "fuel_edge": {
+                                "commodity": "Gasoline",
                                 "start_vertex": "gasoline_NE"
                             },
                             "fuel_demand_edge": {
+                                "commodity": "Gasoline",
                                 "end_vertex": "gasoline_demand_NE"
                             }
                         }
@@ -81,9 +87,11 @@
                     },
                     "edges":{
                             "fuel_edge": {
+                                "commodity": "JetFuel",
                                 "start_vertex": "jetfuel_SE"
                             },
                             "fuel_demand_edge": {
+                                "commodity": "JetFuel",
                                 "end_vertex": "jetfuel_demand_SE"
                             }
                         }
@@ -96,9 +104,11 @@
                     },
                     "edges":{
                             "fuel_edge": {
+                                "commodity": "JetFuel",
                                 "start_vertex": "jetfuel_MIDAT"
                             },
                             "fuel_demand_edge": {
+                                "commodity": "JetFuel",
                                 "end_vertex": "jetfuel_demand_MIDAT"
                             }
                         }
@@ -111,9 +121,11 @@
                     },
                     "edges":{
                             "fuel_edge": {
+                                "commodity": "JetFuel",
                                 "start_vertex": "jetfuel_NE"
                             },
                             "fuel_demand_edge": {
+                                "commodity": "JetFuel",
                                 "end_vertex": "jetfuel_demand_NE"
                             }
                         }
@@ -126,9 +138,11 @@
                     },
                     "edges":{
                             "fuel_edge": {
+                                "commodity": "Diesel",
                                 "start_vertex": "diesel_SE"
                             },
                             "fuel_demand_edge": {
+                                "commodity": "Diesel",
                                 "end_vertex": "diesel_demand_SE"
                             }
                         }
@@ -141,9 +155,11 @@
                     },
                     "edges":{
                             "fuel_edge": {
+                                "commodity": "Diesel",
                                 "start_vertex": "diesel_MIDAT"
                             },
                             "fuel_demand_edge": {
+                                "commodity": "Diesel",
                                 "end_vertex": "diesel_demand_MIDAT"
                             }
                         }
@@ -156,9 +172,11 @@
                     },
                     "edges":{
                             "fuel_edge": {
+                                "commodity": "Diesel",
                                 "start_vertex": "diesel_NE"
                             },
                             "fuel_demand_edge": {
+                                "commodity": "Diesel",
                                 "end_vertex": "diesel_demand_NE"
                             }
                         }

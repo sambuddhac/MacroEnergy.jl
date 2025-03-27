@@ -1,10 +1,10 @@
-mutable struct System
+mutable struct System <: AbstractSystem
     data_dirpath::String
     settings::NamedTuple
     commodities::Dict{Symbol,DataType}
     time_data::Dict{Symbol,TimeData}
     assets::Vector{AbstractAsset}
-    locations::Vector{Node}
+    locations::Vector{Union{Node, Location}}
 end
 
 asset_ids(system::System) = map(x -> x.id, system.assets)
@@ -43,13 +43,60 @@ function get_asset_by_id(system::System, id::Symbol)
     return nothing
 end
 
-function find_node(nodes_list::Vector{Node}, id::Symbol)
-    for node in nodes_list
-        if node.id == id
-            return node
+function find_locations(system::System, id::Symbol)
+    for location in system.locations
+        if location.id == id
+            return location
         end
     end
-    error("Vertex $id not found")
+    return nothing
+end
+
+function find_node(nodes_list::Vector{Union{Node, Location}}, id::Symbol, commodity::Union{Missing,DataType}=missing)
+    @debug "Finding node $id of commodity $commodity"
+    for node in nodes_list
+        # Please reformat the code below
+        candidate = find_node(node, id, commodity)
+        if candidate !== nothing
+            return candidate
+        end
+    end
+    error("Node $id not found")
+    return nothing
+end
+
+function find_node(node::Node, id::Symbol, commodity::Union{Missing,DataType}=missing)
+    if node.id == id
+        return node
+    end
+    return nothing
+end
+
+function find_node(location::Location, id::Symbol, commodity::Union{Missing,DataType}=missing)
+    # If commodity is missing, skip
+    if commodity === missing
+        return nothing
+    end
+    if location.id == id
+        commodity_symbol = typesymbol(commodity)
+        if commodity_symbol in location.commodities
+            @debug "Found $commodity node called $id"
+            # If the location has a node of the commodity we need, return it
+            return location.nodes[commodity_symbol]
+        elseif location.system.settings.AutoCreateNodes
+            # Otherwise, create a new node of the commodity and return it
+            @debug "Making $commodity node called $id"
+            new_node = Node{commodity}(;
+                id = id,
+                timedata = location.system.time_data[commodity_symbol]
+            )
+            add_node!(location, new_node)
+            push!(location.system.locations, new_node)
+            return new_node
+        else
+            @warn("Node $id not found\nNot creating a new Node as AutoCreateNodes = false")
+        end
+    end
     return nothing
 end
 

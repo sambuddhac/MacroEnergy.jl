@@ -30,6 +30,9 @@ abstract type LiquidFuels <: Commodity end ## MWh
 ## Time data types
 abstract type AbstractTimeData{T<:Commodity} end
 
+##
+abstract type AbstractSystem end
+
 ## Structure types
 abstract type MacroObject end
 abstract type AbstractVertex <: MacroObject end
@@ -92,7 +95,6 @@ include("model/assets/thermalpower.jl")
 include("model/assets/powerline.jl")
 include("model/assets/vre.jl")
 
-include("model/assets/hydrogenline.jl")
 include("model/assets/thermalhydrogenccs.jl")
 include("model/assets/thermalpowerccs.jl")
 
@@ -167,7 +169,6 @@ export AbstractAsset,
     get_optimal_retired_capacity,
     HydroRes,
     Hydrogen,
-    HydrogenLine,
     LongDurationStorage,
     LongDurationStorageImplicitMinMaxConstraint,
     LiquidFuels,

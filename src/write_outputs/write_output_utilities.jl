@@ -28,7 +28,7 @@ OutputRow(commodity::Symbol, commodity_subtype::Union{Symbol,Missing}, zone::Sym
 get_optimal_vars(objs::Vector{T}, field::Function, scaling::Float64=1.0, obj_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}=Dict{Symbol,Base.RefValue{<:AbstractAsset}}()) where {T<:Union{AbstractEdge,Storage}} =
     get_optimal_vars(objs, (field,), scaling, obj_asset_map)
 function get_optimal_vars(objs::Vector{T}, field_list::Tuple, scaling::Float64=1.0, obj_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}=Dict{Symbol,Base.RefValue{<:AbstractAsset}}()) where {T<:Union{AbstractEdge,Storage}}
-    # the obj_asset_map is used to map the asset component (e.g., natgas_1_ng_edge, natgas_2_ng_edge, natgas_1_elec_edge) to the actual asset id (e.g., natgas_1)
+    # the obj_asset_map is used to map the asset component (e.g., natgas_1_natgas_edge, natgas_2_natgas_edge, natgas_1_elec_edge) to the actual asset id (e.g., natgas_1)
     if isempty(obj_asset_map)
         return OutputRow[
             OutputRow(
@@ -68,13 +68,14 @@ end
 
 ## Helper functions to extract the optimal values of given fields from a list of MacroObjects at different time intervals ##
 # e.g., get_optimal_vars_timeseries(edges, flow)
+
 function get_optimal_vars_timeseries(
     objs::Vector{T},
     field_list::Tuple,
     scaling::Float64=1.0,
     obj_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}=Dict{Symbol,Base.RefValue{<:AbstractAsset}}()
-) where {T<:Union{AbstractEdge,Storage,Node}}
-    reduce(vcat, [get_optimal_vars_timeseries(o, field_list, scaling, obj_asset_map) for o in objs])
+) where {T<:Union{AbstractEdge,Storage,Node,Location}}
+    reduce(vcat, [get_optimal_vars_timeseries(o, field_list, scaling, obj_asset_map) for o in objs if !isa(o, Location)]) # filter out locations
 end
 
 function get_optimal_vars_timeseries(
@@ -82,8 +83,8 @@ function get_optimal_vars_timeseries(
     f::Function,
     scaling::Float64=1.0,
     obj_asset_map::Dict{Symbol,Base.RefValue{<:AbstractAsset}}=Dict{Symbol,Base.RefValue{<:AbstractAsset}}()
-) where {T<:Union{AbstractEdge,Storage,Node}}
-    reduce(vcat, [get_optimal_vars_timeseries(o, f, scaling, obj_asset_map) for o in objs])
+) where {T<:Union{AbstractEdge,Storage,Node,Location}}
+    reduce(vcat, [get_optimal_vars_timeseries(o, f, scaling, obj_asset_map) for o in objs if !isa(o, Location)])
 end
 
 function get_optimal_vars_timeseries(
@@ -149,9 +150,9 @@ function get_optimal_vars_timeseries(
 end
 
 # Get the commodity type of a MacroObject
-get_commodity_name(obj::AbstractEdge) = Symbol(commodity_type(obj))
-get_commodity_name(obj::Node) = Symbol(commodity_type(obj))
-get_commodity_name(obj::Storage) = Symbol(commodity_type(obj))
+get_commodity_name(obj::AbstractEdge) = typesymbol(commodity_type(obj))
+get_commodity_name(obj::Node) = typesymbol(commodity_type(obj))
+get_commodity_name(obj::Storage) = typesymbol(commodity_type(obj))
 
 # The commodity subtype is an identifier for the field names
 # e.g., "capacity" for capacity variables, "flow" for flow variables, etc.
