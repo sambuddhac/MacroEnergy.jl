@@ -9,6 +9,7 @@ import MacroEnergy:
     Edge,
     EdgeWithUC,
     Node,
+    Location,
     Transformation,
     AbstractStorage,
     Storage,
@@ -71,6 +72,29 @@ function test_load(obj_in::Dict{DataType,Float64}, data_true::T) where {T<:JSON3
     for (k, v) in obj_in
         @test Symbol(k) in keys(data_true)
         @test obj_in[k] == data_true[Symbol(k)]
+    end
+    return nothing
+end
+
+function find_by_id(id::Symbol, data_true::AbstractVector)
+    for instance in data_true
+        true_id = string(instance[:instance_data][:id])
+        if true_id == id
+            return instance
+        end
+    end
+    return nothing
+end
+
+function test_load(obj_in::Vector{<:T}, data_true::JSON3.Array) where T <: Union{Node, Location, AbstractAsset}
+    @test length(obj_in) == length(data_true)
+    for i = 1:length(obj_in)
+            true_instance = find_by_id(obj_in[i].id, data_true)
+            if true_instance === nothing
+                test_load(obj_in[i], data_true[i])
+            else
+                test_load(obj_in[i], true_instance)
+            end
     end
     return nothing
 end
@@ -222,9 +246,7 @@ end
 function test_load(s_in::System, s_true::T) where {T<:JSON3.Object}
     test_configure_settings(s_in.settings, s_true.settings)
     test_load_commodities(s_in.commodities, s_true.commodities)
-    # println(s_in.locations)
-    # println(s_true.nodes)
-    # test_load(s_in.locations, s_true.nodes)
+    test_load(s_in.locations, s_true.nodes)
     test_load(s_in.assets, s_true.assets)
     return nothing
 end
