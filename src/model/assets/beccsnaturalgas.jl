@@ -1,7 +1,7 @@
 struct BECCSNaturalGas <: AbstractAsset
     id::AssetId
     beccs_transform::Transformation
-    biomass_edge::Edge{Biomass}
+    biomass_edge::Edge{<:Biomass}
     natgas_edge::Edge{<:NaturalGas}
     elec_edge::Edge{Electricity}
     co2_edge::Edge{CO2}
@@ -127,8 +127,8 @@ function make(asset_type::Type{BECCSNaturalGas}, data::AbstractDict{Symbol,Any},
     biomass_edge = Edge(
         Symbol(id, "_", biomass_edge_key),
         biomass_edge_data,
-        system.time_data[:Biomass],
-        Biomass,
+        system.time_data[commodity_symbol],
+        commodity,
         biomass_start_node,
         biomass_end_node,
     )
