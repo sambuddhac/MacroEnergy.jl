@@ -41,6 +41,21 @@ Base.@kwdef mutable struct Edge{T} <: AbstractEdge{T}
     @AbstractEdgeBaseAttributes()
 end
 
+function target_is_valid(commodity::Type{<:Commodity}, target::T) where T<:Union{Node, AbstractStorage}
+    if commodity <: commodity_type(target)
+        return true
+    end
+    return false
+end
+
+function target_is_valid(commodity::Type{<:Commodity}, target)
+    return true
+end
+
+function target_is_valid(edge::AbstractEdge, target::AbstractVertex)
+    return target_is_valid(commodity_type(edge), target)
+end
+
 function make_edge(
     id::Symbol,
     data::AbstractDict{Symbol,Any},
@@ -49,6 +64,11 @@ function make_edge(
     start_vertex::AbstractVertex,
     end_vertex::AbstractVertex,
 )
+    if !(target_is_valid(commodity, start_vertex))
+        error("Edge $id cannot be connected to its start vertex, $(start_vertex.id).\nThey have different commodities\n$id is a $commodity edge.\n$(start_vertex.id) is a $(commodity_type(start_vertex)) vertex.")
+    elseif !target_is_valid(commodity, end_vertex)
+        error("Edge $id cannot be connected to its end vertex, $(end_vertex.id).\nThey have different commodities\n$id is a $commodity edge.\n$(end_vertex.id) is a $(commodity_type(end_vertex)) vertex.")
+    end
 
     edge_kwargs = Base.fieldnames(Edge)
     filtered_data = Dict{Symbol, Any}(
@@ -246,9 +266,16 @@ function make_edge_UC(
     start_vertex::AbstractVertex,
     end_vertex::AbstractVertex,
 )
+
+    if !(target_is_valid(commodity, start_vertex))
+        error("Edge $id cannot be connected to its start vertex, $(start_vertex.id).\nThey have different commodities\n$id is a $commodity edge.\n$(start_vertex.id) is a $(commodity_type(start_vertex)) vertex.")
+    elseif !target_is_valid(commodity, end_vertex)
+        error("Edge $id cannot be connected to its end vertex, $(end_vertex.id).\nThey have different commodities\n$id is a $commodity edge.\n$(end_vertex.id) is a $(commodity_type(end_vertex)) vertex.")
+    end
+
     edge_kwargs = Base.fieldnames(EdgeWithUC)
-    filtered_data = Dict{Symbol, Any}(
-        k => v for (k,v) in data if k in edge_kwargs
+    filtered_data = Dict{Symbol,Any}(
+        k => v for (k, v) in data if k in edge_kwargs
     )
     remove_keys = [:id, :start_vertex, :end_vertex, :timedata]
     for key in remove_keys
