@@ -911,6 +911,12 @@ function find_available_filepath(path::AbstractString, filename::AbstractString;
         end
         filename = "$(basename)_$(lpad(i, 3, '0'))$(ext)"
     end
-    
+    return filename
     error("Could not find available file after $max_attempts attempts")
+end
+
+function find_available_filepath(filepath::AbstractString; max_attempts::Int=999)
+    path = dirname(filepath)
+    filename = basename(filepath)
+    return find_available_filepath(path, filename; max_attempts=max_attempts)
 end
