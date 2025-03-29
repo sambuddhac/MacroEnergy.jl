@@ -316,7 +316,7 @@ function convert_json_to_csv(file_path::AbstractString, rel_path::AbstractString
 
     dataframes = Vector{DataFrame}()
     for (asset_type, asset_data) in csv_data.asset_data
-        file_root = string(asset_type)
+        file_root = splitext(basename(file_path))[1]
         csv_file_path = joinpath(dirname(file_path))
         csv_file_path = find_available_filepath(csv_file_path, "$file_root.csv")
         df = DataFrame(asset_data)
