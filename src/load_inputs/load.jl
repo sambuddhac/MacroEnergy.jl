@@ -54,6 +54,13 @@ function load!(system::System, data::AbstractVector{<:AbstractDict{Symbol,Any}})
     return nothing
 end
 
+function load!(system::System, data)::Nothing
+    # This is for unhandled types, which will most likely be empty Vector
+    # or bad inputs
+    @debug("Bad or empty input to load!(). The input data was:\n$data")
+    return nothing
+end
+
 function expand_instances(data::AbstractDict{Symbol,Any})
     instances = Vector{Dict{Symbol,Any}}()
     type = data[:type]
