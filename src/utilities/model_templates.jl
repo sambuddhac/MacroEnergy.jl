@@ -31,11 +31,15 @@ function template_timedata_file(filepath::AbstractString)
         :TotalHoursModeled => 8760,
         :HoursPerSubperiod => 8760,
         :HoursPerTimeStep => 1,
-        :umberOfSubperiods => 1,
+        :NumberOfSubperiods => 1,
     )
     time_data = Dict{Symbol,Any}()
     for (k, v) in default_time_data
-        time_data[k] = Dict{Symbol,Any}(c => v for c in collect(keys(commodity_types())))
+        if k in [:HoursPerSubperiod, :HoursPerTimeStep]
+            time_data[k] = Dict{Symbol,Any}(c => v for c in collect(keys(commodity_types())))
+        else
+            time_data[k] = v
+        end
     end
     write_json(filepath, time_data)
 end
