@@ -20,6 +20,10 @@ function typesymbol(type::DataType)
     return Base.typename(type).name
 end
 
+function typesymbol(type::UnionAll)
+    return Base.typename(type).name
+end
+
 function fieldnames(type::T) where {T<:Type{<:AbstractAsset}}
     return filter(x -> x != :id, Base.fieldnames(type))
 end
