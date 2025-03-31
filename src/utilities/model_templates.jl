@@ -81,6 +81,8 @@ function template_system(dirpath::AbstractString, system_name::AbstractString=@d
 
     system_data = copy(load_default_system_data())
 
+    write_json(joinpath(system_path, "system_data.json"), system_data)
+
     mkpath(joinpath(system_path, "system"))
     mkpath(joinpath(system_path, system_data[:assets][:path]))
     template_nodes_file(joinpath(system_path, system_data[:nodes][:path]))
