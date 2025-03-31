@@ -329,8 +329,7 @@ end
 
 function convert_jsons_to_csv(dir_path::AbstractString, rel_path::AbstractString=dir_path, lazy_load::Bool=false, compress::Bool=false)
     json_files = readdir(dir_path)
-    #FIXME: Need to make this work with @JSON_EXT
-    json_files = filter(x -> endswith(x, ".json")||endswith(x, ".json.gz"), json_files)
+    json_files = filter(x -> any(endswith(x, s) for s in @JSON_EXT), json_files)
 
     dataframes = Vector{DataFrame}()
     for json_file in json_files
