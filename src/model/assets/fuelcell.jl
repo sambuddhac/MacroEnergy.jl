@@ -5,7 +5,15 @@ struct FuelCell <: AbstractAsset
     elec_edge::Edge{Electricity}
 end
 
-function default_data(::Type{FuelCell}, id=missing)
+function default_data(t::Type{FuelCell}, id=missing, style="full")
+    if style == "full"
+        return full_default_data(t, id)
+    else
+        return simple_default_data(t, id)
+    end
+end
+
+function full_default_data(::Type{FuelCell}, id=missing)
     return Dict{Symbol,Any}(
         :id => id,
         :transforms => @transform_data(

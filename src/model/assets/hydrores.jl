@@ -6,7 +6,15 @@ struct HydroRes <: AbstractAsset
     spill_edge::Edge{Electricity}
 end
 
-function default_data(::Type{HydroRes}, id=missing)
+function default_data(t::Type{HydroRes}, id=missing, style="full")
+    if style == "full"
+        return full_default_data(t, id)
+    else
+        return simple_default_data(t, id)
+    end
+end
+
+function full_default_data(::Type{HydroRes}, id=missing)
     return Dict{Symbol,Any}(
         :id => id,
         :storage => @storage_data(
@@ -46,7 +54,6 @@ end
 """
     make(::Type{HydroRes}, data::AbstractDict{Symbol, Any}, system::System) -> HydroRes
 """
-
 function make(asset_type::Type{HydroRes}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 

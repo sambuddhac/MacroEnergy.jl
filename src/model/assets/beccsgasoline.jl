@@ -9,7 +9,15 @@ struct BECCSGasoline <: AbstractAsset
     co2_captured_edge::Edge{CO2Captured}
 end
 
-function default_data(::Type{BECCSGasoline}, id=missing)
+function default_data(t::Type{BECCSGasoline}, id=missing, style="full")
+    if style == "full"
+        return full_default_data(t, id)
+    else
+        return simple_default_data(t, id)
+    end
+end
+
+function full_default_data(::Type{BECCSGasoline}, id=missing)
     return Dict{Symbol,Any}(
         :id => id,
         :transforms => @transform_data(

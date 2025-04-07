@@ -11,7 +11,15 @@ GasStorage(id::AssetId,gas_storage::AbstractStorage{T},charge_edge::Edge{T},disc
 charge_elec_edge::Edge{Electricity},discharge_elec_edge::Edge{Electricity}) where T<:Commodity =
     GasStorage{T}(id,gas_storage,charge_edge,discharge_edge,charge_elec_edge,discharge_elec_edge)
 
-function default_data(::Type{GasStorage}, id=missing)
+function default_data(t::Type{GasStorage}, id=missing, style="full")
+    if style == "full"
+        return full_default_data(t, id)
+    else
+        return simple_default_data(t, id)
+    end
+end
+
+function full_default_data(::Type{GasStorage}, id=missing)
     return Dict{Symbol,Any}(
         :id => id,
         :storage => @storage_data(

@@ -11,7 +11,15 @@ ThermalHydrogen(id::AssetId, thermalhydrogen_transform::Transformation,h2_edge::
 fuel_edge::Edge{T},co2_edge::Edge{CO2}) where T<:Commodity =
     ThermalHydrogen{T}(id, thermalhydrogen_transform, h2_edge, elec_edge, fuel_edge, co2_edge)
 
-function default_data(::Type{ThermalHydrogen}, id=missing)
+function default_data(t::Type{ThermalHydrogen}, id=missing, style="full")
+    if style == "full"
+        return full_default_data(t, id)
+    else
+        return simple_default_data(t, id)
+    end
+end
+
+function full_default_data(::Type{ThermalHydrogen}, id=missing)
     return Dict{Symbol,Any}(
         :id => id,
         :transforms => @transform_data(

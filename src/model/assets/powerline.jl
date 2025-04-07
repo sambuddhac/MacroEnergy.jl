@@ -3,7 +3,15 @@ struct PowerLine <: AbstractAsset
     elec_edge::Edge{Electricity}
 end
 
-function default_data(::Type{PowerLine}, id=missing)
+function default_data(t::Type{PowerLine}, id=missing, style="full")
+    if style == "full"
+        return full_default_data(t, id)
+    else
+        return simple_default_data(t, id)
+    end
+end
+
+function full_default_data(::Type{PowerLine}, id=missing)
     return Dict{Symbol,Any}(
         :id => id,
         :edges => Dict{Symbol,Any}(

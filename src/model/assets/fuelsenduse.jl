@@ -9,7 +9,15 @@ end
 FuelsEndUse(id::AssetId, fuelsenduse_transform::Transformation, fuel_edge::Edge{T}, fuel_demand_edge::Edge{T}, co2_edge::Edge{CO2}) where T<:Commodity =
     FuelsEndUse{T}(id, fuelsenduse_transform, fuel_edge, fuel_demand_edge, co2_edge)
 
-function default_data(::Type{FuelsEndUse}, id=missing)
+function default_data(t::Type{FuelsEndUse}, id=missing, style="full")
+    if style == "full"
+        return full_default_data(t, id)
+    else
+        return simple_default_data(t, id)
+    end
+end
+
+function full_default_data(::Type{FuelsEndUse}, id=missing)
     return Dict{Symbol, Any}(
         :id => id,
         :transforms => @transform_data(

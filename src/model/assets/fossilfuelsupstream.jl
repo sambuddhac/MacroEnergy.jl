@@ -24,7 +24,15 @@ FossilFuelsUpstream(
 ) where {T<:Commodity} =
     FossilFuelsUpstream{T}(id, fossilfuelsupstream_transform, fossil_fuel_edge, fuel_edge, co2_edge)
 
-function default_data(::Type{FossilFuelsUpstream}, id=missing)
+function default_data(t::Type{FossilFuelsUpstream}, id=missing, style="full")
+    if style == "full"
+        return full_default_data(t, id)
+    else
+        return simple_default_data(t, id)
+    end
+end
+    
+function full_default_data(::Type{FossilFuelsUpstream}, id=missing)
     return Dict{Symbol,Any}(
         :id => id,
         :transforms => @transform_data(
