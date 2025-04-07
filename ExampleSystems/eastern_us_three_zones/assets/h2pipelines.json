@@ -3,6 +3,9 @@
         {
             "type": "GasStorage",
             "global_data": {
+                "transforms": {
+                    "timedata": "Hydrogen"
+                },
                 "storage": {
                     "commodity": "Hydrogen",
                     "can_expand": true,
@@ -60,7 +63,7 @@
             "instance_data": [
                 {
                     "id": "h2_SE_to_MIDAT",
-                    "storage": {
+                    "transforms": {
                         "charge_electricity_consumption": 0.067740938,
                         "discharge_electricity_consumption": 0.0
                     },
@@ -82,7 +85,7 @@
                 },
                 {
                     "id": "h2_MIDAT_to_SE",
-                    "storage": {
+                    "transforms": {
                         "charge_electricity_consumption": 0.067740938,
                         "discharge_electricity_consumption": 0.0
                     },
@@ -104,7 +107,7 @@
                 },
                 {
                     "id": "h2_MIDAT_to_NE",
-                    "storage": {
+                    "transforms": {
                         "charge_electricity_consumption": 0.065554656,
                         "discharge_electricity_consumption": 0.0
                     },
@@ -126,7 +129,7 @@
                 },
                 {
                     "id": "h2_NE_to_MIDAT",
-                    "storage": {
+                    "transforms": {
                         "charge_electricity_consumption": 0.065554656,
                         "discharge_electricity_consumption": 0.0
                     },

@@ -34,7 +34,7 @@
                 {
                     "id": "h2_SE_to_MIDAT",
                     "location": "SE",
-                    "storage":{
+                    "transforms":{
                         "charge_electricity_consumption": 0.067740938,
                         "discharge_electricity_consumption": 0.0
                     },
@@ -48,7 +48,7 @@
                 {
                     "id": "h2_MIDAT_to_SE",
                     "location": "MIDAT",
-                    "storage":{
+                    "transforms":{
                         "charge_electricity_consumption": 0.067740938,
                         "discharge_electricity_consumption": 0.0
                     },
@@ -62,7 +62,7 @@
                 {
                     "id": "h2_NE_to_MIDAT",
                     "location": "NE",
-                    "storage": {
+                    "transforms": {
                         "charge_electricity_consumption": 0.065554656,
                         "discharge_electricity_consumption": 0.0
                     },
@@ -76,7 +76,7 @@
                 {
                     "id": "h2_MIDAT_to_NE",
                     "location": "MIDAT",
-                    "storage": {
+                    "transforms": {
                         "charge_electricity_consumption": 0.065554656,
                         "discharge_electricity_consumption": 0.0
                     },
