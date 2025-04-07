@@ -156,7 +156,7 @@ function new_header(vec_data::VectorData, header::Symbol)
     return new_header(vec_data, string(header))
 end
 
-function extract_data!(json_data::AbstractDict{Symbol, Any}, row_data::AbstractDict{Symbol, Any}, vec_data::VectorData, prefix::AbstractString="", nesting_str::AbstractString="--")
+function extract_data!(json_data::AbstractDict{Symbol, <:Any}, row_data::AbstractDict{Symbol, Any}, vec_data::VectorData, prefix::AbstractString="", nesting_str::AbstractString="--")
     for (key, value) in json_data
         if value isa Dict
             new_prefix = prefix * string(key) * nesting_str
