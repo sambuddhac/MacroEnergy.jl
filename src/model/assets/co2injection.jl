@@ -40,6 +40,22 @@ function full_default_data(::Type{CO2Injection}, id=missing)
     )
 end
 
+function simple_default_data(::Type{CO2Injection}, id=missing)
+    return Dict{Symbol, Any}(
+        :id => id,
+        :location => missing,
+        :can_expand => false,
+        :can_retire => false,
+        :existing_capacity => 0.0,
+        :co2_source => missing,
+        :co2_storage => missing,
+        :investment_cost => 0.0,
+        :fixed_om_cost => 0.0,
+        :variable_om_cost => 0.0,
+    )
+
+end
+
 function make(asset_type::Type{CO2Injection}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 

@@ -30,6 +30,23 @@ function full_default_data(::Type{PowerLine}, id=missing)
     )
 end
 
+function simple_default_data(::Type{PowerLine}, id=missing)
+    return Dict{Symbol,Any}(
+        :id => id,
+        :location => missing,
+        :can_expand => true,
+        :can_retire => false,
+        :existing_capacity => 0.0,
+        :investment_cost => 0.0,
+        :fixed_om_cost => 0.0,
+        :variable_om_cost => 0.0,
+        :distance => 0.0,
+        :unidirectional => false,
+        :loss_fraction => 0.0,
+    )
+end
+
+
 """
     make(::Type{PowerLine}, data::AbstractDict{Symbol, Any}, system::System) -> PowerLine
 """

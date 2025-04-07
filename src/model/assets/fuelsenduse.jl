@@ -43,6 +43,19 @@ function full_default_data(::Type{FuelsEndUse}, id=missing)
     )
 end
 
+function simple_default_data(::Type{FuelsEndUse}, id=missing)
+    return Dict{Symbol, Any}(
+        :id => id,
+        :location => missing,
+        :co2_sink => missing,
+        :emission_rate => 0.0,
+        :fuel_commodity => "LiquidFuels",
+        :fuel_demand_commodity => "LiquidFuels",
+        :fuel_demand_end_vertex => missing,
+        :timedata => "LiquidFuels",
+    )
+end
+
 function make(asset_type::Type{FuelsEndUse}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 

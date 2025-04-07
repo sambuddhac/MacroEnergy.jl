@@ -62,6 +62,33 @@ function full_default_data(::Type{GasStorage}, id=missing)
     )
 end
 
+function simple_default_data(::Type{GasStorage}, id=missing)
+    return Dict{Symbol,Any}(
+        :id => id,
+        :location => missing,
+        :storage_can_expand => true,
+        :storage_can_retire => true,
+        :discharge_can_expand => true,
+        :discharge_can_retire => true,
+        :charge_can_expand => true,
+        :charge_can_retire => true,
+        :storage_existing_capacity => 0.0,
+        :discharge_existing_capacity => 0.0,
+        :charge_existing_capacity => 0.0,
+        :storage_investment_cost => 0.0,
+        :storage_fixed_om_cost => 0.0,
+        :storage_variable_om_cost => 0.0,
+        :discharge_investment_cost => 0.0,
+        :discharge_fixed_om_cost => 0.0,
+        :discharge_variable_om_cost => 0.0,
+        :charge_investment_cost => 0.0,
+        :charge_fixed_om_cost => 0.0,
+        :charge_variable_om_cost => 0.0,
+        :charge_electricity_consumption => 0.0,
+        :discharge_electricity_consumption => 0.0,
+    )
+end
+
 function make(asset_type::Type{GasStorage}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 

@@ -62,6 +62,26 @@ function full_default_data(::Type{BECCSHydrogen}, id=missing)
     )
 end
 
+function simple_default_data(::Type{BECCSHydrogen}, id=missing)
+    return Dict{Symbol, Any}(
+        :id => id,
+        :location => missing,
+        :can_expand => true,
+        :can_retire => true,
+        :existing_capacity => 0.0,
+        :capacity_size => 1.0,
+        :co2_sink => missing,
+        :hydrogen_production => 0.0,
+        :electricity_consumption => 0.0,
+        :co2_content => 0.0,
+        :emission_rate => 1.0,
+        :capture_rate => 1.0,
+        :investment_cost => 0.0,
+        :fixed_om_cost => 0.0,
+        :variable_om_cost => 0.0,
+    )
+end
+
 function make(asset_type::Type{BECCSHydrogen}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 

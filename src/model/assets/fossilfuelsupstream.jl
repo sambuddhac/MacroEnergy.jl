@@ -57,6 +57,17 @@ function full_default_data(::Type{FossilFuelsUpstream}, id=missing)
     )
 end
 
+function simple_default_data(::Type{FossilFuelsUpstream}, id=missing)
+    return Dict{Symbol,Any}(
+        :id => id,
+        :location => missing,
+        :emission_rate => 0.0,
+        :co2_sink => missing,
+        :fuel_commodity => missing,
+        :fossil_fuel_commodity => missing,
+    )
+end
+
 function make(asset_type::Type{FossilFuelsUpstream}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 

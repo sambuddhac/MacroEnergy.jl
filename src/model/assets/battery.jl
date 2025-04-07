@@ -49,12 +49,16 @@ end
 function simple_default_data(::Type{Battery}, id=missing)
     return Dict{Symbol,Any}(
         :id => id,
+        :location => missing,
         :storage_can_expand => true,
         :storage_can_retire => true,
         :discharge_can_expand => true,
         :discharge_can_retire => true,
         :charge_can_expand => true,
         :charge_can_retire => true,
+        :storage_existing_capacity => 0.0,
+        :discharge_existing_capacity => 0.0,
+        :charge_existing_capacity => 0.0,
         :storage_investment_cost => 0.0,
         :storage_fixed_om_cost => 0.0,
         :storage_max_duration => 100.0,
@@ -62,18 +66,11 @@ function simple_default_data(::Type{Battery}, id=missing)
         :discharge_investment_cost => 0.0,
         :discharge_fixed_om_cost => 0.0,
         :discharge_variable_om_cost => 0.0,
+        :charge_investment_cost => 0.0,
+        :charge_fixed_om_cost => 0.0,
         :charge_variable_om_cost => 0.0,
         :discharge_efficiency => 1.0,
         :charge_efficiency => 1.0,
-        :storage_constraints => Dict{Symbol,Bool}(
-            :BalanceConstraint => true,
-            :StorageCapacityConstraint => true,
-            :StorageSymmetricCapacityConstraint => true,
-        ),
-        :discharge_constraints => Dict{Symbol,Bool}(
-            :CapacityConstraint => true,
-            :StorageDischargeLimitConstraint => true
-        ),
     )
 end
 

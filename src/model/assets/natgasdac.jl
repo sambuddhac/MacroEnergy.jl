@@ -57,6 +57,24 @@ function full_default_data(::Type{NaturalGasDAC}, id=missing)
     )
 end
 
+function simple_default_data(::Type{NaturalGasDAC}, id=missing)
+    return Dict{Symbol, Any}(
+        :id => id,
+        :location => missing,
+        :can_expand => true,
+        :can_retire => true,
+        :existing_capacity => 0.0,
+        :co2_sink => missing,
+        :emission_rate => 1.0,
+        :capture_rate => 1.0,
+        :fuel_consumption => 0.0,
+        :electricity_production => 0.0,
+        :investment_cost => 0.0,
+        :fixed_om_cost => 0.0,
+        :variable_om_cost => 0.0,
+    )
+end
+
 """
     make(::Type{NaturalGasDAC}, data::AbstractDict{Symbol, Any}, system::System) -> NaturalGasDAC
 """

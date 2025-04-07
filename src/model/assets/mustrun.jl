@@ -35,6 +35,20 @@ function full_default_data(::Type{MustRun}, id=missing)
     )
 end
 
+function simple_default_data(::Type{MustRun}, id=missing)
+    return Dict{Symbol,Any}(
+        :id => id,
+        :location => missing,
+        :can_expand => true,
+        :can_retire => true,
+        :existing_capacity => 0.0,
+        :capacity_size => 1.0,
+        :investment_cost => 0.0,
+        :fixed_om_cost => 0.0,
+        :variable_om_cost => 0.0,
+    )
+end
+
 """
     make(::Type{MustRun}, data::AbstractDict{Symbol, Any}, system::System) -> MustRun
 """

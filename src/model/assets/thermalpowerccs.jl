@@ -57,6 +57,34 @@ function full_default_data(::Type{ThermalPowerCCS}, id=missing)
     )
 end
 
+function simple_default_data(::Type{ThermalPowerCCS}, id=missing)
+    return Dict{Symbol, Any}(
+        :id => id,
+        :location => missing,
+        :can_expand => true,
+        :can_retire => true,
+        :existing_capacity => 0.0,
+        :capacity_size => 1.0,
+        :timedata => "NaturalGas",
+        :fuel_commodity => "NaturalGas",
+        :co2_sink => missing,
+        :uc => false,
+        :investment_cost => 0.0,
+        :fixed_om_cost => 0.0,
+        :variable_om_cost => 0.0,
+        :fuel_consumption => 0.0,
+        :electricity_consumption => 0.0,
+        :emission_rate => 1.0,
+        :capture_rate => 1.0,
+        :startup_cost => 0.0,
+        :startup_fuel_consumption => 0.0,
+        :min_up_time => 0,
+        :min_down_time => 0,
+        :ramp_up_fraction => 0.0,
+        :ramp_down_fraction => 0.0,
+    )
+end
+
 """
     make(::Type{ThermalPowerCCS}, data::AbstractDict{Symbol, Any}, system::System) -> ThermalPowerCCS
 """
