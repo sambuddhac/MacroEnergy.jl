@@ -131,7 +131,7 @@ function template_node(nodes_file::AbstractString, node_commodity::Type{T}; styl
     return template_node(nodes_file, [node_commodity]; style=style, format=format, make_file=make_file)
 end
 
-function template_node(nodes_file::AbstractString, node_commodities::Vector{Type}; style::AbstractString="full", format::AbstractString="json", make_file::Bool=true)
+function template_node(nodes_file::AbstractString, node_commodities::Vector{<:Type}; style::AbstractString="full", format::AbstractString="json", make_file::Bool=true)
     if isfile(nodes_file)
         @debug("Reading existing nodes from $nodes_file")
     elseif isfile(joinpath(nodes_file, "nodes.json"))
@@ -145,15 +145,15 @@ function template_node(nodes_file::AbstractString, node_commodities::Vector{Type
         @error("Cannot find nodes file ")
         return nothing
     end
-    existing_nodes = read_json(nodes_file)
+    existing_nodes = copy(read_json(nodes_file))
     for node_commodity in node_commodities
-        if node_commodity ∉ commodity_types()
+        if node_commodity ∉ values(commodity_types())
             @debug("Node commodity $node_commodity not found in commodity types. Skipping...")
             continue
         end
         node_data = Dict{Symbol,Any}(
             :type => typesymbol(node_commodity),
-            :instance_data => node_default_data()
+            :instance_data => [node_default_data()]
         )
         push!(existing_nodes[:nodes], node_data)
     end
