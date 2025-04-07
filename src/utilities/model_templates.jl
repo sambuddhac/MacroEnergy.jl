@@ -100,18 +100,20 @@ function template_system(dirpath::AbstractString, system_name::AbstractString=@d
 end
 
 function template_asset(assets_dir::AbstractString, asset_type::Type{T}; asset_name::AbstractString=string(typesymbol(asset_type)), style::AbstractString="full", format::AbstractString="json") where T<:AbstractAsset
+    asset_symbol = typesymbol(asset_type)
     asset_data = Dict{Symbol, Any}(
-        :type => typesymbol(asset_type),
-        :instance_data => default_data(asset_type),
+        :type => asset_symbol,
+        :instance_data => [default_data(asset_type, Symbol(string(asset_symbol)*"_1"), style)],
     )
-    # TODO: add logic for simplified style
     if format == "json"
         filepath = find_available_filepath(joinpath(assets_dir, "$asset_name.json"))
         write_json(filepath, Dict{Symbol,Any}(Symbol(asset_name) => asset_data))
     elseif format == "csv"
         filepath = find_available_filepath(joinpath(assets_dir, "$asset_name.csv"))
-        asset_data = json_to_csv(Dict{Symbol,Any}(Symbol(asset_name) => asset_data))
-        write_csv(filepath, asset_data)
+        csv_data = json_to_csv(Dict{Symbol,Any}(Symbol(asset_name) => asset_data))
+        for (_, data) in csv_data.asset_data
+            write_csv(filepath, DataFrame(data))
+        end
     else
         error("Unsupported format: $format. Supported formats are $(input_formats())")
     end

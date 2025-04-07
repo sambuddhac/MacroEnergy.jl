@@ -164,8 +164,8 @@ end
 
 macro setup_data(type, data, id)
     return esc(quote
-        data = recursive_merge(clear_dict(default_data($type, $id)), $data)
-        defaults = default_data($type, $id)
+        data = recursive_merge(clear_dict(default_data($type, $id, "full")), $data)
+        defaults = default_data($type, $id, "full")
     end)
 end
 
