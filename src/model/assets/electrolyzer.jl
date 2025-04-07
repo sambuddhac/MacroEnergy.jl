@@ -1,8 +1,8 @@
 struct Electrolyzer <: AbstractAsset
     id::AssetId
     electrolyzer_transform::Transformation
-    h2_edge::Edge{Hydrogen}
-    elec_edge::Edge{Electricity}
+    h2_edge::Edge{<:Hydrogen}
+    elec_edge::Edge{<:Electricity}
 end
 
 function default_data(t::Type{Electrolyzer}, id=missing, style="full")

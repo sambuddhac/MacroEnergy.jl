@@ -1,7 +1,7 @@
 struct VRE <: AbstractAsset
     id::AssetId
     energy_transform::Transformation
-    edge::Edge{Electricity}
+    edge::Edge{<:Electricity}
 end
 
 function default_data(t::Type{VRE}, id=missing, style="full")

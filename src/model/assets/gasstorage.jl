@@ -3,12 +3,12 @@ struct GasStorage{T} <: AbstractAsset
     gas_storage::AbstractStorage{T}
     charge_edge::Edge{T}
     discharge_edge::Edge{T}
-    charge_elec_edge::Edge{Electricity}
-    discharge_elec_edge::Edge{Electricity}
+    charge_elec_edge::Edge{<:Electricity}
+    discharge_elec_edge::Edge{<:Electricity}
 end
 
 GasStorage(id::AssetId,gas_storage::AbstractStorage{T},charge_edge::Edge{T},discharge_edge::Edge{T},
-charge_elec_edge::Edge{Electricity},discharge_elec_edge::Edge{Electricity}) where T<:Commodity =
+charge_elec_edge::Edge{<:Electricity},discharge_elec_edge::Edge{<:Electricity}) where T<:Commodity =
     GasStorage{T}(id,gas_storage,charge_edge,discharge_edge,charge_elec_edge,discharge_elec_edge)
 
 function default_data(t::Type{GasStorage}, id=missing, style="full")

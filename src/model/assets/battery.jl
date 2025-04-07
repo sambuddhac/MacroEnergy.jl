@@ -1,8 +1,8 @@
 struct Battery <: AbstractAsset
     id::AssetId
-    battery_storage::AbstractStorage{Electricity}
-    discharge_edge::Edge{Electricity}
-    charge_edge::Edge{Electricity}
+    battery_storage::AbstractStorage{<:Electricity}
+    discharge_edge::Edge{<:Electricity}
+    charge_edge::Edge{<:Electricity}
 end
 
 function default_data(t::Type{Battery}, id=missing, style="full")

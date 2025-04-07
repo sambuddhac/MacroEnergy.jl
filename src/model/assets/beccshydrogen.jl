@@ -2,11 +2,11 @@ struct BECCSHydrogen <: AbstractAsset
     id::AssetId
     beccs_transform::Transformation
     biomass_edge::Edge{<:Biomass}
-    h2_edge::Edge{Hydrogen}
-    elec_edge::Edge{Electricity}
-    co2_edge::Edge{CO2}
-    co2_emission_edge::Edge{CO2}
-    co2_captured_edge::Edge{CO2Captured}
+    h2_edge::Edge{<:Hydrogen}
+    elec_edge::Edge{<:Electricity}
+    co2_edge::Edge{<:CO2}
+    co2_emission_edge::Edge{<:CO2}
+    co2_captured_edge::Edge{<:CO2Captured}
 end
 
 function default_data(t::Type{BECCSHydrogen}, id=missing, style="full")

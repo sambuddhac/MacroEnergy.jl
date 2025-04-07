@@ -1,8 +1,8 @@
 struct CO2Injection <: AbstractAsset
     id::AssetId
     co2injection_transform::Transformation
-    co2_captured_edge::Edge{CO2Captured}
-    co2_storage_edge::Edge{CO2Captured}
+    co2_captured_edge::Edge{<:CO2Captured}
+    co2_storage_edge::Edge{<:CO2Captured}
 end
 
 function default_data(t::Type{CO2Injection}, id=missing, style="full")

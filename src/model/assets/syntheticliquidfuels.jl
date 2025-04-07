@@ -1,13 +1,13 @@
 struct SyntheticLiquidFuels <: AbstractAsset
     id::AssetId
     synthetic_liquid_fuels_transform::Transformation
-    co2_captured_edge::Edge{CO2Captured}
+    co2_captured_edge::Edge{<:CO2Captured}
     gasoline_edge::Edge{<:LiquidFuels}
     jetfuel_edge::Edge{<:LiquidFuels}
     diesel_edge::Edge{<:LiquidFuels}
-    elec_edge::Edge{Electricity}
-    h2_edge::Edge{Hydrogen}
-    co2_emission_edge::Edge{CO2}
+    elec_edge::Edge{<:Electricity}
+    h2_edge::Edge{<:Hydrogen}
+    co2_emission_edge::Edge{<:CO2}
 end
 
 function default_data(t::Type{SyntheticLiquidFuels}, id=missing, style="full")

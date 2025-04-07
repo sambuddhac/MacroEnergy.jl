@@ -3,10 +3,10 @@ struct BECCSNaturalGas <: AbstractAsset
     beccs_transform::Transformation
     biomass_edge::Edge{<:Biomass}
     natgas_edge::Edge{<:NaturalGas}
-    elec_edge::Edge{Electricity}
-    co2_edge::Edge{CO2}
-    co2_emission_edge::Edge{CO2}
-    co2_captured_edge::Edge{CO2Captured}
+    elec_edge::Edge{<:Electricity}
+    co2_edge::Edge{<:CO2}
+    co2_emission_edge::Edge{<:CO2}
+    co2_captured_edge::Edge{<:CO2Captured}
 end
 
 function default_data(t::Type{BECCSNaturalGas}, id=missing, style="full")

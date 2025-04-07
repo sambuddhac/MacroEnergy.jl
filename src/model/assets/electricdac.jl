@@ -1,9 +1,9 @@
 struct ElectricDAC <: AbstractAsset
     id::AssetId
     electricdac_transform::Transformation
-    co2_edge::Edge{CO2}
-    elec_edge::Edge{Electricity}
-    co2_captured_edge::Edge{CO2Captured}
+    co2_edge::Edge{<:CO2}
+    elec_edge::Edge{<:Electricity}
+    co2_captured_edge::Edge{<:CO2Captured}
 end
 
 function default_data(t::Type{ElectricDAC}, id=missing, style="full")

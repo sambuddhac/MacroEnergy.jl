@@ -1,6 +1,6 @@
 struct PowerLine <: AbstractAsset
     id::AssetId
-    elec_edge::Edge{Electricity}
+    elec_edge::Edge{<:Electricity}
 end
 
 function default_data(t::Type{PowerLine}, id=missing, style="full")

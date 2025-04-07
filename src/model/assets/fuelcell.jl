@@ -1,8 +1,8 @@
 struct FuelCell <: AbstractAsset
     id::AssetId
     fuelcell_transform::Transformation
-    h2_edge::Edge{Hydrogen}
-    elec_edge::Edge{Electricity}
+    h2_edge::Edge{<:Hydrogen}
+    elec_edge::Edge{<:Electricity}
 end
 
 function default_data(t::Type{FuelCell}, id=missing, style="full")
