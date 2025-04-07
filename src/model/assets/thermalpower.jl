@@ -2,7 +2,7 @@ struct ThermalPower{T} <: AbstractAsset
     id::AssetId
     thermal_transform::Transformation
     elec_edge::Union{Edge{<:Electricity},EdgeWithUC{<:Electricity}}
-    fuel_edge::Edge{T}
+    fuel_edge::Edge{<:T}
     co2_edge::Edge{<:CO2}
 end
 

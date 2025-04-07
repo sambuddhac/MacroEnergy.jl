@@ -1,8 +1,8 @@
 struct FuelsEndUse{T} <: AbstractAsset
     id::AssetId
     fuelsenduse_transform::Transformation
-    fuel_edge::Edge{T}
-    fuel_demand_edge::Edge{T}
+    fuel_edge::Edge{<:T}
+    fuel_demand_edge::Edge{<:T}
     co2_edge::Edge{<:CO2}
 end
 

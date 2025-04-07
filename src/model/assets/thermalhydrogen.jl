@@ -3,7 +3,7 @@ struct ThermalHydrogen{T} <: AbstractAsset
     thermalhydrogen_transform::Transformation
     h2_edge::Union{Edge{<:Hydrogen},EdgeWithUC{<:Hydrogen}}
     elec_edge::Edge{<:Electricity}
-    fuel_edge::Edge{T}
+    fuel_edge::Edge{<:T}
     co2_edge::Edge{<:CO2}
 end
 

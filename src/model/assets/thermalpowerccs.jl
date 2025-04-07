@@ -2,7 +2,7 @@ struct ThermalPowerCCS{T} <: AbstractAsset
     id::AssetId
     thermalpowerccs_transform::Transformation
     elec_edge::Union{Edge{<:Electricity},EdgeWithUC{<:Electricity}}
-    fuel_edge::Edge{T}
+    fuel_edge::Edge{<:T}
     co2_edge::Edge{<:CO2}
     co2_captured_edge::Edge{<:CO2Captured}
 end

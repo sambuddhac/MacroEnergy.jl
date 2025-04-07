@@ -1,16 +1,16 @@
 struct FossilFuelsUpstream{T} <: AbstractAsset
     id::AssetId
     fossilfuelsupstream_transform::Transformation
-    fossil_fuel_edge::Edge{T}
-    fuel_edge::Edge{T}
+    fossil_fuel_edge::Edge{<:T}
+    fuel_edge::Edge{<:T}
     co2_edge::Edge{<:CO2}
 end
 
 FossilFuelsUpstream(
     id::AssetId,
     fossilfuelsupstream_transform::Transformation,
-    fossil_fuel_edge::Edge{T},
-    fuel_edge::Edge{T},
+    fossil_fuel_edge::Edge{<:T},
+    fuel_edge::Edge{<:T},
     co2_edge::Edge{<:CO2}
 ) where {T<:LiquidFuels} =
     FossilFuelsUpstream{LiquidFuels}(id, fossilfuelsupstream_transform, fossil_fuel_edge, fuel_edge, co2_edge)
@@ -18,7 +18,7 @@ FossilFuelsUpstream(
     FossilFuelsUpstream(
     id::AssetId,
     fossilfuelsupstream_transform::Transformation,
-    fossil_fuel_edge::Edge{T},
+    fossil_fuel_edge::Edge{<:T},
     fuel_edge::Edge{T},
     co2_edge::Edge{<:CO2}
 ) where {T<:Commodity} =
