@@ -65,12 +65,14 @@
                     },
                     "edges": {
                         "discharge_edge": {
-                            "end_vertex": "h2_CT",
                             "distance":491.4512001,
                             "capacity_size": 787.6,
                             "investment_cost": 82682.23402
                         },
-                        "charge_edge": {
+                        "external_discharge_edge": {
+                            "end_vertex": "h2_CT"
+                        },
+                        "external_charge_edge": {
                             "start_vertex": "h2_MA"
                         },
                         "discharge_elec_edge": {
@@ -91,12 +93,14 @@
                     },
                     "edges": {
                         "discharge_edge": {
-                            "end_vertex": "h2_MA",
                             "distance":491.4512001,
                             "capacity_size": 787.6,
                             "investment_cost": 82682.23402
                         },
-                        "charge_edge": {
+                        "external_discharge_edge": {
+                            "end_vertex": "h2_MA"
+                        },
+                        "external_charge_edge": {
                             "start_vertex": "h2_CT"
                         },
                         "discharge_elec_edge": {
@@ -117,12 +121,14 @@
                     },
                     "edges": {
                         "discharge_edge": {
-                            "end_vertex": "h2_MA",
                             "distance":473.6625536,
                             "capacity_size": 787.6,
                             "investment_cost": 79896.9841
                         },
-                        "charge_edge": {
+                        "external_discharge_edge": {
+                            "end_vertex": "h2_MA"
+                        },
+                        "external_charge_edge": {
                             "start_vertex": "h2_ME"
                         },
                         "discharge_elec_edge": {
@@ -144,12 +150,14 @@
                     },
                     "edges": {
                         "discharge_edge": {
-                            "end_vertex": "h2_ME",
                             "distance":473.6625536,
                             "capacity_size": 787.6,
                             "investment_cost": 79896.9841
                         },
-                        "charge_edge": {
+                        "external_discharge_edge": {
+                            "end_vertex": "h2_ME"
+                        },
+                        "external_charge_edge": {
                             "start_vertex": "h2_MA"
                         },
                         "discharge_elec_edge": {
