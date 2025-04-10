@@ -60,6 +60,16 @@
                         "type": "Electricity",
                         "unidirectional": true,
                         "has_capacity": false
+                    },
+                    "external_charge_edge": {
+                        "type": "Hydrogen",
+                        "unidirectional": true,
+                        "has_capacity": false
+                    },
+                    "external_discharge_edge": {
+                        "type": "Hydrogen",
+                        "unidirectional": true,
+                        "has_capacity": false
                     }
                 }
             },
@@ -67,10 +77,10 @@
                 {
                     "id": "SE_Above_ground_storage",
                     "edges": {
-                        "discharge_edge": {
+                        "external_discharge_edge": {
                             "end_vertex": "h2_SE"
                         },
-                        "charge_edge":{
+                        "external_charge_edge":{
                             "start_vertex": "h2_SE"
                         },
                         "discharge_elec_edge": {
@@ -84,10 +94,10 @@
                 {
                     "id": "MIDAT_Above_ground_storage",
                     "edges": {
-                        "discharge_edge": {
+                        "external_discharge_edge": {
                             "end_vertex": "h2_MIDAT"
                         },
-                        "charge_edge":{
+                        "external_charge_edge":{
                             "start_vertex": "h2_MIDAT"
                         },
                         "discharge_elec_edge": {
@@ -101,10 +111,10 @@
                 {
                     "id": "NE_Above_ground_storage",
                     "edges": {
-                        "discharge_edge": {
+                        "external_discharge_edge": {
                             "end_vertex": "h2_NE"
                         },
-                        "charge_edge":{
+                        "external_charge_edge":{
                             "start_vertex": "h2_NE"
                         },
                         "discharge_elec_edge": {
