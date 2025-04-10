@@ -5,7 +5,15 @@ struct FuelCell <: AbstractAsset
     elec_edge::Edge{Electricity}
 end
 
-function default_data(::Type{FuelCell}, id=missing)
+function default_data(t::Type{FuelCell}, id=missing, style="full")
+    if style == "full"
+        return full_default_data(t, id)
+    else
+        return simple_default_data(t, id)
+    end
+end
+
+function full_default_data(::Type{FuelCell}, id=missing)
     return Dict{Symbol,Any}(
         :id => id,
         :transforms => @transform_data(
@@ -29,6 +37,21 @@ function default_data(::Type{FuelCell}, id=missing)
                 :commodity => "Hydrogen",
             ),
         ),
+    )
+end
+
+function simple_default_data(::Type{FuelCell}, id=missing)
+    return Dict{Symbol,Any}(
+        :id => id,
+        :location => missing,
+        :can_expand => true,
+        :can_retire => true,
+        :existing_capacity => 0.0,
+        :capacity_size => 1.0,
+        :efficiency_rate => 1.0,
+        :investment_cost => 0.0,
+        :fixed_om_cost => 0.0,
+        :variable_om_cost => 0.0,
     )
 end
 

@@ -22,7 +22,7 @@ function load_system_data(
     prep_system_data(file_path, default_file_path)
 
     # Load the system data from the JSON file(s)
-    data = load_json_inputs(file_path; rel_path=rel_path, lazy_load = lazy_load)
+    data = load_inputs(file_path; rel_path=rel_path, lazy_load = lazy_load)
     @info("Done loading system data. It took $(round(time() - start_time, digits=2)) seconds")
     return data
 end

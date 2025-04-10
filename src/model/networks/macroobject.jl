@@ -32,7 +32,7 @@ function get_macro_objs_with_map(assets::Vector{<:AbstractAsset}, T::Type{<:Macr
         asset = assets[i]
         objects, object_map = get_macro_objs_with_map(asset, T)
         all_objects[i] = objects
-        merge!(asset_obj_map, object_map)
+        Base.merge!(asset_obj_map, object_map)
     end
 
     return reduce(vcat, all_objects), asset_obj_map

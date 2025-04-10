@@ -18,8 +18,14 @@
 function load_json_inputs(file_path::AbstractString; rel_path::AbstractString=dirname(file_path), lazy_load::Bool = true)::Dict{Symbol,Any}
     @debug("Loading JSON data from $file_path")
     json_data = copy(read_json(file_path))
+    # if isempty(json_data)
+    #     return Dict{Symbol, Any}(:path => file_path)
+    # end
     if !lazy_load
         json_data = eager_load_json_inputs(json_data, rel_path)
+        # if isempty(json_data)
+        #     return Dict{Symbol, Any}(:path => file_path)
+        # end
         json_data = clean_up_keys(json_data)
     end
     return json_data
@@ -98,11 +104,15 @@ function fetch_data(path::AbstractString, dict::AbstractDict{Symbol, Any}, root_
     path = rel_or_abs_path(path, root_path)
     
     if isfile(path) && isjson(path)
-        return load_json_inputs(path; rel_path=root_path, lazy_load=lazy_load)
+        return load_inputs(path; rel_path=root_path, lazy_load=lazy_load)
     end
 
     if isfile(path) && iscsv(path)
-        return load_csv(path)
+        temp = load_csv_inputs(path)
+        if !all(isempty.(values(temp)))
+            return temp
+        end
+        return read_csv(path)
     end
 
     # In the future we can include a CSV -> Dict conversion
@@ -110,15 +120,18 @@ function fetch_data(path::AbstractString, dict::AbstractDict{Symbol, Any}, root_
         # return load_time_series_data(path, dict[:header])
     # end
     if isdir(path)
-        json_files = get_json_files(path)
-        if length(json_files) > 1
-            dir_data = Vector{Dict{Symbol,Any}}(undef, length(json_files))
-            for (idx, file) in enumerate(json_files)
-                dir_data[idx] = load_json_inputs(joinpath(path, file); rel_path=root_path, lazy_load=lazy_load)
+        files = get_json_files(path)
+        append!(files, get_csv_files(path))
+        if length(files) > 1
+            dir_data = Vector{Dict{Symbol,Any}}()
+            for file in files
+                @debug("Loading data from $file")
+                temp = load_inputs(joinpath(path, file); rel_path=root_path, lazy_load=lazy_load)
+                if !isempty(temp)
+                    push!(dir_data, temp)
+                end
             end
             return dir_data
-        else
-            return load_json_inputs(joinpath(path, file); rel_path=root_path, lazy_load=lazy_load)
         end
     end
     @warn "Could not find: \"$(path)\", full path: $(abspath(path))"

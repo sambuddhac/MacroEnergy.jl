@@ -110,10 +110,13 @@ function compare_assets(a::AbstractSystem, b::AbstractSystem, checkfunctions::Bo
         comparisons = Bool[]
         for (idx, asset_a) in enumerate(a.assets)
             asset_b = get_asset_by_id(b, asset_a.id)
+            id_a = asset_a.id
             if isnothing(asset_b)
                 @debug("$(asset_a.id) not found in second system")
                 status = "⁉"
+                id_b = "N/A"
                 push!(comparisons, false)
+                diff_string = ""
             else
                 # test_result = compare(asset_a, asset_b, checkfunctions, m)
                 # diff_string = ""
@@ -126,8 +129,9 @@ function compare_assets(a::AbstractSystem, b::AbstractSystem, checkfunctions::Bo
                 status = test_result ? "🟩" : "🟥"
                 diff_string = isempty(diff) ? "" : "\n   -- Diff in: $(diff)"
                 push!(comparisons, test_result)
+                id_b = asset_b.id
             end
-            println("#$idx: $status | $(asset_a.id) | $(asset_b.id)" * diff_string)
+            println("#$idx: $status | $id_a | $id_b" * diff_string)
         end
         return all(comparisons)
     end

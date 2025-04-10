@@ -4,6 +4,7 @@ using CSV, JSON3, GZip, Parquet2
 using Dates
 using DuckDB
 using DataFrames
+using OrderedCollections
 using JuMP
 using HiGHS
 using Revise
@@ -11,7 +12,7 @@ using InteractiveUtils
 using Printf: @printf
 using MacroEnergySystemsScaling
 
-import Base: /
+import Base: /, push!, merge!
 
 # Type parameter for Macro data structures
 
@@ -120,7 +121,7 @@ include_all_in_folder("model/constraints")
 
 include("config/configure_settings.jl")
 
-include_all_in_folder("load_inputs")
+include_all_in_folder("load_inputs/")
 
 include("generate_model.jl")
 

@@ -5,7 +5,15 @@ struct CO2Injection <: AbstractAsset
     co2_storage_edge::Edge{CO2Captured}
 end
 
-function default_data(::Type{CO2Injection}, id=missing)
+function default_data(t::Type{CO2Injection}, id=missing, style="full")
+    if style == "full"
+        return full_default_data(t, id)
+    else
+        return simple_default_data(t, id)
+    end
+end
+
+function full_default_data(::Type{CO2Injection}, id=missing)
     return Dict{Symbol, Any}(
         id => id,
         :transforms => @transform_data(
@@ -30,6 +38,22 @@ function default_data(::Type{CO2Injection}, id=missing)
             )
         )
     )
+end
+
+function simple_default_data(::Type{CO2Injection}, id=missing)
+    return Dict{Symbol, Any}(
+        :id => id,
+        :location => missing,
+        :can_expand => false,
+        :can_retire => false,
+        :existing_capacity => 0.0,
+        :co2_source => missing,
+        :co2_storage => missing,
+        :investment_cost => 0.0,
+        :fixed_om_cost => 0.0,
+        :variable_om_cost => 0.0,
+    )
+
 end
 
 function make(asset_type::Type{CO2Injection}, data::AbstractDict{Symbol,Any}, system::System)

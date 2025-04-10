@@ -10,7 +10,15 @@ struct SyntheticLiquidFuels <: AbstractAsset
     co2_emission_edge::Edge{CO2}
 end
 
-function default_data(::Type{SyntheticLiquidFuels}, id=missing)
+function default_data(t::Type{SyntheticLiquidFuels}, id=missing, style="full")
+    if style == "full"
+        return full_default_data(t, id)
+    else
+        return simple_default_data(t, id)
+    end
+end
+
+function full_default_data(::Type{SyntheticLiquidFuels}, id=missing)
     return Dict{Symbol,Any}(
         :id => id,
         :transforms => @transform_data(
@@ -55,6 +63,29 @@ function default_data(::Type{SyntheticLiquidFuels}, id=missing)
                 :co2_sink => missing,
             ),
         ),
+    )
+end
+
+function simple_default_data(::Type{SyntheticLiquidFuels}, id=missing)
+    return Dict{Symbol, Any}(
+        :id => id,
+        :location => missing,
+        :can_expand => true,
+        :can_retire => true,
+        :existing_capacity => 0.0,
+        :co2_sink => missing,
+        :gasoline_commodity => "LiquidFuels",
+        :jetfuel_commodity => "LiquidFuels",
+        :diesel_commodity => "LiquidFuels",
+        :gasoline_production => 0.0,
+        :jetfuel_production => 0.0,
+        :diesel_production => 0.0,
+        :electricity_consumption => 0.0,
+        :h2_consumption => 0.0,
+        :emission_rate => 1.0,
+        :investment_cost => 0.0,
+        :fixed_om_cost => 0.0,
+        :variable_om_cost => 0.0,
     )
 end
 

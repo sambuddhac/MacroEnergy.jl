@@ -488,3 +488,53 @@ function update_balance_end!(e::AbstractEdge, model::Model)
     end
     
 end
+
+###### Templates ######
+
+macro edge_template_args()
+    quote 
+        [ 
+            :id,
+            :timedata,
+            :start_vertex,
+            :end_vertex,
+            :availability,
+            :can_expand,
+            :can_retire,
+            :capacity_size,
+            :distance,
+            :existing_capacity,
+            :fixed_om_cost,
+            :has_capacity,
+            :integer_decisions,
+            :investment_cost,
+            :loss_fraction,
+            :max_capacity,
+            :min_capacity,
+            :min_flow_fraction,
+            :ramp_down_fraction,
+            :ramp_up_fraction,
+            :unidirectional,
+            :variable_om_cost
+        ]
+    end
+end
+
+function input_template(e::AbstractEdge)
+    template = Dict{Symbol,Any}()
+    for sym in @edge_template_args
+        if !hasproperty(e, sym)
+            @debug "$(sym) not found in $(typeof(e)), $(id(e)))"
+            continue
+        end
+        prop = getfield(e, sym)
+        if typeof(prop) <: Real
+            template[sym] = prop
+        elseif typeof(prop) == Symbol
+            template[sym] = ""
+        elseif typeof(prop) <: Vector
+            template[sym] = [0.0]
+        end
+    end
+    return template
+end

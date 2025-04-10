@@ -5,7 +5,15 @@ struct Battery <: AbstractAsset
     charge_edge::Edge{Electricity}
 end
 
-function default_data(::Type{Battery}, id=missing,)
+function default_data(t::Type{Battery}, id=missing, style="full")
+    if style == "full"
+        return full_default_data(t, id)
+    else
+        return simple_default_data(t, id)
+    end
+end
+
+function full_default_data(::Type{Battery}, id=missing)
     return Dict{Symbol,Any}(
         :id => id,
         :storage => @storage_data(
@@ -35,6 +43,34 @@ function default_data(::Type{Battery}, id=missing,)
                 )
             )
         )
+    )
+end
+
+function simple_default_data(::Type{Battery}, id=missing)
+    return Dict{Symbol,Any}(
+        :id => id,
+        :location => missing,
+        :storage_can_expand => true,
+        :storage_can_retire => true,
+        :discharge_can_expand => true,
+        :discharge_can_retire => true,
+        :charge_can_expand => true,
+        :charge_can_retire => true,
+        :storage_existing_capacity => 0.0,
+        :discharge_existing_capacity => 0.0,
+        :charge_existing_capacity => 0.0,
+        :storage_investment_cost => 0.0,
+        :storage_fixed_om_cost => 0.0,
+        :storage_max_duration => 100.0,
+        :storage_min_duration => 0.0,
+        :discharge_investment_cost => 0.0,
+        :discharge_fixed_om_cost => 0.0,
+        :discharge_variable_om_cost => 0.0,
+        :charge_investment_cost => 0.0,
+        :charge_fixed_om_cost => 0.0,
+        :charge_variable_om_cost => 0.0,
+        :discharge_efficiency => 1.0,
+        :charge_efficiency => 1.0,
     )
 end
 

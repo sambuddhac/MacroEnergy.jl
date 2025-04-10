@@ -13,10 +13,12 @@ function process_data(data::AbstractDict{Symbol,Any})
     return data
 end
 
-function remove_missing!(data::AbstractDict{Symbol,Any})
-    for key in keys(data)
-        if ismissing(data[key])
+function remove_missing!(data::AbstractDict)
+    for (key, value) in data
+        if ismissing(value)
             delete!(data, key)
+        elseif isa(value, AbstractDict)
+            remove_missing!(value)
         end
     end
     return nothing

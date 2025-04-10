@@ -8,7 +8,15 @@ struct SyntheticNaturalGas <: AbstractAsset
     co2_emission_edge::Edge{CO2}
 end
 
-function default_data(::Type{SyntheticNaturalGas}, id=missing)
+function default_data(t::Type{SyntheticNaturalGas}, id=missing, style="full")
+    if style == "full"
+        return full_default_data(t, id)
+    else
+        return simple_default_data(t, id)
+    end
+end
+
+function full_default_data(::Type{SyntheticNaturalGas}, id=missing)
     return Dict{Symbol,Any}(
         :id => id,
         :transforms => @transform_data(
@@ -45,6 +53,24 @@ function default_data(::Type{SyntheticNaturalGas}, id=missing)
                 :co2_sink => missing,
             ),
         ),
+    )
+end
+
+function simple_default_data(::Type{SyntheticNaturalGas}, id=missing)
+    return Dict{Symbol,Any}(
+        :id => id,
+        :location => missing,
+        :can_expand => true,
+        :can_retire => true,
+        :existing_capacity => 0.0,
+        :co2_sink => missing,
+        :natgas_production => 0.0,
+        :electricity_consumption => 0.0,
+        :h2_consumption => 0.0,
+        :emission_rate => 1.0,
+        :investment_cost => 0.0,
+        :fixed_om_cost => 0.0,
+        :variable_om_cost => 0.0,
     )
 end
 

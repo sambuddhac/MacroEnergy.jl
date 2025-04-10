@@ -8,7 +8,15 @@ struct NaturalGasDAC <: AbstractAsset
     co2_captured_edge::Edge{CO2Captured}
 end
 
-function default_data(::Type{NaturalGasDAC}, id=missing)
+function default_data(t::Type{NaturalGasDAC}, id=missing, style="full")
+    if style == "full"
+        return full_default_data(t, id)
+    else
+        return simple_default_data(t, id)
+    end
+end
+
+function full_default_data(::Type{NaturalGasDAC}, id=missing)
     return Dict{Symbol,Any}(
         :id => id,
         :transforms => @transform_data(
@@ -46,6 +54,24 @@ function default_data(::Type{NaturalGasDAC}, id=missing)
                 :commodity => "CO2Captured",
             ),
         ),
+    )
+end
+
+function simple_default_data(::Type{NaturalGasDAC}, id=missing)
+    return Dict{Symbol, Any}(
+        :id => id,
+        :location => missing,
+        :can_expand => true,
+        :can_retire => true,
+        :existing_capacity => 0.0,
+        :co2_sink => missing,
+        :emission_rate => 1.0,
+        :capture_rate => 1.0,
+        :fuel_consumption => 0.0,
+        :electricity_production => 0.0,
+        :investment_cost => 0.0,
+        :fixed_om_cost => 0.0,
+        :variable_om_cost => 0.0,
     )
 end
 

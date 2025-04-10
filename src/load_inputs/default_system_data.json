@@ -3,7 +3,7 @@
         "path": "assets"
     },
     "locations": {
-        "path": "locations"
+        "path": "system/locations.json"
     },
     "nodes": {
          "path": "system/nodes.json"

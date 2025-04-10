@@ -6,7 +6,7 @@
 function load!(system::System, file_path::AbstractString)::Nothing
     file_path = rel_or_abs_path(file_path, system.data_dirpath)
     if isfile(file_path)
-        load!(system, load_json_inputs(file_path))
+        load!(system, load_inputs(file_path))
     elseif isdir(file_path)
         for file in get_json_files(file_path)
             load!(system, joinpath(file_path, file))
@@ -51,6 +51,13 @@ function load!(system::System, data::AbstractVector{<:AbstractDict{Symbol,Any}})
     for instance in data
         load!(system, instance)
     end
+    return nothing
+end
+
+function load!(system::System, data)::Nothing
+    # This is for unhandled types, which will most likely be empty Vector
+    # or bad inputs
+    @debug("Bad or empty input to load!(). The input data was:\n$data")
     return nothing
 end
 
