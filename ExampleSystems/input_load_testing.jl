@@ -68,7 +68,7 @@ function walk_through(case_dir)
     println(system)
 
     ### system_data = MacroEnergy.load_system_data(path; lazy_load=lazy_load)
-        # This calls MacroEnergy.load_system_data(path, dirname(path); default_file_path=default_file_path, lazy_load=lazy_load)
+        # This calls MacroEnergy.load_system_data(path, dirname(path); lazy_load=lazy_load)
         rel_path = dirname(path) 
         println(rel_path) # --> .../MacroEnergy.jl/ExampleSystems/three_zones_macro_genx
 
@@ -76,9 +76,7 @@ function walk_through(case_dir)
         file_path = abspath(MacroEnergy.rel_or_abs_path(path, rel_path))
         println(file_path) # --> .../MacroEnergy.jl/ExampleSystems/three_zones_macro_genx/system_data.json
 
-        default_file_path = joinpath(@__DIR__, "..", "src", "load_inputs", "default_system_data.json")
-
-        MacroEnergy.prep_system_data(file_path, default_file_path)
+        MacroEnergy.prep_system_data(file_path)
 
     # MacroEnergy.generate_system!(system, system_data)
     return system

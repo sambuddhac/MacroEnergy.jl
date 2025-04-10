@@ -3,7 +3,7 @@
 ###### ###### ###### ###### ###### ######
 
 """
-    load_system_data(file_path::AbstractString, rel_path::AbstractString; default_file_path::String = joinpath(@__DIR__, "default_system_data.json"), lazy_load::Bool = true)::Dict{Symbol,Any}
+    load_system_data(file_path::AbstractString, rel_path::AbstractString; lazy_load::Bool = true)::Dict{Symbol,Any}
 
 Load the system data (currently only from a JSON file) given a file path and directory to search for the file in.
 All other file names defined in the system data file are assumed to be relative to rel_path.
@@ -11,7 +11,6 @@ All other file names defined in the system data file are assumed to be relative 
 function load_system_data(
     file_path::AbstractString,
     rel_path::AbstractString = dirname(file_path);
-    default_file_path::String = joinpath(@__DIR__, "default_system_data.json"),
     lazy_load::Bool = true,
 )::Dict{Symbol,Any}
     file_path = abspath(rel_or_abs_path(file_path, rel_path))
@@ -19,7 +18,7 @@ function load_system_data(
     start_time = time()
     @debug("Loading system data from $path")
 
-    prep_system_data(file_path, default_file_path)
+    prep_system_data(file_path)
 
     # Load the system data from the JSON file(s)
     data = load_inputs(file_path; rel_path=rel_path, lazy_load = lazy_load)
