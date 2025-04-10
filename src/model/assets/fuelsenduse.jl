@@ -1,12 +1,12 @@
 struct FuelsEndUse{T} <: AbstractAsset
     id::AssetId
     fuelsenduse_transform::Transformation
-    fuel_edge::Edge{T}
-    fuel_demand_edge::Edge{T}
-    co2_edge::Edge{CO2}
+    fuel_edge::Edge{<:T}
+    fuel_demand_edge::Edge{<:T}
+    co2_edge::Edge{<:CO2}
 end
 
-FuelsEndUse(id::AssetId, fuelsenduse_transform::Transformation, fuel_edge::Edge{T}, fuel_demand_edge::Edge{T}, co2_edge::Edge{CO2}) where T<:Commodity =
+FuelsEndUse(id::AssetId, fuelsenduse_transform::Transformation, fuel_edge::Edge{T}, fuel_demand_edge::Edge{T}, co2_edge::Edge{<:CO2}) where T<:Commodity =
     FuelsEndUse{T}(id, fuelsenduse_transform, fuel_edge, fuel_demand_edge, co2_edge)
 
 function default_data(t::Type{FuelsEndUse}, id=missing, style="full")

@@ -1,7 +1,7 @@
 struct MustRun <: AbstractAsset
     id::AssetId
     energy_transform::Transformation
-    elec_edge::Edge{Electricity}
+    elec_edge::Edge{<:Electricity}
 end
 
 function default_data(t::Type{MustRun}, id=missing, style="full")

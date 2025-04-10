@@ -1,9 +1,9 @@
 struct HydroRes <: AbstractAsset
     id::AssetId
-    hydrostor::AbstractStorage{Electricity}
-    discharge_edge::Edge{Electricity}
-    inflow_edge::Edge{Electricity}
-    spill_edge::Edge{Electricity}
+    hydrostor::AbstractStorage{<:Electricity}
+    discharge_edge::Edge{<:Electricity}
+    inflow_edge::Edge{<:Electricity}
+    spill_edge::Edge{<:Electricity}
 end
 
 function default_data(t::Type{HydroRes}, id=missing, style="full")

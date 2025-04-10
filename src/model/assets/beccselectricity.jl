@@ -2,10 +2,10 @@ struct BECCSElectricity <: AbstractAsset
     id::AssetId
     beccs_transform::Transformation
     biomass_edge::Edge{<:Biomass}
-    elec_edge::Edge{Electricity}
-    co2_edge::Edge{CO2}
-    co2_emission_edge::Edge{CO2}
-    co2_captured_edge::Edge{CO2Captured}
+    elec_edge::Edge{<:Electricity}
+    co2_edge::Edge{<:CO2}
+    co2_emission_edge::Edge{<:CO2}
+    co2_captured_edge::Edge{<:CO2Captured}
 end
 
 function default_data(t::Type{BECCSElectricity}, id=missing, style="full")

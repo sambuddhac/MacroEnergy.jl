@@ -5,11 +5,11 @@ struct BECCSLiquidFuels <: AbstractAsset
     gasoline_edge::Edge{<:LiquidFuels}
     jetfuel_edge::Edge{<:LiquidFuels}
     diesel_edge::Edge{<:LiquidFuels}
-    elec_production_edge::Edge{Electricity}
-    elec_consumption_edge::Edge{Electricity}
-    co2_edge::Edge{CO2}
-    co2_emission_edge::Edge{CO2}
-    co2_captured_edge::Edge{CO2Captured}
+    elec_production_edge::Edge{<:Electricity}
+    elec_consumption_edge::Edge{<:Electricity}
+    co2_edge::Edge{<:CO2}
+    co2_emission_edge::Edge{<:CO2}
+    co2_captured_edge::Edge{<:CO2Captured}
 end
 
 function default_data(t::Type{BECCSLiquidFuels}, id=missing, style="full")

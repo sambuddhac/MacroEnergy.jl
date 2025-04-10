@@ -1,12 +1,12 @@
 struct ThermalPower{T} <: AbstractAsset
     id::AssetId
     thermal_transform::Transformation
-    elec_edge::Union{Edge{Electricity},EdgeWithUC{Electricity}}
-    fuel_edge::Edge{T}
-    co2_edge::Edge{CO2}
+    elec_edge::Union{Edge{<:Electricity},EdgeWithUC{<:Electricity}}
+    fuel_edge::Edge{<:T}
+    co2_edge::Edge{<:CO2}
 end
 
-ThermalPower(id::AssetId, thermal_transform::Transformation, elec_edge::Union{Edge{Electricity},EdgeWithUC{Electricity}}, fuel_edge::Edge{T}, co2_edge::Edge{CO2}) where T<:Commodity =
+ThermalPower(id::AssetId, thermal_transform::Transformation, elec_edge::Union{Edge{<:Electricity},EdgeWithUC{<:Electricity}}, fuel_edge::Edge{T}, co2_edge::Edge{<:CO2}) where T<:Commodity =
     ThermalPower{T}(id, thermal_transform, elec_edge, fuel_edge, co2_edge)
 
 function default_data(t::Type{ThermalPower}, id=missing, style="full")

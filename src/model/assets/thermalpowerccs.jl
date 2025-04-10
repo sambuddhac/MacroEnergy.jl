@@ -1,13 +1,13 @@
 struct ThermalPowerCCS{T} <: AbstractAsset
     id::AssetId
     thermalpowerccs_transform::Transformation
-    elec_edge::Union{Edge{Electricity},EdgeWithUC{Electricity}}
-    fuel_edge::Edge{T}
-    co2_edge::Edge{CO2}
-    co2_captured_edge::Edge{CO2Captured}
+    elec_edge::Union{Edge{<:Electricity},EdgeWithUC{<:Electricity}}
+    fuel_edge::Edge{<:T}
+    co2_edge::Edge{<:CO2}
+    co2_captured_edge::Edge{<:CO2Captured}
 end
 
-ThermalPowerCCS(id::AssetId, thermal_transform::Transformation, elec_edge::Union{Edge{Electricity},EdgeWithUC{Electricity}}, fuel_edge::Edge{T}, co2_edge::Edge{CO2},co2_captured_edge::Edge{CO2Captured}) where T<:Commodity =
+ThermalPowerCCS(id::AssetId, thermal_transform::Transformation, elec_edge::Union{Edge{<:Electricity},EdgeWithUC{<:Electricity}}, fuel_edge::Edge{T}, co2_edge::Edge{<:CO2},co2_captured_edge::Edge{<:CO2Captured}) where T<:Commodity =
     ThermalPowerCCS{T}(id, thermal_transform, elec_edge, fuel_edge, co2_edge,co2_captured_edge)
 
 function default_data(t::Type{ThermalPowerCCS}, id=missing, style="full")
