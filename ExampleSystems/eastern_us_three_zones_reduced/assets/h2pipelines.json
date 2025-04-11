@@ -40,8 +40,10 @@
                     },
                     "edges": {
                         "discharge_edge": {
-                            "end_vertex": "h2_MIDAT",
                             "investment_cost": 92580.5925294
+                        },
+                        "external_discharge_edge": {
+                            "end_vertex": "h2_MIDAT"
                         }
                     }
                 },
@@ -54,8 +56,10 @@
                     },
                     "edges": {
                         "discharge_edge": {
-                            "end_vertex": "h2_SE",
                             "investment_cost": 92580.5925294
+                        },
+                        "external_discharge_edge": {
+                            "end_vertex": "h2_SE"
                         }
                     }
                 },
@@ -68,8 +72,10 @@
                     },
                     "edges": {
                         "discharge_edge": {
-                            "end_vertex": "h2_MIDAT",
                             "investment_cost": 89461.90456
+                        },
+                        "external_discharge_edge": {
+                            "end_vertex": "h2_MIDAT"
                         }
                     }
                 },
@@ -82,8 +88,10 @@
                     },
                     "edges": {
                         "discharge_edge": {
-                            "end_vertex": "h2_NE",
                             "investment_cost": 89461.90456
+                        },
+                        "external_discharge_edge": {
+                            "end_vertex": "h2_NE"
                         }
                     }
                 }

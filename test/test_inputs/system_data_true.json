@@ -16366,8 +16366,8 @@
                     "can_retire": false,
                     "balance_data": {
                         "storage": {
-                            "h2pipe_MA_to_CT_internal_discharge_edge": 1,
-                            "h2pipe_MA_to_CT_internal_charge_edge": 1
+                            "h2pipe_MA_to_CT_discharge_edge": 1,
+                            "h2pipe_MA_to_CT_charge_edge": 1
                         }
                     },
                     "charge_discharge_ratio": 1,
@@ -16402,6 +16402,40 @@
                 },
                 "id": "h2pipe_MA_to_CT",
                 "edges": {
+                    "external_charge_edge": {
+                        "new_capacity": 0,
+                        "integer_decisions": false,
+                        "can_retire": false,
+                        "timedata": "Hydrogen",
+                        "can_expand": false,
+                        "min_down_time": 0,
+                        "retired_capacity": 0,
+                        "capacity": 0,
+                        "has_capacity": false,
+                        "max_capacity": "Inf",
+                        "startup_fuel_balance_id": "none",
+                        "fixed_om_cost": 0,
+                        "existing_capacity": 0,
+                        "retired_units": 0,
+                        "min_up_time": 0,
+                        "commodity": "Hydrogen",
+                        "capacity_size": 1,
+                        "ramp_down_fraction": 1,
+                        "end_vertex": "h2pipe_MA_to_CT_transforms",
+                        "variable_om_cost": 0,
+                        "investment_cost": 0,
+                        "unidirectional": true,
+                        "start_vertex": "h2_MA",
+                        "min_capacity": 0,
+                        "loss_fraction": 0,
+                        "id": "h2pipe_MA_to_CT_external_charge_edge",
+                        "startup_fuel_consumption": 0,
+                        "ramp_up_fraction": 1,
+                        "min_flow_fraction": 0,
+                        "distance": 0,
+                        "new_units": 0,
+                        "startup_cost": 0
+                    },
                     "charge_elec_edge": {
                         "new_capacity": 0,
                         "integer_decisions": false,
@@ -16436,40 +16470,6 @@
                         "new_units": 0,
                         "startup_cost": 0
                     },
-                    "internal_charge_edge": {
-                        "new_capacity": 0,
-                        "integer_decisions": false,
-                        "can_retire": false,
-                        "timedata": "Hydrogen",
-                        "can_expand": false,
-                        "min_down_time": 0,
-                        "retired_capacity": 0,
-                        "capacity": 0,
-                        "has_capacity": false,
-                        "max_capacity": "Inf",
-                        "startup_fuel_balance_id": "none",
-                        "fixed_om_cost": 0,
-                        "existing_capacity": 0,
-                        "retired_units": 0,
-                        "min_up_time": 0,
-                        "commodity": "Hydrogen",
-                        "capacity_size": 1,
-                        "ramp_down_fraction": 1,
-                        "end_vertex": "h2pipe_MA_to_CT_storage",
-                        "variable_om_cost": 0,
-                        "investment_cost": 0,
-                        "unidirectional": true,
-                        "start_vertex": "h2pipe_MA_to_CT_transforms",
-                        "min_capacity": 0,
-                        "loss_fraction": 0,
-                        "id": "h2pipe_MA_to_CT_internal_charge_edge",
-                        "startup_fuel_consumption": 0,
-                        "ramp_up_fraction": 1,
-                        "min_flow_fraction": 0,
-                        "distance": 0,
-                        "new_units": 0,
-                        "startup_cost": 0
-                    },
                     "charge_edge": {
                         "new_capacity": 0,
                         "integer_decisions": false,
@@ -16489,11 +16489,11 @@
                         "commodity": "Hydrogen",
                         "capacity_size": 1,
                         "ramp_down_fraction": 1,
-                        "end_vertex": "h2pipe_MA_to_CT_transforms",
+                        "end_vertex": "h2pipe_MA_to_CT_storage",
                         "variable_om_cost": 0,
                         "investment_cost": 0,
                         "unidirectional": true,
-                        "start_vertex": "h2_MA",
+                        "start_vertex": "h2pipe_MA_to_CT_transforms",
                         "constraints": {
                             "CapacityConstraint": true
                         },
@@ -16526,11 +16526,11 @@
                         "commodity": "Hydrogen",
                         "capacity_size": 787.6,
                         "ramp_down_fraction": 1,
-                        "end_vertex": "h2_CT",
+                        "end_vertex": "h2pipe_MA_to_CT_transforms",
                         "variable_om_cost": 0,
                         "investment_cost": 82682.23402,
                         "unidirectional": true,
-                        "start_vertex": "h2pipe_MA_to_CT_transforms",
+                        "start_vertex": "h2pipe_MA_to_CT_storage",
                         "constraints": {
                             "CapacityConstraint": true
                         },
@@ -16544,7 +16544,7 @@
                         "new_units": 0,
                         "startup_cost": 0
                     },
-                    "internal_discharge_edge": {
+                    "external_discharge_edge": {
                         "new_capacity": 0,
                         "integer_decisions": false,
                         "can_retire": false,
@@ -16563,14 +16563,14 @@
                         "commodity": "Hydrogen",
                         "capacity_size": 1,
                         "ramp_down_fraction": 1,
-                        "end_vertex": "h2pipe_MA_to_CT_transforms",
+                        "end_vertex": "h2_CT",
                         "variable_om_cost": 0,
                         "investment_cost": 0,
                         "unidirectional": true,
-                        "start_vertex": "h2pipe_MA_to_CT_storage",
+                        "start_vertex": "h2pipe_MA_to_CT_transforms",
                         "min_capacity": 0,
                         "loss_fraction": 0,
-                        "id": "h2pipe_MA_to_CT_internal_discharge_edge",
+                        "id": "h2pipe_MA_to_CT_external_discharge_edge",
                         "startup_fuel_consumption": 0,
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
@@ -16619,21 +16619,21 @@
                     },
                     "location": "",
                     "balance_data": {
-                        "internal_discharge_balance": {
-                            "h2pipe_MA_to_CT_discharge_edge": 1,
-                            "h2pipe_MA_to_CT_internal_discharge_edge": 1
+                        "external_discharge_balance": {
+                            "h2pipe_MA_to_CT_external_discharge_edge": 1,
+                            "h2pipe_MA_to_CT_discharge_edge": 1
                         },
                         "charge_electricity_consumption": {
-                            "h2pipe_MA_to_CT_charge_edge": 0,
+                            "h2pipe_MA_to_CT_external_charge_edge": 0,
                             "h2pipe_MA_to_CT_charge_elec_edge": -1
                         },
                         "discharge_electricity_consumption": {
-                            "h2pipe_MA_to_CT_discharge_edge": 0,
+                            "h2pipe_MA_to_CT_external_discharge_edge": 0,
                             "h2pipe_MA_to_CT_discharge_elec_edge": 1
                         },
-                        "internal_charge_balance": {
-                            "h2pipe_MA_to_CT_charge_edge": 1,
-                            "h2pipe_MA_to_CT_internal_charge_edge": 1
+                        "external_charge_balance": {
+                            "h2pipe_MA_to_CT_external_charge_edge": 1,
+                            "h2pipe_MA_to_CT_charge_edge": 1
                         }
                     },
                     "id": "h2pipe_MA_to_CT_transforms",
@@ -16651,8 +16651,8 @@
                     "can_retire": false,
                     "balance_data": {
                         "storage": {
-                            "h2pipe_CT_to_MA_internal_discharge_edge": 1,
-                            "h2pipe_CT_to_MA_internal_charge_edge": 1
+                            "h2pipe_CT_to_MA_charge_edge": 1,
+                            "h2pipe_CT_to_MA_discharge_edge": 1
                         }
                     },
                     "charge_discharge_ratio": 1,
@@ -16687,6 +16687,40 @@
                 },
                 "id": "h2pipe_CT_to_MA",
                 "edges": {
+                    "external_charge_edge": {
+                        "new_capacity": 0,
+                        "integer_decisions": false,
+                        "can_retire": false,
+                        "timedata": "Hydrogen",
+                        "can_expand": false,
+                        "min_down_time": 0,
+                        "retired_capacity": 0,
+                        "capacity": 0,
+                        "has_capacity": false,
+                        "max_capacity": "Inf",
+                        "startup_fuel_balance_id": "none",
+                        "fixed_om_cost": 0,
+                        "existing_capacity": 0,
+                        "retired_units": 0,
+                        "min_up_time": 0,
+                        "commodity": "Hydrogen",
+                        "capacity_size": 1,
+                        "ramp_down_fraction": 1,
+                        "end_vertex": "h2pipe_CT_to_MA_transforms",
+                        "variable_om_cost": 0,
+                        "investment_cost": 0,
+                        "unidirectional": true,
+                        "start_vertex": "h2_CT",
+                        "min_capacity": 0,
+                        "loss_fraction": 0,
+                        "id": "h2pipe_CT_to_MA_external_charge_edge",
+                        "startup_fuel_consumption": 0,
+                        "ramp_up_fraction": 1,
+                        "min_flow_fraction": 0,
+                        "distance": 0,
+                        "new_units": 0,
+                        "startup_cost": 0
+                    },
                     "charge_elec_edge": {
                         "new_capacity": 0,
                         "integer_decisions": false,
@@ -16721,40 +16755,6 @@
                         "new_units": 0,
                         "startup_cost": 0
                     },
-                    "internal_charge_edge": {
-                        "new_capacity": 0,
-                        "integer_decisions": false,
-                        "can_retire": false,
-                        "timedata": "Hydrogen",
-                        "can_expand": false,
-                        "min_down_time": 0,
-                        "retired_capacity": 0,
-                        "capacity": 0,
-                        "has_capacity": false,
-                        "max_capacity": "Inf",
-                        "startup_fuel_balance_id": "none",
-                        "fixed_om_cost": 0,
-                        "existing_capacity": 0,
-                        "retired_units": 0,
-                        "min_up_time": 0,
-                        "commodity": "Hydrogen",
-                        "capacity_size": 1,
-                        "ramp_down_fraction": 1,
-                        "end_vertex": "h2pipe_CT_to_MA_storage",
-                        "variable_om_cost": 0,
-                        "investment_cost": 0,
-                        "unidirectional": true,
-                        "start_vertex": "h2pipe_CT_to_MA_transforms",
-                        "min_capacity": 0,
-                        "loss_fraction": 0,
-                        "id": "h2pipe_CT_to_MA_internal_charge_edge",
-                        "startup_fuel_consumption": 0,
-                        "ramp_up_fraction": 1,
-                        "min_flow_fraction": 0,
-                        "distance": 0,
-                        "new_units": 0,
-                        "startup_cost": 0
-                    },
                     "charge_edge": {
                         "new_capacity": 0,
                         "integer_decisions": false,
@@ -16774,11 +16774,11 @@
                         "commodity": "Hydrogen",
                         "capacity_size": 1,
                         "ramp_down_fraction": 1,
-                        "end_vertex": "h2pipe_CT_to_MA_transforms",
+                        "end_vertex": "h2pipe_CT_to_MA_storage",
                         "variable_om_cost": 0,
                         "investment_cost": 0,
                         "unidirectional": true,
-                        "start_vertex": "h2_CT",
+                        "start_vertex": "h2pipe_CT_to_MA_transforms",
                         "constraints": {
                             "CapacityConstraint": true
                         },
@@ -16811,11 +16811,11 @@
                         "commodity": "Hydrogen",
                         "capacity_size": 787.6,
                         "ramp_down_fraction": 1,
-                        "end_vertex": "h2_MA",
+                        "end_vertex": "h2pipe_CT_to_MA_transforms",
                         "variable_om_cost": 0,
                         "investment_cost": 82682.23402,
                         "unidirectional": true,
-                        "start_vertex": "h2pipe_CT_to_MA_transforms",
+                        "start_vertex": "h2pipe_CT_to_MA_storage",
                         "constraints": {
                             "CapacityConstraint": true
                         },
@@ -16829,7 +16829,7 @@
                         "new_units": 0,
                         "startup_cost": 0
                     },
-                    "internal_discharge_edge": {
+                    "external_discharge_edge": {
                         "new_capacity": 0,
                         "integer_decisions": false,
                         "can_retire": false,
@@ -16848,14 +16848,14 @@
                         "commodity": "Hydrogen",
                         "capacity_size": 1,
                         "ramp_down_fraction": 1,
-                        "end_vertex": "h2pipe_CT_to_MA_transforms",
+                        "end_vertex": "h2_MA",
                         "variable_om_cost": 0,
                         "investment_cost": 0,
                         "unidirectional": true,
-                        "start_vertex": "h2pipe_CT_to_MA_storage",
+                        "start_vertex": "h2pipe_CT_to_MA_transforms",
                         "min_capacity": 0,
                         "loss_fraction": 0,
-                        "id": "h2pipe_CT_to_MA_internal_discharge_edge",
+                        "id": "h2pipe_CT_to_MA_external_discharge_edge",
                         "startup_fuel_consumption": 0,
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
@@ -16904,21 +16904,21 @@
                     },
                     "location": "",
                     "balance_data": {
-                        "internal_discharge_balance": {
-                            "h2pipe_CT_to_MA_internal_discharge_edge": 1,
-                            "h2pipe_CT_to_MA_discharge_edge": 1
+                        "external_discharge_balance": {
+                            "h2pipe_CT_to_MA_discharge_edge": 1,
+                            "h2pipe_CT_to_MA_external_discharge_edge": 1
                         },
                         "charge_electricity_consumption": {
-                            "h2pipe_CT_to_MA_charge_edge": 0,
+                            "h2pipe_CT_to_MA_external_charge_edge": 0,
                             "h2pipe_CT_to_MA_charge_elec_edge": -1
                         },
                         "discharge_electricity_consumption": {
                             "h2pipe_CT_to_MA_discharge_elec_edge": 1,
-                            "h2pipe_CT_to_MA_discharge_edge": 0
+                            "h2pipe_CT_to_MA_external_discharge_edge": 0
                         },
-                        "internal_charge_balance": {
+                        "external_charge_balance": {
                             "h2pipe_CT_to_MA_charge_edge": 1,
-                            "h2pipe_CT_to_MA_internal_charge_edge": 1
+                            "h2pipe_CT_to_MA_external_charge_edge": 1
                         }
                     },
                     "id": "h2pipe_CT_to_MA_transforms",
@@ -16936,8 +16936,8 @@
                     "can_retire": false,
                     "balance_data": {
                         "storage": {
-                            "h2pipe_ME_to_MA_internal_charge_edge": 1,
-                            "h2pipe_ME_to_MA_internal_discharge_edge": 1
+                            "h2pipe_ME_to_MA_discharge_edge": 1,
+                            "h2pipe_ME_to_MA_charge_edge": 1
                         }
                     },
                     "charge_discharge_ratio": 1,
@@ -16972,6 +16972,40 @@
                 },
                 "id": "h2pipe_ME_to_MA",
                 "edges": {
+                    "external_charge_edge": {
+                        "new_capacity": 0,
+                        "integer_decisions": false,
+                        "can_retire": false,
+                        "timedata": "Hydrogen",
+                        "can_expand": false,
+                        "min_down_time": 0,
+                        "retired_capacity": 0,
+                        "capacity": 0,
+                        "has_capacity": false,
+                        "max_capacity": "Inf",
+                        "startup_fuel_balance_id": "none",
+                        "fixed_om_cost": 0,
+                        "existing_capacity": 0,
+                        "retired_units": 0,
+                        "min_up_time": 0,
+                        "commodity": "Hydrogen",
+                        "capacity_size": 1,
+                        "ramp_down_fraction": 1,
+                        "end_vertex": "h2pipe_ME_to_MA_transforms",
+                        "variable_om_cost": 0,
+                        "investment_cost": 0,
+                        "unidirectional": true,
+                        "start_vertex": "h2_ME",
+                        "min_capacity": 0,
+                        "loss_fraction": 0,
+                        "id": "h2pipe_ME_to_MA_external_charge_edge",
+                        "startup_fuel_consumption": 0,
+                        "ramp_up_fraction": 1,
+                        "min_flow_fraction": 0,
+                        "distance": 0,
+                        "new_units": 0,
+                        "startup_cost": 0
+                    },
                     "charge_elec_edge": {
                         "new_capacity": 0,
                         "integer_decisions": false,
@@ -17006,40 +17040,6 @@
                         "new_units": 0,
                         "startup_cost": 0
                     },
-                    "internal_charge_edge": {
-                        "new_capacity": 0,
-                        "integer_decisions": false,
-                        "can_retire": false,
-                        "timedata": "Hydrogen",
-                        "can_expand": false,
-                        "min_down_time": 0,
-                        "retired_capacity": 0,
-                        "capacity": 0,
-                        "has_capacity": false,
-                        "max_capacity": "Inf",
-                        "startup_fuel_balance_id": "none",
-                        "fixed_om_cost": 0,
-                        "existing_capacity": 0,
-                        "retired_units": 0,
-                        "min_up_time": 0,
-                        "commodity": "Hydrogen",
-                        "capacity_size": 1,
-                        "ramp_down_fraction": 1,
-                        "end_vertex": "h2pipe_ME_to_MA_storage",
-                        "variable_om_cost": 0,
-                        "investment_cost": 0,
-                        "unidirectional": true,
-                        "start_vertex": "h2pipe_ME_to_MA_transforms",
-                        "min_capacity": 0,
-                        "loss_fraction": 0,
-                        "id": "h2pipe_ME_to_MA_internal_charge_edge",
-                        "startup_fuel_consumption": 0,
-                        "ramp_up_fraction": 1,
-                        "min_flow_fraction": 0,
-                        "distance": 0,
-                        "new_units": 0,
-                        "startup_cost": 0
-                    },
                     "charge_edge": {
                         "new_capacity": 0,
                         "integer_decisions": false,
@@ -17059,11 +17059,11 @@
                         "commodity": "Hydrogen",
                         "capacity_size": 1,
                         "ramp_down_fraction": 1,
-                        "end_vertex": "h2pipe_ME_to_MA_transforms",
+                        "end_vertex": "h2pipe_ME_to_MA_storage",
                         "variable_om_cost": 0,
                         "investment_cost": 0,
                         "unidirectional": true,
-                        "start_vertex": "h2_ME",
+                        "start_vertex": "h2pipe_ME_to_MA_transforms",
                         "constraints": {
                             "CapacityConstraint": true
                         },
@@ -17096,11 +17096,11 @@
                         "commodity": "Hydrogen",
                         "capacity_size": 787.6,
                         "ramp_down_fraction": 1,
-                        "end_vertex": "h2_MA",
+                        "end_vertex": "h2pipe_ME_to_MA_transforms",
                         "variable_om_cost": 0,
                         "investment_cost": 79896.9841,
                         "unidirectional": true,
-                        "start_vertex": "h2pipe_ME_to_MA_transforms",
+                        "start_vertex": "h2pipe_ME_to_MA_storage",
                         "constraints": {
                             "CapacityConstraint": true
                         },
@@ -17114,7 +17114,7 @@
                         "new_units": 0,
                         "startup_cost": 0
                     },
-                    "internal_discharge_edge": {
+                    "external_discharge_edge": {
                         "new_capacity": 0,
                         "integer_decisions": false,
                         "can_retire": false,
@@ -17133,14 +17133,14 @@
                         "commodity": "Hydrogen",
                         "capacity_size": 1,
                         "ramp_down_fraction": 1,
-                        "end_vertex": "h2pipe_ME_to_MA_transforms",
+                        "end_vertex": "h2_MA",
                         "variable_om_cost": 0,
                         "investment_cost": 0,
                         "unidirectional": true,
-                        "start_vertex": "h2pipe_ME_to_MA_storage",
+                        "start_vertex": "h2pipe_ME_to_MA_transforms",
                         "min_capacity": 0,
                         "loss_fraction": 0,
-                        "id": "h2pipe_ME_to_MA_internal_discharge_edge",
+                        "id": "h2pipe_ME_to_MA_external_discharge_edge",
                         "startup_fuel_consumption": 0,
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
@@ -17189,20 +17189,20 @@
                     },
                     "location": "",
                     "balance_data": {
-                        "internal_discharge_balance": {
+                        "external_discharge_balance": {
                             "h2pipe_ME_to_MA_discharge_edge": 1,
-                            "h2pipe_ME_to_MA_internal_discharge_edge": 1
+                            "h2pipe_ME_to_MA_external_discharge_edge": 1
                         },
                         "charge_electricity_consumption": {
-                            "h2pipe_ME_to_MA_charge_edge": 0,
+                            "h2pipe_ME_to_MA_external_charge_edge": 0,
                             "h2pipe_ME_to_MA_charge_elec_edge": -1
                         },
                         "discharge_electricity_consumption": {
-                            "h2pipe_ME_to_MA_discharge_edge": 0,
-                            "h2pipe_ME_to_MA_discharge_elec_edge": 1
+                            "h2pipe_ME_to_MA_discharge_elec_edge": 1,
+                            "h2pipe_ME_to_MA_external_discharge_edge": 0
                         },
-                        "internal_charge_balance": {
-                            "h2pipe_ME_to_MA_internal_charge_edge": 1,
+                        "external_charge_balance": {
+                            "h2pipe_ME_to_MA_external_charge_edge": 1,
                             "h2pipe_ME_to_MA_charge_edge": 1
                         }
                     },
@@ -17221,8 +17221,8 @@
                     "can_retire": false,
                     "balance_data": {
                         "storage": {
-                            "h2pipe_MA_to_ME_internal_charge_edge": 1,
-                            "h2pipe_MA_to_ME_internal_discharge_edge": 1
+                            "h2pipe_MA_to_ME_discharge_edge": 1,
+                            "h2pipe_MA_to_ME_charge_edge": 1
                         }
                     },
                     "charge_discharge_ratio": 1,
@@ -17257,6 +17257,40 @@
                 },
                 "id": "h2pipe_MA_to_ME",
                 "edges": {
+                    "external_charge_edge": {
+                        "new_capacity": 0,
+                        "integer_decisions": false,
+                        "can_retire": false,
+                        "timedata": "Hydrogen",
+                        "can_expand": false,
+                        "min_down_time": 0,
+                        "retired_capacity": 0,
+                        "capacity": 0,
+                        "has_capacity": false,
+                        "max_capacity": "Inf",
+                        "startup_fuel_balance_id": "none",
+                        "fixed_om_cost": 0,
+                        "existing_capacity": 0,
+                        "retired_units": 0,
+                        "min_up_time": 0,
+                        "commodity": "Hydrogen",
+                        "capacity_size": 1,
+                        "ramp_down_fraction": 1,
+                        "end_vertex": "h2pipe_MA_to_ME_transforms",
+                        "variable_om_cost": 0,
+                        "investment_cost": 0,
+                        "unidirectional": true,
+                        "start_vertex": "h2_MA",
+                        "min_capacity": 0,
+                        "loss_fraction": 0,
+                        "id": "h2pipe_MA_to_ME_external_charge_edge",
+                        "startup_fuel_consumption": 0,
+                        "ramp_up_fraction": 1,
+                        "min_flow_fraction": 0,
+                        "distance": 0,
+                        "new_units": 0,
+                        "startup_cost": 0
+                    },
                     "charge_elec_edge": {
                         "new_capacity": 0,
                         "integer_decisions": false,
@@ -17291,40 +17325,6 @@
                         "new_units": 0,
                         "startup_cost": 0
                     },
-                    "internal_charge_edge": {
-                        "new_capacity": 0,
-                        "integer_decisions": false,
-                        "can_retire": false,
-                        "timedata": "Hydrogen",
-                        "can_expand": false,
-                        "min_down_time": 0,
-                        "retired_capacity": 0,
-                        "capacity": 0,
-                        "has_capacity": false,
-                        "max_capacity": "Inf",
-                        "startup_fuel_balance_id": "none",
-                        "fixed_om_cost": 0,
-                        "existing_capacity": 0,
-                        "retired_units": 0,
-                        "min_up_time": 0,
-                        "commodity": "Hydrogen",
-                        "capacity_size": 1,
-                        "ramp_down_fraction": 1,
-                        "end_vertex": "h2pipe_MA_to_ME_storage",
-                        "variable_om_cost": 0,
-                        "investment_cost": 0,
-                        "unidirectional": true,
-                        "start_vertex": "h2pipe_MA_to_ME_transforms",
-                        "min_capacity": 0,
-                        "loss_fraction": 0,
-                        "id": "h2pipe_MA_to_ME_internal_charge_edge",
-                        "startup_fuel_consumption": 0,
-                        "ramp_up_fraction": 1,
-                        "min_flow_fraction": 0,
-                        "distance": 0,
-                        "new_units": 0,
-                        "startup_cost": 0
-                    },
                     "charge_edge": {
                         "new_capacity": 0,
                         "integer_decisions": false,
@@ -17344,11 +17344,11 @@
                         "commodity": "Hydrogen",
                         "capacity_size": 1,
                         "ramp_down_fraction": 1,
-                        "end_vertex": "h2pipe_MA_to_ME_transforms",
+                        "end_vertex": "h2pipe_MA_to_ME_storage",
                         "variable_om_cost": 0,
                         "investment_cost": 0,
                         "unidirectional": true,
-                        "start_vertex": "h2_MA",
+                        "start_vertex": "h2pipe_MA_to_ME_transforms",
                         "constraints": {
                             "CapacityConstraint": true
                         },
@@ -17381,11 +17381,11 @@
                         "commodity": "Hydrogen",
                         "capacity_size": 787.6,
                         "ramp_down_fraction": 1,
-                        "end_vertex": "h2_ME",
+                        "end_vertex": "h2pipe_MA_to_ME_transforms",
                         "variable_om_cost": 0,
                         "investment_cost": 79896.9841,
                         "unidirectional": true,
-                        "start_vertex": "h2pipe_MA_to_ME_transforms",
+                        "start_vertex": "h2pipe_MA_to_ME_storage",
                         "constraints": {
                             "CapacityConstraint": true
                         },
@@ -17399,7 +17399,7 @@
                         "new_units": 0,
                         "startup_cost": 0
                     },
-                    "internal_discharge_edge": {
+                    "external_discharge_edge": {
                         "new_capacity": 0,
                         "integer_decisions": false,
                         "can_retire": false,
@@ -17418,14 +17418,14 @@
                         "commodity": "Hydrogen",
                         "capacity_size": 1,
                         "ramp_down_fraction": 1,
-                        "end_vertex": "h2pipe_MA_to_ME_transforms",
+                        "end_vertex": "h2_ME",
                         "variable_om_cost": 0,
                         "investment_cost": 0,
                         "unidirectional": true,
-                        "start_vertex": "h2pipe_MA_to_ME_storage",
+                        "start_vertex": "h2pipe_MA_to_ME_transforms",
                         "min_capacity": 0,
                         "loss_fraction": 0,
-                        "id": "h2pipe_MA_to_ME_internal_discharge_edge",
+                        "id": "h2pipe_MA_to_ME_external_discharge_edge",
                         "startup_fuel_consumption": 0,
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
@@ -17474,21 +17474,21 @@
                     },
                     "location": "",
                     "balance_data": {
-                        "internal_discharge_balance": {
+                        "external_discharge_balance": {
                             "h2pipe_MA_to_ME_discharge_edge": 1,
-                            "h2pipe_MA_to_ME_internal_discharge_edge": 1
+                            "h2pipe_MA_to_ME_external_discharge_edge": 1
                         },
                         "charge_electricity_consumption": {
-                            "h2pipe_MA_to_ME_charge_edge": 0,
-                            "h2pipe_MA_to_ME_charge_elec_edge": -1
+                            "h2pipe_MA_to_ME_charge_elec_edge": -1,
+                            "h2pipe_MA_to_ME_external_charge_edge": 0
                         },
                         "discharge_electricity_consumption": {
-                            "h2pipe_MA_to_ME_discharge_edge": 0,
+                            "h2pipe_MA_to_ME_external_discharge_edge": 0,
                             "h2pipe_MA_to_ME_discharge_elec_edge": 1
                         },
-                        "internal_charge_balance": {
-                            "h2pipe_MA_to_ME_internal_charge_edge": 1,
-                            "h2pipe_MA_to_ME_charge_edge": 1
+                        "external_charge_balance": {
+                            "h2pipe_MA_to_ME_charge_edge": 1,
+                            "h2pipe_MA_to_ME_external_charge_edge": 1
                         }
                     },
                     "id": "h2pipe_MA_to_ME_transforms",
@@ -17506,8 +17506,8 @@
                     "can_retire": false,
                     "balance_data": {
                         "storage": {
-                            "MA_Above_ground_storage_internal_charge_edge": 1,
-                            "MA_Above_ground_storage_internal_discharge_edge": 1
+                            "MA_Above_ground_storage_charge_edge": 1,
+                            "MA_Above_ground_storage_discharge_edge": 1
                         }
                     },
                     "charge_discharge_ratio": 1,
@@ -17540,6 +17540,40 @@
                 },
                 "id": "MA_Above_ground_storage",
                 "edges": {
+                    "external_charge_edge": {
+                        "new_capacity": 0,
+                        "integer_decisions": false,
+                        "can_retire": false,
+                        "timedata": "Hydrogen",
+                        "can_expand": false,
+                        "min_down_time": 0,
+                        "retired_capacity": 0,
+                        "capacity": 0,
+                        "has_capacity": false,
+                        "max_capacity": "Inf",
+                        "startup_fuel_balance_id": "none",
+                        "fixed_om_cost": 0,
+                        "existing_capacity": 0,
+                        "retired_units": 0,
+                        "min_up_time": 0,
+                        "commodity": "Hydrogen",
+                        "capacity_size": 1,
+                        "ramp_down_fraction": 1,
+                        "end_vertex": "MA_Above_ground_storage_transforms",
+                        "variable_om_cost": 0,
+                        "investment_cost": 0,
+                        "unidirectional": true,
+                        "start_vertex": "h2_MA",
+                        "min_capacity": 0,
+                        "loss_fraction": 0,
+                        "id": "MA_Above_ground_storage_external_charge_edge",
+                        "startup_fuel_consumption": 0,
+                        "ramp_up_fraction": 1,
+                        "min_flow_fraction": 0,
+                        "distance": 0,
+                        "new_units": 0,
+                        "startup_cost": 0
+                    },
                     "charge_elec_edge": {
                         "new_capacity": 0,
                         "integer_decisions": false,
@@ -17574,40 +17608,6 @@
                         "new_units": 0,
                         "startup_cost": 0
                     },
-                    "internal_charge_edge": {
-                        "new_capacity": 0,
-                        "integer_decisions": false,
-                        "can_retire": false,
-                        "timedata": "Hydrogen",
-                        "can_expand": false,
-                        "min_down_time": 0,
-                        "retired_capacity": 0,
-                        "capacity": 0,
-                        "has_capacity": false,
-                        "max_capacity": "Inf",
-                        "startup_fuel_balance_id": "none",
-                        "fixed_om_cost": 0,
-                        "existing_capacity": 0,
-                        "retired_units": 0,
-                        "min_up_time": 0,
-                        "commodity": "Hydrogen",
-                        "capacity_size": 1,
-                        "ramp_down_fraction": 1,
-                        "end_vertex": "MA_Above_ground_storage_storage",
-                        "variable_om_cost": 0,
-                        "investment_cost": 0,
-                        "unidirectional": true,
-                        "start_vertex": "MA_Above_ground_storage_transforms",
-                        "min_capacity": 0,
-                        "loss_fraction": 0,
-                        "id": "MA_Above_ground_storage_internal_charge_edge",
-                        "startup_fuel_consumption": 0,
-                        "ramp_up_fraction": 1,
-                        "min_flow_fraction": 0,
-                        "distance": 0,
-                        "new_units": 0,
-                        "startup_cost": 0
-                    },
                     "charge_edge": {
                         "new_capacity": 0,
                         "integer_decisions": false,
@@ -17627,11 +17627,11 @@
                         "commodity": "Hydrogen",
                         "capacity_size": 1,
                         "ramp_down_fraction": 1,
-                        "end_vertex": "MA_Above_ground_storage_transforms",
+                        "end_vertex": "MA_Above_ground_storage_storage",
                         "variable_om_cost": 0,
                         "investment_cost": 3219.236569,
                         "unidirectional": true,
-                        "start_vertex": "h2_MA",
+                        "start_vertex": "MA_Above_ground_storage_transforms",
                         "constraints": {
                             "CapacityConstraint": true
                         },
@@ -17664,11 +17664,11 @@
                         "commodity": "Hydrogen",
                         "capacity_size": 1,
                         "ramp_down_fraction": 1,
-                        "end_vertex": "h2_MA",
+                        "end_vertex": "MA_Above_ground_storage_transforms",
                         "variable_om_cost": 0,
                         "investment_cost": 0,
                         "unidirectional": true,
-                        "start_vertex": "MA_Above_ground_storage_transforms",
+                        "start_vertex": "MA_Above_ground_storage_storage",
                         "constraints": {
                             "CapacityConstraint": true,
                             "RampingLimitConstraint": true
@@ -17683,7 +17683,7 @@
                         "new_units": 0,
                         "startup_cost": 0
                     },
-                    "internal_discharge_edge": {
+                    "external_discharge_edge": {
                         "new_capacity": 0,
                         "integer_decisions": false,
                         "can_retire": false,
@@ -17702,14 +17702,14 @@
                         "commodity": "Hydrogen",
                         "capacity_size": 1,
                         "ramp_down_fraction": 1,
-                        "end_vertex": "MA_Above_ground_storage_transforms",
+                        "end_vertex": "h2_MA",
                         "variable_om_cost": 0,
                         "investment_cost": 0,
                         "unidirectional": true,
-                        "start_vertex": "MA_Above_ground_storage_storage",
+                        "start_vertex": "MA_Above_ground_storage_transforms",
                         "min_capacity": 0,
                         "loss_fraction": 0,
-                        "id": "MA_Above_ground_storage_internal_discharge_edge",
+                        "id": "MA_Above_ground_storage_external_discharge_edge",
                         "startup_fuel_consumption": 0,
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
@@ -17758,21 +17758,21 @@
                     },
                     "location": "",
                     "balance_data": {
-                        "internal_discharge_balance": {
+                        "external_discharge_balance": {
                             "MA_Above_ground_storage_discharge_edge": 1,
-                            "MA_Above_ground_storage_internal_discharge_edge": 1
+                            "MA_Above_ground_storage_external_discharge_edge": 1
                         },
                         "charge_electricity_consumption": {
                             "MA_Above_ground_storage_charge_elec_edge": -1,
-                            "MA_Above_ground_storage_charge_edge": 0
+                            "MA_Above_ground_storage_external_charge_edge": 0
                         },
                         "discharge_electricity_consumption": {
-                            "MA_Above_ground_storage_discharge_edge": 0,
+                            "MA_Above_ground_storage_external_discharge_edge": 0,
                             "MA_Above_ground_storage_discharge_elec_edge": 1
                         },
-                        "internal_charge_balance": {
-                            "MA_Above_ground_storage_charge_edge": 1,
-                            "MA_Above_ground_storage_internal_charge_edge": 1
+                        "external_charge_balance": {
+                            "MA_Above_ground_storage_external_charge_edge": 1,
+                            "MA_Above_ground_storage_charge_edge": 1
                         }
                     },
                     "id": "MA_Above_ground_storage_transforms",
@@ -17790,8 +17790,8 @@
                     "can_retire": false,
                     "balance_data": {
                         "storage": {
-                            "CT_Above_ground_storage_internal_discharge_edge": 1,
-                            "CT_Above_ground_storage_internal_charge_edge": 1
+                            "CT_Above_ground_storage_charge_edge": 1,
+                            "CT_Above_ground_storage_discharge_edge": 1
                         }
                     },
                     "charge_discharge_ratio": 1,
@@ -17824,6 +17824,40 @@
                 },
                 "id": "CT_Above_ground_storage",
                 "edges": {
+                    "external_charge_edge": {
+                        "new_capacity": 0,
+                        "integer_decisions": false,
+                        "can_retire": false,
+                        "timedata": "Hydrogen",
+                        "can_expand": false,
+                        "min_down_time": 0,
+                        "retired_capacity": 0,
+                        "capacity": 0,
+                        "has_capacity": false,
+                        "max_capacity": "Inf",
+                        "startup_fuel_balance_id": "none",
+                        "fixed_om_cost": 0,
+                        "existing_capacity": 0,
+                        "retired_units": 0,
+                        "min_up_time": 0,
+                        "commodity": "Hydrogen",
+                        "capacity_size": 1,
+                        "ramp_down_fraction": 1,
+                        "end_vertex": "CT_Above_ground_storage_transforms",
+                        "variable_om_cost": 0,
+                        "investment_cost": 0,
+                        "unidirectional": true,
+                        "start_vertex": "h2_CT",
+                        "min_capacity": 0,
+                        "loss_fraction": 0,
+                        "id": "CT_Above_ground_storage_external_charge_edge",
+                        "startup_fuel_consumption": 0,
+                        "ramp_up_fraction": 1,
+                        "min_flow_fraction": 0,
+                        "distance": 0,
+                        "new_units": 0,
+                        "startup_cost": 0
+                    },
                     "charge_elec_edge": {
                         "new_capacity": 0,
                         "integer_decisions": false,
@@ -17858,40 +17892,6 @@
                         "new_units": 0,
                         "startup_cost": 0
                     },
-                    "internal_charge_edge": {
-                        "new_capacity": 0,
-                        "integer_decisions": false,
-                        "can_retire": false,
-                        "timedata": "Hydrogen",
-                        "can_expand": false,
-                        "min_down_time": 0,
-                        "retired_capacity": 0,
-                        "capacity": 0,
-                        "has_capacity": false,
-                        "max_capacity": "Inf",
-                        "startup_fuel_balance_id": "none",
-                        "fixed_om_cost": 0,
-                        "existing_capacity": 0,
-                        "retired_units": 0,
-                        "min_up_time": 0,
-                        "commodity": "Hydrogen",
-                        "capacity_size": 1,
-                        "ramp_down_fraction": 1,
-                        "end_vertex": "CT_Above_ground_storage_storage",
-                        "variable_om_cost": 0,
-                        "investment_cost": 0,
-                        "unidirectional": true,
-                        "start_vertex": "CT_Above_ground_storage_transforms",
-                        "min_capacity": 0,
-                        "loss_fraction": 0,
-                        "id": "CT_Above_ground_storage_internal_charge_edge",
-                        "startup_fuel_consumption": 0,
-                        "ramp_up_fraction": 1,
-                        "min_flow_fraction": 0,
-                        "distance": 0,
-                        "new_units": 0,
-                        "startup_cost": 0
-                    },
                     "charge_edge": {
                         "new_capacity": 0,
                         "integer_decisions": false,
@@ -17911,11 +17911,11 @@
                         "commodity": "Hydrogen",
                         "capacity_size": 1,
                         "ramp_down_fraction": 1,
-                        "end_vertex": "CT_Above_ground_storage_transforms",
+                        "end_vertex": "CT_Above_ground_storage_storage",
                         "variable_om_cost": 0,
                         "investment_cost": 3219.236569,
                         "unidirectional": true,
-                        "start_vertex": "h2_CT",
+                        "start_vertex": "CT_Above_ground_storage_transforms",
                         "constraints": {
                             "CapacityConstraint": true
                         },
@@ -17948,11 +17948,11 @@
                         "commodity": "Hydrogen",
                         "capacity_size": 1,
                         "ramp_down_fraction": 1,
-                        "end_vertex": "h2_CT",
+                        "end_vertex": "CT_Above_ground_storage_transforms",
                         "variable_om_cost": 0,
                         "investment_cost": 0,
                         "unidirectional": true,
-                        "start_vertex": "CT_Above_ground_storage_transforms",
+                        "start_vertex": "CT_Above_ground_storage_storage",
                         "constraints": {
                             "CapacityConstraint": true,
                             "RampingLimitConstraint": true
@@ -17967,7 +17967,7 @@
                         "new_units": 0,
                         "startup_cost": 0
                     },
-                    "internal_discharge_edge": {
+                    "external_discharge_edge": {
                         "new_capacity": 0,
                         "integer_decisions": false,
                         "can_retire": false,
@@ -17986,14 +17986,14 @@
                         "commodity": "Hydrogen",
                         "capacity_size": 1,
                         "ramp_down_fraction": 1,
-                        "end_vertex": "CT_Above_ground_storage_transforms",
+                        "end_vertex": "h2_CT",
                         "variable_om_cost": 0,
                         "investment_cost": 0,
                         "unidirectional": true,
-                        "start_vertex": "CT_Above_ground_storage_storage",
+                        "start_vertex": "CT_Above_ground_storage_transforms",
                         "min_capacity": 0,
                         "loss_fraction": 0,
-                        "id": "CT_Above_ground_storage_internal_discharge_edge",
+                        "id": "CT_Above_ground_storage_external_discharge_edge",
                         "startup_fuel_consumption": 0,
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
@@ -18042,20 +18042,20 @@
                     },
                     "location": "",
                     "balance_data": {
-                        "internal_discharge_balance": {
-                            "CT_Above_ground_storage_internal_discharge_edge": 1,
-                            "CT_Above_ground_storage_discharge_edge": 1
+                        "external_discharge_balance": {
+                            "CT_Above_ground_storage_discharge_edge": 1,
+                            "CT_Above_ground_storage_external_discharge_edge": 1
                         },
                         "charge_electricity_consumption": {
                             "CT_Above_ground_storage_charge_elec_edge": -1,
-                            "CT_Above_ground_storage_charge_edge": 0
+                            "CT_Above_ground_storage_external_charge_edge": 0
                         },
                         "discharge_electricity_consumption": {
                             "CT_Above_ground_storage_discharge_elec_edge": 1,
-                            "CT_Above_ground_storage_discharge_edge": 0
+                            "CT_Above_ground_storage_external_discharge_edge": 0
                         },
-                        "internal_charge_balance": {
-                            "CT_Above_ground_storage_internal_charge_edge": 1,
+                        "external_charge_balance": {
+                            "CT_Above_ground_storage_external_charge_edge": 1,
                             "CT_Above_ground_storage_charge_edge": 1
                         }
                     },
@@ -18074,8 +18074,8 @@
                     "can_retire": false,
                     "balance_data": {
                         "storage": {
-                            "ME_Above_ground_storage_internal_charge_edge": 1,
-                            "ME_Above_ground_storage_internal_discharge_edge": 1
+                            "ME_Above_ground_storage_discharge_edge": 1,
+                            "ME_Above_ground_storage_charge_edge": 1
                         }
                     },
                     "charge_discharge_ratio": 1,
@@ -18108,6 +18108,40 @@
                 },
                 "id": "ME_Above_ground_storage",
                 "edges": {
+                    "external_charge_edge": {
+                        "new_capacity": 0,
+                        "integer_decisions": false,
+                        "can_retire": false,
+                        "timedata": "Hydrogen",
+                        "can_expand": false,
+                        "min_down_time": 0,
+                        "retired_capacity": 0,
+                        "capacity": 0,
+                        "has_capacity": false,
+                        "max_capacity": "Inf",
+                        "startup_fuel_balance_id": "none",
+                        "fixed_om_cost": 0,
+                        "existing_capacity": 0,
+                        "retired_units": 0,
+                        "min_up_time": 0,
+                        "commodity": "Hydrogen",
+                        "capacity_size": 1,
+                        "ramp_down_fraction": 1,
+                        "end_vertex": "ME_Above_ground_storage_transforms",
+                        "variable_om_cost": 0,
+                        "investment_cost": 0,
+                        "unidirectional": true,
+                        "start_vertex": "h2_ME",
+                        "min_capacity": 0,
+                        "loss_fraction": 0,
+                        "id": "ME_Above_ground_storage_external_charge_edge",
+                        "startup_fuel_consumption": 0,
+                        "ramp_up_fraction": 1,
+                        "min_flow_fraction": 0,
+                        "distance": 0,
+                        "new_units": 0,
+                        "startup_cost": 0
+                    },
                     "charge_elec_edge": {
                         "new_capacity": 0,
                         "integer_decisions": false,
@@ -18142,40 +18176,6 @@
                         "new_units": 0,
                         "startup_cost": 0
                     },
-                    "internal_charge_edge": {
-                        "new_capacity": 0,
-                        "integer_decisions": false,
-                        "can_retire": false,
-                        "timedata": "Hydrogen",
-                        "can_expand": false,
-                        "min_down_time": 0,
-                        "retired_capacity": 0,
-                        "capacity": 0,
-                        "has_capacity": false,
-                        "max_capacity": "Inf",
-                        "startup_fuel_balance_id": "none",
-                        "fixed_om_cost": 0,
-                        "existing_capacity": 0,
-                        "retired_units": 0,
-                        "min_up_time": 0,
-                        "commodity": "Hydrogen",
-                        "capacity_size": 1,
-                        "ramp_down_fraction": 1,
-                        "end_vertex": "ME_Above_ground_storage_storage",
-                        "variable_om_cost": 0,
-                        "investment_cost": 0,
-                        "unidirectional": true,
-                        "start_vertex": "ME_Above_ground_storage_transforms",
-                        "min_capacity": 0,
-                        "loss_fraction": 0,
-                        "id": "ME_Above_ground_storage_internal_charge_edge",
-                        "startup_fuel_consumption": 0,
-                        "ramp_up_fraction": 1,
-                        "min_flow_fraction": 0,
-                        "distance": 0,
-                        "new_units": 0,
-                        "startup_cost": 0
-                    },
                     "charge_edge": {
                         "new_capacity": 0,
                         "integer_decisions": false,
@@ -18195,11 +18195,11 @@
                         "commodity": "Hydrogen",
                         "capacity_size": 1,
                         "ramp_down_fraction": 1,
-                        "end_vertex": "ME_Above_ground_storage_transforms",
+                        "end_vertex": "ME_Above_ground_storage_storage",
                         "variable_om_cost": 0,
                         "investment_cost": 3219.236569,
                         "unidirectional": true,
-                        "start_vertex": "h2_ME",
+                        "start_vertex": "ME_Above_ground_storage_transforms",
                         "constraints": {
                             "CapacityConstraint": true
                         },
@@ -18232,11 +18232,11 @@
                         "commodity": "Hydrogen",
                         "capacity_size": 1,
                         "ramp_down_fraction": 1,
-                        "end_vertex": "h2_ME",
+                        "end_vertex": "ME_Above_ground_storage_transforms",
                         "variable_om_cost": 0,
                         "investment_cost": 0,
                         "unidirectional": true,
-                        "start_vertex": "ME_Above_ground_storage_transforms",
+                        "start_vertex": "ME_Above_ground_storage_storage",
                         "constraints": {
                             "CapacityConstraint": true,
                             "RampingLimitConstraint": true
@@ -18251,7 +18251,7 @@
                         "new_units": 0,
                         "startup_cost": 0
                     },
-                    "internal_discharge_edge": {
+                    "external_discharge_edge": {
                         "new_capacity": 0,
                         "integer_decisions": false,
                         "can_retire": false,
@@ -18270,14 +18270,14 @@
                         "commodity": "Hydrogen",
                         "capacity_size": 1,
                         "ramp_down_fraction": 1,
-                        "end_vertex": "ME_Above_ground_storage_transforms",
+                        "end_vertex": "h2_ME",
                         "variable_om_cost": 0,
                         "investment_cost": 0,
                         "unidirectional": true,
-                        "start_vertex": "ME_Above_ground_storage_storage",
+                        "start_vertex": "ME_Above_ground_storage_transforms",
                         "min_capacity": 0,
                         "loss_fraction": 0,
-                        "id": "ME_Above_ground_storage_internal_discharge_edge",
+                        "id": "ME_Above_ground_storage_external_discharge_edge",
                         "startup_fuel_consumption": 0,
                         "ramp_up_fraction": 1,
                         "min_flow_fraction": 0,
@@ -18326,21 +18326,21 @@
                     },
                     "location": "",
                     "balance_data": {
-                        "internal_discharge_balance": {
+                        "external_discharge_balance": {
                             "ME_Above_ground_storage_discharge_edge": 1,
-                            "ME_Above_ground_storage_internal_discharge_edge": 1
+                            "ME_Above_ground_storage_external_discharge_edge": 1
                         },
                         "charge_electricity_consumption": {
                             "ME_Above_ground_storage_charge_elec_edge": -1,
-                            "ME_Above_ground_storage_charge_edge": 0
+                            "ME_Above_ground_storage_external_charge_edge": 0
                         },
                         "discharge_electricity_consumption": {
                             "ME_Above_ground_storage_discharge_elec_edge": 1,
-                            "ME_Above_ground_storage_discharge_edge": 0
+                            "ME_Above_ground_storage_external_discharge_edge": 0
                         },
-                        "internal_charge_balance": {
+                        "external_charge_balance": {
                             "ME_Above_ground_storage_charge_edge": 1,
-                            "ME_Above_ground_storage_internal_charge_edge": 1
+                            "ME_Above_ground_storage_external_charge_edge": 1
                         }
                     },
                     "id": "ME_Above_ground_storage_transforms",
@@ -32551,23 +32551,29 @@
     ],
     "time_data": {
         "HoursPerSubperiod": {
+            "Biomass_Herb": 168,
+            "CO2Captured": 168,
             "Hydrogen": 168,
             "NaturalGas": 168,
+            "Biomass_Wood": 168,
             "Biomass": 168,
+            "Fossil_NaturalGas": 168,
             "Uranium": 168,
             "Electricity": 168,
-            "CO2": 168,
-            "CO2Captured": 168
+            "CO2": 168
         },
         "NumberOfSubperiods": 3,
         "HoursPerTimeStep": {
+            "Biomass_Herb": 1,
+            "CO2Captured": 1,
             "Hydrogen": 1,
             "NaturalGas": 1,
+            "Biomass_Wood": 1,
             "Biomass": 1,
+            "Fossil_NaturalGas": 1,
             "Uranium": 1,
             "Electricity": 1,
-            "CO2": 1,
-            "CO2Captured": 1
+            "CO2": 1
         }
     },
     "data_dirpath": "./test/test_inputs"

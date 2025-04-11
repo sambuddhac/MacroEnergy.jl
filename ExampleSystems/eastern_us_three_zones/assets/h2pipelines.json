@@ -57,6 +57,16 @@
                         "type": "Electricity",
                         "unidirectional": true,
                         "has_capacity": false
+                    },
+                    "external_charge_edge": {
+                        "type": "Hydrogen",
+                        "unidirectional": true,
+                        "has_capacity": false
+                    },
+                    "external_discharge_edge": {
+                        "type": "Hydrogen",
+                        "unidirectional": true,
+                        "has_capacity": false
                     }
                 }
             },
@@ -69,10 +79,12 @@
                     },
                     "edges": {
                         "discharge_edge": {
-                            "investment_cost": 92580.5925294,
+                            "investment_cost": 92580.5925294
+                        },
+                        "external_discharge_edge": {
                             "end_vertex": "h2_MIDAT"
                         },
-                        "charge_edge":{
+                        "external_charge_edge": {
                             "start_vertex": "h2_SE"
                         },
                         "discharge_elec_edge": {
@@ -91,10 +103,12 @@
                     },
                     "edges": {
                         "discharge_edge": {
-                            "investment_cost": 92580.5925294,
+                            "investment_cost": 92580.5925294
+                        },
+                        "external_discharge_edge": {
                             "end_vertex": "h2_SE"
                         },
-                        "charge_edge":{
+                        "external_charge_edge":{
                             "start_vertex": "h2_MIDAT"
                         },
                         "discharge_elec_edge": {
@@ -113,10 +127,12 @@
                     },
                     "edges": {
                         "discharge_edge": {
-                            "investment_cost": 89461.90456,
+                            "investment_cost": 89461.90456
+                        },
+                        "external_discharge_edge": {
                             "end_vertex": "h2_NE"
                         },
-                        "charge_edge":{
+                        "external_charge_edge":{
                             "start_vertex": "h2_MIDAT"
                         },
                         "discharge_elec_edge": {
@@ -135,10 +151,12 @@
                     },
                     "edges": {
                         "discharge_edge": {
-                            "investment_cost": 89461.90456,
+                            "investment_cost": 89461.90456
+                        },
+                        "external_discharge_edge": {
                             "end_vertex": "h2_MIDAT"
                         },
-                        "charge_edge":{
+                        "external_charge_edge":{
                             "start_vertex": "h2_NE"
                         },
                         "discharge_elec_edge": {
