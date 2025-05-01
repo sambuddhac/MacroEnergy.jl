@@ -136,7 +136,7 @@ makedocs(;
 # Deploy built documentation.
 # ===========================
 deploydocs(;
-    repo="https://github.com/macroenergy/MacroEnergy.jl.git",
+    repo="github.com/macroenergy/MacroEnergy.jl.git",
     target="build",
     branch="gh-pages",
     devbranch="develop",
