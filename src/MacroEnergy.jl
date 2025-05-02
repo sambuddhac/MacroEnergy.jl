@@ -10,7 +10,7 @@ using HiGHS
 using Revise
 using InteractiveUtils
 using Printf: @printf
-using MacroEnergySystemsScaling
+using MacroEnergyScaling
 
 import Base: /, push!, merge!
 
