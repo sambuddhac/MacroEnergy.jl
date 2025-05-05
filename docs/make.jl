@@ -139,7 +139,7 @@ deploydocs(;
     repo="github.com/macroenergy/MacroEnergy.jl.git",
     target="build",
     branch="gh-pages",
-    devbranch="develop",
+    devbranch="main",
     devurl="dev",
     push_preview=true,
 )
