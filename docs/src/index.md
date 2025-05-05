@@ -4,32 +4,43 @@ CurrentModule = MacroEnergy
 
 # Macro
 
-Welcome to the [Macro](https://github.com/macroenergy/MacroEnergy.jl.git) documentation!
+**Welcome to the [Macro](https://github.com/macroenergy/MacroEnergy.jl.git) documentation!**
+
+**This documentation is a work-in-progress, so please forgive our appearance as we add material.**
+
+**All feedback is welcome and please report and errors or omissions through [the MacroEnergy.jl issues page.](https://github.com/macroenergy/MacroEnergy.jl/issues)**
 
 ## What is Macro?
-MAcro-Energy System Capacity Expansion & Resource Optimization Model (MACRO) is a bottom-up, electricity-centric, macro-energy systems optimization model. It is designed to capture capacity investments, operations, and energy flows across and between multiple energy sectors and can be used to explore the impacts of different energy policies, technology costs, and other exogenous factors on the energy system. 
 
-The main features of MACRO include:
+**Macro** is a bottom-up, multi-sectoral infrastructure optimization model for macro-energy systems. It co-optimizes the design and operation of user-defined models of multi-sector energy systems and networks. Macro allows users to explore the impact of energy policies, technology costs and performance, demand patterns, and other factors on an energy system as a whole and as separate sectors.
+
+The main features of Macro include:
+
+- **Graph-based representation** of the energy system, facilitating clear representation and analysis of energy and mass flows between sectors.
+- **"Plug and play" flexibility** for integrating new technologies and sectors, including electricity, hydrogen, heat, and transport.
+- **High spatial and temporal resolution** to accurately capture sector dynamics.
+- Designed for **distributed computing** to enable large-scale optimizations.
 - Tailored **Benders decomposition** framework for optimization.
-- **Graph-based representation** of the energy system, including nodes, storage units, edges/transmission lines, transformation nodes/conversion units.
-- **"Plug and play" flexibility** for integrating various technologies and sectors (e.g., electricity, hydrogen, heat, and transport).
-- Technologically rich, **granular temporal resolution** for detailed analysis.
 - **Open-source** built using Julia and JuMP.
 
-## Software Manual
+## Macro development strategy
 
-```@contents
-Pages = [
-    "installation.md",
-    "sectors.md",
-    "assets.md",
-    "constraints.md",
-    "build_sectors.md",
-    "create_example_case.md",
-    "type_hierarchy.md",
-    "data_model.md",
-    "references.md"
-]
-Depth = 2
-```
+Macro is a very flexible tool for modelling energy systems. However, that flexibility also means the core architecture and functions are complex and difficult to use correctly.
 
+To make Macro as useful and accessible to the widest audience possible we designed and developed it with three layers of abstractions in mind, each serving a different user profile:
+
+![Macro architecture](./images/macro_abstr_layers.png)
+
+The following sections of the documentation are designed to serve the different needs of the different users.
+
+## Structure of the documentation
+
+- ### [Getting Started](@ref)
+
+- ### [User Guide](@ref)
+
+- ### [Modeler Guide](@ref)
+
+- ### [Developer Guide](@ref)
+
+## [Table of contents](@ref)
