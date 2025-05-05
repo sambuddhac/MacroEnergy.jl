@@ -7,7 +7,7 @@ This section of the documentation is designed to provide an overview of the inte
 As mentioned in the [Getting Started](@ref) section, Macro is designed to represent energy systems in a detailed manner, capturing interactions among various sectors and technologies. 
 The internal representation of the energy system is structured as a **multi-commodity flow network**, with each commodity having independent spatial and temporal scale:
 
-![multi-commodity flow network](../images/multi_network.png)
+![multi-commodity flow network](../../images/multi_network.png)
 
 As an example, the figure above illustrates a multi-plex network representing an energy system with electricity, natural gas, hydrogen and CO2 sectors, with a natural gas power plant, an electrolyzer, a DAC module and an SMR with carbon capture. Orange nodes represent the demand nodes in the electricity sector, maroon nodes represent natural gas nodes, blue nodes represent hydrogen, grey nodes represent CO2 and purple nodes represent CO2 capture nodes. The edges depict commodity flow, and squares represent transformation points.
 
