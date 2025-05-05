@@ -16,6 +16,7 @@ const pages = [
         "First Run" => "Getting Started/3_first_run.md",
     ],
     "Guides" => [
+        "Introduction" => "Guides/guides_introduction.md",
         "User Guide" => [
             "Introduction" => "User Guide/user_introduction.md",
             "Create a System" => "User Guide/user_build_system.md",
@@ -61,7 +62,7 @@ const pages = [
         ],
     ],
     "Manual" => [
-        "Overview" => "Manual/Overview.md",
+        "Introduction" => "Manual/manual_introduction.md",
         "Inputs" => "Manual/Inputs.md",
         "Outputs" => "Manual/Outputs.md",
         "System" => "Manual/System.md",
@@ -91,7 +92,8 @@ const pages = [
         ],
         "Model" => "Manual/Model.md"
     ],
-    "Extended Tutorials" => [
+    "Tutorials" => [
+        "Introduction" => "Tutorials/tutorials_introduction.md",
         "Getting Started" => "Tutorials/0_getting_started.md",
         "Running Macro" => "Tutorials/1_running_macro.md",
         "Multisector Modelling" => "Tutorials/2_multisector_modelling.md",

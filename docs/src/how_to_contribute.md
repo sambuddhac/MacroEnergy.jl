@@ -126,3 +126,8 @@ Alternatively, use the `Sync fork` button in the GitHub website.
 - [ColPrac](https://github.com/SciML/ColPrac): Contributor's Guide on Collaborative Practices for Community Packages
 - [Julia Style Guide](https://docs.julialang.org/en/v1/manual/style-guide/)
 
+## Contributing to Macro
+
+## Contributing to the documentation
+
+### Adding a tutorial
