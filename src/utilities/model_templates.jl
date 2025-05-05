@@ -283,7 +283,7 @@ function template_subcommodity(comm_file::AbstractString, subcommodities::Vector
     for (idx, subcommodity) in enumerate(subcommodities)
         commodity = commodities[idx]
         if commodity ∉ listed_commodities
-            @warn("Parent commodity $commodity does not exist. Skipping creating $subcommodity")
+            @warn("Super-commodity $commodity does not exist. Skipping creating $subcommodity")
             continue
         elseif subcommodity in listed_commodities
             @warn("Subcommodity $subcommodity already exists. Skipping creating $subcommodity")
@@ -297,7 +297,7 @@ function template_subcommodity(comm_file::AbstractString, subcommodities::Vector
         )
         push!(new_subcommodities, new_subcommodity)
     end
-    commodities_file[:commodities] = Set{Any}(commodities_file[:commodities])
+    commodities_file[:commodities] = OrderedSet{Any}(commodities_file[:commodities])
     for subc in new_subcommodities
         push!(commodities_file[:commodities], subc)
     end
