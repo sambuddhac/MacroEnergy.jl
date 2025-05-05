@@ -4,7 +4,11 @@ CurrentModule = MacroEnergy
 
 # Macro
 
-### Welcome to the [Macro](https://github.com/macroenergy/MacroEnergy.jl.git) documentation!
+**Welcome to the [Macro](https://github.com/macroenergy/MacroEnergy.jl.git) documentation!**
+
+**This documentation is a work-in-progress, so please forgive our appearance as we add material.**
+
+**All feedback is welcome and please report and errors or omissions through [the MacroEnergy.jl issues page.](https://github.com/macroenergy/MacroEnergy.jl/issues)**
 
 ## What is Macro?
 
