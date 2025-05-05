@@ -219,6 +219,7 @@ export AbstractAsset,
     template_system,
     template_node,
     template_location,
-    template_asset
+    template_asset,
+    template_subcommodity
     
 end # module MacroEnergy
