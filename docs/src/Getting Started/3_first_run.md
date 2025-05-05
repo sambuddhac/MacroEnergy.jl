@@ -12,11 +12,16 @@ Once Macro is installed, the simplest way to get started is to run the example s
 !!! tip "Macro Input Data Description"
     The section [Macro Input Data](@ref) in the [User Guide](@ref) provides a detailed description of all the input files present in the example folder.
 
-To run the example, navigate to the `ExampleSystems/eastern_us_three_zones` folder and execute the `run.jl` file present in the folder:
+To run the example, navigate to the `MacroEnergy.jl` folder and execute the `run.jl` file present in the example folder. On a Unix-based machine, this will look like:
 
 ```bash
-cd ExampleSystems/eastern_us_three_zones
-julia --project=. run.jl
+julia --project=. ExampleSystems/eastern_us_three_zones/run.jl
+```
+
+On Windows, it will be:
+
+```bash
+julia --project=. ExampleSystems\eastern_us_three_zones\run.jl
 ```
 
 This will use Macro to solve the example system and save the results in the `results` directory. By default, Macro writes three files: 

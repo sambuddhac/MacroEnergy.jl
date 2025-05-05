@@ -13,6 +13,7 @@ const pages = [
     "Getting Started" => [
         "Overview" => "Getting Started/1_overview.md",
         "Installation" => "Getting Started/2_installation.md",
+        "What's Included With Macro" => "Getting Started/4_macro_repo_contents.md",
         "First Run" => "Getting Started/3_first_run.md",
     ],
     "Guides" => [

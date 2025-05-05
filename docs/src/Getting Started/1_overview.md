@@ -1,8 +1,19 @@
 # Getting Started
 
-**Macro version 0.1.0**
+## What is Macro?
 
-## High-level Macro Design
+- Overview of what it is
+
+### Example workflows
+
+- For user, modeler, developer
+- Highlight that data is not included
+
+### Related packages
+
+- Description of related packages
+
+## How are real-world system represented?
 
 ### Multi-commodity flow network
 
