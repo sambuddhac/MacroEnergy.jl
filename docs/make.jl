@@ -120,7 +120,6 @@ makedocs(;
         # sidebar_sitename = false,
         collapselevel=1,
     ),
-    build="build_html",
     pages=pages,
 )
 
