@@ -21,6 +21,14 @@ Steps to reproduce the behavior:
 2. Run an example system with '....'
 3. See error
 
+Alternatively, you can provide a minimal Julia script that reproduces the issue:
+
+```julia
+using MacroEnergy
+
+# [Your code here]
+```
+
 **Minimum Working Example**
 We encourage users to upload a ZIP file containing a minimum working example to help us reproduce the bug (unless you're using one of the repository examples).
 **Note:** Uploaded files will be public.
