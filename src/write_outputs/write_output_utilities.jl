@@ -936,40 +936,25 @@ function write_outputs(results_dir::AbstractString, system::System, model::Model
 end
 
 function write_outputs(case_path::AbstractString, stages::Stages, model::Union{Model, Vector{Model}})
-    write_outputs(case_path, stages, model, expansion_mode(stages))
+    write_outputs(case_path, stages, model)
 end
 
-function write_outputs(case_path::AbstractString, stages::Stages, model::Model, ::SingleStage)
-    @info("Writing results for single stage")
-    results_dir = joinpath(case_path, "results")
-    mkpath(results_dir)
-    write_outputs(results_dir, stages.systems[1], model)
-
-    return nothing
-end
-
-function write_outputs(case_path::AbstractString, stages::Stages, models::Vector{Model}, ::Myopic)
-
-    for s in 1:length(stages.systems)
-        @info("Writing results for stage $s")
-        results_dir = joinpath(case_path, "results_stage_$s")
-        mkpath(results_dir)
-        write_outputs(results_dir, stages.systems[s], models[s])
-    end
-
-    return nothing
-end
-
-function write_outputs(case_path::AbstractString, stages::Stages, model::Model, ::PerfectForesight)
-
-    for s in 1:length(stages.systems)
+function write_outputs(case_path::AbstractString, stages::Stages, model::Model)
+    num_stages = length(stages.systems)
+    for s in 1:num_stages
         @info("Writing results for stage $s")
         compute_nominal_costs!(model, stages.systems[s], stages.settings)
-        # Output results
-        results_dir = joinpath(case_path, "results_stage_$s")
+        ## Create results directory to store the results
+        if num_stages > 1
+            # Create a directory for each stage
+            results_dir = joinpath(case_path, "results_stage_$s")
+        else
+            # Create a directory for the single stage
+            results_dir = joinpath(case_path, "results")
+        end
         mkpath(results_dir)
         write_outputs(results_dir, stages.systems[s], model)
-        write_discounted_costs(joinpath(results_dir, "discounted_costs.csv"), stages.systems[s], model)
+        write_discounted_costs(joinpath(results_dir, "discounted_costs.csv"), stages.systems[s], model; stage_index=s)
     end
 
     return nothing
@@ -979,67 +964,23 @@ end
 Write results when using Benders as solution algorithm.
 """
 function write_outputs(case_path::AbstractString, stages::Stages, bd_results::BendersResults)
-    write_outputs(case_path, stages, bd_results, expansion_mode(stages))
-end
-
-function write_outputs(case_path::AbstractString, stages::Stages, bd_results::BendersResults, ::SingleStage)
-    @info("Writing results for single stage solved with Benders decomposition")
-
-    results_dir = joinpath(case_path, "results")
-    mkpath(results_dir)
-
-    system = stages.systems[1]
-
-    subop_indices_stage = collect(1:length(system.time_data[:Electricity].subperiods))
-
-    # Note: system has been updated with the capacity values in planning_solution at the end of function solve_stages
-    # Capacity results
-    write_capacity(joinpath(results_dir, "capacity.csv"), system)
-    
-    # Flow results
-    # get the flow results from the operational subproblems
-    flow_df = collect_flow_results(stages, bd_results)
-    write_stage_flows(results_dir, system, flow_df[subop_indices_stage])
-
-    # Cost results
-    costs = prepare_costs_benders_single_stage(bd_results, subop_indices_stage)
-    write_costs(joinpath(results_dir, "costs.csv"), system, costs)
-
-    return nothing
-end
-
-function prepare_costs_benders_single_stage(bd_results::BendersResults, subop_indices::Vector{Int64})
-    planning_problem = bd_results.planning_problem
-    subop_sol = bd_results.subop_sol
-    planning_variable_values = bd_results.planning_sol.values
-
-    # evaluate the fixed cost expressions in the planning problem
-    fixed_cost = value(x -> planning_variable_values[name(x)], planning_problem[:eFixedCost])
-
-    # evaluate the variable cost expressions using the subproblem solutions
-    variable_cost = evaluate_vtheta_in_expression(planning_problem, :eApproximateVariableCost, subop_sol, subop_indices)
-    
-    return (
-        eFixedCost = fixed_cost,
-        eVariableCost = variable_cost
-    )
-end
-
-"""
-Write outputs for perfect foresight model with Benders decomposition.
-"""
-function write_outputs(case_path::AbstractString, stages::Stages, bd_results::BendersResults, ::PerfectForesight)
 
     settings = stages.settings
     stage_to_subproblem_map, _ = get_stage_to_subproblem_mapping(stages.systems)
 
     # get the flow results from the operational subproblems
     flow_df = collect_flow_results(stages, bd_results)
-    
+    num_stages = length(stages.systems);
     for (stage_idx, system) in enumerate(stages.systems)
         @info("Writing results for stage $stage_idx")
         ## Create results directory to store the results
-        results_dir = joinpath(case_path, "results_stage_$stage_idx")
+        if num_stages > 1
+            # Create a directory for each stage
+            results_dir = joinpath(case_path, "results_stage_$stage_idx")
+        else
+            # Create a directory for the single stage
+            results_dir = joinpath(case_path, "results")
+        end
         mkpath(results_dir)
 
         # subproblem indices for the current stage
@@ -1053,7 +994,7 @@ function write_outputs(case_path::AbstractString, stages::Stages, bd_results::Be
         write_stage_flows(results_dir, system, flow_df[subop_indices_stage])
         
         # Cost results
-        costs = prepare_costs_benders_multistage(system, bd_results, subop_indices_stage, settings, stage_idx)
+        costs = prepare_costs_benders(system, bd_results, subop_indices_stage, settings, stage_idx)
         write_costs(joinpath(results_dir, "costs.csv"), system, costs)
         write_discounted_costs(joinpath(results_dir, "discounted_costs.csv"), system, costs)
     end
@@ -1061,7 +1002,7 @@ function write_outputs(case_path::AbstractString, stages::Stages, bd_results::Be
     return nothing
 end
 
-function prepare_costs_benders_multistage(system::System, 
+function prepare_costs_benders(system::System, 
     bd_results::BendersResults, 
     subop_indices::Vector{Int64}, 
     settings::NamedTuple, 
@@ -1177,13 +1118,14 @@ function write_discounted_costs(
     file_path::AbstractString, 
     system::System, 
     model::Union{Model,NamedTuple};
+    stage_index::Int64=1,
     scaling::Float64=1.0, 
     drop_cols::Vector{<:AbstractString}=String[]
 )
     @info "Writing discounted costs to $file_path"
 
     # Get costs and determine layout (wide or long)
-    costs = get_optimal_discounted_costs(model; scaling)
+    costs = get_optimal_discounted_costs(model,stage_index; scaling)
     layout = get_output_layout(system, :Costs)
 
     if layout == "wide"
@@ -1197,16 +1139,16 @@ function write_discounted_costs(
     return nothing
 end
 
-function get_optimal_discounted_costs(model::Union{Model,NamedTuple}; scaling::Float64=1.0)
+function get_optimal_discounted_costs(model::Union{Model,NamedTuple}, stage_index::Int64; scaling::Float64=1.0)
     @debug " -- Getting optimal discounted costs for the system."
-    costs = prepare_discounted_costs(model, scaling)
+    costs = prepare_discounted_costs(model, stage_index, scaling)
     df = convert_to_dataframe(costs)
     df[!, (!isa).(eachcol(df), Vector{Missing})] # remove missing columns
 end
 
-function prepare_discounted_costs(model::Union{Model,NamedTuple}, scaling::Float64=1.0)
-    fixed_cost = value(model[:eDiscountedFixedCost])
-    variable_cost = value(model[:eDiscountedVariableCost])
+function prepare_discounted_costs(model::Union{Model,NamedTuple}, stage_index::Int64, scaling::Float64=1.0)
+    fixed_cost = value(model[:eDiscountedFixedCost][stage_index])
+    variable_cost = value(model[:eDiscountedVariableCost][stage_index])
     total_cost = fixed_cost + variable_cost
     OutputRow[
         OutputRow(

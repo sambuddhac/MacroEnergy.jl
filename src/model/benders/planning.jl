@@ -21,17 +21,10 @@ function initialize_planning_problem!(stages::Stages,opt::Dict)
     return planning_problem
 
 end
+
 function generate_planning_problem(stages::Stages)
-    generate_planning_problem(stages, expansion_mode(stages))
-end
 
-function generate_planning_problem(stages::Stages,::SingleStage)
-    generate_planning_problem(stages.systems[1])
-end
-
-function generate_planning_problem(stages::Stages,::PerfectForesight)
-
-    @info("Generating multistage planning problem with perfect foresight")
+    @info("Generating planning problem")
 
     systems = stages.systems
     settings = stages.settings
@@ -99,42 +92,6 @@ function generate_planning_problem(stages::Stages,::PerfectForesight)
 
     @expression(model, eDiscountedVariableCost[s in 1:number_of_stages], discount_factor[s] * opexmult[s] * sum(vTHETA[w] for w in stage_to_subproblem_map[s]))
     @expression(model, eApproximateVariableCost, sum(eDiscountedVariableCost[s] for s in 1:number_of_stages))
-
-    @objective(model, Min, model[:eFixedCost] + model[:eApproximateVariableCost])
-
-    @info(" -- Planning problem generation complete, it took $(time() - start_time) seconds")
-
-    return model
-
-end
-
-function generate_planning_problem(system::System)
-    @info("Generating planning problem for single stage expansion")
-
-    number_of_subproblems = length(system.time_data[:Electricity].subperiods);
-
-    start_time = time();
-
-    model = Model()
-
-    @variable(model, vREF == 1)
-
-    model[:eFixedCost] = AffExpr(0.0)
-
-    add_linking_variables!(system, model)
-
-    define_available_capacity!(system, model)
-
-    planning_model!(system, model)
-
-    #### Removing for now, needs more testing  
-    #### add_feasibility_constraints!(system, model)
-
-    model[:eAvailableCapacity] = get_available_capacity([system]);
-
-    @variable(model, vTHETA[w in 1:number_of_subproblems] .>= 0)
-
-    @expression(model,eApproximateVariableCost, sum(vTHETA[w] for w in 1:number_of_subproblems))
 
     @objective(model, Min, model[:eFixedCost] + model[:eApproximateVariableCost])
 

@@ -9,7 +9,6 @@ function load_stages_data(
     data = load_system_data(file_path, rel_path; lazy_load = lazy_load)
 
     # Convert a single stage system to a vector of stages 
-    # to unify the interface with multistage systems
     if !haskey(data, :stages)
         data = Dict(:stages => [data],
             :settings => default_stage_settings() # default stage settings: single stage, no discounting

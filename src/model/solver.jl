@@ -1,18 +1,16 @@
 function solve_stages(stages::Stages, opt::O) where O <: Union{Optimizer, Dict{Symbol, Dict{Symbol, Any}}}
-    solve_stages(stages, opt, expansion_mode(stages), solution_algorithm(stages))
+    solve_stages(stages, opt, solution_algorithm(stages))
 end
 
-####### single stage expansion and perfect foresight expansion #######
-# share the same model generation and optimization workflow
-function solve_stages(stages::Stages, opt::Optimizer, expansion::T, ::Monolithic) where T <: Union{SingleStage, PerfectForesight}
+function solve_stages(stages::Stages, opt::Optimizer, ::Monolithic)
 
-    @info("*** Running $(expansion) simulation ***")
+    @info("*** Running simulation with monolithic solver ***")
     
-    model = generate_model(stages, expansion)
+    model = generate_model(stages)
 
     set_optimizer(model, opt)
 
-    # for single stage and perfect foresight there is only one model
+    # For monolithic solution there is only one model
     # scale constraints if the flag is true in the first system
     if stages.systems[1].settings.ConstraintScaling
         @info "Scaling constraints and RHS"
@@ -58,10 +56,10 @@ function solve_stages(stages::Stages, opt::Optimizer, ::Myopic, ::Monolithic)
     return (stages, models)
 end
 
-####### Benders decomposition algorithm: solves either multistage with perfect foresight or single stage models #######
-function solve_stages(stages::Stages, opt::Dict{Symbol, Dict{Symbol, Any}}, expansion::T, ::Benders) where T <: Union{SingleStage, PerfectForesight}
+####### Benders decomposition algorithm #######
+function solve_stages(stages::Stages, opt::Dict{Symbol, Dict{Symbol, Any}}, ::Benders)
 
-    @info("*** Running $(expansion) simulation with Benders decomposition ***")
+    @info("*** Running simulation with Benders decomposition ***")
     bd_setup = stages.settings.BendersSettings
     systems = stages.systems;
 
@@ -78,8 +76,3 @@ function solve_stages(stages::Stages, opt::Dict{Symbol, Dict{Symbol, Any}}, expa
 
     return (stages, BendersResults(results, subproblems))
 end
-
-function solve_stages(stages::Stages, opt::Dict{Symbol, Dict{Symbol, Any}}, ::Myopic, ::Benders)
-    error("Myopic expansion is currently not supported with Benders decomposition. Please use Monolithic expansion instead.")
-end
-

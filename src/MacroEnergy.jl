@@ -61,21 +61,15 @@ abstract type PolicyConstraint <: OperationConstraint end
 abstract type PlanningConstraint <: AbstractTypeConstraint end
 
 ## Solution algorithms
-abstract type AbstractExpansionMode end
-struct Myopic <: AbstractExpansionMode end
-struct PerfectForesight <: AbstractExpansionMode end
-struct SingleStage <: AbstractExpansionMode end
-expansion_mode(::AbstractExpansionMode) = SingleStage() # default to single stage
-expansion_mode(::SingleStage) = SingleStage()
-expansion_mode(::Myopic) = Myopic()
-expansion_mode(::PerfectForesight) = PerfectForesight()
 
 abstract type AbstractSolutionAlgorithm end
 struct Benders <: AbstractSolutionAlgorithm end
 struct Monolithic <: AbstractSolutionAlgorithm end
-solution_algorithm(::AbstractExpansionMode) = Monolithic() # default to monolithic
+struct Myopic <: AbstractSolutionAlgorithm end
+solution_algorithm(::AbstractSolutionAlgorithm) = Monolithic() # default to monolithic
 solution_algorithm(::Benders) = Benders()
 solution_algorithm(::Monolithic) = Monolithic()
+solution_algorithm(::Myopic) = Myopic()
 
 # global constants
 const ME_DEPOT_PATH = joinpath(homedir(), ".macroenergy")
@@ -131,7 +125,6 @@ include("model/system.jl")
 include("model/stages.jl")
 include("model/networks/macroobject.jl")
 include("model/generate_model.jl")
-include("model/multistage.jl")
 include("model/optimizer.jl")
 include("model/scaling.jl")
 include("model/solver.jl")
