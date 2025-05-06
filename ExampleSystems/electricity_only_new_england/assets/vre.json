@@ -8,9 +8,7 @@
                 "edge": {
                     "unidirectional": true,
                     "has_capacity": true,
-                    "commodity": "Electricity",
-                    "lifetime": 20,
-                    "capital_recovery_period": 20
+                    "commodity": "Electricity"
                 }
             }
         },
@@ -31,7 +29,6 @@
                         "end_vertex": "elec_MA",
                         "investment_cost": 85300,
                         "variable_om_cost": 0,
-                        "wacc": 0.017,
                         "capacity_size": 1,
                         "availability": {
                             "timeseries": {
@@ -59,7 +56,6 @@
                         "end_vertex": "elec_CT",
                         "investment_cost": 97200,
                         "variable_om_cost": 0.1,
-                        "wacc": 0.024,
                         "capacity_size": 1,
                         "availability": {
                             "timeseries": {
@@ -87,7 +83,6 @@
                         "end_vertex": "elec_CT",
                         "investment_cost": 85300,
                         "variable_om_cost": 0,
-                        "wacc": 0.017,
                         "capacity_size": 1,
                         "availability": {
                             "timeseries": {
@@ -115,7 +110,6 @@
                         "end_vertex": "elec_ME",
                         "investment_cost": 97200,
                         "variable_om_cost": 0.1,
-                        "wacc": 0.024,
                         "capacity_size": 1,
                         "availability": {
                             "timeseries": {

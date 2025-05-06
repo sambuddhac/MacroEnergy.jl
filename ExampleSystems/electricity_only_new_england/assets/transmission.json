@@ -6,10 +6,7 @@
                 "elec_edge": {
                     "unidirectional": false,
                     "has_capacity": true,
-                    "commodity": "Electricity",
-                    "wacc": 0.062,
-                    "lifetime": 100,
-                    "capital_recovery_period": 30
+                    "commodity": "Electricity"
                 }
             }
         },

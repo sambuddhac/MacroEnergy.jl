@@ -2,18 +2,12 @@
     "elec_stor": {
         "global_data": {
             "storage": {
-                "commodity": "Electricity",
-                "wacc": 0.027,
-                "lifetime": 20,
-                "capital_recovery_period": 20
+                "commodity": "Electricity"
             },
             "edges": {
                 "discharge_edge": {
                     "unidirectional": true,
-                    "commodity": "Electricity",
-                    "wacc": 0.027,
-                    "lifetime": 20,
-                    "capital_recovery_period": 20
+                    "commodity": "Electricity"
                 },
                 "charge_edge": {
                     "unidirectional": true,
