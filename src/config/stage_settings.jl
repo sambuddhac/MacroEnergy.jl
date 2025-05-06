@@ -5,7 +5,7 @@ const BENDERS_SETTINGS_FILEPATH = "settings/benders_settings.json"
 function default_stage_settings()
     return Dict(
         :StageLengths => [1],
-        :WACC => 0.,
+        :DiscountRate => 0.,
         :ExpansionMode => "SingleStage",
         :SolutionAlgorithm => "Monolithic"
     )
@@ -129,7 +129,7 @@ end
 
 function validate_stage_settings(stage_settings::AbstractDict{Symbol,Any})
     @assert all(stage_settings[:StageLengths].>0)
-    @assert stage_settings[:WACC] >= 0
+    @assert stage_settings[:DiscountRate] >= 0
     @assert isa(stage_settings[:ExpansionMode], AbstractExpansionMode)
     @assert isa(stage_settings[:SolutionAlgorithm], AbstractSolutionAlgorithm)
 end

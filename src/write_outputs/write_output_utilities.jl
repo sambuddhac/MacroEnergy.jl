@@ -1161,12 +1161,12 @@ function compute_nominal_costs!(model::Model, system::System, settings::NamedTup
     compute_fixed_costs!(system, model)
 
     stage_lengths = collect(settings.StageLengths)
-    wacc = settings.WACC
+    discount_rate = settings.DiscountRate
     stage_index = system.time_data[:Electricity].stage_index;
 
     cum_years = sum(stage_lengths[i] for i in 1:stage_index-1; init=0);
-    discount_factor = 1/( (1 + wacc)^cum_years)
-    opexmult = sum([1 / (1 + wacc)^(i - 1) for i in 1:stage_lengths[stage_index]])
+    discount_factor = 1/( (1 + discount_rate)^cum_years)
+    opexmult = sum([1 / (1 + discount_rate)^(i - 1) for i in 1:stage_lengths[stage_index]])
 
     unregister(model,:eVariableCost)
     model[:eVariableCost] = model[:eDiscountedVariableCost][stage_index]/(discount_factor * opexmult);

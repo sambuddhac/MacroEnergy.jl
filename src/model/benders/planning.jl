@@ -82,11 +82,11 @@ function generate_planning_problem(stages::Stages,::PerfectForesight)
     #The settings are the same in all stages, we have a single settings file that gets copied into each system struct
     stage_lengths = collect(settings.StageLengths)
 
-    wacc = settings.WACC
+    discount_rate = settings.DiscountRate
 
     cum_years = [sum(stage_lengths[i] for i in 1:s-1; init=0) for s in 1:number_of_stages];
 
-    discount_factor = 1 ./ ( (1 + wacc) .^ cum_years)
+    discount_factor = 1 ./ ( (1 + discount_rate) .^ cum_years)
 
     @expression(model, eDiscountedFixedCost[s in 1:number_of_stages], discount_factor[s] * fixed_cost[s])
     @expression(model, eFixedCost, sum(eDiscountedFixedCost[s] for s in 1:number_of_stages))
@@ -95,7 +95,7 @@ function generate_planning_problem(stages::Stages,::PerfectForesight)
 
     @variable(model, vTHETA[w in subproblem_indices] .>= 0)
 
-    opexmult = [sum([1 / (1 + wacc)^(i - 1) for i in 1:stage_lengths[s]]) for s in 1:number_of_stages]
+    opexmult = [sum([1 / (1 + discount_rate)^(i - 1) for i in 1:stage_lengths[s]]) for s in 1:number_of_stages]
 
     @expression(model, eDiscountedVariableCost[s in 1:number_of_stages], discount_factor[s] * opexmult[s] * sum(vTHETA[w] for w in stage_to_subproblem_map[s]))
     @expression(model, eApproximateVariableCost, sum(eDiscountedVariableCost[s] for s in 1:number_of_stages))

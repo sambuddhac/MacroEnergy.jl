@@ -162,17 +162,17 @@ function generate_model(stages::Stages, ::PerfectForesight)
     #The settings are the same in all stages, we have a single settings file that gets copied into each system struct
     stage_lengths = collect(settings.StageLengths)
 
-    wacc = settings.WACC
+    discount_rate = settings.DiscountRate
 
     cum_years = [sum(stage_lengths[i] for i in 1:s-1; init=0) for s in 1:number_of_stages];
 
-    discount_factor = 1 ./ ( (1 + wacc) .^ cum_years)
+    discount_factor = 1 ./ ( (1 + discount_rate) .^ cum_years)
 
     @expression(model, eDiscountedFixedCost[s in 1:number_of_stages], discount_factor[s] * fixed_cost[s])
 
     @expression(model, eFixedCost, sum(eDiscountedFixedCost[s] for s in 1:number_of_stages))
 
-    opexmult = [sum([1 / (1 + wacc)^(i - 1) for i in 1:stage_lengths[s]]) for s in 1:number_of_stages]
+    opexmult = [sum([1 / (1 + discount_rate)^(i - 1) for i in 1:stage_lengths[s]]) for s in 1:number_of_stages]
 
     @expression(model, eDiscountedVariableCost[s in 1:number_of_stages], discount_factor[s] * opexmult[s] * variable_cost[s])
 
@@ -303,7 +303,7 @@ function discount_fixed_costs!(y::Union{AbstractEdge,AbstractStorage},settings::
 
     y.investment_cost = investment_cost(y) * sum(1 / (1 + wacc(y))^s for s in 1:payment_years_remaining; init=0);
     
-    opexmult = sum([1 / (1 + settings.WACC)^(i - 1) for i in 1:settings.StageLengths[stage_index(y)]])
+    opexmult = sum([1 / (1 + settings.DiscountRate)^(i - 1) for i in 1:settings.StageLengths[stage_index(y)]])
 
     y.fixed_om_cost = fixed_om_cost(y) * opexmult
 
@@ -332,7 +332,7 @@ function undo_discount_fixed_costs!(y::Union{AbstractEdge,AbstractStorage},setti
     model_years_remaining = sum(settings.StageLengths[stage_index(y):end]; init = 0);
     payment_years_remaining = min(capital_recovery_period(y), model_years_remaining);
     y.investment_cost = investment_cost(y) / sum(1 / (1 + wacc(y))^s for s in 1:payment_years_remaining; init=0);
-    opexmult = sum([1 / (1 + settings.WACC)^(i - 1) for i in 1:settings.StageLengths[stage_index(y)]])
+    opexmult = sum([1 / (1 + settings.DiscountRate)^(i - 1) for i in 1:settings.StageLengths[stage_index(y)]])
     y.fixed_om_cost = fixed_om_cost(y) / opexmult
 end
 function undo_discount_fixed_costs!(g::Transformation,settings::NamedTuple)
