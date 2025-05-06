@@ -128,6 +128,7 @@ include("model/generate_model.jl")
 include("model/optimizer.jl")
 include("model/scaling.jl")
 include("model/solver.jl")
+include("model/myopic.jl")
 include_all_in_folder("model/constraints")
 include_all_in_folder("model/benders")
 

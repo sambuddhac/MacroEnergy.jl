@@ -143,6 +143,8 @@ function set_solution_algorithm!(stage_settings::AbstractDict{Symbol,Any})
         stage_settings[:SolutionAlgorithm] = Monolithic()
     elseif stage_settings[:SolutionAlgorithm] == "Benders"
         stage_settings[:SolutionAlgorithm] = Benders()
+    elseif stage_settings[:SolutionAlgorithm] == "Myopic"
+        stage_settings[:SolutionAlgorithm] = Myopic()
     else
         @warn("No solution algorithm specified, defaulting to Monolithic")
         stage_settings[:SolutionAlgorithm] = Monolithic()

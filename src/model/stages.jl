@@ -34,7 +34,10 @@ end
 function prepare_stages!(systems::Vector{System}, settings::NamedTuple)
     for (stage_id, system) in enumerate(systems)
         @info("Discounting fixed costs for stage $(stage_id)")
-        discount_fixed_costs!(system, settings)
+        if !isa(solution_algorithm(settings[:SolutionAlgorithm]), Myopic)
+            ### Note that myopic simulations do not use discount factors
+            discount_fixed_costs!(system, settings)
+        end
         @info("Computing retirement stages for stage $(stage_id)")
         compute_retirement_stage!(system, settings[:StageLengths])
     end

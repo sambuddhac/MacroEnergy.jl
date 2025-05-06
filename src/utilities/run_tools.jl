@@ -2,7 +2,7 @@
 function run_case(
     case_path::AbstractString=@__DIR__;
     lazy_load::Bool=true,
-    # Monolithic
+    # Monolithic or Myopic
     optimizer::DataType=HiGHS.Optimizer,
     optimizer_env::Any=missing,
     optimizer_attributes::Tuple=("BarConvTol" => 1e-3, "Crossover" => 0, "Method" => 2),
@@ -17,13 +17,13 @@ function run_case(
     stages = load_stages(case_path; lazy_load=lazy_load)
 
     # Create optimizer based on solution algorithm
-    optimizer = if isa(solution_algorithm(stages), Monolithic)
+    optimizer = if isa(solution_algorithm(stages), Monolithic) || isa(solution_algorithm(stages), Myopic)
         create_optimizer(optimizer, optimizer_env, optimizer_attributes)
     elseif isa(solution_algorithm(stages), Benders)
         create_optimizer_benders(planning_optimizer, subproblem_optimizer,
             planning_optimizer_attributes, subproblem_optimizer_attributes)
     else
-        error("The solution algorithm is not Monolithic or Benders. Please double check the `SolutionAlgorithm` in the `settings/stage_settings.json` file.")
+        error("The solution algorithm is not Monolithic, Myopic, or Benders. Please double check the `SolutionAlgorithm` in the `settings/stage_settings.json` file.")
     end
 
     # If Benders, create processes for subproblems optimization

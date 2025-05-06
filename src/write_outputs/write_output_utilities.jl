@@ -935,10 +935,9 @@ function write_outputs(results_dir::AbstractString, system::System, model::Model
     return nothing
 end
 
-function write_outputs(case_path::AbstractString, stages::Stages, model::Union{Model, Vector{Model}})
-    write_outputs(case_path, stages, model)
-end
-
+"""
+Write results when using Monolithic as solution algorithm.
+"""
 function write_outputs(case_path::AbstractString, stages::Stages, model::Model)
     num_stages = length(stages.systems)
     for s in 1:num_stages
@@ -955,6 +954,28 @@ function write_outputs(case_path::AbstractString, stages::Stages, model::Model)
         mkpath(results_dir)
         write_outputs(results_dir, stages.systems[s], model)
         write_discounted_costs(joinpath(results_dir, "discounted_costs.csv"), stages.systems[s], model; stage_index=s)
+    end
+
+    return nothing
+end
+
+"""
+Write results when using Myopic as solution algorithm. Note that myopic simulations do not use discount factors so the costs in the JuMP model are already nominal costs.
+"""
+function write_outputs(case_path::AbstractString, stages::Stages, myopic_results::MyopicResults)
+    num_stages = length(stages.systems)
+    for s in 1:num_stages
+        @info("Writing results for stage $s")
+        ## Create results directory to store the results
+        if num_stages > 1
+            # Create a directory for each stage
+            results_dir = joinpath(case_path, "results_stage_$s")
+        else
+            # Create a directory for the single stage
+            results_dir = joinpath(case_path, "results")
+        end
+        mkpath(results_dir)
+        write_outputs(results_dir, stages.systems[s], myopic_results.models[s])
     end
 
     return nothing
