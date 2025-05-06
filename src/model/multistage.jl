@@ -210,50 +210,6 @@ function prepare_discounted_costs(model::Union{Model,NamedTuple}, scaling::Float
     ]
 end
 
-function add_age_based_retirements!(a::AbstractAsset,model::Model)
-
-    for t in fieldnames(typeof(a))
-        y = getfield(a, t)
-        if isa(y,AbstractEdge) || isa(y,Storage)
-            if y.retirement_stage > 0
-                push!(y.constraints, AgeBasedRetirementConstraint())
-                add_model_constraint!(y.constraints[end], y, model)
-            end
-        end
-    end
-
-end
-
-#### All new capacity built up to the retirement stage must retire in the current stage
-function get_retirement_stage(cur_stage::Int,lifetime::Int,stage_lengths::Vector{Int})
-
-    return maximum(filter(r -> sum(stage_lengths[t] for t in r+1:cur_stage; init=0) >= lifetime,1:cur_stage-1);init=0)
-
-end
-
-function compute_retirement_stage!(system::System, stage_lengths::Vector{Int})
-    
-    for a in system.assets
-        compute_retirement_stage!(a, stage_lengths)
-    end
-
-    return nothing
-end
-
-function compute_retirement_stage!(a::AbstractAsset, stage_lengths::Vector{Int})
-
-    for t in fieldnames(typeof(a))
-        y = getfield(a, t)
-        
-        if :retirement_stage ∈ Base.fieldnames(typeof(y))
-            if can_retire(y)
-                y.retirement_stage = get_retirement_stage(stage_index(y),lifetime(y),stage_lengths)
-            end
-        end
-    end
-
-    return nothing
-end
 
 """
 Evaluate the expression `expr` for a specific stage using operational subproblem solutions.
