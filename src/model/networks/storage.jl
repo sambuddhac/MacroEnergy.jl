@@ -234,8 +234,8 @@ end
 Base.@kwdef mutable struct LongDurationStorage{T} <: AbstractStorage{T}
     @AbstractVertexBaseAttributes()
     @AbstractStorageBaseAttributes()
-    storage_initial::Union{JuMPVariable,Vector{AffExpr},Vector{Float64}}= Vector{VariableRef}()
-    storage_change::Union{JuMPVariable,Vector{AffExpr},Vector{Float64}} = Vector{VariableRef}()
+    storage_initial::Union{JuMPVariable,Dict{Int64,Float64}}= Vector{VariableRef}()
+    storage_change::Union{JuMPVariable,Dict{Int64,Float64}} = Vector{VariableRef}()
 end
 storage_initial(g::LongDurationStorage) = g.storage_initial;
 storage_initial(g::LongDurationStorage, r::Int64) = g.storage_initial[r];
@@ -347,11 +347,15 @@ function operation_model!(g::LongDurationStorage, model::Model)
         error("A storage vertex requires to have a balance named :storage")
     end
 
-    subperiod_end = Dict(w => last(get_subperiod(g, w)) for w in subperiod_indices(g));
+    newcon = LongDurationStorageChangeConstraint();
+    add_model_constraint!(newcon, g, model)
+    push!(g.constraints, newcon)
 
-    @constraint(model, [w in subperiod_indices(g)], 
-        storage_initial(g, w) ==  storage_level(g,subperiod_end[w]) - storage_change(g, w)
-    )
+    # subperiod_end = Dict(w => last(get_subperiod(g, w)) for w in subperiod_indices(g));
+
+    # @constraint(model, [w in subperiod_indices(g)], 
+    #     storage_initial(g, w) ==  storage_level(g,subperiod_end[w]) - storage_change(g, w)
+    # )
 
 end
 
