@@ -19,7 +19,8 @@ function default_benders_settings()
         :StabDynamic => false,
         :IntegerInvestment => false,
         :Distributed => false,
-        :IncludeAutomaticSlackPenalty => false,
+        :ExpectFeasibleSubproblems => false,
+        :IncludeSubproblemSlacksAutomatically => false
     )
 end
 
