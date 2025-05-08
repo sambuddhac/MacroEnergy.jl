@@ -11,33 +11,33 @@ Pages = [
 Depth = 2
 ```
 
-## [User Guide](@ref)
+## [User Guides](@ref)
 ```@contents
 Pages = [
-    "User Guide/1_sectors.md",
-    "User Guide/2_input_data.md",
-    "User Guide/assets/1_introduction.md",
-    "User Guide/4_constraints.md",
-    "User Guide/5_output.md"
+    "Guides/User Guide/1_sectors.md",
+    "Guides/User Guide/2_input_data.md",
+    "Guides/User Guide/assets/1_introduction.md",
+    "Guides/User Guide/4_constraints.md",
+    "Guides/User Guide/5_output.md"
 ]
 Depth = 2
 ```
 
-## [Modeler Guide](@ref)
+## [Modeler Guides](@ref)
 ```@contents
 Pages = [
-    "Modeler Guide/1_introduction.md",
-    "Modeler Guide/2_build_sectors.md",
-    "Modeler Guide/3_create_example_case.md"
+    "Guides/Modeler Guide/1_introduction.md",
+    "Guides/Modeler Guide/2_build_sectors.md",
+    "Guides/Modeler Guide/3_create_example_case.md"
 ]
 Depth = 2
 ```
 
-## [Developer Guide](@ref)
+## [Developer Guides](@ref)
 ```@contents
 Pages = [
-    "Developer Guide/1_introduction.md",
-    "Developer Guide/2_type_hierarchy.md",
+    "Guides/Developer Guide/1_introduction.md",
+    "Guides/Developer Guide/2_type_hierarchy.md",
 ]
 Depth = 2
 ```

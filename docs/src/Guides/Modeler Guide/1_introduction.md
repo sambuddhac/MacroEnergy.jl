@@ -1,4 +1,4 @@
-# Modeler Guide - Overview
+# Modeler Guides
 
 This section of the documentation is designed to provide an overview of the internal representation of **Locations** and **Assets** to help modelers create new sectors and assets. 
 
