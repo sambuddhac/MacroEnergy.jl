@@ -1,5 +1,5 @@
 
-# Running Macro
+# Tutorial: Running Macro
 
 !!! note "Interactive Notebook"
     The interactive version of this tutorial can be found [here](https://github.com/macroenergy/Macro/tree/main/tutorials/tutorial_2_running_macro.ipynb).

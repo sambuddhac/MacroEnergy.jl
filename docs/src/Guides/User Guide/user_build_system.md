@@ -57,5 +57,5 @@ You now need to populate you System with Locations, Assets, Policies, and other 
 - [Adding a Node to a System](@ref)
 - [Adding a Location to a System](@ref)
 - [Adding an Asset to a System](@ref)
-- [Adding policy Constraints to a System](@ref)
+- [Adding Policy Constraints to a System](@ref)
 - [Adding Asset Constraints to a System](@ref)
