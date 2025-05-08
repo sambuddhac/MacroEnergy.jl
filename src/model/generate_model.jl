@@ -17,37 +17,37 @@ function generate_model(stages::Stages)
     fixed_cost = Dict()
     variable_cost = Dict()
 
-    for s in 1:number_of_stages
+    for (stage_idx,system) in enumerate(systems)
 
-        @info(" -- Stage $s")
+        @info(" -- Stage $stage_idx")
 
         model[:eFixedCost] = AffExpr(0.0)
         model[:eVariableCost] = AffExpr(0.0)
 
         @info(" -- Adding linking variables")
-        add_linking_variables!(systems[s], model) 
+        add_linking_variables!(system, model) 
 
         @info(" -- Defining available capacity")
-        define_available_capacity!(systems[s], model)
+        define_available_capacity!(system, model)
 
         @info(" -- Generating planning model")
-        planning_model!(systems[s], model)
+        planning_model!(system, model)
 
         @info(" -- Including age-based retirements")
-        add_age_based_retirements!.(systems[s].assets, model)
+        add_age_based_retirements!.(system.assets, model)
 
-        if s < number_of_stages
-            @info(" -- Available capacity in stage $(s) is being carried over to stage $(s+1)")
-            carry_over_capacities!(systems[s+1], systems[s])
+        if stage_idx < number_of_stages
+            @info(" -- Available capacity in stage $(stage_idx) is being carried over to stage $(stage_idx+1)")
+            carry_over_capacities!(systems[stage_idx+1], system)
         end
 
         @info(" -- Generating operational model")
-        operation_model!(systems[s], model)
+        operation_model!(system, model)
 
-        fixed_cost[s] = model[:eFixedCost];
+        fixed_cost[stage_idx] = model[:eFixedCost];
 	    unregister(model,:eFixedCost)
 
-        variable_cost[s] = model[:eVariableCost];
+        variable_cost[stage_idx] = model[:eVariableCost];
         unregister(model,:eVariableCost)
 
     end
