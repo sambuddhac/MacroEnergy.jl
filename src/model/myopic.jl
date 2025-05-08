@@ -7,9 +7,8 @@ function run_myopic_iteration!(stages::Stages, opt::Optimizer)
     number_of_stages = length(systems)
 
     models = Vector{Model}(undef, number_of_stages)
-    for s in 1:number_of_stages
-        system = systems[s];
-        @info(" -- Generating model for stage $(s)")
+    for (stage_idx,system) in enumerate(systems)
+        @info(" -- Generating model for stage $(stage_idx)")
         model = Model()
 
         @variable(model, vREF == 1)
@@ -33,20 +32,20 @@ function run_myopic_iteration!(stages::Stages, opt::Optimizer)
         @objective(model, Min, model[:eFixedCost] + model[:eVariableCost])
 
         @info(" -- Including age-based retirements")
-        add_age_based_retirements!.(systems[s].assets, model)
+        add_age_based_retirements!.(system.assets, model)
 
         set_optimizer(model, opt)
 
-        scale_constraints!(systems[s], model)
+        scale_constraints!(system, model)
 
         optimize!(model)
 
-        if s < number_of_stages
-            @info(" -- Final capacity in stage $(s) is being carried over to stage $(s+1)")
-            carry_over_capacities!(systems[s+1], systems[s], perfect_foresight=false)
+        if stage_idx < number_of_stages
+            @info(" -- Final capacity in stage $(stage_idx) is being carried over to stage $(stage_idx+1)")
+            carry_over_capacities!(systems[stage_idx+1], system, perfect_foresight=false)
         end
 
-        models[s] = model
+        models[stage_idx] = model
     end
 
     return models
