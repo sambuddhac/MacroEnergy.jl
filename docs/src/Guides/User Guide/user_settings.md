@@ -1,4 +1,5 @@
 # Configuring Settings
+
 Macro provides various settings that allow the user to customize model runs and control specific features.
 
 These are the steps to configure settings:
