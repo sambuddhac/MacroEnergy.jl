@@ -943,6 +943,7 @@ function write_outputs(case_path::AbstractString, stages::Stages, model::Model)
     for s in 1:num_stages
         @info("Writing results for stage $s")
         compute_nominal_costs!(model, stages.systems[s], stages.settings)
+
         ## Create results directory to store the results
         if num_stages > 1
             # Create a directory for each stage
@@ -1015,7 +1016,7 @@ function write_outputs(case_path::AbstractString, stages::Stages, bd_results::Be
         write_stage_flows(results_dir, system, flow_df[subop_indices_stage])
         
         # Cost results
-        costs = prepare_costs_benders(system, bd_results, subop_indices_stage, settings, stage_idx)
+        costs = prepare_costs_benders(system, bd_results, subop_indices_stage, settings)
         write_costs(joinpath(results_dir, "costs.csv"), system, costs)
         write_discounted_costs(joinpath(results_dir, "discounted_costs.csv"), system, costs)
     end
@@ -1026,25 +1027,24 @@ end
 function prepare_costs_benders(system::System, 
     bd_results::BendersResults, 
     subop_indices::Vector{Int64}, 
-    settings::NamedTuple, 
-    stage_idx::Int
-)
+    settings::NamedTuple
+    )
     planning_problem = bd_results.planning_problem
     subop_sol = bd_results.subop_sol
     planning_variable_values = bd_results.planning_sol.values
 
     compute_nominal_costs!(planning_problem, system, settings)
 
-    # Evaluate the fixed cost expressions in the planning problem. Note that this expression has been modified 
+    # Evaluate the fixed cost expressions in the planning problem. Note that this expression has been re-built
     # in compute_nominal_costs! to utilize undiscounted costs and the Benders planning solutions that are 
     # stored in system. So, no need to re-evaluate the expression on planning_variable_values.
     fixed_cost = value(planning_problem[:eFixedCost])
     # Evaluate the discounted fixed cost expression on the Benders planning solutions
-    discounted_fixed_cost = value(x -> planning_variable_values[name(x)], planning_problem[:eDiscountedFixedCost][stage_idx])
+    discounted_fixed_cost = value(x -> planning_variable_values[name(x)], planning_problem[:eDiscountedFixedCost])
 
     # evaluate the variable cost expressions using the subproblem solutions
     variable_cost = evaluate_vtheta_in_expression(planning_problem, :eVariableCost, subop_sol, subop_indices)
-    discounted_variable_cost = evaluate_vtheta_in_expression(planning_problem, :eDiscountedVariableCost, subop_sol, subop_indices, stage_idx)
+    discounted_variable_cost = evaluate_vtheta_in_expression(planning_problem, :eDiscountedVariableCost, subop_sol, subop_indices)
 
     return (
         eFixedCost = fixed_cost,
@@ -1116,22 +1116,25 @@ end
 
 function compute_nominal_costs!(model::Model, system::System, settings::NamedTuple)
     
-    undo_discount_fixed_costs!(system, settings)
-
-    unregister(model,:eFixedCost)
-    model[:eFixedCost] = AffExpr(0.0)
-    compute_fixed_costs!(system, model)
-
     stage_lengths = collect(settings.StageLengths)
     discount_rate = settings.DiscountRate
     stage_index = system.time_data[:Electricity].stage_index;
+    
+    unregister(model,:eDiscountedFixedCost)
+    model[:eDiscountedFixedCost] = model[:eFixedCostByStage][stage_index]
+
+    undo_discount_fixed_costs!(system, settings)
+    unregister(model,:eFixedCost)
+    model[:eFixedCost] = AffExpr(0.0)
+    compute_fixed_costs!(system, model)
 
     cum_years = sum(stage_lengths[i] for i in 1:stage_index-1; init=0);
     discount_factor = 1/( (1 + discount_rate)^cum_years)
     opexmult = sum([1 / (1 + discount_rate)^(i - 1) for i in 1:stage_lengths[stage_index]])
 
-    unregister(model,:eVariableCost)
-    model[:eVariableCost] = model[:eDiscountedVariableCost][stage_index]/(discount_factor * opexmult);
+    unregister(model,:eDiscountedVariableCost)
+    model[:eDiscountedVariableCost] = model[:eVariableCostByStage][stage_index]
+    model[:eVariableCost] = model[:eVariableCostByStage][stage_index]/(discount_factor * opexmult);
 
 end
 
@@ -1168,8 +1171,8 @@ function get_optimal_discounted_costs(model::Union{Model,NamedTuple}, stage_inde
 end
 
 function prepare_discounted_costs(model::Union{Model,NamedTuple}, stage_index::Int64, scaling::Float64=1.0)
-    fixed_cost = value(model[:eDiscountedFixedCost][stage_index])
-    variable_cost = value(model[:eDiscountedVariableCost][stage_index])
+    fixed_cost = value(model[:eDiscountedFixedCost])
+    variable_cost = value(model[:eDiscountedVariableCost])
     total_cost = fixed_cost + variable_cost
     OutputRow[
         OutputRow(
@@ -1226,12 +1229,11 @@ Evaluate the expression `expr` for a specific stage using operational subproblem
 - `expr::Symbol`: The expression to evaluate
 - `subop_sol::Dict`: Dictionary mapping subproblem indices to their operational costs
 - `subop_indices::Vector{Int64}`: The subproblem indices to evaluate
-- `stage_index::Int64`: The stage to evaluate
 
 # Returns
 The evaluated expression for the specified stage 
 """
-function evaluate_vtheta_in_expression(m::Model, expr::Symbol, subop_sol::Dict, subop_indices::Vector{Int64}, stage_index::Union{Int64,Nothing}=nothing)
+function evaluate_vtheta_in_expression(m::Model, expr::Symbol, subop_sol::Dict, subop_indices::Vector{Int64})
     @assert haskey(m, expr)
     
     # Create mapping from theta variables to their operational costs for this stage
@@ -1241,9 +1243,6 @@ function evaluate_vtheta_in_expression(m::Model, expr::Symbol, subop_sol::Dict, 
     )
     
     # Evaluate the expression `expr` using the mapping
-    if isnothing(stage_index)
-        return value(x -> theta_to_cost[x], m[expr])
-    else
-        return value(x -> theta_to_cost[x], m[expr][stage_index])
-    end
+    return value(x -> theta_to_cost[x], m[expr])
+    
 end

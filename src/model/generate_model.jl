@@ -61,15 +61,15 @@ function generate_model(stages::Stages)
 
     discount_factor = 1 ./ ( (1 + discount_rate) .^ cum_years)
 
-    @expression(model, eDiscountedFixedCost[s in 1:number_of_stages], discount_factor[s] * fixed_cost[s])
+    @expression(model, eFixedCostByStage[s in 1:number_of_stages], discount_factor[s] * fixed_cost[s])
 
-    @expression(model, eFixedCost, sum(eDiscountedFixedCost[s] for s in 1:number_of_stages))
+    @expression(model, eFixedCost, sum(eFixedCostByStage[s] for s in 1:number_of_stages))
 
     opexmult = [sum([1 / (1 + discount_rate)^(i - 1) for i in 1:stage_lengths[s]]) for s in 1:number_of_stages]
 
-    @expression(model, eDiscountedVariableCost[s in 1:number_of_stages], discount_factor[s] * opexmult[s] * variable_cost[s])
+    @expression(model, eVariableCostByStage[s in 1:number_of_stages], discount_factor[s] * opexmult[s] * variable_cost[s])
 
-    @expression(model, eVariableCost, sum(eDiscountedVariableCost[s] for s in 1:number_of_stages))
+    @expression(model, eVariableCost, sum(eVariableCostByStage[s] for s in 1:number_of_stages))
 
     @objective(model, Min, model[:eFixedCost] + model[:eVariableCost])
 
