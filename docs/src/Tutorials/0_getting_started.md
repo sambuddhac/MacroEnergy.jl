@@ -5,7 +5,7 @@
 
 This tutorial will guide you through the steps to install Macro, a solver, and all the necessary dependencies.
 
-## Installation
+## Installing Macro
 Before installing Macro, make sure you have the following requirements installed:
 
 - **Julia**: you can download it [here](https://julialang.org/downloads/). 

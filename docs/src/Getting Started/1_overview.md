@@ -1,42 +1,76 @@
 # Getting Started
 
-**Macro version 0.1.0**
+This getting started guides aims to help you:
 
-## High-level Macro Design
+- [Understand how you can use Macro](@ref "How can I use Macro?")
+- [Get a high-level understanding of how real-world systems are modeled in Macro](@ref "How are real-world systems represented in Macro?")
+- [Install Macro](@ref "Installation")
+- [Expore the files included with Macro](@ref "What is in the Macro repo?")
+- [Run your first case](@ref "Running Macro")
+
+## How can I use Macro?
+
+ToDo: give some examples of how planning + dispatch models can be used.
+
+## Example workflows
+
+### Optimizing an energy system
+
+Creating and running a model with Macro can be done without knowing Julia programming. A typical workflow with Macro consists of the following:
+
+1. Collect the data required for your model, including supply and demand of different commodities, and cost and perforamnce data for available production and storage Assets.
+2. [Create a Macro System](@ref "Creating a new System") and add the Assets and Locations required to represent your real-world system. Import your data into your System.
+3. [Add policy constraints to your System.](@ref "Adding policy Constraints to a System")
+4. [Configure the settings for your System.](@ref "Configure Macro Settings")
+5. [Run your case](@ref "Run a Macro Model"), to optimize the design and operation of your System.
+6. Analyze the results.
+
+From there you might run a sensitivity study on your results by changing some of your input data, adding or removing an Asset, or changing one of System policies.
+
+### Adding a new sector
+
+While Macro includes a variety of sector models and Assets; representing real-world production, storage, and transport technologies; you may want to create new Assets or sectors for your project. Doing so will require some Julia programming, but no detailed knowledge of the packages underlying Macro.
+
+To create a new sector, you will need to:
+
+1. Create any new Commodities that your sector will require. These Comodities can be energy, material, data, or flows which are important in your new sector.
+2. Create new Assets to represent production, storage, transport, and end-use technologies in your sector. At least some of these should produce, store, transport, and consume your new Commodities.
+3. Assign default inputs for your Assets and specifiy which inputs are optional vs. required.
+
+## Helpful packages
+
+There are several packages we recommend to improve the speed and quality of your work with Macro.
+
+[MacroEnergySolvers.jl](https://github.com/macroenergy/MacroEnergySolvers.jl) : includes several advanced algorithms for solving Macro models. This includes decompositions, multi-stage models, and sensitivity studies.
+
+[MacroEnergyScaling.jl](https://github.com/macroenergy/MacroEnergyScaling.jl) : can be used to improve the numerical stability of Macro models, improving runtime and the accuracy of your results.
+
+[The manual includes more details on these and other useful packages.](@ref "Related Packages")
+
+Please let us know if you are working on something (Julia-based or otherwise) which could be included in this list!
+
+## How are real-world systems represented in Macro?
 
 ### Multi-commodity flow network
 
-Macro is designed to represent energy systems in a detailed manner, capturing interactions among various sectors and technologies. At high level, the model is structured as a **multi-commodity flow network**, with each commodity having independent spatial and temporal scale. The three main components of the model are:
+Macro Systems are **multi-commodity flow networkscxds**. Commodities can be energy, material, data, or other products of interest. Macro Systems consist of Vertices; where Commodities are produced, stored, and consumed; and Edges, which Commodities can flow along. With just these few elements, you can model complex real-world systems using Macro.
 
-1. **Locations**
-2. **Assets**
-
-### Energy system components
+While you could describe your real-world system in terms of Macro Vertices and Edges, such a system would be quite abstract and unintuitive. Therefore, Macro allows you to build your System from **Locations** and **Assets**. These are collections of Vertices and Edges which correspond more closely to elements of read-world systems.
 
 #### 1. Locations
 
-They represent geographical locations, containing the **demand** or **supply** (node) for different commodities. In the current version of Macro, each location can only contain a single node per commodity type. 
-Adding locations to a system is straightforward, the user only needs to specify a list of names in the `locations.json` input file. For example:
+Locations represent geographic places. They are made up of Nodes, which each carry one Commodity and can be used to define external **supply** and **demand** of that Commodity. Each location can only contain a single Node for each Commodity.
 
-```json
-"locations": [
-    "SE",
-    "MIDAT",
-    "NE"
-]
-```
-
-Users can add nodes of different commodity types to a location using the `nodes.json` input file. This file also contains the parameters specifying the time series of the commodity demand/supply at each node, price for non-served demand, commodity type and location. Please refer to the [Macro Input Data](@ref) section for more details.
+To add a Locations to a System, you must [define the constituent Nodes](@ref "Adding a Node to a System") and [add the Location to list of Locations.](@ref "Adding a Location to a System"). These two links will take you to the Guides on how to do both tasks.
 
 #### 2. Assets
 
-Assets in Macro represent generic **technologies** at a specific location that transforms, transports or stores one or more commodities. Macro has a rich library of assets already modelled, including power lines, pipelines, power plants, electrolyzers, vres, etc.
-Each asset is characterized by a set of parameters, including the list of commodities they take as input and output, as well as all the technical and economic parameters that characterize the technology and regulate the conversion processes.
+Assets in Macro represent means of producing, storing, transporting, and consuming one or more Commodities. Assets can be sited at a Location, so your Macro System will intuitively represent real-world systems. Each Asset is characterized a list of Commodities they take as input and output and technical and economic parameters.
 
-!!! note
-    Pipelines and power lines connecting locations are also considered assets as they can transport, store and transform/compress commodities.
+Macro has a rich library of Assets already designed and implemented. [You can also create your own Assets.](@ref "Creating a New Asset") These can be used just for your project or you can [add it to Macro for others to use](@ref "How to contribute guide").
 
-Examples of assets are (see [Macro Asset Library](@ref) for a list of all the assets available in Macro):
+Some examples of of assets are:
+
 - Pipelines or power lines
 - Power plants (e.g. natural gas/coal/nuclear power plants with and without carbon capture)
 - Batteries and hydrogen storage
@@ -47,6 +81,7 @@ Examples of assets are (see [Macro Asset Library](@ref) for a list of all the as
 - Pumped hydro storage
 - Biorefineries
 
+!!! note
+    Pipelines and power lines connecting locations are also considered assets as they can transport, store and transform/compress commodities.
 
-
-
+The [Macro Asset Library](@ref) contains the list of all Assets available in Macro.
