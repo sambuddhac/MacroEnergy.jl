@@ -104,6 +104,7 @@ end
 """
     make(::Type{ThermalPowerCCS}, data::AbstractDict{Symbol, Any}, system::System) -> ThermalPowerCCS
 """
+
 function make(asset_type::Type{ThermalPowerCCS}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 

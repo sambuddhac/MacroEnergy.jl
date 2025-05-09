@@ -98,6 +98,7 @@ end
 """
     make(::Type{ThermalPower}, data::AbstractDict{Symbol, Any}, system::System) -> ThermalPower
 """
+
 function make(asset_type::Type{ThermalPower}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 
