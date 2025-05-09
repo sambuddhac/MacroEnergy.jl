@@ -18,7 +18,7 @@ function default_data(t::Type{FuelsEndUse}, id=missing, style="full")
 end
 
 function full_default_data(::Type{FuelsEndUse}, id=missing)
-    return Dict{Symbol, Any}(
+    return OrderedDict{Symbol,Any}(
         :id => id,
         :transforms => @transform_data(
             :timedata => "LiquidFuels",
@@ -44,7 +44,7 @@ function full_default_data(::Type{FuelsEndUse}, id=missing)
 end
 
 function simple_default_data(::Type{FuelsEndUse}, id=missing)
-    return Dict{Symbol, Any}(
+    return OrderedDict{Symbol,Any}(
         :id => id,
         :location => missing,
         :co2_sink => missing,

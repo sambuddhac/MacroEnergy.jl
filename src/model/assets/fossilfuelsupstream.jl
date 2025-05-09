@@ -33,7 +33,7 @@ function default_data(t::Type{FossilFuelsUpstream}, id=missing, style="full")
 end
     
 function full_default_data(::Type{FossilFuelsUpstream}, id=missing)
-    return Dict{Symbol,Any}(
+    return OrderedDict{Symbol,Any}(
         :id => id,
         :transforms => @transform_data(
             :timedata => "LiquidFuels",
@@ -58,7 +58,7 @@ function full_default_data(::Type{FossilFuelsUpstream}, id=missing)
 end
 
 function simple_default_data(::Type{FossilFuelsUpstream}, id=missing)
-    return Dict{Symbol,Any}(
+    return OrderedDict{Symbol,Any}(
         :id => id,
         :location => missing,
         :emission_rate => 0.0,
