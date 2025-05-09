@@ -153,17 +153,17 @@ function template_asset(assets_dir::AbstractString, asset_type::Type{T}; asset_n
         asset_commodity = asset_type_info.parameter
         set_commodity!(asset_type, asset_commodity, asset_data[:instance_data][1])
     end
-    if format == "json"
+    if lowercase(format) == "json"
         filepath = find_available_filepath(joinpath(assets_dir, "$asset_name.json"))
         write_json(filepath, Dict{Symbol,Any}(Symbol(asset_name) => asset_data))
-    elseif format == "csv"
+    elseif lowercase(format) == "csv"
         filepath = find_available_filepath(joinpath(assets_dir, "$asset_name.csv"))
         csv_data = json_to_csv(Dict{Symbol,Any}(Symbol(asset_name) => asset_data))
         for (_, data) in csv_data.asset_data
             write_csv(filepath, DataFrame(data))
         end
     else
-        error("Unsupported format: $format. Supported formats are $(input_formats())")
+        error("Unsupported format: $format. Supported formats are $(@input_formats())")
     end
     return nothing
 end
