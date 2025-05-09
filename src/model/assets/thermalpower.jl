@@ -79,10 +79,25 @@ function simple_default_data(::Type{ThermalPower}, id=missing)
     )
 end
 
+function set_commodity!(::Type{ThermalPower}, commodity::Type{<:Commodity}, data::AbstractDict{Symbol,Any})
+    edge_keys = [:fuel_edge]
+    if haskey(data, :fuel_commodity)
+        data[:fuel_commodity] = string(commodity)
+    end
+    if haskey(data, :edges)
+        for edge_key in edge_keys
+            if haskey(data[:edges], edge_key)
+                if haskey(data[:edges][edge_key], :commodity)
+                    data[:edges][edge_key][:commodity] = string(commodity)
+                end
+            end
+        end
+    end
+end
+
 """
     make(::Type{ThermalPower}, data::AbstractDict{Symbol, Any}, system::System) -> ThermalPower
 """
-
 function make(asset_type::Type{ThermalPower}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 

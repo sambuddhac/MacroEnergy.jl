@@ -84,6 +84,22 @@ function simple_default_data(::Type{ThermalHydrogen}, id=missing)
     )
 end
 
+function set_commodity!(::Type{ThermalHydrogen}, commodity::Type{<:Commodity}, data::AbstractDict{Symbol,Any})
+    edge_keys = [:fuel_edge]
+    if haskey(data, :fuel_commodity)
+        data[:fuel_commodity] = string(commodity)
+    end
+    if haskey(data, :edges)
+        for edge_key in edge_keys
+            if haskey(data[:edges], edge_key)
+                if haskey(data[:edges][edge_key], :commodity)
+                    data[:edges][edge_key][:commodity] = string(commodity)
+                end
+            end
+        end
+    end
+end
+
 """
     make(::Type{ThermalHydrogen}, data::AbstractDict{Symbol, Any}, system::System) -> ThermalHydrogen
 

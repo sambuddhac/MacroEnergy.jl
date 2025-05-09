@@ -68,6 +68,25 @@ function simple_default_data(::Type{FossilFuelsUpstream}, id=missing)
     )
 end
 
+function set_commodity!(::Type{FossilFuelsUpstream}, commodity::Type{<:Commodity}, data::AbstractDict{Symbol,Any})
+    edge_keys = [:fossil_fuel_edge, :fuel_edge, :co2_edge]
+    if haskey(data, :fuel_commodity)
+        data[:fuel_commodity] = string(commodity)
+    end
+    if haskey(data, :fossil_fuel_commodity)
+        data[:fossil_fuel_commodity] = string(commodity)
+    end
+    if haskey(data, :edges)
+        for edge_key in edge_keys
+            if haskey(data[:edges], edge_key)
+                if haskey(data[:edges][edge_key], :commodity)
+                    data[:edges][edge_key][:commodity] = string(commodity)
+                end
+            end
+        end
+    end
+end
+
 function make(asset_type::Type{FossilFuelsUpstream}, data::AbstractDict{Symbol,Any}, system::System)
     id = AssetId(data[:id])
 
