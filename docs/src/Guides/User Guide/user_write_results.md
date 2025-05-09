@@ -182,7 +182,7 @@ Users can specify a custom base path for the output directory:
 
 ```julia
 output_path = create_output_path(system, "path/to/output")
-write_capacity(joinpath(output_path, "capacity.csv", system)) # Creates /path/to/output/results/capacity.csv
+write_capacity(joinpath(output_path, "capacity.csv"), system) # Creates /path/to/output/results/capacity.csv
 ```
 
 In this case, the function creates a directory named according to the `OutputDir` setting (e.g., `results`) within your specified path (e.g., `path/to/output/results`).
