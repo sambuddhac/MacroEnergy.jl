@@ -942,7 +942,7 @@ function write_outputs(case_path::AbstractString, case::Case, model::Model)
     num_periods = length(case.periods)
     for s in 1:num_periods
         @info("Writing results for period $s")
-        compute_nominal_costs!(model, case.periods[s], case.settings)
+        compute_undiscounted_costs!(model, case.periods[s], case.settings)
 
         ## Create results directory to store the results
         if num_periods > 1
@@ -961,7 +961,7 @@ function write_outputs(case_path::AbstractString, case::Case, model::Model)
 end
 
 """
-Write results when using Myopic as solution algorithm. Note that myopic simulations do not use discount factors so the costs in the JuMP model are already nominal costs.
+Write results when using Myopic as solution algorithm. Note that myopic simulations do not use discount factors so the costs in the JuMP model are already undiscounted costs.
 """
 function write_outputs(case_path::AbstractString, case::Case, myopic_results::MyopicResults)
     num_periods = length(case.periods)
@@ -1033,10 +1033,10 @@ function prepare_costs_benders(system::System,
     subop_sol = bd_results.subop_sol
     planning_variable_values = bd_results.planning_sol.values
 
-    compute_nominal_costs!(planning_problem, system, settings)
+    compute_undiscounted_costs!(planning_problem, system, settings)
 
     # Evaluate the fixed cost expressions in the planning problem. Note that this expression has been re-built
-    # in compute_nominal_costs! to utilize undiscounted costs and the Benders planning solutions that are 
+    # in compute_undiscounted_costs! to utilize undiscounted costs and the Benders planning solutions that are 
     # stored in system. So, no need to re-evaluate the expression on planning_variable_values.
     fixed_cost = value(planning_problem[:eFixedCost])
     # Evaluate the discounted fixed cost expression on the Benders planning solutions
@@ -1114,7 +1114,7 @@ function get_local_expressions(optimal_getter::Function, subproblems_local::Vect
     return expr_df
 end
 
-function compute_nominal_costs!(model::Model, system::System, settings::NamedTuple)
+function compute_undiscounted_costs!(model::Model, system::System, settings::NamedTuple)
     
     period_lengths = collect(settings.PeriodLengths)
     discount_rate = settings.DiscountRate
