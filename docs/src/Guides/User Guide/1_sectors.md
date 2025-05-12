@@ -13,7 +13,7 @@ The Macro model is designed to represent the energy system in a detailed manner,
 - **Biomass**
 - **Uranium**
 
-As seen in the [High-level Macro Design](@ref), the energy system is modeled as a *multi-plex network* — a multi-layered network that connects different sectors, and the key components that this network are:
+As seen in the High-level Macro Design, the energy system is modeled as a *multi-plex network* — a multi-layered network that connects different sectors, and the key components that this network are:
 
 1. **Locations**: Represent geographical locations, each associated with a commodity type.
 2. **Demand and supply nodes**: Represent the demand or supply of a commodity at a specific location.

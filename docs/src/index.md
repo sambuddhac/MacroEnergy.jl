@@ -23,6 +23,20 @@ The main features of Macro include:
 - Tailored **Benders decomposition** framework for optimization.
 - **Open-source** built using Julia and JuMP.
 
+## Structure of the documentation
+
+The documentation contains five main sections:
+
+- **[Getting Started](@ref)**: How to install Macro and run your first cases
+
+- **[Tutorials](@ref)**: Long-form guides with worked examples, intended to help you learn how to use Macro
+
+- **[Guides](@ref)**: Short guides which walk you through how to achieve specific tasks, intended to be a day-to-day reference when working with Macro
+
+- **[Manual](@ref)**: A detailed description of Macro's components and features
+
+- **[Reference](@ref "References")**: A function reference for Macro's API
+
 ## Macro development strategy
 
 Macro is a very flexible tool for modelling energy systems. However, that flexibility also means the core architecture and functions are complex and difficult to use correctly.
@@ -31,16 +45,4 @@ To make Macro as useful and accessible to the widest audience possible we design
 
 ![Macro architecture](./images/macro_abstr_layers.png)
 
-The following sections of the documentation are designed to serve the different needs of the different users.
-
-## Structure of the documentation
-
-- ### [Getting Started](@ref)
-
-- ### [User Guide](@ref)
-
-- ### [Modeler Guide](@ref)
-
-- ### [Developer Guide](@ref)
-
-## [Table of contents](@ref)
+Due to these abstractions, users and modelers will be able to achieve their goals without needing to understand every aspect of Macro. The [guides section](@ref "Guides") of the documentation has guides for users, modelers, and developers.

@@ -1,6 +1,6 @@
 # Macro
 
-**Macro** is a bottom-up, multi-sectoral infrastructure optimization model for macro-energy systems. It co-optimizes the design and operation of user-defined models of multi-sector energy systems and networks. Macro allows users to explore the impact of energy policies, technology types, costs, and performance, demand patterns, and other factors on an energy system as a whole and as separate sectors.
+**Macro** is a bottom-up, multi-sectoral infrastructure optimization model for macro-energy systems. It co-optimizes the design and operation of user-defined models of multi-sector energy systems and networks. Macro allows users to explore the impact of changing energy policies, technologies, demand patterns, and other factors on an energy system as a whole and as separate sectors.
 
 ## Features
 
@@ -21,7 +21,7 @@ We are working to publish a peer-reviewed paper describing Macro. In the meantim
 
 ```bibtex
 @misc{Macro2025,
-   author = {Ruaridh Macdonald and Filippo Pecci and Luca Bonaldo and Jun We Law and Yu Weng and Sambuddha Chakrabarti and Dharik Mallapragada and Jesse Jenkins},
+   author = {Ruaridh Macdonald and Filippo Pecci and Luca Bonaldo and Jun Wen Law and Yu Weng and Sambuddha Chakrabarti and Dharik Mallapragada and Jesse Jenkins},
    month = {5},
    title = {MacroEnergy.jl},
    url = {https://github.com/macroenergy/MacroEnergy.jl},
@@ -33,7 +33,7 @@ We are working to publish a peer-reviewed paper describing Macro. In the meantim
 
 Macro is not currently released as a Julia package, so must be downloaded and installed manually.
 
-To install Macro, please follow the installation instructions in the documentation, [on the Getting Started / Installation page.](https://macroenergy.github.io/MacroEnergy.jl/dev/Getting%20Started/2_installation.html)
+To install Macro, please follow the installation instructions in the documentation, [on the Getting Started / Installation page.](https://macroenergy.github.io/MacroEnergy.jl/dev/Getting%20Started/2_installation/)
 
 ## Learning to use Macro
 
