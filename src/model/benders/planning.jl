@@ -35,7 +35,7 @@ function generate_planning_problem(case::Case)
 
     @variable(model, vREF == 1)
 
-    number_of_case = length(periods)
+    number_of_periods = length(periods)
 
     fixed_cost = Dict()
 
@@ -57,7 +57,7 @@ function generate_planning_problem(case::Case)
         @info(" -- Including age-based retirements")
         add_age_based_retirements!.(system.assets, model)
 
-        if period_idx < number_of_case
+        if period_idx < number_of_periods
             @info(" -- Available capacity in period $(period_idx) is being carried over to period $(period_idx+1)")
             carry_over_capacities!(periods[period_idx+1], system)
         end
@@ -74,21 +74,21 @@ function generate_planning_problem(case::Case)
 
     discount_rate = settings.DiscountRate
 
-    cum_years = [sum(period_lengths[i] for i in 1:s-1; init=0) for s in 1:number_of_case];
+    cum_years = [sum(period_lengths[i] for i in 1:s-1; init=0) for s in 1:number_of_periods];
 
     discount_factor = 1 ./ ( (1 + discount_rate) .^ cum_years)
 
-    @expression(model, eFixedCostByPeriod[s in 1:number_of_case], discount_factor[s] * fixed_cost[s])
-    @expression(model, eFixedCost, sum(eFixedCostByPeriod[s] for s in 1:number_of_case))
+    @expression(model, eFixedCostByPeriod[s in 1:number_of_periods], discount_factor[s] * fixed_cost[s])
+    @expression(model, eFixedCost, sum(eFixedCostByPeriod[s] for s in 1:number_of_periods))
 
     period_to_subproblem_map, subproblem_indices = get_period_to_subproblem_mapping(periods);
 
     @variable(model, vTHETA[w in subproblem_indices] .>= 0)
 
-    opexmult = [sum([1 / (1 + discount_rate)^(i - 1) for i in 1:period_lengths[s]]) for s in 1:number_of_case]
+    opexmult = [sum([1 / (1 + discount_rate)^(i - 1) for i in 1:period_lengths[s]]) for s in 1:number_of_periods]
 
-    @expression(model, eVariableCostByPeriod[s in 1:number_of_case], discount_factor[s] * opexmult[s] * sum(vTHETA[w] for w in period_to_subproblem_map[s]))
-    @expression(model, eApproximateVariableCost, sum(eVariableCostByPeriod[s] for s in 1:number_of_case))
+    @expression(model, eVariableCostByPeriod[s in 1:number_of_periods], discount_factor[s] * opexmult[s] * sum(vTHETA[w] for w in period_to_subproblem_map[s]))
+    @expression(model, eApproximateVariableCost, sum(eVariableCostByPeriod[s] for s in 1:number_of_periods))
 
     @objective(model, Min, model[:eFixedCost] + model[:eApproximateVariableCost])
 

@@ -12,7 +12,7 @@ function generate_model(case::Case)
 
     @variable(model, vREF == 1)
 
-    number_of_case = length(periods)
+    number_of_periods = length(periods)
 
     fixed_cost = Dict()
     variable_cost = Dict()
@@ -36,7 +36,7 @@ function generate_model(case::Case)
         @info(" -- Including age-based retirements")
         add_age_based_retirements!.(system.assets, model)
 
-        if period_idx < number_of_case
+        if period_idx < number_of_periods
             @info(" -- Available capacity in period $(period_idx) is being carried over to period $(period_idx+1)")
             carry_over_capacities!(periods[period_idx+1], system)
         end
@@ -57,19 +57,19 @@ function generate_model(case::Case)
 
     discount_rate = settings.DiscountRate
 
-    cum_years = [sum(period_lengths[i] for i in 1:s-1; init=0) for s in 1:number_of_case];
+    cum_years = [sum(period_lengths[i] for i in 1:s-1; init=0) for s in 1:number_of_periods];
 
     discount_factor = 1 ./ ( (1 + discount_rate) .^ cum_years)
 
-    @expression(model, eFixedCostByPeriod[s in 1:number_of_case], discount_factor[s] * fixed_cost[s])
+    @expression(model, eFixedCostByPeriod[s in 1:number_of_periods], discount_factor[s] * fixed_cost[s])
 
-    @expression(model, eFixedCost, sum(eFixedCostByPeriod[s] for s in 1:number_of_case))
+    @expression(model, eFixedCost, sum(eFixedCostByPeriod[s] for s in 1:number_of_periods))
 
-    opexmult = [sum([1 / (1 + discount_rate)^(i) for i in 1:period_lengths[s]]) for s in 1:number_of_case]
+    opexmult = [sum([1 / (1 + discount_rate)^(i) for i in 1:period_lengths[s]]) for s in 1:number_of_periods]
 
-    @expression(model, eVariableCostByPeriod[s in 1:number_of_case], discount_factor[s] * opexmult[s] * variable_cost[s])
+    @expression(model, eVariableCostByPeriod[s in 1:number_of_periods], discount_factor[s] * opexmult[s] * variable_cost[s])
 
-    @expression(model, eVariableCost, sum(eVariableCostByPeriod[s] for s in 1:number_of_case))
+    @expression(model, eVariableCost, sum(eVariableCostByPeriod[s] for s in 1:number_of_periods))
 
     @objective(model, Min, model[:eFixedCost] + model[:eVariableCost])
 
@@ -159,8 +159,8 @@ end
 #### All new capacity built up to the retirement period must retire in the current period
 ### Key assumption: all capacity decisions are taken at the very beggining of the period.
 ### Example: Consider four periods of lengths [5,5,5,5] and technology with a lifetime of 15 years. 
-### All capacity built in period 1 will have at most 10 years at the start of period 3.
-### In period 4 we will have to retire all new capacity built up until period get_retirement_period(4,15,[5,5,5,5])=1
+### All capacity built in period 1 will have at most 10 years old at the start of period 3, so no age based retirement will be needed.
+### In period 4 we will have to retire at least all new capacity built up until period get_retirement_period(4,15,[5,5,5,5])=1
 function get_retirement_period(cur_period::Int,lifetime::Int,period_lengths::Vector{Int})
 
     return maximum(filter(r -> sum(period_lengths[t] for t in r:cur_period-1; init=0) >= lifetime,1:cur_period-1);init=0)
