@@ -10,8 +10,8 @@ function generate_case(
 )::Case
 
     case = periods_data[:case]
-    num_case = length(case)
-    @info("Running system generation for $num_case case")
+    num_periods = length(case)
+    @info("Running system generation for $num_periods periods")
     
     start_time = time()
     periods::Vector{System} = map(1:num_case) do period_idx
@@ -33,9 +33,9 @@ end
 
 function prepare_case!(periods::Vector{System}, settings::NamedTuple)
     for (period_id, system) in enumerate(periods)
-        @info("Discounting fixed costs for period $(period_id)")
-        if !isa(solution_algorithm(settings[:SolutionAlgorithm]), Myopic)
+        if !isa(solution_algorithm(settings[:SolutionAlgorithm]), Myopic) && length(periods) > 1
             ### Note that myopic simulations do not use discount factors
+            @info("Discounting fixed costs for period $(period_id)")
             discount_fixed_costs!(system, settings)
         end
         @info("Computing retirement case for period $(period_id)")
