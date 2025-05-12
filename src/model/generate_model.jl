@@ -157,9 +157,13 @@ function add_age_based_retirements!(a::AbstractAsset,model::Model)
 end
 
 #### All new capacity built up to the retirement period must retire in the current period
+### Key assumption: all capacity decisions are taken at the very beggining of the period.
+### Example: Consider four periods of lengths [5,5,5,5] and technology with a lifetime of 15 years. 
+### All capacity built in period 1 will have at most 10 years at the start of period 3.
+### In period 4 we will have to retire all new capacity built up until period get_retirement_period(4,15,[5,5,5,5])=1
 function get_retirement_period(cur_period::Int,lifetime::Int,period_lengths::Vector{Int})
 
-    return maximum(filter(r -> sum(period_lengths[t] for t in r+1:cur_period; init=0) >= lifetime,1:cur_period-1);init=0)
+    return maximum(filter(r -> sum(period_lengths[t] for t in r:cur_period-1; init=0) >= lifetime,1:cur_period-1);init=0)
 
 end
 
