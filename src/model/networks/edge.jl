@@ -41,7 +41,8 @@ macro AbstractEdgeBaseAttributes()
         startup_fuel_consumption::Float64 = $edge_defaults[:startup_fuel_consumption]
         startup_fuel_balance_id::Symbol = $edge_defaults[:startup_fuel_balance_id]
         retirement_period::Int64 = $edge_defaults[:retirement_period]
-        wacc::Float64 = $edge_defaults[:wacc]
+        wacc::Float64 = settings.DiscountRate
+        annualized_investment_cost::Float64 = 0.0
     end)
 end
 
@@ -67,7 +68,7 @@ end
     - flow::Union{JuMPVariable,Vector{Float64}}: Flow of commodity `T` through the edge at each timestep
     - has_capacity::Bool: Whether the edge has capacity variables
     - integer_decisions::Bool: Whether capacity decisions must be integer
-    - investment_cost::Float64: Cost per unit of new capacity
+    - investment_cost::Float64: CAPEX per unit of new capacity
     - loss_fraction::Float64: Fraction of flow lost during transmission
     - max_capacity::Float64: Maximum allowed capacity
     - min_capacity::Float64: Minimum required capacity
@@ -199,6 +200,7 @@ retirement_period(e::AbstractEdge) = e.retirement_period;
 start_vertex(e::AbstractEdge)::AbstractVertex = e.start_vertex;
 variable_om_cost(e::AbstractEdge) = e.variable_om_cost;
 wacc(e::AbstractEdge) = e.wacc;
+annualized_investment_cost(e::AbstractEdge) = e.annualized_investment_cost;
 ##### End of Edge interface #####
 
 function add_linking_variables!(e::AbstractEdge, model::Model)
@@ -263,6 +265,8 @@ function planning_model!(e::AbstractEdge, model::Model)
 
     end
 
+    e.annualized_investment_cost = investment_cost(e) * wacc(e) / (1 - (1 + wacc(e))^-capital_recovery_period(e))
+
     compute_fixed_costs!(e, model)
 
     return nothing
@@ -274,7 +278,7 @@ function compute_fixed_costs!(e::AbstractEdge, model::Model)
         if can_expand(e)
             add_to_expression!(
                     model[:eFixedCost],
-                    investment_cost(e),
+                    annualized_investment_cost(e),
                     new_capacity(e),
                 )
         end

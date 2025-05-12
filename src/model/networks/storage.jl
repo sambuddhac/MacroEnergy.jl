@@ -32,7 +32,8 @@ macro AbstractStorageBaseAttributes()
         retirement_period::Int64 = $storage_defaults[:retirement_period]
         retired_units::Union{Missing, JuMPVariable} = missing
         storage_level::JuMPVariable = Vector{VariableRef}()
-        wacc::Float64 = $storage_defaults[:wacc]
+        wacc::Float64 = settings.DiscountRate
+        annualized_investment_cost::Float64 = 0.0
     end)
 end
 
@@ -58,7 +59,7 @@ end
     - discharge_edge::Union{Nothing,AbstractEdge}: `Edge` representing discharging flow
     - existing_capacity::Float64: Initial installed storage capacity
     - fixed_om_cost::Float64: Fixed operation and maintenance costs
-    - investment_cost::Float64: Cost per unit of new storage capacity
+    - investment_cost::Float64: CAPEX per unit of new storage capacity
     - loss_fraction::Float64: Fraction of stored commodity lost at each timestep
     - max_capacity::Float64: Maximum allowed storage capacity
     - max_duration::Float64: Maximum storage duration in hours
@@ -152,7 +153,7 @@ spillage_edge(g::AbstractStorage) = g.spillage_edge;
 storage_level(g::AbstractStorage) = g.storage_level;
 storage_level(g::AbstractStorage, t::Int64) = storage_level(g)[t];
 wacc(g::AbstractStorage) = g.wacc;
-
+annualized_investment_cost(g::AbstractStorage) = g.annualized_investment_cost;
 
 function add_linking_variables!(g::Storage, model::Model)
     if has_capacity(g)
@@ -193,6 +194,8 @@ function planning_model!(g::Storage, model::Model)
     if !g.can_retire
         fix(retired_units(g), 0.0; force = true)
     end
+
+    g.annualized_investment_cost = investment_cost(g) * wacc(g) / (1 - (1 + wacc(g))^-capital_recovery_period(g))
 
     compute_fixed_costs!(g, model)
 
@@ -292,6 +295,8 @@ function planning_model!(g::LongDurationStorage, model::Model)
         fix(retired_units(g), 0.0; force = true)
     end
 
+    g.annualized_investment_cost = investment_cost(g) * wacc(g) / (1 - (1 + wacc(g))^-capital_recovery_period(g))
+
     compute_fixed_costs!(g, model)
 
     @constraint(model, retired_capacity(g) <= existing_capacity(g))
@@ -364,7 +369,7 @@ function compute_fixed_costs!(g::AbstractStorage, model::Model)
         if can_expand(g)
             add_to_expression!(
                     model[:eFixedCost],
-                    investment_cost(g),
+                    annualized_investment_cost(g),
                     new_capacity(g),
                 )
         end
