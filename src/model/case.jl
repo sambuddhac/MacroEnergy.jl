@@ -14,7 +14,7 @@ function generate_case(
     @info("Running system generation for $num_periods periods")
     
     start_time = time()
-    periods::Vector{System} = map(1:num_case) do period_idx
+    periods::Vector{System} = map(1:num_periods) do period_idx
         system_data = case[period_idx]
         system_data[:time_data][:PeriodIndex] = period_idx
         period_system = empty_system(dirname(path))
