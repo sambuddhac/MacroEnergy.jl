@@ -6,17 +6,17 @@ end
 
 function add_model_constraint!(ct::AgeBasedRetirementConstraint, y::Union{AbstractEdge,AbstractStorage}, model::Model)
     
-    curr_stage = stage_index(y);
-    ret_stage = retirement_stage(y);
+    curr_period = period_index(y);
+    ret_period = retirement_period(y);
 
-    if ret_stage==0
-        #### None of the capacity built in previous stages reaches its end of life before the current stage
+    if ret_period==0
+        #### None of the capacity built in previous case reaches its end of life before the current period
         return nothing
     else
-        #### All new capacity built up to the retirement stage must retire in the current stage
+        #### All new capacity built up to the retirement period must retire in the current period
         ct.constraint_ref = @constraint(
             model, 
-            sum(new_capacity_track(y,k) for k=1:ret_stage) <= sum(retired_capacity_track(y,k) for k=1:curr_stage)
+            sum(new_capacity_track(y,k) for k=1:ret_period) <= sum(retired_capacity_track(y,k) for k=1:curr_period)
         )
         
     end

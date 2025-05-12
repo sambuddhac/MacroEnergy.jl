@@ -938,23 +938,23 @@ end
 """
 Write results when using Monolithic as solution algorithm.
 """
-function write_outputs(case_path::AbstractString, stages::Stages, model::Model)
-    num_stages = length(stages.systems)
-    for s in 1:num_stages
-        @info("Writing results for stage $s")
-        compute_nominal_costs!(model, stages.systems[s], stages.settings)
+function write_outputs(case_path::AbstractString, case::Case, model::Model)
+    num_case = length(case.periods)
+    for s in 1:num_case
+        @info("Writing results for period $s")
+        compute_nominal_costs!(model, case.periods[s], case.settings)
 
         ## Create results directory to store the results
-        if num_stages > 1
-            # Create a directory for each stage
-            results_dir = joinpath(case_path, "results_stage_$s")
+        if num_case > 1
+            # Create a directory for each period
+            results_dir = joinpath(case_path, "results_period_$s")
         else
-            # Create a directory for the single stage
+            # Create a directory for the single period
             results_dir = joinpath(case_path, "results")
         end
         mkpath(results_dir)
-        write_outputs(results_dir, stages.systems[s], model)
-        write_discounted_costs(joinpath(results_dir, "discounted_costs.csv"), stages.systems[s], model; stage_index=s)
+        write_outputs(results_dir, case.periods[s], model)
+        write_discounted_costs(joinpath(results_dir, "discounted_costs.csv"), case.periods[s], model; period_index=s)
     end
 
     return nothing
@@ -963,20 +963,20 @@ end
 """
 Write results when using Myopic as solution algorithm. Note that myopic simulations do not use discount factors so the costs in the JuMP model are already nominal costs.
 """
-function write_outputs(case_path::AbstractString, stages::Stages, myopic_results::MyopicResults)
-    num_stages = length(stages.systems)
-    for s in 1:num_stages
-        @info("Writing results for stage $s")
+function write_outputs(case_path::AbstractString, case::Case, myopic_results::MyopicResults)
+    num_case = length(case.periods)
+    for s in 1:num_case
+        @info("Writing results for period $s")
         ## Create results directory to store the results
-        if num_stages > 1
-            # Create a directory for each stage
-            results_dir = joinpath(case_path, "results_stage_$s")
+        if num_case > 1
+            # Create a directory for each period
+            results_dir = joinpath(case_path, "results_period_$s")
         else
-            # Create a directory for the single stage
+            # Create a directory for the single period
             results_dir = joinpath(case_path, "results")
         end
         mkpath(results_dir)
-        write_outputs(results_dir, stages.systems[s], myopic_results.models[s])
+        write_outputs(results_dir, case.periods[s], myopic_results.models[s])
     end
 
     return nothing
@@ -985,38 +985,38 @@ end
 """
 Write results when using Benders as solution algorithm.
 """
-function write_outputs(case_path::AbstractString, stages::Stages, bd_results::BendersResults)
+function write_outputs(case_path::AbstractString, case::Case, bd_results::BendersResults)
 
-    settings = stages.settings
-    stage_to_subproblem_map, _ = get_stage_to_subproblem_mapping(stages.systems)
+    settings = case.settings
+    period_to_subproblem_map, _ = get_period_to_subproblem_mapping(case.periods)
 
     # get the flow results from the operational subproblems
-    flow_df = collect_flow_results(stages, bd_results)
-    num_stages = length(stages.systems);
-    for (stage_idx, system) in enumerate(stages.systems)
-        @info("Writing results for stage $stage_idx")
+    flow_df = collect_flow_results(case, bd_results)
+    num_case = length(case.periods);
+    for (period_idx, system) in enumerate(case.periods)
+        @info("Writing results for period $period_idx")
         ## Create results directory to store the results
-        if num_stages > 1
-            # Create a directory for each stage
-            results_dir = joinpath(case_path, "results_stage_$stage_idx")
+        if num_case > 1
+            # Create a directory for each period
+            results_dir = joinpath(case_path, "results_period_$period_idx")
         else
-            # Create a directory for the single stage
+            # Create a directory for the single period
             results_dir = joinpath(case_path, "results")
         end
         mkpath(results_dir)
 
-        # subproblem indices for the current stage
-        subop_indices_stage = stage_to_subproblem_map[stage_idx]
+        # subproblem indices for the current period
+        subop_indices_period = period_to_subproblem_map[period_idx]
 
-        # Note: system has been updated with the capacity values in planning_solution at the end of function solve_stages
+        # Note: system has been updated with the capacity values in planning_solution at the end of function solve_case
         # Capacity results
         write_capacity(joinpath(results_dir, "capacity.csv"), system)
 
         # Flow results
-        write_stage_flows(results_dir, system, flow_df[subop_indices_stage])
+        write_period_flows(results_dir, system, flow_df[subop_indices_period])
         
         # Cost results
-        costs = prepare_costs_benders(system, bd_results, subop_indices_stage, settings)
+        costs = prepare_costs_benders(system, bd_results, subop_indices_period, settings)
         write_costs(joinpath(results_dir, "costs.csv"), system, costs)
         write_discounted_costs(joinpath(results_dir, "discounted_costs.csv"), system, costs)
     end
@@ -1057,8 +1057,8 @@ end
 """
 Collect flow results from all subproblems, handling distributed case.
 """
-function collect_flow_results(stages::Stages, bd_results::BendersResults)
-    if stages.settings.BendersSettings[:Distributed]
+function collect_flow_results(case::Case, bd_results::BendersResults)
+    if case.settings.BendersSettings[:Distributed]
         return collect_distributed_flows(bd_results)
     else
         return collect_local_flows(bd_results)
@@ -1091,7 +1091,7 @@ function collect_local_flows(bd_results::BendersResults)
 end
 
 
-function write_stage_flows(results_dir::AbstractString, system::System, flow_dfs::Vector{DataFrame})
+function write_period_flows(results_dir::AbstractString, system::System, flow_dfs::Vector{DataFrame})
     file_path = joinpath(results_dir, "flows.csv")
     @info("Writing flow results to $file_path")
     flow_results = reduce(vcat, flow_dfs)
@@ -1116,25 +1116,25 @@ end
 
 function compute_nominal_costs!(model::Model, system::System, settings::NamedTuple)
     
-    stage_lengths = collect(settings.StageLengths)
+    period_lengths = collect(settings.PeriodLengths)
     discount_rate = settings.DiscountRate
-    stage_index = system.time_data[:Electricity].stage_index;
+    period_index = system.time_data[:Electricity].period_index;
     
     unregister(model,:eDiscountedFixedCost)
-    model[:eDiscountedFixedCost] = model[:eFixedCostByStage][stage_index]
+    model[:eDiscountedFixedCost] = model[:eFixedCostByPeriod][period_index]
 
     undo_discount_fixed_costs!(system, settings)
     unregister(model,:eFixedCost)
     model[:eFixedCost] = AffExpr(0.0)
     compute_fixed_costs!(system, model)
 
-    cum_years = sum(stage_lengths[i] for i in 1:stage_index-1; init=0);
+    cum_years = sum(period_lengths[i] for i in 1:period_index-1; init=0);
     discount_factor = 1/( (1 + discount_rate)^cum_years)
-    opexmult = sum([1 / (1 + discount_rate)^(i - 1) for i in 1:stage_lengths[stage_index]])
+    opexmult = sum([1 / (1 + discount_rate)^(i - 1) for i in 1:period_lengths[period_index]])
 
     unregister(model,:eDiscountedVariableCost)
-    model[:eDiscountedVariableCost] = model[:eVariableCostByStage][stage_index]
-    model[:eVariableCost] = model[:eVariableCostByStage][stage_index]/(discount_factor * opexmult);
+    model[:eDiscountedVariableCost] = model[:eVariableCostByPeriod][period_index]
+    model[:eVariableCost] = model[:eVariableCostByPeriod][period_index]/(discount_factor * opexmult);
 
 end
 
@@ -1142,14 +1142,14 @@ function write_discounted_costs(
     file_path::AbstractString, 
     system::System, 
     model::Union{Model,NamedTuple};
-    stage_index::Int64=1,
+    period_index::Int64=1,
     scaling::Float64=1.0, 
     drop_cols::Vector{<:AbstractString}=String[]
 )
     @info "Writing discounted costs to $file_path"
 
     # Get costs and determine layout (wide or long)
-    costs = get_optimal_discounted_costs(model,stage_index; scaling)
+    costs = get_optimal_discounted_costs(model,period_index; scaling)
     layout = get_output_layout(system, :Costs)
 
     if layout == "wide"
@@ -1163,14 +1163,14 @@ function write_discounted_costs(
     return nothing
 end
 
-function get_optimal_discounted_costs(model::Union{Model,NamedTuple}, stage_index::Int64; scaling::Float64=1.0)
+function get_optimal_discounted_costs(model::Union{Model,NamedTuple}, period_index::Int64; scaling::Float64=1.0)
     @debug " -- Getting optimal discounted costs for the system."
-    costs = prepare_discounted_costs(model, stage_index, scaling)
+    costs = prepare_discounted_costs(model, period_index, scaling)
     df = convert_to_dataframe(costs)
     df[!, (!isa).(eachcol(df), Vector{Missing})] # remove missing columns
 end
 
-function prepare_discounted_costs(model::Union{Model,NamedTuple}, stage_index::Int64, scaling::Float64=1.0)
+function prepare_discounted_costs(model::Union{Model,NamedTuple}, period_index::Int64, scaling::Float64=1.0)
     fixed_cost = value(model[:eDiscountedFixedCost])
     variable_cost = value(model[:eDiscountedVariableCost])
     total_cost = fixed_cost + variable_cost
@@ -1222,7 +1222,7 @@ end
 
 
 """
-Evaluate the expression `expr` for a specific stage using operational subproblem solutions.
+Evaluate the expression `expr` for a specific period using operational subproblem solutions.
 
 # Arguments
 - `m::Model`: JuMP model containing vTHETA variables and the expression `expr` to evaluate
@@ -1231,12 +1231,12 @@ Evaluate the expression `expr` for a specific stage using operational subproblem
 - `subop_indices::Vector{Int64}`: The subproblem indices to evaluate
 
 # Returns
-The evaluated expression for the specified stage 
+The evaluated expression for the specified period 
 """
 function evaluate_vtheta_in_expression(m::Model, expr::Symbol, subop_sol::Dict, subop_indices::Vector{Int64})
     @assert haskey(m, expr)
     
-    # Create mapping from theta variables to their operational costs for this stage
+    # Create mapping from theta variables to their operational costs for this period
     theta_to_cost = Dict(
         m[:vTHETA][w] => subop_sol[w].op_cost 
         for w in subop_indices

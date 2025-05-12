@@ -2,13 +2,13 @@ struct MyopicResults
     models::Vector{Model}
 end
 
-function run_myopic_iteration!(stages::Stages, opt::Optimizer)
-    systems = stages.systems
-    number_of_stages = length(systems)
+function run_myopic_iteration!(case::Case, opt::Optimizer)
+    periods = case.periods
+    number_of_case = length(periods)
 
-    models = Vector{Model}(undef, number_of_stages)
-    for (stage_idx,system) in enumerate(systems)
-        @info(" -- Generating model for stage $(stage_idx)")
+    models = Vector{Model}(undef, number_of_case)
+    for (period_idx,system) in enumerate(periods)
+        @info(" -- Generating model for period $(period_idx)")
         model = Model()
 
         @variable(model, vREF == 1)
@@ -40,12 +40,12 @@ function run_myopic_iteration!(stages::Stages, opt::Optimizer)
 
         optimize!(model)
 
-        if stage_idx < number_of_stages
-            @info(" -- Final capacity in stage $(stage_idx) is being carried over to stage $(stage_idx+1)")
-            carry_over_capacities!(systems[stage_idx+1], system, perfect_foresight=false)
+        if period_idx < number_of_case
+            @info(" -- Final capacity in period $(period_idx) is being carried over to period $(period_idx+1)")
+            carry_over_capacities!(periods[period_idx+1], system, perfect_foresight=false)
         end
 
-        models[stage_idx] = model
+        models[period_idx] = model
     end
 
     return models

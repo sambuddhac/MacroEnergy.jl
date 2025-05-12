@@ -1,8 +1,8 @@
 
-function generate_model(stages::Stages)
+function generate_model(case::Case)
 
-    systems = stages.systems
-    settings = stages.settings
+    periods = case.periods
+    settings = case.settings
 
     @info("Generating model")
 
@@ -12,14 +12,14 @@ function generate_model(stages::Stages)
 
     @variable(model, vREF == 1)
 
-    number_of_stages = length(systems)
+    number_of_case = length(periods)
 
     fixed_cost = Dict()
     variable_cost = Dict()
 
-    for (stage_idx,system) in enumerate(systems)
+    for (period_idx,system) in enumerate(periods)
 
-        @info(" -- Stage $stage_idx")
+        @info(" -- Period $period_idx")
 
         model[:eFixedCost] = AffExpr(0.0)
         model[:eVariableCost] = AffExpr(0.0)
@@ -36,40 +36,40 @@ function generate_model(stages::Stages)
         @info(" -- Including age-based retirements")
         add_age_based_retirements!.(system.assets, model)
 
-        if stage_idx < number_of_stages
-            @info(" -- Available capacity in stage $(stage_idx) is being carried over to stage $(stage_idx+1)")
-            carry_over_capacities!(systems[stage_idx+1], system)
+        if period_idx < number_of_case
+            @info(" -- Available capacity in period $(period_idx) is being carried over to period $(period_idx+1)")
+            carry_over_capacities!(periods[period_idx+1], system)
         end
 
         @info(" -- Generating operational model")
         operation_model!(system, model)
 
-        fixed_cost[stage_idx] = model[:eFixedCost];
+        fixed_cost[period_idx] = model[:eFixedCost];
 	    unregister(model,:eFixedCost)
 
-        variable_cost[stage_idx] = model[:eVariableCost];
+        variable_cost[period_idx] = model[:eVariableCost];
         unregister(model,:eVariableCost)
 
     end
 
-    #The settings are the same in all stages, we have a single settings file that gets copied into each system struct
-    stage_lengths = collect(settings.StageLengths)
+    #The settings are the same in all case, we have a single settings file that gets copied into each system struct
+    period_lengths = collect(settings.PeriodLengths)
 
     discount_rate = settings.DiscountRate
 
-    cum_years = [sum(stage_lengths[i] for i in 1:s-1; init=0) for s in 1:number_of_stages];
+    cum_years = [sum(period_lengths[i] for i in 1:s-1; init=0) for s in 1:number_of_case];
 
     discount_factor = 1 ./ ( (1 + discount_rate) .^ cum_years)
 
-    @expression(model, eFixedCostByStage[s in 1:number_of_stages], discount_factor[s] * fixed_cost[s])
+    @expression(model, eFixedCostByPeriod[s in 1:number_of_case], discount_factor[s] * fixed_cost[s])
 
-    @expression(model, eFixedCost, sum(eFixedCostByStage[s] for s in 1:number_of_stages))
+    @expression(model, eFixedCost, sum(eFixedCostByPeriod[s] for s in 1:number_of_case))
 
-    opexmult = [sum([1 / (1 + discount_rate)^(i - 1) for i in 1:stage_lengths[s]]) for s in 1:number_of_stages]
+    opexmult = [sum([1 / (1 + discount_rate)^(i - 1) for i in 1:period_lengths[s]]) for s in 1:number_of_case]
 
-    @expression(model, eVariableCostByStage[s in 1:number_of_stages], discount_factor[s] * opexmult[s] * variable_cost[s])
+    @expression(model, eVariableCostByPeriod[s in 1:number_of_case], discount_factor[s] * opexmult[s] * variable_cost[s])
 
-    @expression(model, eVariableCost, sum(eVariableCostByStage[s] for s in 1:number_of_stages))
+    @expression(model, eVariableCost, sum(eVariableCostByPeriod[s] for s in 1:number_of_case))
 
     @objective(model, Min, model[:eFixedCost] + model[:eVariableCost])
 
@@ -147,7 +147,7 @@ function add_age_based_retirements!(a::AbstractAsset,model::Model)
     for t in fieldnames(typeof(a))
         y = getfield(a, t)
         if isa(y,AbstractEdge) || isa(y,Storage)
-            if y.retirement_stage > 0
+            if y.retirement_period > 0
                 push!(y.constraints, AgeBasedRetirementConstraint())
                 add_model_constraint!(y.constraints[end], y, model)
             end
@@ -156,30 +156,30 @@ function add_age_based_retirements!(a::AbstractAsset,model::Model)
 
 end
 
-#### All new capacity built up to the retirement stage must retire in the current stage
-function get_retirement_stage(cur_stage::Int,lifetime::Int,stage_lengths::Vector{Int})
+#### All new capacity built up to the retirement period must retire in the current period
+function get_retirement_period(cur_period::Int,lifetime::Int,period_lengths::Vector{Int})
 
-    return maximum(filter(r -> sum(stage_lengths[t] for t in r+1:cur_stage; init=0) >= lifetime,1:cur_stage-1);init=0)
+    return maximum(filter(r -> sum(period_lengths[t] for t in r+1:cur_period; init=0) >= lifetime,1:cur_period-1);init=0)
 
 end
 
-function compute_retirement_stage!(system::System, stage_lengths::Vector{Int})
+function compute_retirement_period!(system::System, period_lengths::Vector{Int})
     
     for a in system.assets
-        compute_retirement_stage!(a, stage_lengths)
+        compute_retirement_period!(a, period_lengths)
     end
 
     return nothing
 end
 
-function compute_retirement_stage!(a::AbstractAsset, stage_lengths::Vector{Int})
+function compute_retirement_period!(a::AbstractAsset, period_lengths::Vector{Int})
 
     for t in fieldnames(typeof(a))
         y = getfield(a, t)
         
-        if :retirement_stage ∈ Base.fieldnames(typeof(y))
+        if :retirement_period ∈ Base.fieldnames(typeof(y))
             if can_retire(y)
-                y.retirement_stage = get_retirement_stage(stage_index(y),lifetime(y),stage_lengths)
+                y.retirement_period = get_retirement_period(period_index(y),lifetime(y),period_lengths)
             end
         end
     end
@@ -192,7 +192,7 @@ function carry_over_capacities!(system::System, system_prev::System; perfect_for
     for a in system.assets
         a_prev_index = findfirst(id.(system_prev.assets).==id(a))
         if isnothing(a_prev_index)
-            @info("Skipping asset $(id(a)) as it was not present in the previous stage")
+            @info("Skipping asset $(id(a)) as it was not present in the previous period")
             validate_existing_capacity(a)
         else
             a_prev = system_prev.assets[a_prev_index];
@@ -219,13 +219,13 @@ function carry_over_capacities!(y::Union{AbstractEdge,AbstractStorage},y_prev::U
             y.existing_capacity = value(capacity(y_prev))
         end
         
-        for prev_stage in keys(new_capacity_track(y_prev))
+        for prev_period in keys(new_capacity_track(y_prev))
             if perfect_foresight
-                y.new_capacity_track[prev_stage] = new_capacity_track(y_prev,prev_stage)
-                y.retired_capacity_track[prev_stage] = retired_capacity_track(y_prev,prev_stage)
+                y.new_capacity_track[prev_period] = new_capacity_track(y_prev,prev_period)
+                y.retired_capacity_track[prev_period] = retired_capacity_track(y_prev,prev_period)
             else
-                y.new_capacity_track[prev_stage] = value(new_capacity_track(y_prev,prev_stage))
-                y.retired_capacity_track[prev_stage] = value(retired_capacity_track(y_prev,prev_stage))
+                y.new_capacity_track[prev_period] = value(new_capacity_track(y_prev,prev_period))
+                y.retired_capacity_track[prev_period] = value(retired_capacity_track(y_prev,prev_period))
             end
         end
         
@@ -254,12 +254,12 @@ end
 function discount_fixed_costs!(y::Union{AbstractEdge,AbstractStorage},settings::NamedTuple)
     
     # Number of years of payments that are remaining
-    model_years_remaining = sum(settings.StageLengths[stage_index(y):end]; init = 0);
+    model_years_remaining = sum(settings.PeriodLengths[period_index(y):end]; init = 0);
     payment_years_remaining = min(capital_recovery_period(y), model_years_remaining);
 
     y.investment_cost = investment_cost(y) * sum(1 / (1 + wacc(y))^s for s in 1:payment_years_remaining; init=0);
     
-    opexmult = sum([1 / (1 + settings.DiscountRate)^(i - 1) for i in 1:settings.StageLengths[stage_index(y)]])
+    opexmult = sum([1 / (1 + settings.DiscountRate)^(i - 1) for i in 1:settings.PeriodLengths[period_index(y)]])
 
     y.fixed_om_cost = fixed_om_cost(y) * opexmult
 
@@ -285,10 +285,10 @@ end
 
 function undo_discount_fixed_costs!(y::Union{AbstractEdge,AbstractStorage},settings::NamedTuple)
     # Number of years of payments that are remaining
-    model_years_remaining = sum(settings.StageLengths[stage_index(y):end]; init = 0);
+    model_years_remaining = sum(settings.PeriodLengths[period_index(y):end]; init = 0);
     payment_years_remaining = min(capital_recovery_period(y), model_years_remaining);
     y.investment_cost = investment_cost(y) / sum(1 / (1 + wacc(y))^s for s in 1:payment_years_remaining; init=0);
-    opexmult = sum([1 / (1 + settings.DiscountRate)^(i - 1) for i in 1:settings.StageLengths[stage_index(y)]])
+    opexmult = sum([1 / (1 + settings.DiscountRate)^(i - 1) for i in 1:settings.PeriodLengths[period_index(y)]])
     y.fixed_om_cost = fixed_om_cost(y) / opexmult
 end
 function undo_discount_fixed_costs!(g::Transformation,settings::NamedTuple)
@@ -303,7 +303,7 @@ function validate_existing_capacity(asset::AbstractAsset)
         if isa(getfield(asset, t), AbstractEdge) || isa(getfield(asset, t), AbstractStorage)
             if existing_capacity(getfield(asset, t)) > 0
                 msg = " -- Asset with id: \"$(id(asset))\" has existing capacity equal to $(existing_capacity(getfield(asset,t)))"
-                msg *= "\nbut it was not present in the previous stage. Please double check that the input data is correct."
+                msg *= "\nbut it was not present in the previous period. Please double check that the input data is correct."
                 @warn(msg)
             end
         end

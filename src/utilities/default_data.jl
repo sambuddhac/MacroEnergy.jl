@@ -37,7 +37,7 @@ function edge_default_data()
         :lifetime => 1,
         :capital_recovery_period => 1,
         :wacc => 0.0,
-        :retirement_stage => 0
+        :retirement_period => 0
     )
 end
 
@@ -81,7 +81,7 @@ function storage_default_data()
         :capital_recovery_period => 1,
         :lifetime => 1,
         :wacc => 0.0,
-        :retirement_stage =>0
+        :retirement_period =>0
     )
 end
 

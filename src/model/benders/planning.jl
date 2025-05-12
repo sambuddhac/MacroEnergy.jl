@@ -1,7 +1,7 @@
 
-function initialize_planning_problem!(stages::Stages,opt::Dict)
+function initialize_planning_problem!(case::Case,opt::Dict)
     
-    planning_problem = generate_planning_problem(stages);
+    planning_problem = generate_planning_problem(case);
 
     if opt[:solver] == Gurobi.Optimizer
         optimizer = create_optimizer(opt[:solver], GRB_ENV[], opt[:attributes])
@@ -13,7 +13,7 @@ function initialize_planning_problem!(stages::Stages,opt::Dict)
 
     set_silent(planning_problem)
 
-    if stages.systems[1].settings.ConstraintScaling
+    if case.periods[1].settings.ConstraintScaling
         @info "Scaling constraints and RHS"
         scale_constraints!(planning_problem)
     end
@@ -22,12 +22,12 @@ function initialize_planning_problem!(stages::Stages,opt::Dict)
 
 end
 
-function generate_planning_problem(stages::Stages)
+function generate_planning_problem(case::Case)
 
     @info("Generating planning problem")
 
-    systems = stages.systems
-    settings = stages.settings
+    periods = case.periods
+    settings = case.settings
 
     start_time = time();
 
@@ -35,13 +35,13 @@ function generate_planning_problem(stages::Stages)
 
     @variable(model, vREF == 1)
 
-    number_of_stages = length(systems)
+    number_of_case = length(periods)
 
     fixed_cost = Dict()
 
-    for (stage_idx,system) in enumerate(systems)
+    for (period_idx,system) in enumerate(periods)
 
-        @info(" -- Stage $stage_idx")
+        @info(" -- Period $period_idx")
 
         model[:eFixedCost] = AffExpr(0.0)
 
@@ -57,38 +57,38 @@ function generate_planning_problem(stages::Stages)
         @info(" -- Including age-based retirements")
         add_age_based_retirements!.(system.assets, model)
 
-        if stage_idx < number_of_stages
-            @info(" -- Available capacity in stage $(stage_idx) is being carried over to stage $(stage_idx+1)")
-            carry_over_capacities!(systems[stage_idx+1], system)
+        if period_idx < number_of_case
+            @info(" -- Available capacity in period $(period_idx) is being carried over to period $(period_idx+1)")
+            carry_over_capacities!(periods[period_idx+1], system)
         end
 
-        fixed_cost[stage_idx] = model[:eFixedCost];
+        fixed_cost[period_idx] = model[:eFixedCost];
         unregister(model,:eFixedCost)
 
     end
 
-    model[:eAvailableCapacity] = get_available_capacity(systems);
+    model[:eAvailableCapacity] = get_available_capacity(periods);
 
-    #The settings are the same in all stages, we have a single settings file that gets copied into each system struct
-    stage_lengths = collect(settings.StageLengths)
+    #The settings are the same in all case, we have a single settings file that gets copied into each system struct
+    period_lengths = collect(settings.PeriodLengths)
 
     discount_rate = settings.DiscountRate
 
-    cum_years = [sum(stage_lengths[i] for i in 1:s-1; init=0) for s in 1:number_of_stages];
+    cum_years = [sum(period_lengths[i] for i in 1:s-1; init=0) for s in 1:number_of_case];
 
     discount_factor = 1 ./ ( (1 + discount_rate) .^ cum_years)
 
-    @expression(model, eFixedCostByStage[s in 1:number_of_stages], discount_factor[s] * fixed_cost[s])
-    @expression(model, eFixedCost, sum(eFixedCostByStage[s] for s in 1:number_of_stages))
+    @expression(model, eFixedCostByPeriod[s in 1:number_of_case], discount_factor[s] * fixed_cost[s])
+    @expression(model, eFixedCost, sum(eFixedCostByPeriod[s] for s in 1:number_of_case))
 
-    stage_to_subproblem_map, subproblem_indices = get_stage_to_subproblem_mapping(systems);
+    period_to_subproblem_map, subproblem_indices = get_period_to_subproblem_mapping(periods);
 
     @variable(model, vTHETA[w in subproblem_indices] .>= 0)
 
-    opexmult = [sum([1 / (1 + discount_rate)^(i - 1) for i in 1:stage_lengths[s]]) for s in 1:number_of_stages]
+    opexmult = [sum([1 / (1 + discount_rate)^(i - 1) for i in 1:period_lengths[s]]) for s in 1:number_of_case]
 
-    @expression(model, eVariableCostByStage[s in 1:number_of_stages], discount_factor[s] * opexmult[s] * sum(vTHETA[w] for w in stage_to_subproblem_map[s]))
-    @expression(model, eApproximateVariableCost, sum(eVariableCostByStage[s] for s in 1:number_of_stages))
+    @expression(model, eVariableCostByPeriod[s in 1:number_of_case], discount_factor[s] * opexmult[s] * sum(vTHETA[w] for w in period_to_subproblem_map[s]))
+    @expression(model, eApproximateVariableCost, sum(eVariableCostByPeriod[s] for s in 1:number_of_case))
 
     @objective(model, Min, model[:eFixedCost] + model[:eApproximateVariableCost])
 
@@ -98,11 +98,11 @@ function generate_planning_problem(stages::Stages)
 
 end
 
-function get_available_capacity(systems::Vector{System})
+function get_available_capacity(periods::Vector{System})
     
     AvailableCapacity = Dict{Tuple{Symbol,Int64}, Union{JuMPVariable,AffExpr}}();
 
-    for system in systems
+    for system in periods
         AvailableCapacity = get_available_capacity!(system,AvailableCapacity)
     end
 
@@ -141,20 +141,20 @@ end
 
 function get_available_capacity!(g::AbstractStorage, AvailableCapacity::Dict{Tuple{Symbol,Int64}, Union{JuMPVariable,AffExpr}})
 
-    AvailableCapacity[g.id,stage_index(g)] = g.capacity;
+    AvailableCapacity[g.id,period_index(g)] = g.capacity;
 
 end
 
 
 function get_available_capacity!(e::AbstractEdge, AvailableCapacity::Dict{Tuple{Symbol,Int64}, Union{JuMPVariable,AffExpr}})
 
-    AvailableCapacity[e.id,stage_index(e)] = e.capacity;
+    AvailableCapacity[e.id,period_index(e)] = e.capacity;
 
 end
 
-function update_with_planning_solution!(stages::Stages, planning_variable_values::Dict)
+function update_with_planning_solution!(case::Case, planning_variable_values::Dict)
 
-    for system in stages.systems
+    for system in case.periods
         update_with_planning_solution!(system, planning_variable_values)
     end
 end

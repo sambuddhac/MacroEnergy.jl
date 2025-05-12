@@ -1,5 +1,5 @@
 {
-    "stages": [
+    "case": [
         {
             "commodities": {
                 "path": "system/commodities.json"
@@ -62,6 +62,6 @@
         }
     ],
     "settings": {
-        "path": "settings/stage_settings.json"
+        "path": "settings/case_settings.json"
     }
 }

@@ -40,7 +40,7 @@ macro AbstractEdgeBaseAttributes()
         startup_cost::Float64 = $edge_defaults[:startup_cost]
         startup_fuel_consumption::Float64 = $edge_defaults[:startup_fuel_consumption]
         startup_fuel_balance_id::Symbol = $edge_defaults[:startup_fuel_balance_id]
-        retirement_stage::Int64 = $edge_defaults[:retirement_stage]
+        retirement_period::Int64 = $edge_defaults[:retirement_period]
         wacc::Float64 = $edge_defaults[:wacc]
     end)
 end
@@ -185,17 +185,17 @@ min_capacity(e::AbstractEdge) = e.min_capacity;
 min_flow_fraction(e::AbstractEdge) = e.min_flow_fraction;
 new_capacity(e::AbstractEdge) = e.new_capacity;
 new_capacity_track(e::AbstractEdge) = e.new_capacity_track;
-#### Note that edge "e" may not be present in the inputs for all stages
+#### Note that edge "e" may not be present in the inputs for all case
 new_capacity_track(e::AbstractEdge,s::Int64) =  (haskey(new_capacity_track(e),s) == false) ? 0.0 : e.new_capacity_track[s];
 new_units(e::AbstractEdge) = e.new_units;
 ramp_down_fraction(e::AbstractEdge) = e.ramp_down_fraction;
 ramp_up_fraction(e::AbstractEdge) = e.ramp_up_fraction;
 retired_capacity(e::AbstractEdge) = e.retired_capacity;
 retired_capacity_track(e::AbstractEdge) = e.retired_capacity_track;
-#### Note that edge "e" may not be present in the inputs for all stages
+#### Note that edge "e" may not be present in the inputs for all case
 retired_capacity_track(e::AbstractEdge,s::Int64) =  (haskey(retired_capacity_track(e),s) == false) ? 0.0 : e.retired_capacity_track[s];
 retired_units(e::AbstractEdge) = e.retired_units;
-retirement_stage(e::AbstractEdge) = e.retirement_stage;
+retirement_period(e::AbstractEdge) = e.retirement_period;
 start_vertex(e::AbstractEdge)::AbstractVertex = e.start_vertex;
 variable_om_cost(e::AbstractEdge) = e.variable_om_cost;
 wacc(e::AbstractEdge) = e.wacc;
@@ -204,7 +204,7 @@ wacc(e::AbstractEdge) = e.wacc;
 function add_linking_variables!(e::AbstractEdge, model::Model)
 
     if has_capacity(e)
-        e.capacity = @variable(model, lower_bound = 0.0, base_name = "vCAP_$(id(e))_stage$(stage_index(e))")
+        e.capacity = @variable(model, lower_bound = 0.0, base_name = "vCAP_$(id(e))_period$(period_index(e))")
     end
 
     return nothing
@@ -215,17 +215,17 @@ function define_available_capacity!(e::AbstractEdge, model::Model)
 
     if has_capacity(e)
         
-        e.new_units = @variable(model, lower_bound = 0.0, base_name = "vNEWUNIT_$(id(e))_stage$(stage_index(e))")
+        e.new_units = @variable(model, lower_bound = 0.0, base_name = "vNEWUNIT_$(id(e))_period$(period_index(e))")
 
-        e.retired_units = @variable(model, lower_bound = 0.0, base_name = "vRETUNIT_$(id(e))_stage$(stage_index(e))")
+        e.retired_units = @variable(model, lower_bound = 0.0, base_name = "vRETUNIT_$(id(e))_period$(period_index(e))")
 
         e.new_capacity = @expression(model, capacity_size(e) * new_units(e))
         
         e.retired_capacity = @expression(model, capacity_size(e) * retired_units(e))
 
-        e.new_capacity_track[stage_index(e)] = new_capacity(e);
+        e.new_capacity_track[period_index(e)] = new_capacity(e);
         
-        e.retired_capacity_track[stage_index(e)] = retired_capacity(e);
+        e.retired_capacity_track[period_index(e)] = retired_capacity(e);
 
         @constraint(model, capacity(e) == new_capacity(e) - retired_capacity(e) + existing_capacity(e))
 
@@ -295,10 +295,10 @@ function operation_model!(e::Edge, model::Model)
             model,
             [t in time_interval(e)],
             lower_bound = 0.0,
-            base_name = "vFLOW_$(id(e))_stage$(stage_index(e))"
+            base_name = "vFLOW_$(id(e))_period$(period_index(e))"
         )
     else
-        e.flow = @variable(model, [t in time_interval(e)], base_name = "vFLOW_$(id(e))_stage$(stage_index(e))")
+        e.flow = @variable(model, [t in time_interval(e)], base_name = "vFLOW_$(id(e))_period$(period_index(e))")
     end
 
     update_balances!(e, model)
@@ -451,28 +451,28 @@ function operation_model!(e::EdgeWithUC, model::Model)
         model,
         [t in time_interval(e)],
         lower_bound = 0.0,
-        base_name = "vFLOW_$(id(e))_stage$(stage_index(e))"
+        base_name = "vFLOW_$(id(e))_period$(period_index(e))"
     )
 
     e.ucommit = @variable(
         model,
         [t in time_interval(e)],
         lower_bound = 0.0,
-        base_name = "vCOMMIT_$(id(e))_stage$(stage_index(e))"
+        base_name = "vCOMMIT_$(id(e))_period$(period_index(e))"
     )
 
     e.ustart = @variable(
         model,
         [t in time_interval(e)],
         lower_bound = 0.0,
-        base_name = "vSTART_$(id(e))_stage$(stage_index(e))"
+        base_name = "vSTART_$(id(e))_period$(period_index(e))"
     )
 
     e.ushut = @variable(
         model,
         [t in time_interval(e)],
         lower_bound = 0.0,
-        base_name = "vSHUT_$(id(e))_stage$(stage_index(e))"
+        base_name = "vSHUT_$(id(e))_period$(period_index(e))"
     )
 
     update_balances!(e, model)
@@ -589,8 +589,8 @@ function update_balance_start!(e::AbstractEdge, model::Model)
         effective_flow = @expression(model, [t in time_interval(e)], flow(e, t))
 
     else
-        flow_pos = @variable(model, [t in time_interval(e)], lower_bound = 0.0, base_name = "vFLOWPOS_$(id(e))_stage$(stage_index(e))")
-        flow_neg = @variable(model, [t in time_interval(e)], lower_bound = 0.0, base_name = "vFLOWNEG_$(id(e))_stage$(stage_index(e))")
+        flow_pos = @variable(model, [t in time_interval(e)], lower_bound = 0.0, base_name = "vFLOWPOS_$(id(e))_period$(period_index(e))")
+        flow_neg = @variable(model, [t in time_interval(e)], lower_bound = 0.0, base_name = "vFLOWNEG_$(id(e))_period$(period_index(e))")
 
         @constraint(model, [t in time_interval(e)], flow_pos[t] - flow_neg[t] == flow(e, t))
 
@@ -618,8 +618,8 @@ function update_balance_end!(e::AbstractEdge, model::Model)
         effective_flow = @expression(model, [t in time_interval(e)], flow(e, t))
     else
     
-        flow_pos = @variable(model, [t in time_interval(e)], lower_bound = 0.0, base_name = "vFLOWPOS_$(id(e))_stage$(stage_index(e))")
-        flow_neg = @variable(model, [t in time_interval(e)], lower_bound = 0.0, base_name = "vFLOWNEG_$(id(e))_stage$(stage_index(e))")
+        flow_pos = @variable(model, [t in time_interval(e)], lower_bound = 0.0, base_name = "vFLOWPOS_$(id(e))_period$(period_index(e))")
+        flow_neg = @variable(model, [t in time_interval(e)], lower_bound = 0.0, base_name = "vFLOWNEG_$(id(e))_period$(period_index(e))")
 
         @constraint(model, [t in time_interval(e)], flow_pos[t] - flow_neg[t] == flow(e, t))
 

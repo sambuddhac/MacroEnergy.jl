@@ -29,7 +29,7 @@ macro AbstractStorageBaseAttributes()
         new_units::Union{Missing, JuMPVariable} = missing
         retired_capacity::Union{AffExpr,Float64} = AffExpr(0.0)
         retired_capacity_track::Dict{Int64,AffExpr} = Dict(1=>AffExpr(0.0))
-        retirement_stage::Int64 = $storage_defaults[:retirement_stage]
+        retirement_period::Int64 = $storage_defaults[:retirement_period]
         retired_units::Union{Missing, JuMPVariable} = missing
         storage_level::JuMPVariable = Vector{VariableRef}()
         wacc::Float64 = $storage_defaults[:wacc]
@@ -139,15 +139,15 @@ min_outflow_fraction(g::AbstractStorage) = g.min_outflow_fraction;
 min_storage_level(g::AbstractStorage) = g.min_storage_level;
 new_capacity(g::AbstractStorage) = g.new_capacity;
 new_capacity_track(g::AbstractStorage) = g.new_capacity_track;
-#### Note that storage "g" may not be present in the inputs for all stages
+#### Note that storage "g" may not be present in the inputs for all case
 new_capacity_track(g::AbstractStorage,s::Int64) =  (haskey(new_capacity_track(g),s) == false) ? 0.0 : g.new_capacity_track[s];
 new_units(g::AbstractStorage) = g.new_units;
 retired_capacity(g::AbstractStorage) = g.retired_capacity;
 retired_capacity_track(g::AbstractStorage) = g.retired_capacity_track;
-#### Note that storage "g" may not be present in the inputs for all stages
+#### Note that storage "g" may not be present in the inputs for all case
 retired_capacity_track(g::AbstractStorage,s::Int64) =  (haskey(retired_capacity_track(g),s) == false) ? 0.0 : g.retired_capacity_track[s];
 retired_units(g::AbstractStorage) = g.retired_units;
-retirement_stage(g::AbstractStorage) = g.retirement_stage;
+retirement_period(g::AbstractStorage) = g.retirement_period;
 spillage_edge(g::AbstractStorage) = g.spillage_edge;
 storage_level(g::AbstractStorage) = g.storage_level;
 storage_level(g::AbstractStorage, t::Int64) = storage_level(g)[t];
@@ -156,24 +156,24 @@ wacc(g::AbstractStorage) = g.wacc;
 
 function add_linking_variables!(g::Storage, model::Model)
     if has_capacity(g)
-        g.capacity = @variable(model, lower_bound = 0.0, base_name = "vCAP_$(id(g))_stage$(stage_index(g))")
+        g.capacity = @variable(model, lower_bound = 0.0, base_name = "vCAP_$(id(g))_period$(period_index(g))")
     end
 end
 
 function define_available_capacity!(g::AbstractStorage, model::Model)
 
     if has_capacity(g)
-        g.new_units = @variable(model, lower_bound = 0.0, base_name = "vNEWUNIT_$(id(g))_stage$(stage_index(g))")
+        g.new_units = @variable(model, lower_bound = 0.0, base_name = "vNEWUNIT_$(id(g))_period$(period_index(g))")
 
-        g.retired_units = @variable(model, lower_bound = 0.0, base_name = "vRETUNIT_$(id(g))_stage$(stage_index(g))")
+        g.retired_units = @variable(model, lower_bound = 0.0, base_name = "vRETUNIT_$(id(g))_period$(period_index(g))")
         
         g.new_capacity = @expression(model, capacity_size(g) * new_units(g))
         
         g.retired_capacity = @expression(model, capacity_size(g) * retired_units(g))
         
-        g.new_capacity_track[stage_index(g)] = new_capacity(g);
+        g.new_capacity_track[period_index(g)] = new_capacity(g);
             
-        g.retired_capacity_track[stage_index(g)] = retired_capacity(g);
+        g.retired_capacity_track[period_index(g)] = retired_capacity(g);
 
         @constraint(model, capacity(g) == new_capacity(g) - retired_capacity(g) + existing_capacity(g))
 
@@ -206,7 +206,7 @@ function operation_model!(g::Storage, model::Model)
         model,
         [t in time_interval(g)],
         lower_bound = 0.0,
-        base_name = "vSTOR_$(g.id)_stage$(stage_index(g))"
+        base_name = "vSTOR_$(g.id)_period$(period_index(g))"
     )
 
     if :storage ∈ balance_ids(g)
@@ -271,13 +271,13 @@ LongDurationStorage(id::Symbol, data::Dict{Symbol,Any}, time_data::TimeData, com
 
 function add_linking_variables!(g::LongDurationStorage, model::Model)
 
-    g.capacity = @variable(model, lower_bound = 0.0, base_name = "vCAP_$(id(g))_stage$(stage_index(g))")
+    g.capacity = @variable(model, lower_bound = 0.0, base_name = "vCAP_$(id(g))_period$(period_index(g))")
 
     g.storage_initial =
-    @variable(model, [r in modeled_subperiods(g)], lower_bound = 0.0, base_name = "vSTOR_INIT_$(g.id)_stage$(stage_index(g))")
+    @variable(model, [r in modeled_subperiods(g)], lower_bound = 0.0, base_name = "vSTOR_INIT_$(g.id)_period$(period_index(g))")
 
     g.storage_change =
-    @variable(model, [w in subperiod_indices(g)], base_name = "vSTOR_CHANGE_$(g.id)_stage$(stage_index(g))")
+    @variable(model, [w in subperiod_indices(g)], base_name = "vSTOR_CHANGE_$(g.id)_period$(period_index(g))")
 
 end
 
@@ -304,7 +304,7 @@ function planning_model!(g::LongDurationStorage, model::Model)
     )
 
     @constraint(model, [r in MODELED_SUBPERIODS], 
-        storage_initial(g, mod1(r + 1, NPeriods)) == storage_initial(g, r) + storage_change(g, period_map(g,r))
+        storage_initial(g, mod1(r + 1, NPeriods)) == storage_initial(g, r) + storage_change(g, subperiod_map(g,r))
     )
 
 end
@@ -316,7 +316,7 @@ function operation_model!(g::LongDurationStorage, model::Model)
         model,
         [t in time_interval(g)],
         lower_bound = 0.0,
-        base_name = "vSTOR_$(g.id)_stage$(stage_index(g))"
+        base_name = "vSTOR_$(g.id)_period$(period_index(g))"
     )
 
     

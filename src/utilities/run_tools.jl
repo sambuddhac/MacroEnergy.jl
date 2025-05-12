@@ -14,36 +14,36 @@ function run_case(
 )
     @info("Running case at $(case_path)")
 
-    stages = load_stages(case_path; lazy_load=lazy_load)
+    case = load_case(case_path; lazy_load=lazy_load)
 
     # Create optimizer based on solution algorithm
-    optimizer = if isa(solution_algorithm(stages), Monolithic) || isa(solution_algorithm(stages), Myopic)
+    optimizer = if isa(solution_algorithm(case), Monolithic) || isa(solution_algorithm(case), Myopic)
         create_optimizer(optimizer, optimizer_env, optimizer_attributes)
-    elseif isa(solution_algorithm(stages), Benders)
+    elseif isa(solution_algorithm(case), Benders)
         create_optimizer_benders(planning_optimizer, subproblem_optimizer,
             planning_optimizer_attributes, subproblem_optimizer_attributes)
     else
-        error("The solution algorithm is not Monolithic, Myopic, or Benders. Please double check the `SolutionAlgorithm` in the `settings/stage_settings.json` file.")
+        error("The solution algorithm is not Monolithic, Myopic, or Benders. Please double check the `SolutionAlgorithm` in the `settings/case_settings.json` file.")
     end
 
     # If Benders, create processes for subproblems optimization
-    if isa(solution_algorithm(stages), Benders)
-        if stages.settings.BendersSettings[:Distributed]
-            number_of_subproblems = sum(length(system.time_data[:Electricity].subperiods) for system in stages.systems)
+    if isa(solution_algorithm(case), Benders)
+        if case.settings.BendersSettings[:Distributed]
+            number_of_subproblems = sum(length(system.time_data[:Electricity].subperiods) for system in case.periods)
             start_distributed_processes!(number_of_subproblems, case_path)
         end
     end
 
-    (stages, solution) = solve_stages(stages, optimizer)
+    (case, solution) = solve_case(case, optimizer)
 
-    write_outputs(case_path, stages, solution)
+    write_outputs(case_path, case, solution)
 
     # If Benders, delete processes
-    if isa(solution_algorithm(stages), Benders)
-        if stages.settings.BendersSettings[:Distributed]
+    if isa(solution_algorithm(case), Benders)
+        if case.settings.BendersSettings[:Distributed]
             rmprocs.(workers())
         end
     end
 
-    return stages.systems, solution
+    return case.periods, solution
 end

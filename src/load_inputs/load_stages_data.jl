@@ -1,4 +1,4 @@
-function load_stages_data(
+function load_case_data(
     file_path::AbstractString,
     rel_path::AbstractString = dirname(file_path);
     lazy_load::Bool = true,
@@ -8,20 +8,20 @@ function load_stages_data(
     # Load the system data from the JSON file(s)
     data = load_system_data(file_path, rel_path; lazy_load = lazy_load)
 
-    # Convert a single stage system to a vector of stages 
-    if !haskey(data, :stages)
-        data = Dict(:stages => [data],
-            :settings => default_stage_settings() # default stage settings: single stage, no discounting
+    # Convert a single period system to a vector of case 
+    if !haskey(data, :case)
+        data = Dict(:case => [data],
+            :settings => default_case_settings() # default case settings: single period, no discounting
         )
     end
 
     return data
 end
 
-function load_stages(
+function load_case(
     path::AbstractString = pwd();
     lazy_load::Bool=true,
-)::Stages
+)::Case
 
     # The path should either be a a file path to a JSON file, preferably "system_data.json"
     # or a directory containing "system_data.json"
@@ -31,16 +31,16 @@ function load_stages(
     end
 
     if isjson(path)
-        @info("Loading stages from $path")
+        @info("Loading case from $path")
         start_time = time()
 
-        stages_data = load_stages_data(path; lazy_load = lazy_load)
-        stages = generate_stages(path, stages_data)
+        case_data = load_case_data(path; lazy_load = lazy_load)
+        case = generate_case(path, case_data)
 
-        @info("Done loading stages. It took $(round(time() - start_time, digits=2)) seconds")
-        return stages
+        @info("Done loading case. It took $(round(time() - start_time, digits=2)) seconds")
+        return case
     else
-        msg = "No stages data found in $path. Either provide a path to a .JSON file or a directory containing a system_data.json file"
+        msg = "No case data found in $path. Either provide a path to a .JSON file or a directory containing a system_data.json file"
         throw(ArgumentError(msg))
     end
 end

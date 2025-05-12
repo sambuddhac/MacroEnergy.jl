@@ -1,10 +1,10 @@
 # Constants for file paths
-const STAGE_SETTINGS_FILENAME = "stage_settings.json"
+const STAGE_SETTINGS_FILENAME = "case_settings.json"
 const BENDERS_SETTINGS_FILEPATH = "settings/benders_settings.json"
 
-function default_stage_settings()
+function default_case_settings()
     return Dict(
-        :StageLengths => [1],
+        :PeriodLengths => [1],
         :DiscountRate => 0.,
         :SolutionAlgorithm => "Monolithic"
     )
@@ -69,7 +69,7 @@ function load_benders_settings(settings::AbstractDict{Symbol,Any}, path::Abstrac
     return settings
 end
 
-function configure_stages(
+function configure_case(
     path::AbstractString,
     rel_path::AbstractString,
 )
@@ -79,90 +79,90 @@ function configure_stages(
     end
     
     if !isfile(path)
-        error("Stage settings file not found: $path")
+        error("Period settings file not found: $path")
     end
     
-    # Load stage settings
-    stage_settings = copy(read_file(path))
+    # Load case settings
+    case_settings = copy(read_file(path))
     
     # Check for BendersSettings path if Benders is the solution algorithm
-    if stage_settings[:SolutionAlgorithm] == "Benders"
-        stage_settings = load_benders_settings(stage_settings, rel_path)
+    if case_settings[:SolutionAlgorithm] == "Benders"
+        case_settings = load_benders_settings(case_settings, rel_path)
     end
     
-    return configure_stages(stage_settings)
+    return configure_case(case_settings)
 end
 
-function configure_stages(
-    stage_settings::AbstractDict{Symbol,Any},
+function configure_case(
+    case_settings::AbstractDict{Symbol,Any},
     rel_path::AbstractString,
 )
-    if haskey(stage_settings, :path)
-        @info("Configuring stages from path")
-        path = rel_or_abs_path(stage_settings[:path], rel_path)
-        return configure_stages(path, rel_path)
+    if haskey(case_settings, :path)
+        @info("Configuring case from path")
+        path = rel_or_abs_path(case_settings[:path], rel_path)
+        return configure_case(path, rel_path)
     else
         # if Benders is the solution algorithm and BendersSettings is not specified 
-        # in the stage_settings, try to load the Benders settings from the default location
-        if stage_settings[:SolutionAlgorithm] == "Benders" && 
-            !haskey(stage_settings, :BendersSettings)
+        # in the case_settings, try to load the Benders settings from the default location
+        if case_settings[:SolutionAlgorithm] == "Benders" && 
+            !haskey(case_settings, :BendersSettings)
             benders_settings = try_load_benders_settings(rel_path)
             if !isnothing(benders_settings)
-                stage_settings[:BendersSettings] = benders_settings
+                case_settings[:BendersSettings] = benders_settings
             end
         end
-        return configure_stages(stage_settings)
+        return configure_case(case_settings)
     end
 end
 
-function configure_stages(stage_settings::AbstractDict{Symbol,Any})
-    @info("Configuring stages")
-    settings = default_stage_settings()
-    settings = merge(settings, stage_settings)
-    set_stage_lengths!(settings)
+function configure_case(case_settings::AbstractDict{Symbol,Any})
+    @info("Configuring case")
+    settings = default_case_settings()
+    settings = merge(settings, case_settings)
+    set_period_lengths!(settings)
     set_solution_algorithm!(settings)
     isa(settings[:SolutionAlgorithm], Benders) && configure_benders!(settings)
-    validate_stage_settings(settings)
+    validate_case_settings(settings)
     return namedtuple(settings)
 end
 
-function validate_stage_settings(stage_settings::AbstractDict{Symbol,Any})
-    @assert all(stage_settings[:StageLengths].>0)
-    @assert stage_settings[:DiscountRate] >= 0
-    @assert isa(stage_settings[:SolutionAlgorithm], AbstractSolutionAlgorithm)
+function validate_case_settings(case_settings::AbstractDict{Symbol,Any})
+    @assert all(case_settings[:PeriodLengths].>0)
+    @assert case_settings[:DiscountRate] >= 0
+    @assert isa(case_settings[:SolutionAlgorithm], AbstractSolutionAlgorithm)
 end
 
-function set_stage_lengths!(stage_settings::AbstractDict{Symbol,Any})
-    stage_settings[:StageLengths] = copy(stage_settings[:StageLengths])
+function set_period_lengths!(case_settings::AbstractDict{Symbol,Any})
+    case_settings[:PeriodLengths] = copy(case_settings[:PeriodLengths])
     return nothing
 end
 
 
-function set_solution_algorithm!(stage_settings::AbstractDict{Symbol,Any})
+function set_solution_algorithm!(case_settings::AbstractDict{Symbol,Any})
     @info("Setting solution algorithm")
-    if stage_settings[:SolutionAlgorithm] == "Monolithic"
-        stage_settings[:SolutionAlgorithm] = Monolithic()
-    elseif stage_settings[:SolutionAlgorithm] == "Benders"
-        stage_settings[:SolutionAlgorithm] = Benders()
-    elseif stage_settings[:SolutionAlgorithm] == "Myopic"
-        stage_settings[:SolutionAlgorithm] = Myopic()
+    if case_settings[:SolutionAlgorithm] == "Monolithic"
+        case_settings[:SolutionAlgorithm] = Monolithic()
+    elseif case_settings[:SolutionAlgorithm] == "Benders"
+        case_settings[:SolutionAlgorithm] = Benders()
+    elseif case_settings[:SolutionAlgorithm] == "Myopic"
+        case_settings[:SolutionAlgorithm] = Myopic()
     else
         @warn("No solution algorithm specified, defaulting to Monolithic")
-        stage_settings[:SolutionAlgorithm] = Monolithic()
+        case_settings[:SolutionAlgorithm] = Monolithic()
     end
-    @info("Solution algorithm set to $(stage_settings[:SolutionAlgorithm])")
+    @info("Solution algorithm set to $(case_settings[:SolutionAlgorithm])")
     return nothing
 end
 
-function configure_benders!(stage_settings::AbstractDict{Symbol,Any})
+function configure_benders!(case_settings::AbstractDict{Symbol,Any})
     # use default benders settings if BendersSettings is not specified
-    benders_settings = get(stage_settings, :BendersSettings, Dict{Symbol,Any}())
+    benders_settings = get(case_settings, :BendersSettings, Dict{Symbol,Any}())
     isempty(benders_settings) && @warn("No benders settings specified, using default settings")
     @info("Configuring benders")
     settings = default_benders_settings()
     settings = merge(settings, benders_settings)
     validate_benders_settings(settings)
-    stage_settings[:BendersSettings] = settings
+    case_settings[:BendersSettings] = settings
     return nothing
 end
 
