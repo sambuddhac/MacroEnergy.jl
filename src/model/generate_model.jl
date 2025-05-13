@@ -286,8 +286,13 @@ function discount_fixed_costs!(y::Union{AbstractEdge,AbstractStorage},settings::
     
     # Number of years of payments that are remaining
     model_years_remaining = sum(settings.PeriodLengths[period_index(y):end]; init = 0);
-    payment_years_remaining = min(capital_recovery_period(y), model_years_remaining);
     
+    if isa(solution_algorithm(settings[:SolutionAlgorithm]), Myopic)
+        payment_years_remaining = min(capital_recovery_period(y), PeriodLengths[period_index(y)]);
+    else
+        payment_years_remaining = min(capital_recovery_period(y), model_years_remaining);
+    end
+
     y.annualized_investment_cost = annualized_investment_cost(y) * sum(1 / (1 + settings.DiscountRate)^s for s in 1:payment_years_remaining; init=0);
     
     opexmult = sum([1 / (1 + settings.DiscountRate)^(i - 1) for i in 1:settings.PeriodLengths[period_index(y)]])
