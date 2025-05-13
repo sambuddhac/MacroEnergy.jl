@@ -963,12 +963,12 @@ end
 """
 Write results when using Myopic as solution algorithm. 
 """
-function write_outputs(case_path::AbstractString, case::Case, model::Model, myopic_results::MyopicResults)
+function write_outputs(case_path::AbstractString, case::Case, myopic_results::MyopicResults)
     num_periods = length(case.periods)
     for s in 1:num_periods
         @info("Writing results for period $s")
-        compute_undiscounted_costs!(model, case.periods[s], case.settings)
-
+        compute_undiscounted_costs!(myopic_results.models[s], case.periods[s], case.settings)
+        
         ## Create results directory to store the results
         if num_periods > 1
             # Create a directory for each period
