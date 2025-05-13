@@ -961,12 +961,14 @@ function write_outputs(case_path::AbstractString, case::Case, model::Model)
 end
 
 """
-Write results when using Myopic as solution algorithm. Note that myopic simulations do not use discount factors so the costs in the JuMP model are already undiscounted costs.
+Write results when using Myopic as solution algorithm. 
 """
 function write_outputs(case_path::AbstractString, case::Case, myopic_results::MyopicResults)
     num_periods = length(case.periods)
     for s in 1:num_periods
         @info("Writing results for period $s")
+        compute_undiscounted_costs!(model, case.periods[s], case.settings)
+        
         ## Create results directory to store the results
         if num_periods > 1
             # Create a directory for each period
