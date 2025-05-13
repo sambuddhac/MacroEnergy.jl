@@ -42,7 +42,7 @@ macro AbstractEdgeBaseAttributes()
         startup_fuel_balance_id::Symbol = $edge_defaults[:startup_fuel_balance_id]
         retirement_period::Int64 = $edge_defaults[:retirement_period]
         wacc::Float64 = settings.DiscountRate
-        annualized_investment_cost::Float64 = 0.0
+        annualized_investment_cost::Float64 = $edge_defaults[:annualized_investment_cost]
     end)
 end
 
@@ -351,7 +351,7 @@ end
     - flow::Union{JuMPVariable,Vector{Float64}}: Flow of commodity through the edge at each timestep
     - has_capacity::Bool: Whether the edge has capacity variables
     - integer_decisions::Bool: Whether capacity decisions must be integer
-    - investment_cost::Float64: Cost per unit of new capacity
+    - investment_cost::Float64: CAPEX per unit of new capacity
     - loss_fraction::Float64: Fraction of flow lost during transmission
     - max_capacity::Float64: Maximum allowed capacity
     - min_capacity::Float64: Minimum required capacity
