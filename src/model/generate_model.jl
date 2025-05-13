@@ -65,7 +65,7 @@ function generate_model(case::Case)
 
     @expression(model, eFixedCost, sum(eFixedCostByPeriod[s] for s in 1:number_of_case))
 
-    opexmult = [sum([1 / (1 + discount_rate)^(i - 1) for i in 1:period_lengths[s]]) for s in 1:number_of_case]
+    opexmult = [sum([1 / (1 + discount_rate)^(i) for i in 1:period_lengths[s]]) for s in 1:number_of_case]
 
     @expression(model, eVariableCostByPeriod[s in 1:number_of_case], discount_factor[s] * opexmult[s] * variable_cost[s])
 
@@ -330,7 +330,7 @@ function undo_discount_fixed_costs!(y::Union{AbstractEdge,AbstractStorage},setti
     end
     
     y.annualized_investment_cost = annualized_investment_cost(y) / sum(1 / (1 + settings.DiscountRate)^s for s in 1:payment_years_remaining; init=0);
-    opexmult = sum([1 / (1 + settings.DiscountRate)^(i - 1) for i in 1:settings.PeriodLengths[period_index(y)]])
+    opexmult = sum([1 / (1 + settings.DiscountRate)^(i) for i in 1:settings.PeriodLengths[period_index(y)]])
     y.fixed_om_cost = fixed_om_cost(y) / opexmult
 end
 function undo_discount_fixed_costs!(g::Transformation,settings::NamedTuple)
