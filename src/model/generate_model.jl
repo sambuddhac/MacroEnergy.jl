@@ -255,7 +255,7 @@ function compute_annualized_costs!(a::AbstractAsset)
 end
 
 function compute_annualized_costs!(y::Union{AbstractEdge,AbstractStorage})
-    if !isempty(annualized_investment_cost(y))
+    if annualized_investment_cost(y) != 0.0
         y.annualized_investment_cost = annualized_investment_cost(y)
     else
         y.annualized_investment_cost = investment_cost(y) * wacc(y) / (1 - (1 + wacc(y))^-capital_recovery_period(y))
@@ -287,7 +287,7 @@ function discount_fixed_costs!(y::Union{AbstractEdge,AbstractStorage},settings::
     model_years_remaining = sum(settings.PeriodLengths[period_index(y):end]; init = 0);
     
     if isa(solution_algorithm(settings[:SolutionAlgorithm]), Myopic)
-        payment_years_remaining = min(capital_recovery_period(y), PeriodLengths[period_index(y)]);
+        payment_years_remaining = min(capital_recovery_period(y), settings.PeriodLengths[period_index(y)]);
     else
         payment_years_remaining = min(capital_recovery_period(y), model_years_remaining);
     end
@@ -323,7 +323,7 @@ function undo_discount_fixed_costs!(y::Union{AbstractEdge,AbstractStorage},setti
     model_years_remaining = sum(settings.PeriodLengths[period_index(y):end]; init = 0);
 
     if isa(solution_algorithm(settings[:SolutionAlgorithm]), Myopic)
-        payment_years_remaining = min(capital_recovery_period(y), PeriodLengths[period_index(y)]);
+        payment_years_remaining = min(capital_recovery_period(y), settings.PeriodLengths[period_index(y)]);
     else
         payment_years_remaining = min(capital_recovery_period(y), model_years_remaining);
     end
