@@ -34,11 +34,10 @@ end
 function prepare_case!(periods::Vector{System}, settings::NamedTuple)
     for (period_id, system) in enumerate(periods)
         compute_annualized_costs!(system) 
-        if !isa(solution_algorithm(settings[:SolutionAlgorithm]), Myopic) && length(periods) > 1
-            ### Note that myopic simulations do not use discount factors
-            @info("Discounting fixed costs for period $(period_id)")
-            discount_fixed_costs!(system, settings)
-        end
+        
+        @info("Discounting fixed costs for period $(period_id)")
+        discount_fixed_costs!(system, settings)
+        
         @info("Computing retirement case for period $(period_id)")
         compute_retirement_period!(system, settings[:PeriodLengths])
     end
