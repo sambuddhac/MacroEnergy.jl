@@ -255,7 +255,12 @@ function compute_annualized_costs!(a::AbstractAsset)
 end
 
 function compute_annualized_costs!(y::Union{AbstractEdge,AbstractStorage})
-    y.annualized_investment_cost = investment_cost(y) * wacc(y) / (1 - (1 + wacc(y))^-capital_recovery_period(y))
+    if wacc(y) == 0.0
+        #### If wacc was not passed, we assume that the investment cost is already annualized
+        y.annualized_investment_cost = investment_cost(y)
+    else
+        y.annualized_investment_cost = investment_cost(y) * wacc(y) / (1 - (1 + wacc(y))^-capital_recovery_period(y))
+    end
 end
 
 function compute_annualized_costs!(g::Transformation)
