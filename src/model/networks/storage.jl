@@ -195,8 +195,6 @@ function planning_model!(g::Storage, model::Model)
         fix(retired_units(g), 0.0; force = true)
     end
 
-    g.annualized_investment_cost = investment_cost(g) * wacc(g) / (1 - (1 + wacc(g))^-capital_recovery_period(g))
-
     compute_fixed_costs!(g, model)
 
     @constraint(model, retired_capacity(g) <= existing_capacity(g))
@@ -294,8 +292,6 @@ function planning_model!(g::LongDurationStorage, model::Model)
     if !g.can_retire
         fix(retired_units(g), 0.0; force = true)
     end
-
-    g.annualized_investment_cost = investment_cost(g) * wacc(g) / (1 - (1 + wacc(g))^-capital_recovery_period(g))
 
     compute_fixed_costs!(g, model)
 

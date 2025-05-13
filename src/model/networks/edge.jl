@@ -265,8 +265,6 @@ function planning_model!(e::AbstractEdge, model::Model)
 
     end
 
-    e.annualized_investment_cost = investment_cost(e) * wacc(e) / (1 - (1 + wacc(e))^-capital_recovery_period(e))
-
     compute_fixed_costs!(e, model)
 
     return nothing

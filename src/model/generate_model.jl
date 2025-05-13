@@ -242,6 +242,28 @@ function carry_over_capacities!(n::Node,n_prev::Node; perfect_foresight::Bool = 
     return nothing
 end
 
+function compute_annualized_costs!(system::System)
+    for a in system.assets
+        compute_annualized_costs!(a)
+    end
+end
+
+function compute_annualized_costs!(a::AbstractAsset)
+    for t in fieldnames(typeof(a))
+        compute_annualized_costs!(getfield(a, t))
+    end
+end
+
+function compute_annualized_costs!(y::Union{AbstractEdge,AbstractStorage})
+    y.annualized_investment_cost = investment_cost(y) * wacc(y) / (1 - (1 + wacc(y))^-capital_recovery_period(y))
+end
+
+function compute_annualized_costs!(g::Transformation)
+    return nothing
+end
+function compute_annualized_costs!(n::Node)
+    return nothing
+end
 
 function discount_fixed_costs!(system::System, settings::NamedTuple)
     for a in system.assets
