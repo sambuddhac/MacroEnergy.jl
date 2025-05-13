@@ -939,22 +939,23 @@ end
 Write results when using Monolithic as solution algorithm.
 """
 function write_outputs(case_path::AbstractString, case::Case, model::Model)
-    num_periods = length(case.periods)
-    for s in 1:num_periods
-        @info("Writing results for period $s")
-        compute_undiscounted_costs!(model, case.periods[s], case.settings)
+    num_periods =number_of_periods(case)
+    periods = get_periods(case)
+    for (period_idx,period) in enumerate(periods)
+        @info("Writing results for period $period_idx")
+        compute_undiscounted_costs!(model, period, get_settings(case))
 
         ## Create results directory to store the results
         if num_periods > 1
             # Create a directory for each period
-            results_dir = joinpath(case_path, "results_period_$s")
+            results_dir = joinpath(case_path, "results_period_$period_idx")
         else
             # Create a directory for the single period
             results_dir = joinpath(case_path, "results")
         end
         mkpath(results_dir)
-        write_outputs(results_dir, case.periods[s], model)
-        write_discounted_costs(joinpath(results_dir, "discounted_costs.csv"), case.periods[s], model; period_index=s)
+        write_outputs(results_dir, period, model)
+        write_discounted_costs(joinpath(results_dir, "discounted_costs.csv"), period, model; period_index=period_idx)
     end
 
     return nothing
@@ -964,21 +965,21 @@ end
 Write results when using Myopic as solution algorithm. 
 """
 function write_outputs(case_path::AbstractString, case::Case, myopic_results::MyopicResults)
-    num_periods = length(case.periods)
-    for s in 1:num_periods
-        @info("Writing results for period $s")
-        compute_undiscounted_costs!(myopic_results.models[s], case.periods[s], case.settings)
-        
+    num_periods = number_of_periods(case);
+    periods = get_periods(case)
+    for (period_idx, period) in enumerate(periods)
+        @info("Writing results for period $period_idx")
+        compute_undiscounted_costs!(myopic_results.models[period_idx], period, settings(case))
         ## Create results directory to store the results
         if num_periods > 1
             # Create a directory for each period
-            results_dir = joinpath(case_path, "results_period_$s")
+            results_dir = joinpath(case_path, "results_period_$period_idx")
         else
             # Create a directory for the single period
             results_dir = joinpath(case_path, "results")
         end
         mkpath(results_dir)
-        write_outputs(results_dir, case.periods[s], myopic_results.models[s])
+        write_outputs(results_dir, period, myopic_results.models[period_idx])
     end
 
     return nothing
@@ -989,13 +990,16 @@ Write results when using Benders as solution algorithm.
 """
 function write_outputs(case_path::AbstractString, case::Case, bd_results::BendersResults)
 
-    settings = case.settings
-    period_to_subproblem_map, _ = get_period_to_subproblem_mapping(case.periods)
+    settings = get_settings(case);
+    num_periods = number_of_periods(case);
+    periods = get_periods(case);
+
+    period_to_subproblem_map, _ = get_period_to_subproblem_mapping(periods)
 
     # get the flow results from the operational subproblems
     flow_df = collect_flow_results(case, bd_results)
-    num_periods = length(case.periods);
-    for (period_idx, system) in enumerate(case.periods)
+
+    for (period_idx, period) in enumerate(periods)
         @info("Writing results for period $period_idx")
         ## Create results directory to store the results
         if num_periods > 1
@@ -1010,17 +1014,17 @@ function write_outputs(case_path::AbstractString, case::Case, bd_results::Bender
         # subproblem indices for the current period
         subop_indices_period = period_to_subproblem_map[period_idx]
 
-        # Note: system has been updated with the capacity values in planning_solution at the end of function solve_case
+        # Note: period has been updated with the capacity values in planning_solution at the end of function solve_case
         # Capacity results
-        write_capacity(joinpath(results_dir, "capacity.csv"), system)
+        write_capacity(joinpath(results_dir, "capacity.csv"), period)
 
         # Flow results
-        write_period_flows(results_dir, system, flow_df[subop_indices_period])
+        write_flows(results_dir, period, flow_df[subop_indices_period])
         
         # Cost results
-        costs = prepare_costs_benders(system, bd_results, subop_indices_period, settings)
-        write_costs(joinpath(results_dir, "costs.csv"), system, costs)
-        write_discounted_costs(joinpath(results_dir, "discounted_costs.csv"), system, costs)
+        costs = prepare_costs_benders(period, bd_results, subop_indices_period, settings)
+        write_costs(joinpath(results_dir, "costs.csv"), period, costs)
+        write_discounted_costs(joinpath(results_dir, "discounted_costs.csv"), period, costs)
     end
 
     return nothing
@@ -1093,7 +1097,7 @@ function collect_local_flows(bd_results::BendersResults)
 end
 
 
-function write_period_flows(results_dir::AbstractString, system::System, flow_dfs::Vector{DataFrame})
+function write_flows(results_dir::AbstractString, system::System, flow_dfs::Vector{DataFrame})
     file_path = joinpath(results_dir, "flows.csv")
     @info("Writing flow results to $file_path")
     flow_results = reduce(vcat, flow_dfs)

@@ -1,8 +1,9 @@
 
 function generate_model(case::Case)
 
-    periods = case.periods
-    settings = case.settings
+    periods = get_periods(case)
+    settings = get_settings(case)
+    num_periods = number_of_periods(case)
 
     @info("Generating model")
 
@@ -11,8 +12,6 @@ function generate_model(case::Case)
     model = Model()
 
     @variable(model, vREF == 1)
-
-    number_of_periods = length(periods)
 
     fixed_cost = Dict()
     variable_cost = Dict()
@@ -36,7 +35,7 @@ function generate_model(case::Case)
         @info(" -- Including age-based retirements")
         add_age_based_retirements!.(system.assets, model)
 
-        if period_idx < number_of_periods
+        if period_idx < num_periods
             @info(" -- Available capacity in period $(period_idx) is being carried over to period $(period_idx+1)")
             carry_over_capacities!(periods[period_idx+1], system)
         end
@@ -57,19 +56,19 @@ function generate_model(case::Case)
 
     discount_rate = settings.DiscountRate
 
-    cum_years = [sum(period_lengths[i] for i in 1:s-1; init=0) for s in 1:number_of_periods];
+    cum_years = [sum(period_lengths[i] for i in 1:s-1; init=0) for s in 1:num_periods];
 
     discount_factor = 1 ./ ( (1 + discount_rate) .^ cum_years)
 
-    @expression(model, eFixedCostByPeriod[s in 1:number_of_periods], discount_factor[s] * fixed_cost[s])
+    @expression(model, eFixedCostByPeriod[s in 1:num_periods], discount_factor[s] * fixed_cost[s])
 
-    @expression(model, eFixedCost, sum(eFixedCostByPeriod[s] for s in 1:number_of_periods))
+    @expression(model, eFixedCost, sum(eFixedCostByPeriod[s] for s in 1:num_periods))
 
-    opexmult = [sum([1 / (1 + discount_rate)^(i) for i in 1:period_lengths[s]]) for s in 1:number_of_periods]
+    opexmult = [sum([1 / (1 + discount_rate)^(i) for i in 1:period_lengths[s]]) for s in 1:num_periods]
 
-    @expression(model, eVariableCostByPeriod[s in 1:number_of_periods], discount_factor[s] * opexmult[s] * variable_cost[s])
+    @expression(model, eVariableCostByPeriod[s in 1:num_periods], discount_factor[s] * opexmult[s] * variable_cost[s])
 
-    @expression(model, eVariableCost, sum(eVariableCostByPeriod[s] for s in 1:number_of_periods))
+    @expression(model, eVariableCost, sum(eVariableCostByPeriod[s] for s in 1:num_periods))
 
     @objective(model, Min, model[:eFixedCost] + model[:eVariableCost])
 

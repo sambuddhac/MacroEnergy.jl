@@ -63,9 +63,9 @@ function scale_constraints!(system::System, model::Model)
 end
 
 # MacroEnergyScaling.scale_constraints!
-function scale_constraints!(periods::Vector{System}, models::Vector{Model})
-    @assert length(periods) == length(models)
-    for (system, model) in zip(periods, models)
+function scale_constraints!(systems::Vector{System}, models::Vector{Model})
+    @assert length(systems) == length(models)
+    for (system, model) in zip(systems, models)
         scale_constraints!(system, model)
     end
     return nothing
@@ -73,6 +73,6 @@ end
 
 # MacroEnergyScaling.scale_constraints!
 function scale_constraints!(case::Case, models::Vector{Model})
-    scale_constraints!(case.periods, models)
+    scale_constraints!(case.systems, models)
     return nothing
 end

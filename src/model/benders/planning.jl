@@ -13,7 +13,7 @@ function initialize_planning_problem!(case::Case,opt::Dict)
 
     set_silent(planning_problem)
 
-    if case.periods[1].settings.ConstraintScaling
+    if case.systems[1].settings.ConstraintScaling
         @info "Scaling constraints and RHS"
         scale_constraints!(planning_problem)
     end
@@ -26,7 +26,7 @@ function generate_planning_problem(case::Case)
 
     @info("Generating planning problem")
 
-    periods = case.periods
+    periods = case.systems
     settings = case.settings
 
     start_time = time();
@@ -154,7 +154,7 @@ end
 
 function update_with_planning_solution!(case::Case, planning_variable_values::Dict)
 
-    for system in case.periods
+    for system in case.systems
         update_with_planning_solution!(system, planning_variable_values)
     end
 end

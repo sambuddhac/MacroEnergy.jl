@@ -3,7 +3,7 @@ function load_time_data(
     commodities::Dict{Symbol,DataType},
     rel_path::AbstractString
 )
-    period_index = get(data, :PeriodIndex, 1)
+    period_index = get(data, :SystemIndex, 1)
     if haskey(data, :path)
         path = rel_or_abs_path(data[:path], rel_path)
         return load_time_data(path, commodities, rel_path, period_index)
@@ -30,7 +30,7 @@ function load_time_data(
     time_data = copy(JSON3.read(path))
     haskey(time_data, :SubPeriodMap) && load_subperiod_map!(time_data, rel_path)
     validate_and_set_default_total_hours_modeled!(time_data::AbstractDict{Symbol,Any})
-    time_data[:PeriodIndex] = period_index
+    time_data[:SystemIndex] = period_index
     return load_time_data(time_data, commodities)
 end
 
@@ -161,7 +161,7 @@ function create_commodity_timedata(
     return TimeData{type}(;
         time_interval = time_interval,
         hours_per_timestep = hours_per_timestep,
-        period_index = get(time_data, :PeriodIndex, 1),
+        period_index = get(time_data, :SystemIndex, 1),
         subperiods = subperiods,
         subperiod_indices = unique_rep_periods,
         subperiod_weights = Dict(unique_rep_periods .=> weights),

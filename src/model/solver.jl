@@ -12,7 +12,7 @@ function solve_case(case::Case, opt::Optimizer, ::Monolithic)
 
     # For monolithic solution there is only one model
     # scale constraints if the flag is true in the first system
-    if case.periods[1].settings.ConstraintScaling
+    if case.systems[1].settings.ConstraintScaling
         @info "Scaling constraints and RHS"
         scale_constraints!(model)
     end
@@ -36,8 +36,8 @@ end
 function solve_case(case::Case, opt::Dict{Symbol, Dict{Symbol, Any}}, ::Benders)
 
     @info("*** Running simulation with Benders decomposition ***")
-    bd_setup = case.settings.BendersSettings
-    periods = case.periods;
+    bd_setup = get_settings(case).BendersSettings
+    periods = get_periods(case);
 
     # Decomposed system
     periods_decomp = generate_decomposed_system(periods);

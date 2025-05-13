@@ -3,16 +3,11 @@ struct MyopicResults
 end
 
 function run_myopic_iteration!(case::Case, opt::Optimizer)
-
-    periods = case.periods
-    settings = case.settings
-
-    number_of_periods = length(periods)
-
+    periods = get_periods(case)
+    num_periods = num_periods(case)
     fixed_cost = Dict()
     variable_cost = Dict()
-
-    models = Vector{Model}(undef, number_of_periods)
+    models = Vector{Model}(undef, num_periods)
     for (period_idx,system) in enumerate(periods)
         @info(" -- Generating model for period $(period_idx)")
         model = Model()
@@ -48,7 +43,7 @@ function run_myopic_iteration!(case::Case, opt::Optimizer)
 
         discount_rate = settings.DiscountRate
     
-        cum_years = [sum(period_lengths[i] for i in 1:s-1; init=0) for s in 1:number_of_periods];
+        cum_years = [sum(period_lengths[i] for i in 1:s-1; init=0) for s in 1:num_periods];
     
         discount_factor = 1 ./ ( (1 + discount_rate) .^ cum_years)
     
@@ -56,7 +51,7 @@ function run_myopic_iteration!(case::Case, opt::Optimizer)
     
         @expression(model, eFixedCost, eFixedCostByPeriod)
     
-        opexmult = [sum([1 / (1 + discount_rate)^(i) for i in 1:period_lengths[s]]) for s in 1:number_of_periods]
+        opexmult = [sum([1 / (1 + discount_rate)^(i) for i in 1:period_lengths[s]]) for s in 1:num_periods]
     
         @expression(model, eVariableCostByPeriod, discount_factor * opexmult[period_idx] * variable_cost[period_idx])
     
@@ -73,7 +68,7 @@ function run_myopic_iteration!(case::Case, opt::Optimizer)
 
         optimize!(model)
 
-        if period_idx < number_of_periods
+        if period_idx < num_periods
             @info(" -- Final capacity in period $(period_idx) is being carried over to period $(period_idx+1)")
             carry_over_capacities!(periods[period_idx+1], system, perfect_foresight=false)
         end
