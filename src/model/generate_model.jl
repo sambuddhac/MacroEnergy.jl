@@ -295,7 +295,7 @@ function discount_fixed_costs!(y::Union{AbstractEdge,AbstractStorage},settings::
 
     y.annualized_investment_cost = annualized_investment_cost(y) * sum(1 / (1 + settings.DiscountRate)^s for s in 1:payment_years_remaining; init=0);
     
-    opexmult = sum([1 / (1 + settings.DiscountRate)^(i - 1) for i in 1:settings.PeriodLengths[period_index(y)]])
+    opexmult = sum([1 / (1 + settings.DiscountRate)^(i) for i in 1:settings.PeriodLengths[period_index(y)]])
 
     y.fixed_om_cost = fixed_om_cost(y) * opexmult
 
