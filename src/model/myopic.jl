@@ -3,8 +3,14 @@ struct MyopicResults
 end
 
 function run_myopic_iteration!(case::Case, opt::Optimizer)
+
     periods = case.periods
+    settings = case.settings
+
     number_of_case = length(periods)
+
+    fixed_cost = Dict()
+    variable_cost = Dict()
 
     models = Vector{Model}(undef, number_of_case)
     for (period_idx,system) in enumerate(periods)
@@ -28,6 +34,33 @@ function run_myopic_iteration!(case::Case, opt::Optimizer)
 
         @info(" -- Generating operational model")
         operation_model!(system, model)
+
+        # Express myopic cost in present value from perspective of start of modeling horizon, in consistency with Monolithic version
+
+        fixed_cost[period_idx] = model[:eFixedCost];
+	    unregister(model,:eFixedCost)
+        
+        variable_cost[period_idx] = model[:eVariableCost];
+        unregister(model,:eVariableCost)
+        
+
+        period_lengths = collect(settings.PeriodLengths)
+
+        discount_rate = settings.DiscountRate
+    
+        cum_years = [sum(period_lengths[i] for i in 1:s-1; init=0) for s in 1:number_of_case];
+    
+        discount_factor = 1 ./ ( (1 + discount_rate) .^ cum_years)
+    
+        @expression(model, eFixedCostByPeriod, discount_factor * fixed_cost[period_idx])
+    
+        @expression(model, eFixedCost, eFixedCostByPeriod)
+    
+        opexmult = [sum([1 / (1 + discount_rate)^(i) for i in 1:period_lengths[s]]) for s in 1:number_of_case]
+    
+        @expression(model, eVariableCostByPeriod, discount_factor * opexmult[period_idx] * variable_cost[period_idx])
+    
+        @expression(model, eVariableCost, eVariableCostByPeriod)
 
         @objective(model, Min, model[:eFixedCost] + model[:eVariableCost])
 

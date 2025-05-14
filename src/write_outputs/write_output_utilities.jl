@@ -1132,7 +1132,7 @@ function compute_undiscounted_costs!(model::Model, system::System, settings::Nam
 
     cum_years = sum(period_lengths[i] for i in 1:period_index-1; init=0);
     discount_factor = 1/( (1 + discount_rate)^cum_years)
-    opexmult = sum([1 / (1 + discount_rate)^(i - 1) for i in 1:period_lengths[period_index]])
+    opexmult = sum([1 / (1 + discount_rate)^(i) for i in 1:period_lengths[period_index]])
 
     unregister(model,:eDiscountedVariableCost)
     model[:eDiscountedVariableCost] = model[:eVariableCostByPeriod][period_index]
