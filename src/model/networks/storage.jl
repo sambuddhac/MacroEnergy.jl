@@ -33,7 +33,7 @@ macro AbstractStorageBaseAttributes()
         retired_units::Union{Missing, JuMPVariable} = missing
         storage_level::JuMPVariable = Vector{VariableRef}()
         wacc::Float64 = settings.DiscountRate
-        annualized_investment_cost::Float64 = $storage_defaults[:annualized_investment_cost]
+        annualized_investment_cost::Union{Nothing,Float64} = $storage_defaults[:annualized_investment_cost]
     end)
 end
 
