@@ -255,10 +255,9 @@ function compute_annualized_costs!(a::AbstractAsset)
 end
 
 function compute_annualized_costs!(y::Union{AbstractEdge,AbstractStorage})
-    if annualized_investment_cost(y) != 0.0
-        y.annualized_investment_cost = annualized_investment_cost(y)
-    else
-        y.annualized_investment_cost = investment_cost(y) * wacc(y) / (1 - (1 + wacc(y))^-capital_recovery_period(y))
+    if annualized_investment_cost(y) == 0.0
+        annualization_factor = wacc(y)>0 ? wacc(y) / (1 - (1 + wacc(y))^-capital_recovery_period(y))  : 1.0
+        y.annualized_investment_cost = investment_cost(y) * annualization_factor;
     end
 end
 
