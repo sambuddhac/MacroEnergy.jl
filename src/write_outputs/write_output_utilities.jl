@@ -969,7 +969,7 @@ function write_outputs(case_path::AbstractString, case::Case, myopic_results::My
     periods = get_periods(case)
     for (period_idx, period) in enumerate(periods)
         @info("Writing results for period $period_idx")
-        compute_undiscounted_costs!(myopic_results.models[period_idx], period, settings(case))
+        compute_undiscounted_costs!(myopic_results.models[period_idx], period, get_settings(case))
         ## Create results directory to store the results
         if num_periods > 1
             # Create a directory for each period

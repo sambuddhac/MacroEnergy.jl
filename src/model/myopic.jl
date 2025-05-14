@@ -4,10 +4,21 @@ end
 
 function run_myopic_iteration!(case::Case, opt::Optimizer)
     periods = get_periods(case)
-    num_periods = num_periods(case)
+    num_periods = number_of_periods(case)
     fixed_cost = Dict()
     variable_cost = Dict()
     models = Vector{Model}(undef, num_periods)
+
+    period_lengths = collect(get_settings(case).PeriodLengths)
+
+    discount_rate = get_settings(case).DiscountRate
+
+    cum_years = [sum(period_lengths[i] for i in 1:s-1; init=0) for s in 1:num_periods];
+
+    discount_factor = 1 ./ ( (1 + discount_rate) .^ cum_years)
+
+    opexmult = [sum([1 / (1 + discount_rate)^(i) for i in 1:period_lengths[s]]) for s in 1:num_periods]
+
     for (period_idx,system) in enumerate(periods)
         @info(" -- Generating model for period $(period_idx)")
         model = Model()
@@ -37,25 +48,14 @@ function run_myopic_iteration!(case::Case, opt::Optimizer)
         
         variable_cost[period_idx] = model[:eVariableCost];
         unregister(model,:eVariableCost)
+    
+        @expression(model, eFixedCostByPeriod[period_idx], discount_factor[period_idx] * fixed_cost[period_idx])
+    
+        @expression(model, eFixedCost, eFixedCostByPeriod[period_idx])
         
-
-        period_lengths = collect(settings.PeriodLengths)
-
-        discount_rate = settings.DiscountRate
+        @expression(model, eVariableCostByPeriod[period_idx], discount_factor[period_idx] * opexmult[period_idx] * variable_cost[period_idx])
     
-        cum_years = [sum(period_lengths[i] for i in 1:s-1; init=0) for s in 1:num_periods];
-    
-        discount_factor = 1 ./ ( (1 + discount_rate) .^ cum_years)
-    
-        @expression(model, eFixedCostByPeriod, discount_factor * fixed_cost[period_idx])
-    
-        @expression(model, eFixedCost, eFixedCostByPeriod)
-    
-        opexmult = [sum([1 / (1 + discount_rate)^(i) for i in 1:period_lengths[s]]) for s in 1:num_periods]
-    
-        @expression(model, eVariableCostByPeriod, discount_factor * opexmult[period_idx] * variable_cost[period_idx])
-    
-        @expression(model, eVariableCost, eVariableCostByPeriod)
+        @expression(model, eVariableCost, eVariableCostByPeriod[period_idx])
 
         @objective(model, Min, model[:eFixedCost] + model[:eVariableCost])
 
