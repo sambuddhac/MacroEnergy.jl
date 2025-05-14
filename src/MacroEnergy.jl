@@ -221,5 +221,7 @@ export AbstractAsset,
     template_location,
     template_asset,
     template_subcommodity
+    asset_ids
+    asset_ids_from_dir
     
 end # module MacroEnergy
