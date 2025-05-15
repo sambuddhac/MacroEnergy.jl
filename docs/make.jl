@@ -25,7 +25,6 @@ const pages = [
     "Guides" => [
         "Introduction" => "Guides/guides_introduction.md",
         "User Guide" => [
-            "Introduction" => "Guides/User Guide/user_introduction.md",
             "Create a System" => "Guides/User Guide/user_build_system.md",
             "Adding Commodities" => "Guides/User Guide/user_add_commodity.md",
             "Adding Nodes" => "Guides/User Guide/user_add_node.md",
@@ -40,13 +39,11 @@ const pages = [
             "Exploring the Asset library" => "Guides/User Guide/user_using_asset_libary.md"
         ],
         "Modeler Guide" => [
-            "Introduction" => "Guides/Modeler Guide/1_introduction.md",
             "Creating a Sector" => "Guides/Modeler Guide/modeler_build_sectors.md",
             "Creating an Asset" => "Guides/Modeler Guide/modeler_build_asset.md",
             "How to Create an Example Case" => "Guides/Modeler Guide/3_create_example_case.md",
         ],
         "Developer Guide" => [
-            "Introduction" => "Guides/Developer Guide/1_introduction.md",
             "Creating a Constraint" => "Guides/Developer Guide/dev_create_constraint.md",
             "Type Hierarchy" => "Guides/Developer Guide/2_type_hierarchy.md",
         ],
