@@ -469,7 +469,7 @@ julia> asset_ids_from_dir("ExampleSystems/template_example/assets")
 
 ## Add Instance Data
 
-The `simple` and `full` versions of the `template_asset` functions will create Assets with Macros default input data. This data does not represent realistic assumptions, so you must add your own data to the fields. You may delete any fields you do not want to change.
+The `simple` and `full` versions of the `template_asset` functions will create Assets with Macro's default input data. This data does not represent realistic assumptions, so you must add your own data to the fields. You may delete any fields you do not want to change.
 
 If you are using the `simple` version of an Asset file you must define a Location for each Asset, by editing the `location` field of each Assets `instance_data`.
 
