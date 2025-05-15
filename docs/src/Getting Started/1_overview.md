@@ -10,9 +10,7 @@ This getting started guides aims to help you:
 
 ## How can I use Macro?
 
-ToDo: give some examples of how planning + dispatch models can be used.
-
-## Example workflows
+Macro can be used in a variety of ways to optimize the design and operation of energy systems, investigate the value of new technologies or polices, optimize investments in an energy system over multiple years, and many more. Some example workflows are given below:
 
 ### Optimizing an energy system
 
