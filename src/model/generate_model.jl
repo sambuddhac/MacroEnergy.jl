@@ -326,9 +326,9 @@ function undo_discount_fixed_costs!(y::Union{AbstractEdge,AbstractStorage},setti
         payment_years_remaining = min(capital_recovery_period(y), model_years_remaining);
     end
     
-    y.annualized_investment_cost = annualized_investment_cost(y) / sum(1 / (1 + settings.DiscountRate)^s for s in 1:payment_years_remaining; init=0);
+    y.annualized_investment_cost = payment_years_remaining * annualized_investment_cost(y) / sum(1 / (1 + settings.DiscountRate)^s for s in 1:payment_years_remaining; init=0);
     opexmult = sum([1 / (1 + settings.DiscountRate)^(i) for i in 1:settings.PeriodLengths[period_index(y)]])
-    y.fixed_om_cost = fixed_om_cost(y) / opexmult
+    y.fixed_om_cost = settings.PeriodLengths[period_index(y)]*fixed_om_cost(y) / opexmult
 end
 function undo_discount_fixed_costs!(g::Transformation,settings::NamedTuple)
     return nothing

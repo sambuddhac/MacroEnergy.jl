@@ -1140,7 +1140,7 @@ function compute_undiscounted_costs!(model::Model, system::System, settings::Nam
 
     unregister(model,:eDiscountedVariableCost)
     model[:eDiscountedVariableCost] = model[:eVariableCostByPeriod][period_index]
-    model[:eVariableCost] = model[:eVariableCostByPeriod][period_index]/(discount_factor * opexmult);
+    model[:eVariableCost] = period_lengths[period_index]*model[:eVariableCostByPeriod][period_index]/(discount_factor * opexmult)
 
 end
 
