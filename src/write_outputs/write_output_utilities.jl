@@ -927,7 +927,7 @@ function write_outputs(results_dir::AbstractString, system::System, model::Model
     write_capacity(joinpath(results_dir, "capacity.csv"), system)
     
     # Cost results
-    write_costs(joinpath(results_dir, "costs.csv"), system, model)
+    write_costs(joinpath(results_dir, "undiscounted_costs.csv"), system, model)
 
     # Flow results
     write_flow(joinpath(results_dir, "flows.csv"), system)
@@ -955,7 +955,7 @@ function write_outputs(case_path::AbstractString, case::Case, model::Model)
         end
         mkpath(results_dir)
         write_outputs(results_dir, period, model)
-        write_discounted_costs(joinpath(results_dir, "discounted_costs.csv"), period, model; period_index=period_idx)
+        write_discounted_costs(joinpath(results_dir, "costs.csv"), period, model; period_index=period_idx)
     end
 
     return nothing
@@ -969,6 +969,7 @@ function write_outputs(case_path::AbstractString, case::Case, myopic_results::My
     periods = get_periods(case)
     for (period_idx, period) in enumerate(periods)
         @info("Writing results for period $period_idx")
+        compute_total_myopic_costs!(myopic_results.models[period_idx], period, get_settings(case))
         compute_undiscounted_costs!(myopic_results.models[period_idx], period, get_settings(case))
         ## Create results directory to store the results
         if num_periods > 1
@@ -979,7 +980,9 @@ function write_outputs(case_path::AbstractString, case::Case, myopic_results::My
             results_dir = joinpath(case_path, "results")
         end
         mkpath(results_dir)
+        
         write_outputs(results_dir, period, myopic_results.models[period_idx])
+        write_discounted_costs(joinpath(results_dir, "costs.csv"), period, myopic_results.models[period_idx]; period_index=period_idx)
     end
 
     return nothing
@@ -1023,8 +1026,8 @@ function write_outputs(case_path::AbstractString, case::Case, bd_results::Bender
         
         # Cost results
         costs = prepare_costs_benders(period, bd_results, subop_indices_period, settings)
-        write_costs(joinpath(results_dir, "costs.csv"), period, costs)
-        write_discounted_costs(joinpath(results_dir, "discounted_costs.csv"), period, costs)
+        write_costs(joinpath(results_dir, "undiscounted_costs.csv"), period, costs)
+        write_discounted_costs(joinpath(results_dir, "costs.csv"), period, costs)
     end
 
     return nothing
@@ -1141,6 +1144,15 @@ function compute_undiscounted_costs!(model::Model, system::System, settings::Nam
     unregister(model,:eDiscountedVariableCost)
     model[:eDiscountedVariableCost] = model[:eVariableCostByPeriod][period_index]
     model[:eVariableCost] = period_lengths[period_index]*model[:eVariableCostByPeriod][period_index]/(discount_factor * opexmult)
+
+end
+
+function compute_total_myopic_costs!(model::Model, system::System, settings::NamedTuple)
+    
+    add_costs_not_seen_by_myopic!(system, settings)
+    unregister(model,:eFixedCost)
+    model[:eFixedCost] = AffExpr(0.0)
+    compute_fixed_costs!(system, model)
 
 end
 
