@@ -74,6 +74,30 @@ function write_costs(
     return nothing
 end
 
+function write_undiscounted_costs(
+    file_path::AbstractString, 
+    system::System, 
+    model::Union{Model,NamedTuple}; 
+    scaling::Float64=1.0, 
+    drop_cols::Vector{<:AbstractString}=String[]
+)
+    @info "Writing undiscounted costs to $file_path"
+
+    # Get costs and determine layout (wide or long)
+    costs = get_optimal_costs(model; scaling)
+    layout = get_output_layout(system, :Costs)
+
+    if layout == "wide"
+        default_drop_cols = ["commodity", "commodity_subtype", "zone", "resource_id", "component_id", "type"]
+        # Only use default_drop_cols if user didn't specify any
+        drop_cols = isempty(drop_cols) ? default_drop_cols : drop_cols
+        costs = reshape_wide(costs)
+    end
+
+    write_dataframe(file_path, costs, drop_cols)
+    return nothing
+end
+
 function compute_fixed_costs!(system::System, model::Model)
     for a in system.assets
         compute_fixed_costs!(a, model)
