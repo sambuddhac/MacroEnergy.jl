@@ -12,6 +12,7 @@ using InteractiveUtils
 using Printf: @printf
 using MacroEnergyScaling
 using GitHub
+using Markdown
 
 import Base: /, push!, merge!
 
@@ -225,6 +226,8 @@ export AbstractAsset,
     asset_ids,
     asset_ids_from_dir,
     list_examples,
-    download_example
+    download_example,
+    example_readme,
+    example_contents
     
 end # module MacroEnergy
