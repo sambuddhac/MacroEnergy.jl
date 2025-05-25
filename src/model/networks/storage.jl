@@ -360,21 +360,31 @@ function operation_model!(g::LongDurationStorage, model::Model)
 
 end
 
-function compute_fixed_costs!(g::AbstractStorage, model::Model)
+function compute_investment_costs!(g::AbstractStorage, model::Model)
     if has_capacity(g)
         if can_expand(g)
             add_to_expression!(
-                    model[:eFixedCost],
+                    model[:eInvestmentFixedCost],
                     annualized_investment_cost(g),
                     new_capacity(g),
                 )
         end
+    end
+end
+
+function compute_om_fixed_costs!(g::AbstractStorage, model::Model)
+    if has_capacity(g)
         if fixed_om_cost(g) > 0
             add_to_expression!(
-                model[:eFixedCost],
+                model[:eOMFixedCost],
                 fixed_om_cost(g),
                 capacity(g),
             )
         end
     end
+end
+
+function compute_fixed_costs!(g::AbstractStorage, model::Model)
+    compute_investment_costs!(g, model)
+    compute_om_fixed_costs!(g, model)
 end

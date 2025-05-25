@@ -1,5 +1,5 @@
 """
-    get_optimal_costs(model::Union{Model,NamedTuple}; scaling::Float64=1.0)
+    get_optimal_undiscounted_costs(model::Union{Model,NamedTuple}; scaling::Float64=1.0)
 
 Get the total, fixed, and variable costs for the system.
 
@@ -11,7 +11,7 @@ Get the total, fixed, and variable costs for the system.
 
 # Example
 ```julia
-get_optimal_costs(model)
+get_optimal_undiscounted_costs(model)
 3×8 DataFrame
  Row │ commodity  commodity_subtype  zone    resource_id  component_id  type    variable      value   
      │ Symbol     Symbol             Symbol  Symbol       Symbol        Symbol  Symbol        Float64 
@@ -21,9 +21,9 @@ get_optimal_costs(model)
    3 │ all        cost               all     all          all           Cost    TotalCost     36787.3
 ```
 """
-function get_optimal_costs(model::Union{Model,NamedTuple}; scaling::Float64=1.0)
+function get_optimal_undiscounted_costs(model::Union{Model,NamedTuple}; scaling::Float64=1.0)
     @debug " -- Getting optimal costs for the system."
-    costs = prepare_costs(model, scaling)
+    costs = prepare_undiscounted_costs(model, scaling)
     df = convert_to_dataframe(costs)
     df[!, (!isa).(eachcol(df), Vector{Missing})] # remove missing columns
 end
@@ -60,7 +60,7 @@ function write_costs(
     @info "Writing costs to $file_path"
 
     # Get costs and determine layout (wide or long)
-    costs = get_optimal_costs(model; scaling)
+    costs = get_optimal_discounted_costs(model; scaling)
     layout = get_output_layout(system, :Costs)
 
     if layout == "wide"
@@ -84,7 +84,7 @@ function write_undiscounted_costs(
     @info "Writing undiscounted costs to $file_path"
 
     # Get costs and determine layout (wide or long)
-    costs = get_optimal_costs(model; scaling)
+    costs = get_optimal_undiscounted_costs(model; scaling)
     layout = get_output_layout(system, :Costs)
 
     if layout == "wide"
@@ -111,5 +111,21 @@ function compute_fixed_costs!(a::AbstractAsset, model::Model)
 end
 
 function compute_fixed_costs!(g::Union{Node,Transformation},model::Model)
+    return nothing
+end
+
+function compute_investment_costs!(system::System, model::Model)
+    for a in system.assets
+        compute_investment_costs!(a, model)
+    end
+end
+
+function compute_investment_costs!(a::AbstractAsset, model::Model)
+    for t in fieldnames(typeof(a))
+        compute_investment_costs!(getfield(a, t), model)
+    end
+end
+
+function compute_investment_costs!(g::Union{Node,Transformation},model::Model)
     return nothing
 end
