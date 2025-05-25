@@ -872,7 +872,7 @@ function write_outputs(results_dir::AbstractString, system::System, model::Model
     write_capacity(joinpath(results_dir, "capacity.csv"), system)
     
     # Cost results
-    write_costs(joinpath(results_dir, "discounted_costs.csv"), system, model)
+    write_costs(joinpath(results_dir, "costs.csv"), system, model)
     write_undiscounted_costs(joinpath(results_dir, "undiscounted_costs.csv"), system, model)
 
     # Flow results
@@ -974,7 +974,7 @@ function write_outputs(case_path::AbstractString, case::Case, bd_results::Bender
         
         # Cost results
         costs = prepare_costs_benders(period, bd_results, subop_indices_period, settings)
-        write_costs(joinpath(results_dir, "discounted_costs.csv"), period, costs)
+        write_costs(joinpath(results_dir, "costs.csv"), period, costs)
     end
 
     return nothing
