@@ -199,62 +199,6 @@ get_type(obj::T) where {T<:Union{AbstractEdge,Node,Storage}} = Symbol(typeof(obj
 get_unit(obj::AbstractEdge, f::Function) = unit(commodity_type(obj.timedata), f)    #TODO: check if this is correct
 get_unit(obj::T, f::Function) where {T<:Union{Node,Storage}} = unit(commodity_type(obj), f)
 
-## Helper functions to extract final costs from the optimized model ##
-# This fuction will returns:
-# - Variable cost
-# - Fixed cost
-# - Total cost
-# Preparing undiscounted costs
-function prepare_undiscounted_costs(model::Union{Model,NamedTuple}, scaling::Float64=1.0)
-    fixed_cost = value(model[:eFixedCost])
-    variable_cost = value(model[:eVariableCost])
-    total_cost = fixed_cost + variable_cost
-    OutputRow[
-        OutputRow(
-            :all,
-            :cost,
-            :all,
-            :all,
-            :all,
-            :Cost,
-            :FixedCost,
-            missing,
-            missing,
-            missing,
-            fixed_cost * scaling^2,
-            # :USD,
-        ),
-        OutputRow(
-            :all,
-            :cost,
-            :all,
-            :all,
-            :all,
-            :Cost,
-            :VariableCost,
-            missing,
-            missing,
-            missing,
-            variable_cost * scaling^2,
-            # :USD,
-        ),
-        OutputRow(
-            :all,
-            :cost,
-            :all,
-            :all,
-            :all,
-            :Cost,
-            :TotalCost,
-            missing,
-            missing,
-            missing,
-            total_cost * scaling^2,
-            # :USD,
-        )
-    ]
-end
-
 # Function to collect all the outputs from a system and return them as a DataFrame
 """
     collect_results(system::System, model::Model, scaling::Float64=1.0)
@@ -929,6 +873,7 @@ function write_outputs(results_dir::AbstractString, system::System, model::Model
     
     # Cost results
     write_costs(joinpath(results_dir, "discounted_costs.csv"), system, model)
+    write_undiscounted_costs(joinpath(results_dir, "undiscounted_costs.csv"), system, model)
 
     # Flow results
     write_flow(joinpath(results_dir, "flows.csv"), system)
@@ -940,7 +885,7 @@ end
 Write results when using Monolithic as solution algorithm.
 """
 function write_outputs(case_path::AbstractString, case::Case, model::Model)
-    num_periods =number_of_periods(case)
+    num_periods = number_of_periods(case)
     periods = get_periods(case)
     for (period_idx,period) in enumerate(periods)
         @info("Writing results for period $period_idx")
@@ -959,7 +904,6 @@ function write_outputs(case_path::AbstractString, case::Case, model::Model)
         end
         mkpath(results_dir)
         write_outputs(results_dir, period, model)
-        # write_undiscounted_costs(joinpath(results_dir, "costs.csv"), period, model; period_index=period_idx)
     end
 
     return nothing
@@ -973,7 +917,6 @@ function write_outputs(case_path::AbstractString, case::Case, myopic_results::My
     periods = get_periods(case)
     for (period_idx, period) in enumerate(periods)
         @info("Writing results for period $period_idx")
-        # compute_total_myopic_costs!(myopic_results.models[period_idx], period, get_settings(case))
 
         create_discounted_cost_expressions!(myopic_results.models[period_idx], period, get_settings(case))
 
@@ -987,10 +930,7 @@ function write_outputs(case_path::AbstractString, case::Case, myopic_results::My
             results_dir = joinpath(case_path, "results")
         end
         mkpath(results_dir)
-        
-        # Write undiscounted costs
         write_outputs(results_dir, period, myopic_results.models[period_idx])
-        # write_undiscounted_costs(joinpath(results_dir, "costs.csv"), period, myopic_results.models[period_idx]; period_index=period_idx)
     end
 
     return nothing
@@ -1035,7 +975,6 @@ function write_outputs(case_path::AbstractString, case::Case, bd_results::Bender
         # Cost results
         costs = prepare_costs_benders(period, bd_results, subop_indices_period, settings)
         write_costs(joinpath(results_dir, "discounted_costs.csv"), period, costs)
-        # write_undiscounted_costs(joinpath(results_dir, "costs.csv"), period, costs)
     end
 
     return nothing
@@ -1136,18 +1075,29 @@ function create_discounted_cost_expressions!(model::Model, system::System, setti
     
     period_index = system.time_data[:Electricity].period_index;
     discount_rate = settings.DiscountRate
+    period_lengths = collect(settings.PeriodLengths)
+    cum_years = sum(period_lengths[i] for i in 1:period_index-1; init=0)
+    discount_factor = 1/( (1 + discount_rate)^cum_years)
     
     unregister(model,:eDiscountedFixedCost)
+
     if isa(solution_algorithm(settings[:SolutionAlgorithm]), Myopic)
+
         unregister(model,:eDiscountedInvestmentFixedCost)
         add_costs_not_seen_by_myopic!(system, settings)
+        unregister(model,:eInvestmentFixedCost)
         model[:eInvestmentFixedCost] = AffExpr(0.0)
         compute_investment_costs!(system, model)
-        model[:eDiscountedInvestmentFixedCost] = model[:eInvestmentFixedCost]
+        
+        model[:eDiscountedInvestmentFixedCost] = discount_factor * model[:eInvestmentFixedCost]
+        
         model[:eDiscountedFixedCost] = model[:eDiscountedInvestmentFixedCost] + model[:eOMFixedCostByPeriod][period_index]
-    else
+
+    elseif isa(solution_algorithm(settings[:SolutionAlgorithm]), Monolithic) || isa(solution_algorithm(settings[:SolutionAlgorithm]), Benders)
         # Perfect foresight  cases (applies to both Monolithic and Benders)
         model[:eDiscountedFixedCost] = model[:eFixedCostByPeriod][period_index]
+    else
+        nothing
     end
 
     unregister(model,:eDiscountedVariableCost)
@@ -1166,25 +1116,15 @@ function compute_undiscounted_costs!(model::Model, system::System, settings::Nam
     model[:eOMFixedCost] = AffExpr(0.0)
     model[:eInvestmentFixedCost] = AffExpr(0.0)
     compute_fixed_costs!(system, model)
+    model[:eFixedCost] = model[:eInvestmentFixedCost] + model[:eOMFixedCost] 
 
     cum_years = sum(period_lengths[i] for i in 1:period_index-1; init=0);
     discount_factor = 1/( (1 + discount_rate)^cum_years)
     opexmult = sum([1 / (1 + discount_rate)^(i) for i in 1:period_lengths[period_index]])
 
-    # unregister(model,:eDiscountedVariableCost)
-    # model[:eDiscountedVariableCost] = model[:eVariableCostByPeriod][period_index]
     model[:eVariableCost] = period_lengths[period_index]*model[:eVariableCostByPeriod][period_index]/(discount_factor * opexmult)
 
 end
-
-# function compute_total_myopic_costs!(model::Model, system::System, settings::NamedTuple)
-    
-#     add_costs_not_seen_by_myopic!(system, settings)
-#     unregister(model,:eFixedCost)
-#     model[:eFixedCost] = AffExpr(0.0)
-#     compute_fixed_costs!(system, model)
-
-# end
 
 function write_costs(
     file_path::AbstractString, 
@@ -1211,11 +1151,99 @@ function write_costs(
     return nothing
 end
 
+function write_undiscounted_costs(
+    file_path::AbstractString, 
+    system::System, 
+    model::Union{Model,NamedTuple};
+    period_index::Int64=1,
+    scaling::Float64=1.0, 
+    drop_cols::Vector{<:AbstractString}=String[]
+)
+    @info "Writing undiscounted costs to $file_path"
+
+    # Get costs and determine layout (wide or long)
+    costs = get_optimal_undiscounted_costs(model,period_index; scaling)
+    layout = get_output_layout(system, :Costs)
+
+    if layout == "wide"
+        default_drop_cols = ["commodity", "commodity_subtype", "zone", "resource_id", "component_id", "type"]
+        # Only use default_drop_cols if user didn't specify any
+        drop_cols = isempty(drop_cols) ? default_drop_cols : drop_cols
+        costs = reshape_wide(costs)
+    end
+
+    write_dataframe(file_path, costs, drop_cols)
+    return nothing
+end
+
 function get_optimal_discounted_costs(model::Union{Model,NamedTuple}, period_index::Int64; scaling::Float64=1.0)
     @debug " -- Getting optimal discounted costs for the system."
     costs = prepare_discounted_costs(model, period_index, scaling)
     df = convert_to_dataframe(costs)
     df[!, (!isa).(eachcol(df), Vector{Missing})] # remove missing columns
+end
+
+function get_optimal_undiscounted_costs(model::Union{Model,NamedTuple}, period_index::Int64; scaling::Float64=1.0)
+    @debug " -- Getting optimal discounted costs for the system."
+    costs = prepare_undiscounted_costs(model, period_index, scaling)
+    df = convert_to_dataframe(costs)
+    df[!, (!isa).(eachcol(df), Vector{Missing})] # remove missing columns
+end
+
+## Helper functions to extract undiscounted and discounted costs from the optimized model ##
+# This fuction will returns:
+# - Variable cost
+# - Fixed cost
+# - Total cost
+# Preparing undiscounted costs
+function prepare_undiscounted_costs(model::Union{Model,NamedTuple}, period_index::Int64, scaling::Float64=1.0)
+    fixed_cost = value(model[:eFixedCost])
+    variable_cost = value(model[:eVariableCost])
+    total_cost = fixed_cost + variable_cost
+    OutputRow[
+        OutputRow(
+            :all,
+            :cost,
+            :all,
+            :all,
+            :all,
+            :Cost,
+            :FixedCost,
+            missing,
+            missing,
+            missing,
+            fixed_cost * scaling^2,
+            # :USD,
+        ),
+        OutputRow(
+            :all,
+            :cost,
+            :all,
+            :all,
+            :all,
+            :Cost,
+            :VariableCost,
+            missing,
+            missing,
+            missing,
+            variable_cost * scaling^2,
+            # :USD,
+        ),
+        OutputRow(
+            :all,
+            :cost,
+            :all,
+            :all,
+            :all,
+            :Cost,
+            :TotalCost,
+            missing,
+            missing,
+            missing,
+            total_cost * scaling^2,
+            # :USD,
+        )
+    ]
 end
 
 function prepare_discounted_costs(model::Union{Model,NamedTuple}, period_index::Int64, scaling::Float64=1.0)
