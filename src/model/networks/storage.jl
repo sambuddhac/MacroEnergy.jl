@@ -15,7 +15,7 @@ macro AbstractStorageBaseAttributes()
         investment_cost::Float64 = $storage_defaults[:investment_cost]
         lifetime::Int64 = $storage_defaults[:lifetime]
         long_duration::Bool = $storage_defaults[:long_duration]
-        loss_fraction::Float64 = $storage_defaults[:loss_fraction]
+        loss_fraction::Vector{Float64} = $storage_defaults[:loss_fraction]
         max_capacity::Float64 = $storage_defaults[:max_capacity]
         max_duration::Float64 = $storage_defaults[:max_duration]
         max_new_capacity::Float64 = $storage_defaults[:max_new_capacity]
@@ -61,6 +61,7 @@ end
     - fixed_om_cost::Float64: Fixed operation and maintenance costs
     - investment_cost::Float64: CAPEX per unit of new storage capacity
     - loss_fraction::Float64: Fraction of stored commodity lost at each timestep
+    - loss_fraction::Vector{Float64}: Fraction of stored commodity lost at each timestep
     - max_capacity::Float64: Maximum allowed storage capacity
     - max_duration::Float64: Maximum storage duration in hours
     - max_storage_level::Float64: Maximum storage level as fraction of capacity
@@ -103,6 +104,9 @@ function make_storage(
             delete!(filtered_data, key)
         end
     end
+    if haskey(filtered_data,:loss_fraction) && !isa(filtered_data[:loss_fraction], Vector{Float64})
+        filtered_data[:loss_fraction] = [filtered_data[:loss_fraction]];
+    end 
     _storage = Storage{commodity}(;
         id = id,
         timedata = time_data,
@@ -130,6 +134,16 @@ has_capacity(g::AbstractStorage) = true;
 investment_cost(g::AbstractStorage) = g.investment_cost;
 lifetime(g::AbstractStorage) = g.lifetime;
 loss_fraction(g::AbstractStorage) = g.loss_fraction;
+function loss_fraction(g::AbstractStorage, t::Int64)
+    a = loss_fraction(g)
+    if isempty(a)
+        return 0.0
+    elseif length(a) == 1
+        return a[1]
+    else
+        return a[t]
+    end
+end
 max_capacity(g::AbstractStorage) = g.max_capacity;
 max_duration(g::AbstractStorage) = g.max_duration;
 max_new_capacity(g::AbstractStorage) = g.max_new_capacity;
@@ -218,7 +232,7 @@ function operation_model!(g::Storage, model::Model)
                     model,
                     [t in time_interval(g)],
                     -storage_level(g, t) +
-                    (1 - loss_fraction(g)) *
+                    (1 - loss_fraction(g,timestepbefore(t, 1, subperiods(g)))) *
                     storage_level(g, timestepbefore(t, 1, subperiods(g)))
                 )
             else
@@ -260,6 +274,9 @@ function make_long_duration_storage(
             delete!(filtered_data, key)
         end
     end
+    if haskey(filtered_data,:loss_fraction) && !isa(filtered_data[:loss_fraction], Vector{Float64})
+        filtered_data[:loss_fraction] = [filtered_data[:loss_fraction]];
+    end 
     _storage = LongDurationStorage{commodity}(;
         id=id,
         timedata=time_data,
@@ -331,11 +348,11 @@ function operation_model!(g::LongDurationStorage, model::Model)
                     [t in time_interval(g)],
                     if t ∈ STARTS 
                         -storage_level(g, t) +
-                        (1 - loss_fraction(g)) *
+                        (1 - loss_fraction(g,timestepbefore(t, 1, subperiods(g)))) *
                         (storage_level(g, timestepbefore(t, 1, subperiods(g))) - storage_change(g, current_subperiod(g,t)))
                     else
                         -storage_level(g, t) +
-                        (1 - loss_fraction(g)) *
+                        (1 - loss_fraction(g,timestepbefore(t, 1, subperiods(g)))) *
                         storage_level(g, timestepbefore(t, 1, subperiods(g)))
                     end
                 )
