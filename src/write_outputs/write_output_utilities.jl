@@ -1126,55 +1126,6 @@ function compute_undiscounted_costs!(model::Model, system::System, settings::Nam
 
 end
 
-function write_costs(
-    file_path::AbstractString, 
-    system::System, 
-    model::Union{Model,NamedTuple};
-    period_index::Int64=1,
-    scaling::Float64=1.0, 
-    drop_cols::Vector{<:AbstractString}=String[]
-)
-    @info "Writing discounted costs to $file_path"
-
-    # Get costs and determine layout (wide or long)
-    costs = get_optimal_discounted_costs(model,period_index; scaling)
-    layout = get_output_layout(system, :Costs)
-
-    if layout == "wide"
-        default_drop_cols = ["commodity", "commodity_subtype", "zone", "resource_id", "component_id", "type"]
-        # Only use default_drop_cols if user didn't specify any
-        drop_cols = isempty(drop_cols) ? default_drop_cols : drop_cols
-        costs = reshape_wide(costs)
-    end
-
-    write_dataframe(file_path, costs, drop_cols)
-    return nothing
-end
-
-function write_undiscounted_costs(
-    file_path::AbstractString, 
-    system::System, 
-    model::Union{Model,NamedTuple};
-    period_index::Int64=1,
-    scaling::Float64=1.0, 
-    drop_cols::Vector{<:AbstractString}=String[]
-)
-    @info "Writing undiscounted costs to $file_path"
-
-    # Get costs and determine layout (wide or long)
-    costs = get_optimal_undiscounted_costs(model,period_index; scaling)
-    layout = get_output_layout(system, :Costs)
-
-    if layout == "wide"
-        default_drop_cols = ["commodity", "commodity_subtype", "zone", "resource_id", "component_id", "type"]
-        # Only use default_drop_cols if user didn't specify any
-        drop_cols = isempty(drop_cols) ? default_drop_cols : drop_cols
-        costs = reshape_wide(costs)
-    end
-
-    write_dataframe(file_path, costs, drop_cols)
-    return nothing
-end
 
 function get_optimal_discounted_costs(model::Union{Model,NamedTuple}, period_index::Int64; scaling::Float64=1.0)
     @debug " -- Getting optimal discounted costs for the system."

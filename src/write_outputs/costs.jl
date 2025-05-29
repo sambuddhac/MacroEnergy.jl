@@ -53,14 +53,15 @@ The extension of the file determines the format of the file.
 function write_costs(
     file_path::AbstractString, 
     system::System, 
-    model::Union{Model,NamedTuple}; 
+    model::Union{Model,NamedTuple};
+    period_index::Int64=1,
     scaling::Float64=1.0, 
     drop_cols::Vector{<:AbstractString}=String[]
 )
-    @info "Writing costs to $file_path"
+    @info "Writing discounted costs to $file_path"
 
     # Get costs and determine layout (wide or long)
-    costs = get_optimal_discounted_costs(model; scaling)
+    costs = get_optimal_discounted_costs(model,period_index; scaling)
     layout = get_output_layout(system, :Costs)
 
     if layout == "wide"
@@ -77,14 +78,15 @@ end
 function write_undiscounted_costs(
     file_path::AbstractString, 
     system::System, 
-    model::Union{Model,NamedTuple}; 
+    model::Union{Model,NamedTuple};
+    period_index::Int64=1,
     scaling::Float64=1.0, 
     drop_cols::Vector{<:AbstractString}=String[]
 )
     @info "Writing undiscounted costs to $file_path"
 
     # Get costs and determine layout (wide or long)
-    costs = get_optimal_undiscounted_costs(model; scaling)
+    costs = get_optimal_undiscounted_costs(model,period_index; scaling)
     layout = get_output_layout(system, :Costs)
 
     if layout == "wide"
