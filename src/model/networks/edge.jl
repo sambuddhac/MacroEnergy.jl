@@ -271,23 +271,33 @@ function planning_model!(e::AbstractEdge, model::Model)
 
 end
 
-function compute_fixed_costs!(e::AbstractEdge, model::Model)
+function compute_investment_costs!(e::AbstractEdge, model::Model)
     if has_capacity(e)
         if can_expand(e)
             add_to_expression!(
-                    model[:eFixedCost],
+                    model[:eInvestmentFixedCost],
                     annualized_investment_cost(e),
                     new_capacity(e),
                 )
         end
+    end
+end
+
+function compute_om_fixed_costs!(e::AbstractEdge, model::Model)
+    if has_capacity(e)
         if fixed_om_cost(e) > 0
             add_to_expression!(
-                model[:eFixedCost],
+                model[:eOMFixedCost],
                 fixed_om_cost(e),
                 capacity(e),
             )
         end
     end
+end
+
+function compute_fixed_costs!(e::AbstractEdge, model::Model)
+    compute_investment_costs!(e, model)
+    compute_om_fixed_costs!(e, model)
 end
 
 function operation_model!(e::Edge, model::Model)
