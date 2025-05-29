@@ -75,7 +75,7 @@ Some examples of of assets are:
 - Hydroelectric reservoirs
 - Variable renewable energy sources (e.g. wind turbines, solar panels)
 - Electrolyzers
-- SMRs
+- Steam methane reformers
 - Run-of-river, reservoir storage and pumped storage hydro-electric facilities
 - Biorefineries
 
