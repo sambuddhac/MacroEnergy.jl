@@ -83,7 +83,7 @@ The current library includes the following assets:
 - [Power Line](@ref)
 
 ```@raw html
-<a href="powerline.html"><img width="220" src="../../images/powerline.png" /></a>
+<a href="transmissionlink.html"><img width="220" src="../../images/transmissionlink.png" /></a>
 ```
 
 - [Thermal Hydrogen Plant (with and without CCS)](@ref)

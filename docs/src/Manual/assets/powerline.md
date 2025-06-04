@@ -4,7 +4,7 @@
 A power line is represented in Macro using the following graph structure:
 
 ```@raw html
-<img width="400" src="../../images/powerline.png" />
+<img width="400" src="../../images/transmissionlink.png" />
 ```
 
 A power line asset is very simple and is made of:
@@ -58,9 +58,9 @@ The following is an example of the input file for a power line asset that create
 
 ```json
 {
-    "line": [
+    "link": [
         {
-            "type": "PowerLine",
+            "type": "TransmissionLink",
             "global_data": {
                 "edges": {
                     "elec_edge": {
