@@ -254,29 +254,32 @@ function carry_over_capacities!(n::Node,n_prev::Node; perfect_foresight::Bool = 
     return nothing
 end
 
-function compute_annualized_costs!(system::System)
+function compute_annualized_costs!(system::System,settings::NamedTuple)
     for a in system.assets
-        compute_annualized_costs!(a)
+        compute_annualized_costs!(a,settings)
     end
 end
 
-function compute_annualized_costs!(a::AbstractAsset)
+function compute_annualized_costs!(a::AbstractAsset,settings::NamedTuple)
     for t in fieldnames(typeof(a))
-        compute_annualized_costs!(getfield(a, t))
+        compute_annualized_costs!(getfield(a, t),settings)
     end
 end
 
-function compute_annualized_costs!(y::Union{AbstractEdge,AbstractStorage})
+function compute_annualized_costs!(y::Union{AbstractEdge,AbstractStorage},settings::NamedTuple)
     if isnothing(annualized_investment_cost(y))
+        if ismissing(wacc(y))
+            y.wacc = settings.DiscountRate;
+        end
         annualization_factor = wacc(y)>0 ? wacc(y) / (1 - (1 + wacc(y))^-capital_recovery_period(y))  : 1.0
         y.annualized_investment_cost = investment_cost(y) * annualization_factor;
     end
 end
 
-function compute_annualized_costs!(g::Transformation)
+function compute_annualized_costs!(g::Transformation,settings::NamedTuple)
     return nothing
 end
-function compute_annualized_costs!(n::Node)
+function compute_annualized_costs!(n::Node,settings::NamedTuple)
     return nothing
 end
 
