@@ -20,6 +20,9 @@ using Gurobi
 using GitHub
 using Markdown
 
+import MacroEnergyScaling: scale_constraints!
+import JuMP: set_optimizer, set_optimizer_attributes
+
 import Base: /, push!, merge!
 
 # Type parameter for Macro data structures
