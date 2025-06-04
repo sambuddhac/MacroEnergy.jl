@@ -36,7 +36,7 @@ function download_example(example_name::String, local_path::String = pwd())
     return nothing
 end
 
-function example_readme(example_name::String, local_path::String = pwd())
+function example_readme(example_name::String)
     example_dir, examples_repo = find_example(example_name)
     for item in directory(examples_repo, example_dir)[1]
         if lowercase(item.name) == "readme.md"
@@ -50,7 +50,7 @@ function example_readme(example_name::String, local_path::String = pwd())
     return nothing
 end
 
-function example_contents(example_name::String, local_path::String = pwd())
+function example_contents(example_name::String)
     example_dir, examples_repo = find_example(example_name)
     example_files = [file.path for file in directory(examples_repo, example_dir)[1] if file.typ == "file"]
     println("Contents of $example_name:")
