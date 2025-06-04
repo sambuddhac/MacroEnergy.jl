@@ -201,13 +201,15 @@ get_unit(obj::T, f::Function) where {T<:Union{Node,Storage}} = unit(commodity_ty
 
 # Function to collect all the outputs from a system and return them as a DataFrame
 """
-    collect_results(system::System, model::Model, scaling::Float64=1.0)
+    collect_results(system::System, model::Model, settings::NamedTuple, period_index::Int64=1, scaling::Float64=1.0)
 
 Returns a `DataFrame` with all the results after the optimization is performed. 
 
 # Arguments
 - `system::System`: The system object containing the case inputs.
 - `model::Model`: The model being optimized.
+- `settings::NamedTuple`: The settings for the system, including output configurations.
+- `period_index::Int64`: The index of the period to collect results for (default is 1).
 - `scaling::Float64`: The scaling factor for the results.
 # Returns
 - `DataFrame`: A `DataFrame containing all the outputs from a system.
@@ -225,7 +227,7 @@ collect_results(system, model)
       ...
 ```
 """
-function collect_results(system::System, model::Model, scaling::Float64=1.0)
+function collect_results(system::System, model::Model, settings::NamedTuple, period_index::Int64=1, scaling::Float64=1.0)
     edges, edge_asset_map = get_edges(system, return_ids_map=true)
 
     # capacity variables 
@@ -246,9 +248,15 @@ function collect_results(system::System, model::Model, scaling::Float64=1.0)
     storlevel = get_optimal_vars_timeseries(storages, storage_level, scaling, storage_asset_map)
 
     # costs
-    costs = prepare_discounted_costs(model, scaling)
+    create_discounted_cost_expressions!(model, system, settings)
 
-    convert_to_dataframe(reduce(vcat, [ecap, eflow, nsd, storlevel, costs]))
+    compute_undiscounted_costs!(model, system, settings)
+
+    discounted_costs = prepare_discounted_costs(model, period_index, scaling)
+
+    undiscounted_costs = prepare_undiscounted_costs(model, period_index, scaling)
+
+    convert_to_dataframe(reduce(vcat, [ecap, eflow, nsd, storlevel, discounted_costs,undiscounted_costs]))
 end
 
 # Function to convert a vector of OutputRow objects to a DataFrame for 
@@ -337,7 +345,7 @@ end
 
 # Function to collect the results from a system and write them to a CSV file
 """
-    write_results(file_path::AbstractString, system::System, model::Model)
+    write_results(file_path::AbstractString, system::System, model::Model, settings::NamedTuple, period_index::Int64=1)
 
 Collects all the results as a `DataFrame` and then writes them to disk after the optimization is performed. 
 
@@ -345,6 +353,8 @@ Collects all the results as a `DataFrame` and then writes them to disk after the
 - `file_path::AbstractString`: full path of the file to export. 
 - `system::System`: The system object containing the case inputs.
 - `model::Model`: The model being optimized.
+- `period_index::Int64`: The index of the period to collect results for (default is 1).
+- `settings::NamedTuple`: The settings for the system, including output configurations.
 
 # Returns
 
@@ -355,11 +365,11 @@ write_results(case_path * "results.csv.gz", system, model)  # GZIP
 write_results(case_path * "results.parquet", system, model) # PARQUET
 ```
 """
-function write_results(file_path::AbstractString, system::System, model::Model)
+function write_results(file_path::AbstractString, system::System, model::Model, settings::NamedTuple, period_index::Int64=1)
     @info "Writing results to $file_path"
 
     # Prepare output data
-    output = collect_results(system, model)
+    output = collect_results(system, model,settings, period_index)
     output.case_name .= coalesce.(output.case_name, basename(system.data_dirpath))
     output.year .= coalesce.(output.year, year(now()))
 
