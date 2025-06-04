@@ -38,10 +38,10 @@ function prepare_case!(systems::Vector{System}, settings::NamedTuple)
     for (system_id, system) in enumerate(systems)
         compute_annualized_costs!(system,settings) 
         
-        @info("Discounting fixed costs for period $(system_id)")
+        @info(" -- Discounting fixed costs for period $(system_id)")
         discount_fixed_costs!(system, settings)
         
-        @info("Computing retirement case for period $(system_id)")
+        @info(" -- Computing retirement case for period $(system_id)")
         compute_retirement_period!(system, settings[:PeriodLengths])
     end
 end

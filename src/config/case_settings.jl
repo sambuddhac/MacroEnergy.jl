@@ -139,7 +139,7 @@ end
 
 
 function set_solution_algorithm!(case_settings::AbstractDict{Symbol,Any})
-    @info("Setting solution algorithm")
+    @info(" -- Setting solution algorithm")
     if case_settings[:SolutionAlgorithm] == "Monolithic"
         case_settings[:SolutionAlgorithm] = Monolithic()
     elseif case_settings[:SolutionAlgorithm] == "Benders"
@@ -150,7 +150,7 @@ function set_solution_algorithm!(case_settings::AbstractDict{Symbol,Any})
         @warn("No solution algorithm specified, defaulting to Monolithic")
         case_settings[:SolutionAlgorithm] = Monolithic()
     end
-    @info("Solution algorithm set to $(case_settings[:SolutionAlgorithm])")
+    @info(" -- Solution algorithm set to $(case_settings[:SolutionAlgorithm])")
     return nothing
 end
 
