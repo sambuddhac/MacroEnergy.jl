@@ -17,9 +17,8 @@ using DistributedArrays
 using Distributed
 using ClusterManagers
 using Gurobi
-
-import MacroEnergyScaling: scale_constraints!
-import JuMP: set_optimizer, set_optimizer_attributes
+using GitHub
+using Markdown
 
 import Base: /, push!, merge!
 
@@ -252,8 +251,12 @@ export AbstractAsset,
     template_node,
     template_location,
     template_asset,
-    template_subcommodity
-    asset_ids
-    asset_ids_from_dir
+    template_subcommodity,
+    asset_ids,
+    asset_ids_from_dir,
+    list_examples,
+    download_example,
+    example_readme,
+    example_contents
     
 end # module MacroEnergy
