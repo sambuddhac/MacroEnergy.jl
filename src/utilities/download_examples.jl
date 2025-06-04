@@ -57,7 +57,24 @@ function download_example(example_name::String, target_dir::String = pwd())
         return nothing
     end
     download_gh(example_dir, examples_repo, target_dir)
-    println("Example downloaded to $target_dir")
+    println("Example '$example_name' downloaded to $target_dir")
+    return nothing
+end
+
+@doc """
+    download_examples(target_dir::String = pwd(), pause_seconds::Float64 = 1.0)::Nothing
+
+Download all examples from the MacroEnergyExamples repository to a specified target directory.\n
+The `target_dir` is the directory where all examples will be downloaded, defaulting to the current working directory. pause_seconds is the time to pause between downloads to avoid hitting GitHub API rate limits.
+"""
+function download_examples(target_dir::String = pwd(), pause_seconds::Float64 = 1.0)
+    all_examples = list_examples()
+    println("Downloading all examples to $target_dir")
+    for example_name in all_examples
+        download_example(example_name, target_dir)
+        # Pause for pause_seconds seconds to avoid hitting GitHub API rate limits
+        sleep(pause_seconds)
+    end
     return nothing
 end
 

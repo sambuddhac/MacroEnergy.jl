@@ -227,6 +227,7 @@ export AbstractAsset,
     asset_ids_from_dir,
     list_examples,
     download_example,
+    download_examples,
     example_readme,
     example_contents
     
