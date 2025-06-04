@@ -96,7 +96,7 @@ MyCase
 │   ├──naturalgas_power.json
 │   ├──naturalgas_power_ccs.json
 │   ├──nuclear_power.json
-│   ├──transmissionlinks.json
+│   ├──powerlines.json
 │   ├──synthetic_liquid_fuels.json
 │   ├──synthetic_naturalgas.json
 │   └──vre.json
