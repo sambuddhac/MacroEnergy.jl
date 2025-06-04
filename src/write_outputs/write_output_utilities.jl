@@ -1137,14 +1137,18 @@ function compute_undiscounted_costs!(model::Model, system::System, settings::Nam
 
 end
 
-
+"""
+Helper function to extract discounted costs from the optimization results and return them as a DataFrame.
+"""
 function get_optimal_discounted_costs(model::Union{Model,NamedTuple}, period_index::Int64; scaling::Float64=1.0)
     @debug " -- Getting optimal discounted costs for the system."
     costs = prepare_discounted_costs(model, period_index, scaling)
     df = convert_to_dataframe(costs)
     df[!, (!isa).(eachcol(df), Vector{Missing})] # remove missing columns
 end
-
+"""
+Helper function to extract undiscounted costs from the optimization results and return them as a DataFrame.
+"""
 function get_optimal_undiscounted_costs(model::Union{Model,NamedTuple}, period_index::Int64; scaling::Float64=1.0)
     @debug " -- Getting optimal discounted costs for the system."
     costs = prepare_undiscounted_costs(model, period_index, scaling)
