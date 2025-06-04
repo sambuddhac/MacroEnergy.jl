@@ -229,6 +229,7 @@ export AbstractAsset,
     download_example,
     download_examples,
     example_readme,
-    example_contents
+    example_contents,
+    authenticate_github
     
 end # module MacroEnergy
