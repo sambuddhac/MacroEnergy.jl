@@ -24,15 +24,18 @@ function find_example(example_name::String)
     example_idx = findfirst(x -> x.name == example_name, examples_dir)
     if isnothing(example_idx)
         println("Example not found: $example_name")
-        return nothing
+        return nothing, nothing
     end
     return examples_dir[example_idx], examples_repo
 end
 
-function download_example(example_name::String, local_path::String = pwd())
-    example_dir, examples_repo = find_example(example_name)
-    download_gh(example_dir, examples_repo, local_path)
-    println("Example downloaded to $local_path")
+function download_example(example_name::String, target_dir::String = pwd())
+    (example_dir, examples_repo) = find_example(example_name)
+    if isnothing(example_dir)
+        return nothing
+    end
+    download_gh(example_dir, examples_repo, target_dir)
+    println("Example downloaded to $target_dir")
     return nothing
 end
 
@@ -60,9 +63,9 @@ function example_contents(example_name::String)
     return nothing
 end
 
-function download_gh(dir_path::String, repo::GitHub.Repo, local_path::String)
+function download_gh(dir_path::String, repo::GitHub.Repo, target_dir::String)
     try
-        download_gh(directory(repo, dir_path)[1], repo, local_path)
+        download_gh(directory(repo, dir_path)[1], repo, target_dir)
         return nothing
     catch e
         if isa(e, GitHub.GitHubError) && e.code == 404
@@ -75,20 +78,27 @@ function download_gh(dir_path::String, repo::GitHub.Repo, local_path::String)
     end
 end
 
-function download_gh(elem::GitHub.Content, repo::GitHub.Repo, local_path::String)
+function download_gh(elem::GitHub.Content, repo::GitHub.Repo, target_dir::String)
+    target_dir = joinpath(pwd(), target_dir)
+    split_path = splitpath(elem.path)
+    if split_path[1] == "examples"
+        target_path = joinpath(target_dir, split_path[2:end]...)
+    else
+        target_path = joinpath(target_dir, split_path...)
+    end
     if elem.typ == "file"
-        download(elem.download_url, joinpath(local_path, elem.path))
+        download(elem.download_url, target_path)
     elseif elem.typ == "dir"
-        mkpath(joinpath(local_path, elem.path))
+        mkpath(joinpath(target_dir, target_path))
         new_dir = directory(repo, elem.path)[1]
         for sub_elem in new_dir
-            download_gh(sub_elem, repo, local_path)
+            download_gh(sub_elem, repo, target_dir)
         end
     end
 end
 
-function download_gh(elems::Vector{GitHub.Content}, repo::GitHub.Repo, local_path::String)
+function download_gh(elems::Vector{GitHub.Content}, repo::GitHub.Repo, target_dir::String)
     for elem in elems
-        download_gh(elem, repo, local_path)
+        download_gh(elem, repo, target_dir)
     end
 end
