@@ -6,6 +6,14 @@ macro examples_repo()
     end)
 end
 
+@doc """
+    list_examples()::Vector{String}
+
+List all available examples in the MacroEnergyExamples repository.
+This function will print the names of all examples and return a vector of their names.
+These names can be used with `download_example` and other methods to download or get
+information about specific examples.
+"""
 function list_examples()
     examples_repo = @examples_repo
     examples_dir = directory(examples_repo, examples_path)[1]
@@ -18,6 +26,13 @@ function list_examples()
     return examples
 end
 
+@doc """
+    find_example(example_name::String)::Tuple{GitHub.Content, GitHub.Repo}
+
+Find an example by its name in the MacroEnergyExamples repository. These names can be obtained
+from `list_examples()`. `find_example` returns a tuple containing the `GitHub.Content` object
+for the requested examples GitHub directory and the `GitHub.Repo` object for the MacroEnergyExamples repository.
+"""
 function find_example(example_name::String)
     examples_repo = @examples_repo
     examples_dir = directory(examples_repo, examples_path)[1]
@@ -29,6 +44,13 @@ function find_example(example_name::String)
     return examples_dir[example_idx], examples_repo
 end
 
+@doc """
+    download_example(example_name::String, target_dir::String = pwd())::Nothing
+
+Download an example from the MacroEnergyExamples repository to a specified target directory.
+The `example_name` should match one of the names listed by `list_examples()`.
+The `target_dir` is the directory where the example will be downloaded, defaulting to the current working directory.
+"""
 function download_example(example_name::String, target_dir::String = pwd())
     (example_dir, examples_repo) = find_example(example_name)
     if isnothing(example_dir)
@@ -39,6 +61,12 @@ function download_example(example_name::String, target_dir::String = pwd())
     return nothing
 end
 
+@doc """
+    example_readme(example_name::String)::Nothing
+
+Display the README.md file for a specific example from the MacroEnergyExamples repository.
+The `example_name` should match one of the names listed by `list_examples()`.
+"""
 function example_readme(example_name::String)
     example_dir, examples_repo = find_example(example_name)
     for item in directory(examples_repo, example_dir)[1]
@@ -53,6 +81,13 @@ function example_readme(example_name::String)
     return nothing
 end
 
+@doc """
+    example_contents(example_name::String)::Nothing
+
+Display the contents of a specific example from the MacroEnergyExamples repository.
+The `example_name` should match one of the names listed by `list_examples()`.
+This function will print the names of all files in the example directory.
+"""
 function example_contents(example_name::String)
     example_dir, examples_repo = find_example(example_name)
     example_files = [file.path for file in directory(examples_repo, example_dir)[1] if file.typ == "file"]
@@ -63,6 +98,13 @@ function example_contents(example_name::String)
     return nothing
 end
 
+"""
+    download_gh(dir_path::String, repo::GitHub.Repo, target_dir::String)::Nothing
+
+Download a directory from a GitHub repository to a specified target directory.\n
+The `dir_path` is the path to the directory in the repository, `repo` is the `GitHub.Repo` object,
+and `target_dir` is the local directory where the contents will be downloaded.
+"""
 function download_gh(dir_path::String, repo::GitHub.Repo, target_dir::String)
     try
         download_gh(directory(repo, dir_path)[1], repo, target_dir)
@@ -78,6 +120,12 @@ function download_gh(dir_path::String, repo::GitHub.Repo, target_dir::String)
     end
 end
 
+"""
+    download_gh(elem::GitHub.Content, repo::GitHub.Repo, target_dir::String)::Nothing
+
+Attempt to download a single element (file or directory) from a GitHub repository to a specified target directory. If the element is a file, it will be downloaded directly. If it is a directory, the function will recursively download all contents within that directory.\n
+The `elem` is a `GitHub.Content` object representing the file or directory, `repo` is the `GitHub.Repo` object, and `target_dir` is the local directory where the contents will be downloaded.
+"""
 function download_gh(elem::GitHub.Content, repo::GitHub.Repo, target_dir::String)
     target_dir = joinpath(pwd(), target_dir)
     split_path = splitpath(elem.path)
