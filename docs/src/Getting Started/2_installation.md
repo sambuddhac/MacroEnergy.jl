@@ -30,14 +30,14 @@ cd MacroEnergy.jl
 - **Install Macro and all its dependencies**:
 
 ```bash
-julia --project -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+julia --project=. -e "using Pkg; Pkg.instantiate(); Pkg.precompile()"
 ```
 
 - **Test the installation**:
 Start Julia with the project environment in a terminal:
 
 ```bash
-$ julia --project
+$ julia --project=.
 ```
 
 Load Macro in the Julia REPL:
@@ -54,7 +54,7 @@ If the user wants to edit the installation, for example, to install a specific v
 
 ```bash
 $ cd MacroEnergy.jl
-$ julia --project
+$ julia --project=.
 ```
 
 Alternatively, you can first run Julia:
@@ -91,7 +91,7 @@ To activate the project environment, you can use the following commands:
 
 ```bash
 cd MacroEnergy.jl
-julia --project
+julia --project=.
 ```
 
 or
