@@ -46,7 +46,7 @@ const pages = [
             "Creating a New Asset" => "Guides/Modeler Guide/modeler_build_asset.md",
             "Creating a New Example Case" => "Guides/Modeler Guide/modeler_create_example_case.md",
             "Suggested Development Workflow" => "Guides/Modeler Guide/modeler_workflow.md",
-            "Debugging and Testing" => "Guides/Modeler Guide/modeler_debugging_testing.md",
+            "Debugging and Testing Tips" => "Guides/Modeler Guide/modeler_debugging_testing.md",
         ],
         "Developer Guide" => [
             "Creating a Constraint" => "Guides/Developer Guide/dev_create_constraint.md",

@@ -5,7 +5,7 @@ Creating new sectors in Macro involves two main steps:
 1. Choose a **unique name** for the new sector.
 2. Add the new sector to the `MacroEnergy.jl` file.
 
-## The `Commodity` Julia Type
+## The `Commodity` Type
 
 !!! tip "Types in Julia"
     If you're not familiar with Julia's type system, we recommend this [section of the Julia documentation](https://docs.julialang.org/en/v1/manual/types/). In particular, for more information on abstract types, see the [Abstract Types](https://docs.julialang.org/en/v1/manual/types/#man-abstract-types) section.
