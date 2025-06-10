@@ -91,6 +91,7 @@ const pages = [
         "Macro Objects" => "References/3_macro_objects.md",
         "Writing output data" => "References/4_writing_output.md",
         "Utilities" => "References/5_utilities.md",
+        "Downloading examples" => "References/ref_download_examples.md",
         # "Asset Library" => "References/2_assets.md", TODO: think if we should include this
     ],
 ]
