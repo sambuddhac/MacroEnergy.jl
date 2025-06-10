@@ -2,12 +2,7 @@ macro examples_repo()
     return esc(quote
         reponame = "macroenergy/MacroEnergyExamples.jl"
         examples_path = "examples"
-        if isa(auth, GitHub.OAuth2)
-            auth_kwargs = (; auth=auth)
-        else
-            # If no auth is provided, use the default public repository access
-            auth_kwargs = NamedTuple()
-        end
+        auth_kwargs = check_auth(auth)
         examples_repo = repo(reponame; auth_kwargs...)
     end)
 end
@@ -26,11 +21,8 @@ or a `GitHub.UsernamePassAuth` or `GitHub.JWTAuth` object created using the GitH
 """
 function list_examples(; auth=nothing)
     examples_repo = @examples_repo
-    if isa(auth, GitHub.OAuth2)
-        examples_dir = directory(examples_repo, examples_path; auth=auth)[1]
-    else
-        examples_dir = directory(examples_repo, examples_path)[1]
-    end
+    auth_kwargs = check_auth(auth)
+    examples_dir = directory(examples_repo, examples_path; auth_kwargs...)[1]
     examples = [example.name for example in examples_dir if example.typ == "dir"]
     println("Available examples:")
     for example in examples
@@ -53,11 +45,8 @@ or a `GitHub.UsernamePassAuth` or `GitHub.JWTAuth` object created using the GitH
 """
 function find_example(example_name::String; auth=nothing)
     examples_repo = @examples_repo
-    if isa(auth, GitHub.OAuth2)
-        examples_dir = directory(examples_repo, examples_path; auth=auth)[1]
-    else
-        examples_dir = directory(examples_repo, examples_path)[1]
-    end
+    auth_kwargs = check_auth(auth)
+    examples_dir = directory(examples_repo, examples_path; auth_kwargs...)[1]
     example_idx = findfirst(x -> x.name == example_name, examples_dir)
     if isnothing(example_idx)
         println("Example not found: $example_name")
@@ -78,11 +67,7 @@ It should be a valid `GitHub.OAuth2` object created using the `authenticate_gith
 or a `GitHub.UsernamePassAuth` or `GitHub.JWTAuth` object created using the GitHub.jl package.
 """
 function download_example(example_name::String, target_dir::String = pwd(); auth=nothing)
-    if isa(auth, GitHub.OAuth2)
-        auth_kwargs = (; auth=auth)
-    else
-        auth_kwargs = NamedTuple()
-    end
+    auth_kwargs = check_auth(auth)
     (example_dir, examples_repo) = find_example(example_name; auth_kwargs...)
     if isnothing(example_dir)
         return nothing
@@ -103,11 +88,7 @@ It should be a valid `GitHub.OAuth2` object created using the `authenticate_gith
 or a `GitHub.UsernamePassAuth` or `GitHub.JWTAuth` object created using the GitHub.jl package.
 """
 function download_examples(target_dir::String = pwd(), pause_seconds::Float64 = 1.0; auth=nothing)
-    if isa(auth, GitHub.OAuth2)
-        auth_kwargs = (; auth=auth)
-    else
-        auth_kwargs = NamedTuple()
-    end
+    auth_kwargs = check_auth(auth)
     try
         all_examples = list_examples(; auth_kwargs...)
         println("Downloading all examples to $target_dir")
@@ -133,11 +114,7 @@ It should be a valid `GitHub.OAuth2` object created using the `authenticate_gith
 or a `GitHub.UsernamePassAuth` or `GitHub.JWTAuth` object created using the GitHub.jl package.
 """
 function example_readme(example_name::String; auth=nothing)
-    if isa(auth, GitHub.OAuth2)
-        auth_kwargs = (; auth=auth)
-    else
-        auth_kwargs = NamedTuple()
-    end
+    auth_kwargs = check_auth(auth)
     example_dir, examples_repo = find_example(example_name; auth_kwargs...)
     for item in directory(examples_repo, example_dir; auth_kwargs...)[1]
         if lowercase(item.name) == "readme.md"
@@ -163,11 +140,7 @@ It should be a valid `GitHub.OAuth2` object created using the `authenticate_gith
 or a `GitHub.UsernamePassAuth` or `GitHub.JWTAuth` object created using the GitHub.jl package.
 """
 function example_contents(example_name::String; auth=nothing)
-    if isa(auth, GitHub.OAuth2)
-        auth_kwargs = (; auth=auth)
-    else
-        auth_kwargs = NamedTuple()
-    end
+    auth_kwargs = check_auth(auth)
     example_dir, examples_repo = find_example(example_name; auth_kwargs...)
     example_files = [file.path for file in directory(examples_repo, example_dir; auth_kwargs...)[1] if file.typ == "file"]
     println("Contents of $example_name:")
@@ -185,12 +158,9 @@ The `dir_path` is the path to the directory in the repository, `repo` is the `Gi
 and `target_dir` is the local directory where the contents will be downloaded.
 """
 function download_gh(dir_path::String, repo::GitHub.Repo, target_dir::String; auth=nothing)
+    auth_kwargs = check_auth(auth)
     try
-        if isa(auth, GitHub.OAuth2)
-            download_gh(directory(repo, dir_path)[1], repo, target_dir; auth=auth)
-        else
-            download_gh(directory(repo, dir_path)[1], repo, target_dir)
-        end
+        download_gh(directory(repo, dir_path)[1], repo, target_dir; auth_kwargs...)
         return nothing
     catch e
         if isa(e, GitHub.GitHubError) && e.code == 404
@@ -210,11 +180,7 @@ Attempt to download a single element (file or directory) from a GitHub repositor
 The `elem` is a `GitHub.Content` object representing the file or directory, `repo` is the `GitHub.Repo` object, and `target_dir` is the local directory where the contents will be downloaded.
 """
 function download_gh(elem::GitHub.Content, repo::GitHub.Repo, target_dir::String; auth=nothing)
-    if isa(auth, GitHub.OAuth2)
-        auth_kwargs = (; auth=auth)
-    else
-        auth_kwargs = NamedTuple()
-    end
+    auth_kwargs = check_auth(auth)
     target_dir = joinpath(pwd(), target_dir)
     split_path = splitpath(elem.path)
     if split_path[1] == "examples"
@@ -234,11 +200,7 @@ function download_gh(elem::GitHub.Content, repo::GitHub.Repo, target_dir::String
 end
 
 function download_gh(elems::Vector{GitHub.Content}, repo::GitHub.Repo, target_dir::String; auth=nothing)
-    if isa(auth, GitHub.OAuth2)
-        auth_kwargs = (; auth=auth)
-    else
-        auth_kwargs = NamedTuple()
-    end
+    auth_kwargs = check_auth(auth)
     for elem in elems
         download_gh(elem, repo, target_dir; auth_kwargs...)
     end
@@ -262,4 +224,17 @@ You can use the created OAuth2 token to authenticate your other function calls, 
 """
 function authenticate_github(token::String)::GitHub.OAuth2
     return GitHub.authenticate(token)
+end
+
+"""
+    check_auth(auth::Any)::NamedTuple
+
+Check if the provided authentication object is valid for GitHub API requests. This function returns a NamedTuple containing the `auth` object if it is a valid type, or an empty NamedTuple otherwise.\n
+The `auth` parameter can be a `GitHub.OAuth2`, `GitHub.UsernamePassAuth`, or `GitHub.JWTAuth` object.
+"""
+function check_auth(auth::Any)::NamedTuple
+    if isa(auth, GitHub.OAuth2) || isa(auth, GitHub.UsernamePassAuth) || isa(auth, GitHub.JWTAuth)
+        return (; auth=auth)
+    end
+        return NamedTuple()
 end
