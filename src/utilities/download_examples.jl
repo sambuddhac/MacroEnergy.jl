@@ -216,11 +216,12 @@ You should create a personal access token in the GitHub settings under Developer
 
 You can use the created OAuth2 token to authenticate your other function calls, for example: 
     
-    ```julia
-    auth = authenticate_github("your_personal_access_token")
-    list_examples(; auth=auth)
-    download_example("example_name"; auth=auth)
-    ```
+```julia
+auth = authenticate_github("your_personal_access_token")
+list_examples(; auth=auth)
+download_example("example_name"; auth=auth)
+```
+
 """
 function authenticate_github(token::String)::GitHub.OAuth2
     return GitHub.authenticate(token)
