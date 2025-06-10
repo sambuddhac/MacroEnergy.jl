@@ -191,7 +191,7 @@ function download_gh(elem::GitHub.Content, repo::GitHub.Repo, target_dir::String
     if elem.typ == "file"
         download(elem.download_url, target_path)
     elseif elem.typ == "dir"
-        mkpath(joinpath(target_dir, target_path))
+        mkpath(target_path)
         new_dir = directory(repo, elem.path)[1]
         for sub_elem in new_dir
             download_gh(sub_elem, repo, target_dir; auth_kwargs...)
