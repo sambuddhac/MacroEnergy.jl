@@ -1,15 +1,97 @@
 # Creating a New Asset
 
-#TODO: update this section
+The main design principle of Macro is to allow modelers to easily extend the model with new assets. Indeed, thanks to the [graph-based representation](@ref "Energy System Graph-Based Representation"), assets can be quickly assembled by connecting `Transformation`s, `Edge`s, `Storage`s components and/or other assets. 
 
-Once the new commodity type is added to Macro, the modeler can create new assets that use this commodity type. For instance, a modeler may want to create a new asset that converts a commodity `MyNewSector` into two other commodities, `Electricity` and `CO2`. 
+!!! tip "Macro Asset Library"
+    Before creating a new asset, we recommend reviewing existing assets in the [`src/model/assets` folder](https://github.com/macroenergy/MacroEnergy.jl/tree/main/src/model/assets) and the [Macro Asset Library](@ref). All asset files follow a **consistent structure** to facilitate the creation of new assets.
 
-!!! tip "Tip"
-    Before creating a new asset, we recommend the modeler to have a look at the existing assets in the `src/assets` folder. All the asset files follow a same structure to streamline the creation of new assets.
+## Quick Start
+To create a new asset (e.g. `MyNewAsset`), follow these steps:
 
-As for the case of the commodity type, each asset in Macro is defined as a **subtype** of the `AbstractAsset` type (the user can find some examples by checking the `struct` definition in the `.jl` files in the `src/assets` folder):
+1. **Design the asset**
 
-`src/assets/electrolyzer.jl`
+    Design the asset by defining its commodity inflows and outflows, conversion processes, and storage components.
+    
+2. (Recommended) **Draw a diagram of the asset**
+
+    Create a diagram of the asset to visualize its components and their connections. Each component will be implemented as a Macro `Transformation` (conversion process), `Edge` (commodity flow), or `Storage` (storage unit).
+
+3. **Determine which components (`Edge`s and `Storage`s) will have capacity variables for expansion and retirement during optimization**
+
+4. **Create a new Julia file**
+
+    Create a new Julia file named `mynewasset.jl` in the `src/model/assets` folder. This file will contain the asset definition and the `make` function to construct the asset from input data. The following sections will guide you through the file creation process.
+
+5. **Include the new asset file**
+
+    Add the following line to the `MacroEnergy.jl` file to include your new asset:
+
+    ```
+    include("model/assets/mynewasset.jl")
+    ```
+
+    similar to how other asset files are included.
+
+The following sections will expand on each of the steps above.
+
+## Step 1: Design the new asset
+
+The first step in creating a new asset is to design its internal components, including transformations, edges, and storage units, and define how they connect to each other.
+
+For this step, it is useful to draw a diagram of the asset to visualize the components and their connections, similar to the ones shown in the [Macro Asset Library](@ref).
+
+!!! note "Macro Components"
+    Macro components (`Transformation`, `Edge`, and `Storage`) are abstract representations of the asset's functionality in the graph-based system, as described in the [previous section](@ref "Energy System Graph-Based Representation"), and do not represent real-world components.
+
+**Example**: Below is the diagram of the `Electrolyzer` asset:
+
+```@raw html
+<img width="300" src="../../images/electrolyzer.png" />
+```
+
+which, as you can see, it's made of the following "primary" components:
+
+- 1 `Transformation`
+- 2 `Edge` components:
+    - 1 **incoming** `Electricity` `Edge`
+    - 1 **outgoing** `Hydrogen` `Edge`
+
+## Step 2: Create the new asset file
+
+!!! note "File Structure"
+    Remember to place the new asset file in the `src/model/assets` folder.
+
+The new asset file should include the following:
+- A `struct` definition for the asset, inheriting from `AbstractAsset`.
+- `default_data`, `full_default_data`, and `simple_default_data` functions to define the default data for the asset.
+- A `make` function to construct the asset from input data.
+
+### 2.1 Define the asset type
+
+Defining a new asset type in Macro is straightforward. You simply need to define a new `struct` at the top of the file as a subtype of `AbstractAsset`.
+
+```julia
+struct MyNewAsset <: AbstractAsset
+    # ... asset structure will go here ...
+end
+```
+
+Following the diagram of the new asset drawn in the previous step, fill in the fields of the `struct` with the appropriate components:
+
+```julia
+struct MyNewAsset <: AbstractAsset
+    id::AssetId
+    transform::Transformation
+    edge1::Edge{CommodityType1}
+    edge2::Edge{CommodityType2}
+    # ... additional asset structure components ...
+end
+```
+
+For example, here is the `struct` definition of the `Electrolyzer` asset:
+
+[`src/model/assets/electrolyzer.jl`](https://github.com/macroenergy/MacroEnergy.jl/blob/ec38f804cb823f6eb666d026e18ee69cfd68b4d7/src/model/assets/electrolyzer.jl#L1C1-L6C4)
+
 ```julia
 struct Electrolyzer <: AbstractAsset
     id::AssetId
@@ -19,228 +101,558 @@ struct Electrolyzer <: AbstractAsset
 end
 ```
 
-The steps to create a new asset `MyNewAsset` are:
-1. Design the new asset in terms of transformations, edges, and storage units for each commodity type used in the asset.
-2. Create a new Julia file in the `src/assets` folder called `mynewasset.jl`.
-3. At the top of the file, define the asset type as a subtype of `AbstractAsset`.
+You can find more examples by examining the `struct` definitions in the `.jl` files within the [`src/model/assets` folder](https://github.com/macroenergy/MacroEnergy.jl/tree/main/src/model/assets).
+
+### 2.2 Define the default data functions
+
+The `default_data`, `full_default_data`, and `simple_default_data` functions are used to define the default data for the new asset. This is particularly important for having the correct data setup when creating the asset. 
+
+1\. **`default_data`**
+
+The `default_data` is a helper function that returns a dictionary (an `OrderedDict` to be precise) with the data in the "full" or "simple" format. When creating a new asset, simply add the following lines to the file (replace `MyNewAsset` with the name of the asset being created):
 
 ```julia
-struct MyNewAsset <: AbstractAsset
-    # ... asset structure will go here ...
+function default_data(t::Type{MyNewAsset}, id=missing, style="full")
+    if style == "full"
+        return full_default_data(t, id)
+    else
+        return simple_default_data(t, id)
+    end
 end
 ```
 
-4. Define the fields of the asset type as transformations, edges, and storage units with the appropriate commodity types.
+2\. **`full_default_data`**
+
+Here's a detailed breakdown of how to construct the `full_default_data` function:
+
+- **Function Signature:**
+
+    ```
+    function full_default_data(::Type{MyNewAsset}, id=missing)
+    ```
+
+  - Takes the asset type as a type parameter
+  - Takes an optional `id` parameter that defaults to `missing`
+
+- **Return Structure**
+The function returns an `OrderedDict{Symbol,Any}` with the following main sections:
 
 ```julia
-struct MyNewAsset <: AbstractAsset
-    transform::Transformation
-    edge1::Edge{CommodityType1}
-    edge2::Edge{CommodityType2}
-    # ... rest of the asset structure will go here ...
-end
+return OrderedDict{Symbol,Any}(
+    :id => id,
+    # sections depending on the asset structure
+    :transforms => @transform_data(...),    # If asset has transformations
+    :edges => Dict{Symbol,Any}(             # If asset has edges
+        :edge_name_1 => @edge_data(...),
+        :edge_name_2 => @edge_data(...),
+        # ... additional edges ...
+    ),
+    :storage => @storage_data(...)          # If asset has storage
+)
 ```
 
-5. Define a `make` function in the same file with the steps to create an instance of the asset. The function should have the following signature:
+!!! note "Default Data"
+    The `@transform_data`, `@edge_data`, and `@storage_data` macros are used to define the data for the transformation, edge, and storage unit respectively and to merge the data with the default values for each component. For the list of all default data, see the [default data file](https://github.com/macroenergy/MacroEnergy.jl/blob/main/src/utilities/default_data.jl).
+
+Copy and paste the relevant sections of the above code and modify them to fit the asset structure:
+
+- **Transform Section**
+The `:transforms` section uses the `@transform_data` macro to define transformation properties:
 ```julia
-function make(::Type{MyNewAsset}, data::AbstractDict{Symbol,Any}, system::System)
-    # ... make function will go here ...
-    return MyNewAsset(transform, edge1, edge2, # ... rest of the asset structure will go here ...)
-end
+    :transforms => @transform_data(
+        :timedata => "CommodityType",  # The commodity type to use for time resolution
+        :constraints => Dict{Symbol, Bool}(  # Default/required constraints
+            :BalanceConstraint => true,
+            # Add other constraints as needed
+        ),
+        # Add transformation-specific parameters
+        :parameter_name => default_value,
+    )
 ```
 
-!!! note "Make function"
-    The `make` function should include the steps to create the asset structure, including:
-    1. **Creation of each component of the asset**: transformations, edges, and storage units.
-    2. **Default constraints** for each component.
-    3. **Stoichiometric equations/coefficients** for the transformation processes.
-
-6. (Optional) Create a new JSON data file to test the new assets.
-
-!!! warning "Include the new files in the MacroEnergy.jl file"
-    Remember to include the new files in the `MacroEnergy.jl` file, so that they are available when the package is loaded.
-
-The following section provides an example of how to create a new sector and assets in Macro.
-
-### Example
-For example, let's create a new sector called `MyNewSector` with two assets: `MyAsset1`, and `MyAsset2`. 
-
-The first asset will be a technology that converts a commodity `MyNewSector`, into two other commodities, `Electricity` and `CO2`, while the second asset will be a technology with a `storage unit` that stores the commodity `MyNewSector`.
-
-As seen in the previous section, the steps to create a new sector and assets are as follows:
-- Add the following line to the MacroEnergy.jl file:
+- **Edges Section**
+The `:edges` section defines all edges in the asset using the `@edge_data` macro:
 ```julia
-abstract type MyNewSector <: Commodity end
+    :edges => Dict{Symbol,Any}(
+        :edge_name => @edge_data(
+            :commodity => "CommodityType",  # The commodity type flowing through this edge
+            :has_capacity => true,    # `edge_name` will have capacity variables by default
+            :can_expand => true,      # `edge_name` can expand
+            :can_retire => true,      # `edge_name` can retire
+            :constraints => Dict{Symbol, Bool}(  # Edge-specific constraints
+                :CapacityConstraint => true,
+                # Add other constraints as needed
+            ),
+            # Add edge-specific parameters
+            :parameter_name => default_value,
+        ),
+        # Add more edges as needed
+    )
 ```
-(try to add this line right after the definition of the `Commodity` type). 
 
-- Create a new file called `MyAsset1.jl` in the `src/assets` folder with the following content:
-
+- **Storage Section** (if applicable)
+If the asset includes storage, add a storage section:
 ```julia
-# Structure of the asset
-struct MyAsset1 <: AbstractAsset
-    id::AssetId
-    myasset1_transform::Transformation
-    mynewsector_edge::Edge{MyNewSector}
-    e_edge::Edge{Electricity}
-    co2_edge::Edge{CO2}
-end
-
-# Make function to create an instance of the asset
-# The function takes as input the data and the system, and returns an instance of the asset
-# The data is a dictionary with the asset data, and the system is the system object containing the locations, time data, and other relevant information
-function make(::Type{MyAsset1}, data::AbstractDict{Symbol,Any}, system::System)
-
-    # asset id
-    id = AssetId(data[:id])
-
-    # transformation
-    transform_data = process_data(data[:transforms])
-    myasset1_transform_default_constraints = [BalanceConstraint()]
-    myasset1_transform = Transformation(;
-        id = Symbol(transform_data[:id]),
-        timedata = system.time_data[Symbol(transform_data[:timedata])],
-        constraints = get(transform_data, :constraints, myasset1_transform_default_constraints),
+    :storage => @storage_data(
+        :commodity => "CommodityType",
+        :constraints => Dict{Symbol, Bool}(
+            :StorageCapacityConstraint => true,
+            # Add other storage constraints
+        ),
+        # Add storage-specific parameters
+        :parameter_name => default_value,
     )
+```
 
-    # edges
-    mynewsector_edge_data = process_data(data[:edges][:mynewsector_edge])
-    mynewsector_edge_default_constraints = Vector{AbstractTypeConstraint}()
-    mynewsector_start_node = find_node(system.locations, Symbol(mynewsector_edge_data[:start_vertex]))
-    mynewsector_end_node = myasset1_transform
-    mynewsector_edge = Edge(
-        Symbol(String(id) * "_" * mynewsector_edge_data[:id]),
-        mynewsector_edge_data,
-        system.time_data[:MyNewSector],
-        MyNewSector,
-        mynewsector_start_node,
-        mynewsector_end_node,
-    )
-    mynewsector_edge.constraints = get(mynewsector_edge_data, :constraints, mynewsector_edge_default_constraints)
-    mynewsector_edge.unidirectional = get(mynewsector_edge_data, :unidirectional, true)
+As seen above, some common parameters you might need to include are:
+- For transformations:
+  - `:timedata` - Time resolution of the time series data. Common choice is "Electricity"
+  - `:constraints` - Required constraints
+  - **stoichiometric_coefficients** - Stoichiometric coefficients for the transformation (e.g. `:fuel_consumption`, `:emission_rate`, etc.)
 
-    elec_edge_data = process_data(data[:edges][:e_edge])
-    elec_start_node = myasset1_transform
-    elec_end_node = find_node(system.locations, Symbol(elec_edge_data[:end_vertex]))
-    elec_edge = EdgeWithUC(
-        Symbol(String(id) * "_" * elec_edge_data[:id]),
-        elec_edge_data,
-        system.time_data[:Electricity],
-        Electricity,
-        elec_start_node,
-        elec_end_node,
-    )
-    elec_edge.constraints = get(
-        elec_edge_data,
-        :constraints,
-        [
-            CapacityConstraint(),
-            RampingLimitConstraint(),
-            MinUpTimeConstraint(),
-            MinDownTimeConstraint(),
-        ],
-    )
-    elec_edge.unidirectional = get(elec_edge_data, :unidirectional, true)
-    elec_edge.startup_fuel_balance_id = :energy
+- For edges:
+  - `:commodity` - The commodity type flowing through the edge
+  - `:has_capacity` - To specify that a particular edge has capacity variables
+  - `:can_expand` - To specify that a particular edge can expand
+  - `:can_retire` - To specify that a particular edge can retire
+  - `:constraints` - Edge-specific constraints
 
-    co2_edge_data = process_data(data[:edges][:co2_edge])
-    co2_start_node = myasset1_transform
-    co2_end_node = find_node(system.locations, Symbol(co2_edge_data[:end_vertex]))
-    co2_edge = Edge(
-        Symbol(String(id) * "_" * co2_edge_data[:id]),
-        co2_edge_data,
-        system.time_data[:CO2],
-        CO2,
-        co2_start_node,
-        co2_end_node,
-    )
-    co2_edge.constraints =
-        get(co2_edge_data, :constraints, Vector{AbstractTypeConstraint}())
-    co2_edge.unidirectional = get(co2_edge_data, :unidirectional, true)
+**Example Implementation**
 
-    myasset1_transform.balance_data = Dict(
-        # Edit this part to include the stoichiometric equations for the transformation process 
+Here's an example implementation based on the `Electrolyzer` asset:
+```julia
+function full_default_data(::Type{Electrolyzer}, id=missing)
+    return OrderedDict{Symbol,Any}(
+        :id => id,
+        :transforms => @transform_data(
+            :timedata => "Electricity",
+            :constraints => Dict{Symbol, Bool}(
+                :BalanceConstraint => true,
+            ),
+            :efficiency_rate => 0.0
+        ),
+        :edges => Dict{Symbol,Any}(
+            :h2_edge => @edge_data(
+                :commodity => "Hydrogen",
+                :has_capacity => true,
+                :can_retire => true,
+                :can_expand => true,
+                :can_retire => true,
+                :constraints => Dict{Symbol, Bool}(
+                    :CapacityConstraint => true,
+                ),
+            ),
+            :elec_edge => @edge_data(
+                :commodity => "Electricity",
+            ),
         ),
     )
-
-    return MyAsset1(id, myasset1_transform, mynewsector_edge, elec_edge, co2_edge)
 end
 ```
 
-From the code above, you can see that the modeler needs to provide the asset structure as a Julia `struct`, along with the default constraints for transformations and edges (`myasset1_transform_default_constraints`, `mynewsector_edge_default_constraints`), and the stoichiometric coefficients for the transformation process being modeled (`myasset1_transform.balance_data`).
+As can be seen above, the default data for the `Electrolyzer` asset includes:
+- A `Transformation` component with the `:timedata` set to `"Electricity"`, `:constraints` set to `:BalanceConstraint` and an `:efficiency_rate` set to `0.0`.
+- A `Hydrogen` `Edge` with **capacity variables** and the ability to expand and retire by default.
+- An `Electricity` `Edge` with no capacity variables.
 
-!!! tip "Tip"
-    Checking out other asset files in the `src/assets` folder is a good place to start adding new assets. 
+3\. **`simple_default_data`**
 
-The creation of the second asset, `MyAsset2`, follows very similar steps to the creation of `MyAsset1`. The main difference is that `MyAsset2` has a storage unit:
-    
+As mentioned above, the `simple_default_data` function returns a compact version of the default data dictionary. The main difference with the `full_default_data` function is that the dictionary that is returned doesn't include sub-dictionaries for the `:transforms`, `:edges`, and `:storage` sections, and all the **data is included in the top-level dictionary**.
+
+The function signature is the same as the `full_default_data` function, but the **return structure** is different:
 ```julia
-struct MyAsset2 <: AbstractAsset
-    id::AssetId
-    myasset2_storage::AbstractStorage{MyNewSector}  # <--- Storage unit
-    discharge_edge::Edge{MyNewSector}
-    charge_edge::Edge{MyNewSector}
-end
-
-function make(::Type{MyAsset2}, data::AbstractDict{Symbol,Any}, system::System)
-
-    # asset id
-    id = AssetId(data[:id])
-
-    # storage
-    storage_data = process_data(data[:storage])
-    myasset2_storage_default_constraints = [
-            BalanceConstraint(),
-            StorageCapacityConstraint(),
-            StorageMaxDurationConstraint(),
-            StorageMinDurationConstraint(),
-            StorageSymmetricCapacityConstraint(),
-        ]
-    myasset2_storage = Storage(id, 
-        storage_data, 
-        system.time_data[Symbol(storage_data[:commodity])], 
-        MyNewSector, 
-        myasset2_storage_default_constraints
+function simple_default_data(::Type{MyNewAsset}, id=missing)
+    return OrderedDict{Symbol,Any}(
+        :id => id,
+        :parameter_name => default_value,
+        # ... additional parameters ...
     )
-
-    # edges
-    discharge_edge_data = process_data(data[:edges][:discharge_edge])
-    discharge_edge_default_constraints = [CapacityConstraint()]
-    discharge_start_node = myasset2_storage
-    discharge_end_node = find_node(system.locations, Symbol(discharge_edge_data[:end_vertex]))
-    discharge_edge = Edge(
-        Symbol(String(id) * "_" * discharge_edge_data[:id]),
-        discharge_edge_data,
-        system.time_data[:MyNewSector],
-        MyNewSector,
-        discharge_start_node,
-        discharge_end_node,
-    )
-    discharge_edge.constraints = get(discharge_edge_data, :constraints, discharge_edge_default_constraints)
-    discharge_edge.unidirectional = get(discharge_edge_data, :unidirectional, true)
-
-    charge_edge_data = process_data(data[:edges][:charge_edge])
-    charge_start_node = find_node(system.locations, Symbol(charge_edge_data[:start_vertex]))
-    charge_end_node = myasset2_storage
-    charge_edge = Edge(
-        Symbol(String(id) * "_" * charge_edge_data[:id]),
-        charge_edge_data,
-        system.time_data[:MyNewSector],
-        MyNewSector,
-        charge_start_node,
-        charge_end_node,
-    )
-    charge_edge.constraints = get(charge_edge_data, :constraints, Vector{AbstractTypeConstraint}())
-    charge_edge.unidirectional = get(charge_edge_data, :unidirectional, true)
-
-    myasset2_storage.discharge_edge = discharge_edge
-    myasset2_storage.charge_edge = charge_edge
-
-    myasset2_storage.balance_data = Dict(
-        # Edit this part to include the energy efficiency of the storage unit or any other stoichiometric equations
-        ),
-    )
-
-    return MyAsset2(id, myasset2_storage, discharge_edge, charge_edge)
 end
 ```
+
+As an example, here's the `simple_default_data` function for the `Electrolyzer` asset:
+```julia
+function simple_default_data(::Type{Electrolyzer}, id=missing)
+    return OrderedDict{Symbol,Any}(
+        :id => id,
+        :location => missing,
+        :can_expand => true,
+        :can_retire => true,
+        :existing_capacity => 0.0,
+        :capacity_size => 1.0,
+        :efficiency_rate => 0.0,
+        :investment_cost => 0.0,
+        :fixed_om_cost => 0.0,
+        :variable_om_cost => 0.0,
+    )
+end
+```
+
+### 2.3 Define the `make` function
+The `make` function is used to tell Macro how to create an instance of the new asset.
+It is a crucial step for the following tasks:
+- **Reading** the relevant sections of the input file and **constructing each component** of the asset (e.g. `Transformation`, `Edge`, `Storage`)
+- Incorporating **modeling choices** or default behaviors (e.g. linking edges to the correct nodes)
+- Creating the **stoichiometric equations** for the conversion processes happening in the asset (see the `balance_data` attribute of the `Transformation` and `Storage` components described in the [Stoichiometric Coefficients](@ref "2.3.4 Balance Data") section below)
+
+1\. **Function Signature**
+
+Let's start by looking at the **function signature**:
+```julia
+function make(asset_type::Type{MyNewAsset}, data::AbstractDict{Symbol,Any}, system::System)
+    # ... implementation details ...
+end
+```
+
+The `make` function takes three arguments:
+- `asset_type::Type{MyNewAsset}`: The type of the asset to be created (i.e. `MyNewAsset`)
+- `data::AbstractDict{Symbol,Any}`: A dictionary containing the input data for the asset.
+- `system::System`: The system in which the asset is being added.
+
+2\. **Return Structure**
+
+The function should return an instance of the asset:
+```julia
+function make(asset_type::Type{MyNewAsset}, data::AbstractDict{Symbol,Any}, system::System)
+    # ... implementation details ...
+    return MyNewAsset(id, transform, edge1, edge2, # ... additional components ...)
+end
+```
+
+3\. **Implementation**
+
+The body of the `make` function can be broken down into nine main blocks:
+
+1. **ID Setup** – Assigning a unique identifier to the asset
+2. **Data Setup** – Loading and organizing default input data
+3. **Component Creation** – Building each component (e.g., transformations, edges, etc.)
+4. **Stoichiometric Coefficients Setup** – Defining the stoichiometric equations for the asset's balance equations
+5. **Asset creation** – Constructing the asset
+
+Let's break down each block separately and see how to implement them.
+
+#### 2.3.1 ID Setup
+The first block of the `make` function is the ID setup. It reads the `:id` key from the input data and creates a unique identifier for the asset (of type `AssetId`).
+
+```julia
+id = AssetId(data[:id])
+```
+
+#### 2.3.2 Data Setup
+The second block of the `make` function is the data setup. It prepares the input data for the rest of the function and loads all default data for the asset.
+
+```julia
+@setup_data(asset_type, data, id)
+```
+
+#### 2.3.3 Component Creation
+The third block of the `make` function is the component creation. It builds each component of the asset separately, and prepares the `Edge`s, `Transformation`, and `Storage` to be used in final asset creation.
+
+!!! tip "Modeling Choices"
+    In this step, modelers can make modeling choices, setting default values for missing data and constraints, linking edges to the correct nodes, and more. See the asset files in the `src/model/assets` folder for examples.
+
+Each **component creation** is made of the following steps (we will use the `Electrolyzer` asset as an example):
+
+- **Key assignment**
+
+Add a line to assign the key for the component to a new variable of type `Symbol`. This key is used to load the correct portion of the data corresponding to the component being created.
+
+!!! warning "Key Assignment"
+    Make sure to match the key used in the both the `full_default_data` function and the JSON input file to group the data for the corresponding component.
+
+For instance, in the `Electrolyzer` asset, the key for the transformation used in the `full_default_data` function and the JSON input file is `:transforms`. So, the following line is added to the `make` function:
+
+```julia
+electrolyzer_key = :transforms
+```
+
+The keys for the other components of the `Electrolyzer` asset are assigned in a similar way:
+
+```julia
+elec_edge_key = :elec_edge
+# ...
+h2_edge_key = :h2_edge
+```
+
+- **Input data loading**
+This step invokes the `@process_data` macro to load the input data for each component from the JSON input file. The macro takes three arguments:
+- The variable to store the processed data.
+- The section of the input data to process (e.g, `data[component_key]`).
+- A list of tuples containing the data and the key to search for in the input data.
+
+Here is an example of how the `@process_data` macro works for the `Electrolyzer` asset:
+```julia
+@process_data(
+    transform_data,          # The variable to store the processed data
+    data[electrolyzer_key],  # The section of the input data to process
+    [
+        (data[electrolyzer_key], key),
+        (data[electrolyzer_key], Symbol("transform_", key)),
+        (data, Symbol("transform_", key)),
+        (data, key),
+    ]
+)
+```
+In particular, for each key in the default data, the macro will look for a match in the input data in the following order:
+
+1. Check if the `transforms` section of the JSON input file (i.e., `data["transforms"]`) contains the key.
+2. Check if the `transforms` section of the JSON input file (i.e., `data["transforms"]`) contains the key with the prefix `transform_` (e.g. `transform_constraints`).
+3. Check if the `data` section of the input data (i.e., the top-level of the JSON input file) contains the key with the prefix `transform_` (e.g. `transform_constraints`). **Note**: This is very important for the reduced data format, where all the data is at the top-level.
+4. Check if the `data` section of the input data contains the key.
+
+The macro will look for data in each source in sequence, using the first value it finds. This allows for flexible data specification with fallback options.
+
+This is another example of a component creation for the hydrogen **edge** of the `Electrolyzer` asset:
+```julia
+h2_edge_key = :h2_edge  # The key for the hydrogen edge in the input data
+@process_data(
+    h2_edge_data, 
+    data[:edges][h2_edge_key],  # The section of the input data to process
+    [
+        (data[:edges][h2_edge_key], key),
+        (data[:edges][h2_edge_key], Symbol("h2_", key)),
+        (data, Symbol("h2_", key)),
+        (data, key),
+    ]
+)
+```
+
+- **Vertex assignment (for edges)**
+This step assigns the correct nodes, transformation, or storage unit to each edge (in Macro, these three components are also called `Vertices`, see [Macro Internal Components](@ref) for more details).
+
+When assigning vertices to edges, two cases can happen:
+1. The edge is connected to an asset component defined earlier in the `make` function (e.g. a transformation or a storage unit).
+2. The edge is connected to an external `Node`, which is defined outside of the asset in the nodes JSON file.
+
+In the first case, simply create a new variable with the name of the component and assign it to the component.
+
+```julia
+# The vertex is the transformation itself (look at the diagram above)
+elec_end_node = electrolyzer_transform
+# ...
+h2_start_node = electrolyzer_transform  
+```
+`elec_end_node` and `h2_start_node` will now contain the transformation that must be connected to the electricity and hydrogen edges respectively.
+
+In the second case, the vertex is an external `Node`. The id of the node must be listed in the edge data of the JSON input file using the `:locations` key or `start_vertex`/`end_vertex` keys. Macro provides two macros, `@start_vertex` and `@end_vertex`, to find the correct node in the system and store it in a variable.
+
+The `@start_vertex` and `@end_vertex` macros take four arguments:
+- The variable to store the node.
+- The edge data.
+- The commodity type of the edge.
+- A list of tuples containing the edge data and the key to search for in the JSON input file.
+
+Here is an example for the electricity edge of the `Electrolyzer` asset:
+```julia
+@start_vertex(
+    elec_start_node,
+    elec_edge_data,
+    Electricity,
+    [(elec_edge_data, :start_vertex), (data, :location)],
+)
+```
+The `elec_start_node` variable will now contain the node that must be connected to the electricity edge.
+
+This is the example for the hydrogen edge of the `Electrolyzer` asset:
+```julia
+@end_vertex(
+    h2_end_node,
+    h2_edge_data,
+    Hydrogen,
+    [(h2_edge_data, :end_vertex), (data, :location)],
+)
+```
+The `h2_end_node` variable will now contain the node that must be connected to the hydrogen edge.
+
+- **Instance creation**
+The final step creates an instance of the edge, transformation, or storage unit and stores it in a variable. Use the `Edge`, `Transformation`, or `Storage` functions to create the corresponding instance.
+
+For example, here is how to create the transformation component for the `Electrolyzer` asset:
+```julia
+electrolyzer_transform = Transformation(;
+    id = Symbol(id, "_", electrolyzer_key),  # The id of the transformation is the id of the asset plus the key of the transformation
+    timedata = system.time_data[Symbol(transform_data[:timedata])],
+    constraints = transform_data[:constraints],
+)
+```
+`electrolyzer_transform` is now an instance of the `Transformation` type and can, for example, be used in the `Edge` creation step as `start_node` and `end_node` (see below).
+
+Here is an example for the electricity edge of the `Electrolyzer` asset:
+```julia
+elec_edge = Edge(
+    Symbol(id, "_", elec_edge_key),
+    elec_edge_data,
+    system.time_data[:Electricity],
+    Electricity,
+    elec_start_node,
+    elec_end_node,
+)
+```
+
+Note the last two arguments of the `Edge` function:
+- `elec_start_node` is a `Node` instance of type `Electricity` created using the `@start_vertex` macro.
+- `elec_end_node` is the `Transformation` part of the asset created in the previous step.
+
+Similarly, here is an example for the hydrogen edge of the `Electrolyzer` asset:
+```julia
+h2_edge = Edge(
+    Symbol(id, "_", h2_edge_key),
+    h2_edge_data,
+    system.time_data[:Hydrogen],
+    Hydrogen,
+    h2_start_node,
+    h2_end_node,
+)
+```
+
+To summarize, this is the complete component creation step for the `Transformation` and `Edge` components of the `Electrolyzer` asset:
+
+```julia
+# Transformation creation
+electrolyzer_key = :transforms
+@process_data(
+    transform_data, 
+    data[electrolyzer_key], 
+    [
+        (data[electrolyzer_key], key),
+        (data[electrolyzer_key], Symbol("transform_", key)),
+        (data, Symbol("transform_", key)),
+        (data, key),
+    ]
+)
+electrolyzer = Transformation(;
+    id = Symbol(id, "_", electrolyzer_key),
+    timedata = system.time_data[Symbol(transform_data[:timedata])],
+    constraints = transform_data[:constraints],
+)
+
+# Electricity edge creation
+elec_edge_key = :elec_edge
+@process_data(
+    elec_edge_data, 
+    data[:edges][elec_edge_key], 
+    [
+        (data[:edges][elec_edge_key], key),
+        (data[:edges][elec_edge_key], Symbol("elec_", key)),
+        (data, Symbol("elec_", key)),
+    ]
+)
+@start_vertex(
+    elec_start_node,
+    elec_edge_data,
+    Electricity,
+    [(elec_edge_data, :start_vertex), (data, :location)],
+)
+elec_end_node = electrolyzer
+elec_edge = Edge(
+    Symbol(id, "_", elec_edge_key),
+    elec_edge_data,
+    system.time_data[:Electricity],
+    Electricity,
+    elec_start_node,
+    elec_end_node,
+)
+
+# Hydrogen edge creation
+h2_edge_key = :h2_edge
+@process_data(
+    h2_edge_data, 
+    data[:edges][h2_edge_key], 
+    [
+        (data[:edges][h2_edge_key], key),
+        (data[:edges][h2_edge_key], Symbol("h2_", key)),
+        (data, Symbol("h2_", key)),
+        (data, key),
+    ]
+)
+h2_start_node = electrolyzer
+@end_vertex(
+    h2_end_node,
+    h2_edge_data,
+    Hydrogen,
+    [(h2_edge_data, :end_vertex), (data, :location)],
+)
+h2_edge = Edge(
+    Symbol(id, "_", h2_edge_key),
+    h2_edge_data,
+    system.time_data[:Hydrogen],
+    Hydrogen,
+    h2_start_node,
+    h2_end_node,
+)
+```
+
+#### 2.3.4 Balance Data
+This step defines the stoichiometric equations for the balance equations of the transformations and defines the efficiency in charge and discharge of the storage units.
+
+- **Transformations**
+The stoichiometric equations are defined in the `balance_data` dictionary of the `Transformation` instance.
+
+Here is an example for the `Electrolyzer` asset:
+```julia
+electrolyzer_transform.balance_data = Dict(
+    :energy => Dict(
+        h2_edge.id => 1.0,
+        elec_edge.id => get(transform_data, :efficiency_rate, 1.0),
+    ),
+)
+```
+and the stoichiometric equation is:
+ ```math
+\begin{aligned}
+\phi_{h2} &= \phi_{elec} \cdot \epsilon_{efficiency} \\
+\end{aligned}
+```
+where $\phi_{h2}$ is the flow of hydrogen, $\phi_{elec}$ is the flow of electricity, and $\epsilon_{efficiency}$ is the efficiency rate of the electrolyzer.
+
+!!! warning "Balance Data Keys"
+    You can define as many balance equations as needed. The only requirement is that the keys in the `balance_data` dictionaries (e.g. `:energy`, `:emissions`, etc.) must be unique.
+    See the [src/model/assets folder](https://github.com/macroenergy/MacroEnergy.jl/tree/main/src/model/assets) for more examples of balance data definitions.
+
+- **Storage units**
+The efficiency in charge and discharge of the storage units are defined in the `balance_data` dictionary of the `Storage` instance.
+
+Example taken from the `Battery` asset:
+```julia
+battery_storage.balance_data = Dict(
+    :storage => Dict(
+        battery_discharge.id => 1 / discharge_efficiency,
+        battery_charge.id => charge_efficiency,
+    ),
+)
+```
+
+#### 2.3.5 Asset creation
+This is the final step of the `make` function. It integrates all components to construct and return the final asset. 
+
+```julia
+return MyNewAsset(id, transform, edge1, edge2, # ... all components ...)
+```
+
+!!! warning "Positional arguments"
+    The positional arguments of the asset constructor must match the order of the components in the asset `struct` definition.
+    For example, if the asset `struct` is defined as 
+    ```julia
+    struct ExampleAsset <: AbstractAsset
+        id::AssetId
+        transform::Transformation
+        edge1::Edge
+        edge2::Edge
+    end
+    ```
+    then the asset must be created as:
+    ```julia
+    return ExampleAsset(id, transform, edge1, edge2)
+    ```
+
+For example, here is how to create the `Electrolyzer` asset:
+```julia
+return Electrolyzer(id, electrolyzer_transform, h2_edge, elec_edge)
+```
+
+## Next Steps
+
+We recommend reviewing the following sections in the **Modeler Guide** for additional guidance on how to efficiently develop and test new assets:
+- [Creating a New Example Case](@ref "Creating a New Example Case"): A step-by-step guide to creating a new example case for testing and validation of the new asset.
+- [Suggested Development Workflow](@ref "Suggested Development Workflow"): A recommended workflow for developing new assets.
+- [Debugging and Testing Tips](@ref "Debugging and Testing a Macro Model"): Tips and best practices for debugging and testing new assets.
