@@ -58,7 +58,7 @@ The definition of the transformation object can be found here [MacroEnergy.Trans
 
 !!! tip "Default constraints"
     The **default constraint** for the transformation part of the ThermalHydrogen asset is the following:
-    - [Balance constraint](@ref)
+    - [Balance constraint](@ref balance_constraint_ref)
 
 #### Flow equations
 In the following equations, $\phi$ is the flow of the commodity and $\epsilon$ is the stoichiometric coefficient defined in the transformation table below.
@@ -77,12 +77,12 @@ In the following equations, $\phi$ is the flow of the commodity and $\epsilon$ i
 ### Edges
 !!! note "Unit commitment and default constraints"
     The `Hydrogen` edge **can have unit commitment operations**. To enable it, the user needs to set the `uc` attribute to `true`. The default constraints for unit commitment case are the following:
-    - [Capacity constraint](@ref)
-    - [Ramping limits constraint](@ref)
-    - [Minimum up and down time constraint](@ref)
+    - [Capacity constraint](@ref capacity_constraint_ref)
+    - [Ramping limits constraint](@ref ramping_limits_constraint_ref)
+    - [Minimum up and down time constraint](@ref min_up_and_down_time_constraint_ref)
 
     In case of no unit commitment, the `uc` attribute is set to `false` and the default constraints are the following:
-    - [Capacity constraint](@ref)
+    - [Capacity constraint](@ref capacity_constraint_ref)
 
 !!! warning "Asset expansion"
     As a modeling decision, only the `Hydrogen` and `Fuel` edges are allowed to expand. Therefore, both the `has_capacity` and `constraints` attributes can only be set for those edges. For all the other edges, these attributes are pre-set to `false` and to an empty list respectively to ensure the correct modeling of the asset. 
