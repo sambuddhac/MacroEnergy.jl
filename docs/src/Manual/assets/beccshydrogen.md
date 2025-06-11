@@ -65,7 +65,7 @@ The definition of the transformation object can be found here [MacroEnergy.Trans
 
 !!! tip "Default constraints"
     The **default constraint** for the transformation part of the BECCS hydrogen asset is the following:
-    - [Balance constraint](@ref)
+    - [Balance constraint](@ref balance_constraint_ref)
  
 #### Flow equations
 In the following equations, $\phi$ is the flow of the commodity and $\epsilon$ is the stoichiometric coefficient defined in the transformation table below.
@@ -115,7 +115,7 @@ All the edges are represented by the same set of attributes. The definition of t
 | **variable\_om\_cost** | `Float64` | `Float64` | `0.0` | Variable operation and maintenance cost (USD/MWh). |
 
 !!! tip "Default constraints"
-    The only **default constraint** for the edges of the BECCS hydrogen asset is the [Capacity constraint](@ref) applied to the `Biomass` edge. 
+    The only **default constraint** for the edges of the BECCS hydrogen asset is the [Capacity constraint](@ref capacity_constraint_ref) applied to the `Biomass` edge. 
 
 ## Example
 The following is an example of the input file for a BECCS hydrogen asset that creates six BECCS hydrogen assets, two in each of the SE, MIDAT and NE regions.

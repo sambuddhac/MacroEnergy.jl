@@ -63,7 +63,7 @@ The definition of the `Edge` object can be found here [MacroEnergy.Edge](@ref).
 | **variable\_om\_cost** | `Float64` | `Float64` | `0.0` | Variable operation and maintenance cost (USD/MWh). |
 
 !!! tip "Default constraint"
-    **Default constraint** for the electricity edge of the VRE is the [Capacity constraint](@ref).
+    **Default constraint** for the electricity edge of the VRE is the [Capacity constraint](@ref capacity_constraint_ref).
 
 ## Example
 The following input file example shows how to create four existing VRE assets (two utility-scale solar and two onshore wind facilities) and four new VRE assets (one offshore wind, one onshore wind, and two utility-scale solar facilities).
