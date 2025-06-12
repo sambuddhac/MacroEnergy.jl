@@ -32,22 +32,6 @@ While enabled by default in all assets in the [Macro Asset Library](@ref), the u
 }
 ```
 
-Or, in the full input format:
-```json
-{
-    "transform": {
-        "constraints": {
-            "BalanceConstraint": true/false
-        }
-    },
-    "storage": {
-        "constraints": {
-            "BalanceConstraint": true/false
-        }
-    }
-}
-```
-
 ## Capacity Constraint
 *Note: Enabled by default in all assets in the [Macro Asset Library](@ref)*
 
@@ -103,19 +87,6 @@ The capacity constraint is enabled by default in all assets in the [Macro Asset 
 }
 ```
 
-Or, in the full input format:
-```json
-{
-    "edges": {
-        "elec_edge": {
-            "constraints": {
-                "CapacityConstraint": true/false
-            }
-        }
-    }
-}
-```
-
 As a reminder, users can define the availability as a time series in the asset's JSON input file using the following format:
 
 - **Vector of numbers**
@@ -154,27 +125,12 @@ To enable this constraint:
 1. Add the `MaxCapacityConstraint` to the list of constraints in the JSON input file of the asset and set it to `true`.
 2. Add a value to the `max_capacity` attribute of the asset.
 
-**Example** (reduced input format):
 ```json
 {
     "elec_constraints": {
         "MaxCapacityConstraint": true
     },
     "max_capacity": 27760
-}
-```
-
-**Example** (full input format):
-```json
-{
-    "edges": {
-        "elec_edge": {
-            "constraints": {
-                "MaxCapacityConstraint": true
-            },
-            "max_capacity": 27760
-        }
-    }
 }
 ```
 
@@ -195,27 +151,12 @@ To enable this constraint:
 1. Add the `MinCapacityConstraint` to the list of constraints in the JSON input file of the asset and set it to `true`.
 2. Add a value to the `min_capacity` attribute of the asset.
 
-**Example** (reduced input format):
 ```json
 {
     "elec_constraints": {
         "MinCapacityConstraint": true
     },
     "min_capacity": 100
-}
-```
-
-**Example** (full input format):
-```json
-{
-    "edges": {
-        "elec_edge": {  
-            "constraints": {
-                "MinCapacityConstraint": true
-            },
-            "min_capacity": 100
-        }
-    }
 }
 ```
 
@@ -244,27 +185,12 @@ To enable this constraint:
 1. Add the `MinFlowConstraint` to the list of constraints in the JSON input file of the asset and set it to `true`.
 2. Add a value to the `min_flow_fraction` attribute of the asset.
 
-**Example** (reduced input format):
 ```json
 {
     "elec_constraints": {
         "MinFlowConstraint": true
     },
     "min_flow_fraction": 0.5
-}
-```
-
-**Example** (full input format):
-```json
-{
-    "edges": {
-        "elec_edge": {
-            "constraints": {
-                "MinFlowConstraint": true
-            },
-            "min_flow_fraction": 0.5
-        }
-    }
 }
 ```
 
@@ -293,7 +219,6 @@ To enable this constraint:
 1. Add the `MinUpTimeConstraint`/`MinDownTimeConstraint` to the list of constraints in the JSON input file of the asset and set it to `true`.
 2. Add a value to the `min_up_time`/`min_down_time` attribute of the asset.
 
-**Example** (reduced input format):
 ```json
 {
     "elec_constraints": {
@@ -302,22 +227,6 @@ To enable this constraint:
     },
     "min_up_time": 6,
     "min_down_time": 6
-}
-```
-
-**Example** (full input format):
-```json
-{
-    "edges": {
-        "elec_edge": {
-            "constraints": {
-                "MinUpTimeConstraint": true,
-                "MinDownTimeConstraint": true
-            },
-            "min_up_time": 6,
-            "min_down_time": 6
-        }
-    }
 }
 ```
 
@@ -341,7 +250,6 @@ To enable this constraint:
 1. Add the `MustRunConstraint` to the list of constraints in the JSON input file of the asset and set it to `true`.
 2. (optional) Add a time series with the availability of the edge.
 
-**Example** (reduced input format):
 ```json
 {
     "elec_constraints": {
@@ -351,25 +259,6 @@ To enable this constraint:
         "timeseries": {
             "path": "system/availability.csv",
             "header": "<asset_id>"
-        }
-    }
-}
-```
-
-**Example** (full input format):
-```json
-{
-    "edges": {
-        "elec_edge": {
-            "constraints": {
-                "MustRunConstraint": true
-            },
-            "availability": {
-                "timeseries": {
-                    "path": "system/availability.csv",
-                    "header": "<asset_id>"
-                }
-            }
         }
     }
 }
@@ -411,7 +300,6 @@ To enable this constraint:
 1. Add the `RampingLimitConstraint` to the list of constraints in the JSON input file of the asset and set it to `true`.
 2. Add a value to the `ramp_up_fraction`/`ramp_down_fraction` attribute of the asset.
 
-**Example** (reduced input format):
 ```json
 {
     "elec_constraints": {
@@ -419,21 +307,6 @@ To enable this constraint:
     },
     "ramp_up_fraction": 0.6,
     "ramp_down_fraction": 0.6
-}
-```
-
-**Example** (full input format):
-```json
-{
-    "edges": {
-        "elec_edge": {
-            "constraints": {
-                "RampingLimitConstraint": true
-            },
-            "ramp_up_fraction": 0.6,
-            "ramp_down_fraction": 0.6
-        }
-    }
 }
 ```
 
@@ -455,22 +328,10 @@ As mentioned above, this constraint is enabled by default for batteries and gas 
 
 1. Add the `StorageCapacityConstraint` to the list of constraints in the JSON input file of the asset and set it to `true`.
 
-**Example** (reduced input format):
 ```json
 {
     "storage_constraints": {
         "StorageCapacityConstraint": true
-    }
-}
-```
-
-**Example** (full input format):
-```json
-{
-    "storage": {
-        "constraints": {
-            "StorageCapacityConstraint": true
-        }
     }
 }
 ```
@@ -492,25 +353,12 @@ To enable this constraint:
 1. Add the `MaxStorageLevelConstraint` to the list of constraints in the JSON input file of the asset and set it to `true`.
 2. Add a value to the `max_storage_level` attribute of the asset.
 
-**Example** (reduced input format):
 ```json
 {
     "storage_constraints": {
         "MaxStorageLevelConstraint": true
     },
     "max_storage_level": 1
-}
-```
-
-**Example** (full input format):
-```json
-{
-    "storage": {
-        "constraints": {
-            "MaxStorageLevelConstraint": true
-        },
-        "max_storage_level": 1
-    }
 }
 ```
 
@@ -531,25 +379,12 @@ To enable this constraint:
 1. Add the `MinStorageLevelConstraint` to the list of constraints in the JSON input file of the asset and set it to `true`.
 2. Add a value to the `min_storage_level` attribute of the asset.
 
-**Example** (reduced input format):
 ```json
 {
     "storage_constraints": {
         "MinStorageLevelConstraint": true
     },
     "min_storage_level": 0.3
-}
-```
-
-**Example** (full input format):
-```json
-{
-    "storage": {
-        "constraints": {
-            "MinStorageLevelConstraint": true
-        },
-        "min_storage_level": 0.3
-    }
 }
 ```
 
@@ -564,15 +399,11 @@ The storage charge/discharge ratio constraint links the capacity of the charging
     \end{aligned}
     ```
 
-!!! warning "Constraint Application Scope"
-    This constraint is applied to the storage component of the asset, not to the individual charging and discharging edges.
-
 To enable this constraint:
 
 1. Add the `StorageChargeDischargeRatioConstraint` to the list of constraints in the JSON input file of the asset and set it to `true`.
 2. Add a value to the `charge_discharge_ratio` attribute of the asset.
 
-**Example** (reduced input format):
 ```json
 {
     "storage_constraints": {
@@ -582,17 +413,8 @@ To enable this constraint:
 }
 ```
 
-**Example** (full input format):
-```json
-{
-    "storage": {
-        "constraints": {
-            "StorageChargeDischargeRatioConstraint": true
-        },
-        "storage_charge_discharge_ratio": 0.5
-    }
-}
-```
+!!! warning "Constraint Application Scope"
+    As noted above, this constraint is applied to the storage component of the asset, not to the individual charging and discharging edges.
 
 ## Storage Discharge Limit Constraint
 *Note: Enabled by default for batteries.*
@@ -610,10 +432,6 @@ To enable this constraint:
 
 1. Add the `StorageDischargeLimitConstraint` to the list of constraints in the JSON input file of the asset and set it to `true`.
 
-!!! warning "Constraint Application Scope"
-    This constraint is applied to discharging edges only.
-
-**Example** (reduced input format):
 ```json
 {
     "discharge_constraints": {
@@ -622,18 +440,8 @@ To enable this constraint:
 }
 ```
 
-**Example** (full input format):
-```json
-{
-    "edges": {
-        "discharge_edge": { 
-            "constraints": {
-                "StorageDischargeLimitConstraint": true
-            }
-        }
-    }
-}
-```
+!!! warning "Constraint Application Scope"
+    This constraint is applied to discharging edges only.
 
 ## Storage Maximum/Minimum Duration Constraint
 This constraint limits the maximum/minimum energy capacity that can be stored relative to the discharging capacity. The limit is specified in the `max_duration`/`min_duration` attribute as a number of time steps.
@@ -653,9 +461,8 @@ This constraint limits the maximum/minimum energy capacity that can be stored re
 To enable this constraint:
 
 1. Add the `StorageMaxDurationConstraint`/`StorageMinDurationConstraint` to the list of constraints in the JSON input file of the asset and set it to `true`.
-2. Add a value to the `storage_max_duration`/`storage_min_duration` (reduced input format) or `max_duration`/`min_duration` attribute of the asset (full input format).
+2. Add a value to the `storage_max_duration`/`storage_min_duration` attribute of the asset.
 
-**Example** (reduced input format):
 ```json
 {
     "storage_constraints": {
@@ -663,19 +470,6 @@ To enable this constraint:
     },
     "storage_max_duration": 10,
     "storage_min_duration": 1
-}
-```
-
-**Example** (full input format):
-```json
-{
-    "storage": {
-        "constraints": {
-            "StorageMaximumDurationConstraint": true
-        },
-        "max_duration": 10,
-        "min_duration": 1
-    }
 }
 ```
 
@@ -689,14 +483,10 @@ This constraint ensures that for symmetric storage systems, the maximum simultan
     \end{aligned}
     ```
 
-!!! warning "Constraint Application Scope"
-    This constraint is applied to the discharging edge of the asset.
-
 To enable this constraint:
 
 1. Add the `StorageSymmetricCapacityConstraint` to the list of constraints in the JSON input file of the asset and set it to `true`.
 
-**Example** (reduced input format):
 ```json
 {
     "discharge_constraints": {
@@ -705,18 +495,8 @@ To enable this constraint:
 }
 ```
 
-**Example** (full input format):
-```json
-{
-    "edges": {
-        "discharge_edge": {
-            "constraints": {
-                "StorageSymmetricCapacityConstraint": true
-            }
-        }
-    }
-}
-```
+!!! warning "Constraint Application Scope"
+    This constraint is applied to the discharging edge of the asset.
 
 ## Minimum Storage Outflow
 
@@ -739,25 +519,12 @@ To enable this constraint:
 1. Add the `MinStorageOutflowConstraint` to the list of constraints in the JSON input file of the asset and set it to `true`.
 2. Add a value to the `min_outflow_fraction` attribute of the asset.
 
-**Example** (reduced input format):
 ```json
 {
     "storage_constraints": {
         "MinStorageOutflowConstraint": true
     },
     "min_outflow_fraction": 0.1
-}
-```
-
-**Example** (full input format):
-```json
-{
-    "storage": {
-        "constraints": {
-            "MinStorageOutflowConstraint": true
-        },
-        "min_outflow_fraction": 0.1
-    }
 }
 ```
 
@@ -769,7 +536,6 @@ This set of constraints manages storage levels for **long duration storage syste
 This constraint is enabled by default for batteries, gas storage, and hydro reservoirs when `long_duration` is set to `true` in the asset JSON input file. To enable/disable this constraint for other assets, use the following:
 1. Add the `LongDurationStorageImplicitMinMaxConstraint` to the list of constraints in the JSON input file of the asset and set it to `true`.
 
-**Example** (reduced input format):
 ```json
 {
     "storage_long_duration": true,
@@ -778,16 +544,3 @@ This constraint is enabled by default for batteries, gas storage, and hydro rese
     }
 }
 ```
-
-**Example** (full input format):
-```json
-{
-    "storage": {
-        "long_duration": true,
-        "constraints": {
-            "LongDurationStorageImplicitMinMaxConstraint": true/false
-        }
-    }
-}
-```
-
