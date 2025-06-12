@@ -4,8 +4,15 @@ One of Macro's most powerful features is the ability to enable and disable const
 
 This guide documents all available constraints and explains how to enable them in your system.
 
-!!! tip "Examples"
-    For all the examples below, we will refer to both the reduced and full input formats.
+!!! tip "Important - Attribute Prefixes"
+    The **prefix** before `_constraints` (and all other attributes) in the JSON input file varies depending on the component of the asset that the constraint is applied to. Some examples are:
+    - `transform_constraints`: constraints on the conversion component of an asset
+    - `storage_constraints`: constraints on the storage component of an asset
+    - `elec_constraints`: constraints on the power input/output component of an asset
+    - `discharge_constraints`: constraints on the discharging component of an asset
+    - etc.
+
+    Throughout this guide, we show examples with different prefixes to illustrate this variety. When implementing constraints for your specific asset, make sure to review [this example case](https://github.com/macroenergy/MacroEnergy.jl/tree/main/ExampleSystems/eastern_us_three_zones_reduced/assets) or the asset definition in the [Macro Asset Library](@ref) to make sure you use the correct prefix for your asset type.
 
 ## Balance Constraint
 *Note: Enabled by default in all assets in the [Macro Asset Library](@ref)*
