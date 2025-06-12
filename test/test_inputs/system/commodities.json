@@ -8,6 +8,7 @@
         "CO2Captured",
         "Biomass",
         "Uranium",
-        "Coal"
+        "Coal",
+        "Cement"
     ]
 }
