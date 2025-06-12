@@ -73,10 +73,10 @@ The definition of the `Storage` object can be found here [MacroEnergy.Storage](@
 !!! tip "Default constraints"
     The **default constraints** for the storage component of the hydroelectric reservoir are the following:
 
-    - [Balance constraint](@ref)
+    - [Balance constraint](@ref balance_constraint_ref)
 
     If the storage is a long-duration storage, the following additional constraints are applied:
-    - [Long-duration storage constraints](@ref)
+    - [Long-duration storage constraints](@ref long_duration_storage_constraints_ref)
 
 ### Edges (discharge\_edge, inflow\_edge, spillage\_edge)
 !!! warning "Asset expansion"
@@ -116,8 +116,8 @@ All the edges have the same set of attributes. The definition of the `Edge` obje
 !!! tip "Default constraints"
     **Default constraints** for the edges of the hydroelectric reservoir are only applied to the inflow edge. These constraints are:
 
-    - [Must run constraint](@ref)
-    - [Storage charge discharge ratio constraint](@ref)
+    - [Must run constraint](@ref must_run_constraint_ref)
+    - [Storage charge discharge ratio constraint](@ref storage_charge_discharge_ratio_constraint_ref)
 
 ## Example
 The following input file example shows how to create a hydroelectric reservoir asset in each of the three zones SE, MIDAT and NE.

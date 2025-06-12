@@ -79,12 +79,13 @@ The definition of the `Storage` object can be found here [MacroEnergy.Storage](@
 !!! tip "Default constraints"
     As noted in the above table, the **default constraints** for the storage component of the battery are the following:
 
-    - [Balance constraint](@ref)
-    - [Storage capacity constraint](@ref)
-    - [Storage symmetric capacity constraint](@ref)
+    - [Balance constraint](@ref balance_constraint_ref)
+    - [Storage capacity constraint](@ref storage_capacity_constraint_ref)
+    - [Storage symmetric capacity constraint](@ref storage_symmetric_capacity_constraint_ref)
+
 
     If the storage is a long-duration storage, the following additional constraints are applied:
-    - [Long-duration storage constraints](@ref)
+    - [Long-duration storage constraints](@ref long_duration_storage_constraints_ref)
 
 ### Charge and discharge edges
 Both the charge and discharge edges are represented by the same set of attributes. The definition of the `Edge` object can be found here [MacroEnergy.Edge](@ref).
@@ -112,14 +113,14 @@ Both the charge and discharge edges are represented by the same set of attribute
 | **variable\_om\_cost** | `Float64` | `Float64` | `0.0` | Variable operation and maintenance cost (USD/MWh). |
 
 !!! tip "Efficiency"
-    The efficiency of the charging/discharging process can be set in the `charge_edge` and `discharge_edge` parts of the input file. These parameters are used, for example, in the [Balance constraint](@ref) to balance the charge and discharge flows. 
+    The efficiency of the charging/discharging process can be set in the `charge_edge` and `discharge_edge` parts of the input file. These parameters are used, for example, in the [Balance constraint](@ref balance_constraint_ref) to balance the charge and discharge flows. 
 
 !!! tip "Default constraints - discharge edge"
     The **default constraints** for the discharge edge are the following:
 
-    - [Capacity constraint](@ref)
-    - [Storage discharge limit constraint](@ref)
-    - [Ramping limits constraint](@ref)
+    - [Capacity constraint](@ref capacity_constraint_ref)
+    - [Storage discharge limit constraint](@ref storage_discharge_limit_constraint_ref)
+    - [Ramping limits constraint](@ref ramping_limits_constraint_ref)
 
 ## Example
 The following is an example of the input file for a battery asset that creates three batteries, one in each of the SE, MIDAT and NE regions.

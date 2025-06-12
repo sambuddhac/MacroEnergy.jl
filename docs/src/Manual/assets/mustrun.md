@@ -59,7 +59,7 @@ The definition of the `Edge` object can be found here [MacroEnergy.Edge](@ref).
 | **variable\_om\_cost** | `Float64` | `Float64` | `0.0` | Variable operation and maintenance cost (USD/MWh). |
 
 !!! tip "Default constraint"
-    **Default constraint** for the electricity edge of the MustRun asset is the [Must run constraint](@ref).
+    **Default constraint** for the electricity edge of the MustRun asset is the [Must run constraint](@ref must_run_constraint_ref).
 
 ## Example
 The following input file example shows how to create a MustRun asset in each of the three zones SE, MIDAT and NE.
