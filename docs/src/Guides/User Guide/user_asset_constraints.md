@@ -17,7 +17,7 @@ This guide documents all available constraints and explains how to enable them i
 ## Balance Constraint
 *Note: Enabled by default in all assets in the [Macro Asset Library](@ref)*
 
-The balance constraint ensures that the sum of inflows and outflows at any **transformation** or **storage** component of an asset equals zero at each time step.
+The balance constraint ensures that the sum of inflows and outflows at any component of an asset equals zero at each time step.
 
 !!! note "Formulation"
     ```math
@@ -42,10 +42,10 @@ While enabled by default in all assets in the [Macro Asset Library](@ref), the u
 ## Capacity Constraint
 *Note: Enabled by default in all assets in the [Macro Asset Library](@ref)*
 
-The capacity constraint ensures that the flow of a commodity through an **edge** of an asset (e.g, power output) does not exceed the nameplate capacity (multiplied by its availability factor).
+The capacity constraint ensures that the **flow** of a commodity through an edge of an asset (e.g, power output) does not exceed the nameplate capacity (multiplied by its availability factor).
 
 
-!!! note "Formulation"
+!!! note "Formulation - Assets without unit commitment"
     For unidirectional edges, the constraint takes this form:
     ```math
     \begin{aligned}
@@ -62,27 +62,23 @@ The capacity constraint ensures that the flow of a commodity through an **edge**
 
     where `sign(e)` is the sign of the flow of the edge, which is `1` for positive flows and `-1` for negative flows.
 
-**Edges with Unit Commitment**
 
-For unidirectional edges:
-
-!!! note "Formulation"
+!!! note "Formulation - Assets with unit commitment"
+    Unidirectional edges:
     ```math
     \begin{aligned}
         \sum_{t \in \text{time\_interval(e)}} \text{flow(e, t)} \leq \text{availability(e, t)} \times \text{capacity(e)} \times \text{ucommit(e, t)}
     \end{aligned}
     ```
 
-For bidirectional edges:
-
-!!! note "Formulation"
+    Bidirectional edges:
     ```math
     \begin{aligned}
         \text{sign(e)} \times \text{flow(e, t)} \leq \text{availability(e, t)} \times \text{capacity(e)} \times \text{ucommit(e, t)}
     \end{aligned}
     ```
 
-where `sign(e)` is the sign of the flow of the edge, which is `1` for positive flows and `-1` for negative flows.
+    where `sign(e)` is the sign of the flow of the edge, which is `1` for positive flows and `-1` for negative flows.
 
 The capacity constraint is enabled by default in all assets in the [Macro Asset Library](@ref). The user can enable/disable it by adding these lines to their asset's JSON input file:
 
@@ -116,7 +112,7 @@ As a reminder, users can define the availability as a time series in the asset's
 ```
 
 ## Maximum Capacity
-The maximum capacity constraint enforces that the capacity of an **edge** or **storage** of an asset does not exceed the `max_capacity` attribute as specified in the JSON input file.
+The maximum capacity constraint enforces that the **capacity** of an edge or storage of an asset does not exceed the `max_capacity` attribute as specified in the JSON input file.
 
 !!! note "Formulation"
     ```math
@@ -142,7 +138,7 @@ To enable this constraint:
 ```
 
 ## Minimum Capacity
-The minimum capacity constraint enforces that the capacity of an **edge** or **storage** of an asset is greater than or equal to the `min_capacity` attribute as specified in the JSON input file.
+The minimum capacity constraint enforces that the **capacity** of an edge or storage of an asset is greater than or equal to the `min_capacity` attribute as specified in the JSON input file.
 
 !!! note "Formulation"
     ```math
@@ -168,7 +164,7 @@ To enable this constraint:
 ```
 
 ## Minimum Flow Constraint
-The minimum flow constraint enforces that the flow of a commodity in an **edge** does not exceed a user-defined fraction of the capacity of the edge (`min_flow_fraction` attribute).
+The minimum flow constraint enforces that the **flow** of a commodity in an edge does not exceed a user-defined fraction of the capacity of the edge (specified using the `min_flow_fraction` attribute).
 
 !!! note "Formulation"
     ```math
@@ -205,7 +201,7 @@ To enable this constraint:
     This constraint is available only for unidirectional edges.
 
 ## Minimum Up/Down Time (Unit Commitment)
-The minimum up/down time constraint enforces that **edges** with unit commitment must be on/off for a minimum number of time steps (specified using the `min_up_time`/`min_down_time` attribute).
+The minimum up/down time constraint enforces that edges with unit commitment must be on/off for a minimum number of time steps (specified using the `min_up_time`/`min_down_time` attribute).
 
 !!! note "Formulation"
     ```math
@@ -241,7 +237,7 @@ To enable this constraint:
     This constraint will throw an error if the minimum up/down time is longer than the length of one subperiod.
 
 ## Must Run Constraint
-The must run constraint forces an **edge** to operate at its full capacity (adjusted by availability) at all times.
+The must run constraint forces an edge to operate at its full capacity (adjusted by availability) at all times.
 
 !!! note "Formulation"
     ```math
@@ -275,20 +271,7 @@ To enable this constraint:
     This constraint is available only for unidirectional edges.
 
 ## Ramping Limit Constraint (RampUp/RampDown)
-The ramping limits constraint restricts how quickly the flow through an **edge** can change between consecutive time steps. The maximum rate of change is defined as a fraction of the edge's capacity (`ramp_up_fraction`/`ramp_down_fraction`).
-
-
-!!! note "Formulation - Assets with unit commitment"
-    ```math
-    \begin{aligned}
-        \text{flow(e, t)} - \text{flow(e, t-1)} - \text{ramp\_up\_fraction(e)} \times \text{capacity\_size(e)} \times (\text{ucommit(e, t)} - \text{ustart(e, t)}) + \text{min(availability(e, t), max(min\_flow\_fraction(e), ramp\_up\_fraction(e)))} \times \text{capacity\_size(e)} \times \text{ustart(e, t)} - \text{min\_flow\_fraction(e)} \times \text{capacity\_size(e)} \times \text{ushut(e, t)} \leq 0
-    \end{aligned}
-    ```
-    ```math
-    \begin{aligned}
-        \text{flow(e, t-1)} - \text{flow(e, t)} - \text{ramp\_down\_fraction(e)} \times \text{capacity\_size(e)} \times (\text{ucommit(e, t)} - \text{ustart(e, t)}) - \text{min\_flow\_fraction(e)} \times \text{capacity\_size(e)} \times \text{ustart(e, t)} + \text{min(availability(e, t), max(min\_flow\_fraction(e), ramp\_down\_fraction(e)))} \times \text{capacity\_size(e)} \times \text{ushut(e, t)} \leq 0
-    \end{aligned}
-    ```
+The ramping limits constraint restricts how quickly the **flow** through an edge can change between consecutive time steps. The maximum rate of change is defined as a fraction of the edge's capacity (`ramp_up_fraction`/`ramp_down_fraction`).
 
 !!! note "Formulation - Assets without unit commitment"
     ```math
@@ -299,6 +282,18 @@ The ramping limits constraint restricts how quickly the flow through an **edge**
     ```math
     \begin{aligned}
         \text{flow(e, t-1)} - \text{flow(e, t)} \leq \text{ramp\_down\_fraction(e)} \times \text{capacity(e)}
+    \end{aligned}
+    ```
+
+!!! note "Formulation - Assets with unit commitment"
+    ```math
+    \begin{aligned}
+        \text{flow(e, t)} - \text{flow(e, t-1)} - \text{ramp\_up\_fraction(e)} \times \text{capacity\_size(e)} \times (\text{ucommit(e, t)} - \text{ustart(e, t)}) + \text{min(availability(e, t), max(min\_flow\_fraction(e), ramp\_up\_fraction(e)))} \times \text{capacity\_size(e)} \times \text{ustart(e, t)} - \text{min\_flow\_fraction(e)} \times \text{capacity\_size(e)} \times \text{ushut(e, t)} \leq 0
+    \end{aligned}
+    ```
+    ```math
+    \begin{aligned}
+        \text{flow(e, t-1)} - \text{flow(e, t)} - \text{ramp\_down\_fraction(e)} \times \text{capacity\_size(e)} \times (\text{ucommit(e, t)} - \text{ustart(e, t)}) - \text{min\_flow\_fraction(e)} \times \text{capacity\_size(e)} \times \text{ustart(e, t)} + \text{min(availability(e, t), max(min\_flow\_fraction(e), ramp\_down\_fraction(e)))} \times \text{capacity\_size(e)} \times \text{ushut(e, t)} \leq 0
     \end{aligned}
     ```
 
@@ -320,7 +315,7 @@ To enable this constraint:
 ## Storage Capacity Constraint
 *Note: Enabled by default for batteries and gas storage assets*
 
-This constraint ensures that the storage level of a **storage** component of an asset never exceeds its total energy capacity.
+This constraint ensures that the **storage level** of a storage component of an asset never exceeds its total energy capacity.
 
 !!! note "Formulation"
     ```math
@@ -344,7 +339,7 @@ As mentioned above, this constraint is enabled by default for batteries and gas 
 ```
 
 ## Maximum Storage Level
-The maximum storage level constraint enforces that the storage level of a **storage** component of an asset does not exceed the `capacity` times the `max_storage_level` attribute as specified in the JSON input file.
+The maximum storage level constraint enforces that the **storage level** of a storage component of an asset does not exceed the `capacity` times the `max_storage_level` attribute as specified in the JSON input file.
 
 !!! note "Formulation"
     ```math
@@ -370,7 +365,7 @@ To enable this constraint:
 ```
 
 ## Minimum Storage Level
-The minimum storage level constraint enforces that the storage level of a **storage** of an asset does not exceed the `capacity` times the `min_storage_level` attribute as specified in the JSON input file.   
+The minimum storage level constraint enforces that the **storage level** of a storage component of an asset does not exceed the `capacity` times the `min_storage_level` attribute as specified in the JSON input file.   
 
 !!! note "Formulation"
     ```math
