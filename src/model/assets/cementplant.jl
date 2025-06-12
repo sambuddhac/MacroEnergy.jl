@@ -56,7 +56,6 @@ function full_default_data(::Type{CementPlant}, id=missing)
             ),
             :co2_captured_edge => @edge_data(
                 :commodity=>"CO2Captured",
-                :co2_sink => missing,
             ),
         ),
     )
