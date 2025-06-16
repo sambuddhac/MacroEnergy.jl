@@ -35,8 +35,10 @@ function run_case(
 
     (case, solution) = solve_case(case, optimizer)
 
-    
-    write_outputs(create_output_path(case.systems[1], case_path), case, solution)
+    if length(case.systems) ≥ 1
+        case_path = create_output_path(case.systems[1], case_path)
+    end
+    write_outputs(case_path, case, solution)
 
     # If Benders, delete processes
     if isa(solution_algorithm(case), Benders)
