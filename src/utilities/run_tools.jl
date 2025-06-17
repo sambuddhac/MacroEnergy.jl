@@ -42,7 +42,7 @@ function run_case(
 
     # If Benders, delete processes
     if isa(solution_algorithm(case), Benders)
-        if case.settings.BendersSettings[:Distributed]
+        if case.settings.BendersSettings[:Distributed] && length(workers()) > 1
             rmprocs.(workers())
         end
     end
