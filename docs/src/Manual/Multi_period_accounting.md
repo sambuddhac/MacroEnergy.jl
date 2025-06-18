@@ -22,60 +22,79 @@
 
 ### Investment cost
 
-$$\textbf{Total investment cost in objective function} = \sum_y \sum_z \sum_i \sum_{j=1}^{P_i} \frac{1}{(1+DR)^{j+N_i}} \textbf{Annualized investment cost}_{y,z,i}$$
+The total investment cost in the objective function is expressed as:
+```math
+\text{Investment cost} = \sum_y \sum_z \sum_i \sum_{j=1}^{P_i} \frac{1}{(1+DR)^{j+N_i}} \text{Annualized investment cost}_{y,z,i}
+```
 
 where: 
-- \textbf{Annualized investment cost} represents the product of annualized cost per unit of capacity and the amount of capacity deployed.
+- $\text{Annualized investment cost}_{y,z,i}$ represents the product of annualized cost per unit of capacity and the amount of capacity deployed.
 - $y$ indexes technologies, $z$ indexes zones, and $i$ indexes periods.
 - DR represents the general discount rate (which can equivalently be referred to as the social discount rate)
-- $$N_i$ is the number of years from the beginning of the modeling horizon to the first year of period $i$.
+- $N_i$ is the number of years from the beginning of the modeling horizon to the first year of period $i$.
 
-$$N_i = \sum_{i=1}^{i-1}L_i$$
+```math
+N_i = \sum_{i=1}^{i-1}L_i
+```
 
 - $L_i$ is the number of years in period $i$
 - $P_i$ is the minimum of the economic lifetime or the total number of years across all remaining periods.
 
-$$P_i = \min(EL_y, \sum_{i}^{|I|}L_i)$$
+```math
+P_i = \min(EL_y, \sum_{i}^{|I|}L_i)
+```
 
 
 ## Fixed O&M cost
 
-$$\textbf{Fixed O\&M cost in objective function} = \sum_i^{|I|} \sum_{j=1}^{L_i} \frac{1}{(1+DR)^{j+N_i}} \text{Annual Fixed O\&M cost}_i$$
+```math
+\text{Fixed O\&M cost} = \sum_i^{|I|} \sum_{j=1}^{L_i} \frac{1}{(1+DR)^{j+N_i}} \text{Annual Fixed O\&M cost}_i
+```
 
 ## Variable cost
 
  Annual costs must be summed over periods $i$, based on the number of years within each period $L_i$, and discounted:
 
-$${Variable cost in objective function} = \sum_i^{|I|} \sum_{j=1}^{L_i} \frac{1}{(1+DR)^{j+N_i}} \text{Annual variable cost}_i$$
+```math
+\text{Variable cost} = \sum_i^{|I|} \sum_{j=1}^{L_i} \frac{1}{(1+DR)^{j+N_i}} \text{Annual variable cost}_i
+```
 
 ## Myopic
 
 ### Investment cost
 
-$$\textbf{Investment cost in objective function}_i = \sum_y^{|G|} \sum_z^{|Z|} \sum_{j=1}^{P_i} \frac{1}{(1+DR)^{j+N_i}} \textbf{Annualized investment cost per MW} \* \textbf{Capacity deployed in MW}$$
+```math
+\text{Investment cost}_i = \sum_y^{|G|} \sum_z^{|Z|} \sum_{j=1}^{P_i} \frac{1}{(1+DR)^{j+N_i}} \text{Annualized investment cost}
+```
 
 where:
 
 $P_i$ is the minimum of the economic lifetime or the total number of years in the period (a period will typically be shorter in duration than the economic lifetime). 
 
-$$P_i = \min(EL_y, L_i)$$
+```math
+P_i = \min(EL_y, L_i)
+```
 
 Note that the costs reported out of the model add back annuities not considered by the myopic foresight, to enable comparisons with the perfect foresight case. In other words, the reported investment cost is calculated using $P_i = \min(EL_y, \sum_{i}^{|I|}L_i)$.
 
 ### Fixed O&M costs
 
-$$\textbf{Fixed O\&M cost}_i = \sum_{j=1}^{L_i} \frac{1}{(1+DR)^{j+N_i}} \text{Annual Fixed O\&M cost}_i$$
+```math
+\text{Fixed O\&M cost}_i = \sum_{j=1}^{L_i} \frac{1}{(1+DR)^{j+N_i}} \text{Annual Fixed O\&M cost}_i
+```
 
 ### Variable cost
 
-$$\textbf{Variable cost}_i = \sum_{j=1}^{L_i} \frac{1}{(1+DR)^{j+N_i}} \text{weight}_j \text{Annual variable cost}_i$$
+```math
+\text{Variable cost}_i = \sum_{j=1}^{L_i} \frac{1}{(1+DR)^{j+N_i}} \text{Annual variable cost}_i
+```
 
 
 # Cost outputs
 
 Reported in two forms:
-    - **Discounted** costs are reported in "costs.csv". These expressed in present value terms from the perspective of the beginning of the modeling horizon (this corresponds to the values considered in the objective function)
-    - **Undiscounted**: expressed in present value terms from the perspective of the point in time when the costs incurred.
+*  **Discounted** costs are reported in "costs.csv". These expressed in present value terms from the perspective of the beginning of the modeling horizon (this corresponds to the values considered in the objective function)
+*  **Undiscounted**: expressed in present value terms from the perspective of the point in time when the costs incurred.
 
 All reported cost components for a given period represent costs for the whole period; i..e, costs are not in annual terms. Users can multiply these outputs by the appropriate coefficients (based no number of years in each period) to estimate annual costs from the reported data.
 
