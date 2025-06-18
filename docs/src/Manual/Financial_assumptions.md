@@ -14,8 +14,10 @@ The annualized investment cost is calculated inside Macro. Users input the CAPEX
 Macro calculates the annualized investment cost internally using the following expressions.
 
 ```math
-\text{Capital recovery factor}_y = \frac{WACC_y}{1-(1+\text{WACC}_y)^{-EL_y}}
+\text{CRF}_y = \frac{WACC_y}{1-(1+\text{WACC}_y)^{-EL_y}}
 ```
+
+where CRF is the Capital Recovery Factor.
     
 ```math
 \text{Annualized investment cost}_y = \text{CRF}_y \text{CAPEX}_{y,z}
