@@ -8,7 +8,8 @@
         "Uranium",
         "CO2",
         "Coal",
-        "LiquidFuels"
+        "LiquidFuels",
+        "Cement"
     ],
     "settings": {
         "ConstraintScaling": false,

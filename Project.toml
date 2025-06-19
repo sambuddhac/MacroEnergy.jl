@@ -45,9 +45,10 @@ MacroEnergySolvers = "0.1.0"
 GitHub = "5.9.0"
 Gurobi = "1.6.0"
 MacroEnergyScaling = "0.2.0"
-Markdown = "1.9.4"
+Markdown = "1.9.0"
 Parquet2 = "0.2.27"
-Pkg = "1.11.0"
+Pkg = "1.9.0"
+Revise = "3"
 
 [extras]
 JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
