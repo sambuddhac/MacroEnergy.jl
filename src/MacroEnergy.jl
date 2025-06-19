@@ -141,7 +141,7 @@ include("model/assets/fuelcell.jl")
 include("model/assets/gasstorage.jl")
 include("model/assets/thermalhydrogen.jl")
 include("model/assets/thermalpower.jl")
-include("model/assets/powerline.jl")
+include("model/assets/transmissionlink.jl")
 include("model/assets/vre.jl")
 include("model/assets/thermalhydrogenccs.jl")
 include("model/assets/thermalpowerccs.jl")
@@ -229,7 +229,6 @@ export AbstractAsset,
     OperationConstraint,
     PlanningConstraint,
     PolicyConstraint,
-    PowerLine,
     RampingLimitConstraint,
     run_case,
     Storage,
@@ -245,6 +244,7 @@ export AbstractAsset,
     ThermalPower,
     ThermalHydrogenCCS,
     ThermalPowerCCS,
+    TransmissionLink,
     Transformation,
     Uranium,
     VRE,
