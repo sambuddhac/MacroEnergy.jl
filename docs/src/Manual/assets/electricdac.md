@@ -49,7 +49,7 @@ The definition of the transformation object can be found here [MacroEnergy.Trans
 
 !!! tip "Default constraints"
     The **default constraint** for the transformation part of the ElectricDAC asset is the following:
-    - [Balance constraint](@ref)
+    - [Balance constraint](@ref balance_constraint_ref)
 
 #### Flow equations
 In the following equations, $\phi$ is the flow of the commodity and $\epsilon$ is the stoichiometric coefficient defined in the transformation table below.
@@ -90,7 +90,7 @@ Both the incoming and outgoing edges are represented by the same set of attribut
 | **variable\_om\_cost** | `Float64` | `Float64` | `0.0` | Variable operation and maintenance cost (USD/MWh). |
 
 !!! tip "Default constraints"
-    The only **default constraint** for the edges of the ElectricDAC asset is the [Capacity constraint](@ref) applied to the CO2 edge. 
+    The only **default constraint** for the edges of the ElectricDAC asset is the [Capacity constraint](@ref capacity_constraint_ref) applied to the CO2 edge. 
 
 ## Example
 The following is an example of the input file for an ElectricDAC asset that creates three electric DAC units, each for a different region.

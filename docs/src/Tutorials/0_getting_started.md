@@ -34,13 +34,19 @@ cd MacroEnergy.jl
 ```
 - **Install Macro and all the dependencies**:
 ```bash
-julia --project -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+julia --project=. -e "using Pkg; Pkg.instantiate(); Pkg.precompile()"
 ```
 
 ### Setting up Jupyter Notebook
 Once Macro is installed, to enable Jupyter Notebook support, you can run the following command:
 ```bash
-julia --project -e 'using IJulia; IJulia.installkernel("Macro", "--project=@.")'
+julia --project=. 
+```
+in the terminal. Then, you can install the IJulia package and install the Macro kernel with the following commands:
+```julia
+julia> ]
+(MacroEnergy) pkg> add IJulia
+julia> using IJulia; IJulia.installkernel("MacroEnergy", "--project=@.")
 ```
 Once the kernel is installed, you can run Jupyter Notebook with one of the following commands:
 ```bash

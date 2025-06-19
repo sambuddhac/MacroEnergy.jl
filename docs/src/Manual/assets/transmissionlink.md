@@ -51,7 +51,7 @@ The definition of the `Edge` object can be found here [MacroEnergy.Edge](@ref).
 | **variable\_om\_cost** | `Float64` | `Float64` | `0.0` | Variable operation and maintenance cost (USD/MWh). |
 
 !!! tip "Default constraints"
-    The **default constraint** for power lines is the [Capacity constraint](@ref). 
+    The **default constraint** for power lines is the [Capacity constraint](@ref capacity_constraint_ref). 
 
 ## Example
 The following is an example of the input file for a power line asset that creates two power lines, one connecting the SE and MIDAT regions, and one connecting the MIDAT and NE regions.

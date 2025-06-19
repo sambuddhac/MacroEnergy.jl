@@ -54,7 +54,7 @@ The definition of the `Edge` object can be found here [MacroEnergy.Edge](@ref).
 !!! tip "Default constraints"
     The **default constraints** for the hydrogen line asset are the following:
 
-    - [Capacity constraint](@ref)
+    - [Capacity constraint](@ref capacity_constraint_ref)
 
 ## Example
 The following is an example of the input file for a hydrogen line asset that creates two hydrogen lines, one connecting the SE and MIDAT regions, and one connecting the NE and SE regions.
