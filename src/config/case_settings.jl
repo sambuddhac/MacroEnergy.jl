@@ -98,7 +98,7 @@ function configure_case(
     rel_path::AbstractString,
 )
     if haskey(case_settings, :path)
-        @info("Configuring case from path")
+        @info("Configuring case from $(case_settings[:path])")
         path = rel_or_abs_path(case_settings[:path], rel_path)
         return configure_case(path, rel_path)
     else
