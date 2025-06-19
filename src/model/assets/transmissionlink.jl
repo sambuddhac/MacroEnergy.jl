@@ -36,6 +36,7 @@ function simple_default_data(::Type{TransmissionLink}, id=missing)
     return OrderedDict{Symbol,Any}(
         :id => id,
         :location => missing,
+        :commodity => "Electricity",
         :can_expand => true,
         :can_retire => false,
         :existing_capacity => 0.0,
