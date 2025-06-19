@@ -12,9 +12,22 @@ function generate_case(
     systems_data::Dict{Symbol,Any},
 )::Case
 
+    @info("*** Generating case ***")
+
+    settings = configure_case(systems_data[:settings], dirname(path))
+
     case = systems_data[:case]
     num_systems = length(case)
-    @info("Running system generation")
+
+    # Check that the number of systems matches the length of [PeriodLengths]
+    if num_systems != length(settings[:PeriodLengths])
+        error(
+            "Your number of systems ($(num_systems)) does not match the number of periods lengths ($(length(settings[:PeriodLengths]))) in your case settings.
+            If you didn't specify period lengths, the default is for one 1-year period"
+            )
+    end
+
+    @info("Generating systems")
     
     start_time = time()
     systems::Vector{System} = map(1:num_systems) do system_idx
@@ -25,11 +38,11 @@ function generate_case(
         return system
     end
 
-    settings = configure_case(systems_data[:settings], dirname(path))
+    println("Case settings: $(settings)")
 
     prepare_case!(systems, settings)
 
-    @info("Done generating case. It took $(round(time() - start_time, digits=2)) seconds")
+    @info("*** Done generating case. It took $(round(time() - start_time, digits=2)) seconds ***")
     return Case(systems, settings)
 end
 
@@ -38,10 +51,10 @@ function prepare_case!(systems::Vector{System}, settings::NamedTuple)
     for (system_id, system) in enumerate(systems)
         compute_annualized_costs!(system,settings) 
         
-        @info("Discounting fixed costs for period $(system_id)")
+        @info(" -- Discounting fixed costs for period $(system_id)")
         discount_fixed_costs!(system, settings)
         
-        @info("Computing retirement case for period $(system_id)")
+        @info(" -- Computing retirement case for period $(system_id)")
         compute_retirement_period!(system, settings[:PeriodLengths])
     end
 end
