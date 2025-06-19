@@ -3,13 +3,14 @@
         {
             "type": "TransmissionLink",
             "global_data": {
-                "elec_constraints": {
+                "transmission_constraints": {
                     "MaxCapacityConstraint": true
                 }
             },
             "instance_data": [
                 {
                     "id": "SE_to_MIDAT",
+                    "commodity": "Electricity",
                     "transmission_origin": "elec_SE",
                     "transmission_dest": "elec_MIDAT",
                     "distance": 491.4512001,
@@ -20,6 +21,7 @@
                 },
                 {
                     "id": "MIDAT_to_NE",
+                    "commodity": "Electricity",
                     "transmission_origin": "elec_MIDAT",
                     "transmission_dest": "elec_NE",
                     "distance": 473.6625536,
