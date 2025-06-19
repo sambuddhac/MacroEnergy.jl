@@ -3,6 +3,7 @@ function load_case_data(
     rel_path::AbstractString = dirname(file_path);
     lazy_load::Bool = true,
 )::Dict{Symbol,Any}
+    start_time = time()
     file_path = abspath(rel_or_abs_path(file_path, rel_path))
 
     # Load the system data from the JSON file(s)
@@ -15,6 +16,7 @@ function load_case_data(
         )
     end
 
+    @info("Done loading case data. It took $(round(time() - start_time, digits=2)) seconds")
     return data
 end
 
@@ -32,12 +34,10 @@ function load_case(
 
     if isjson(path)
         @info("Loading case from $path")
-        start_time = time()
 
         case_data = load_case_data(path; lazy_load = lazy_load)
         case = generate_case(path, case_data)
 
-        @info("Done loading case. It took $(round(time() - start_time, digits=2)) seconds")
         return case
     else
         msg = "No case data found in $path. Either provide a path to a .JSON file or a directory containing a system_data.json file"

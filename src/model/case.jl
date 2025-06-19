@@ -12,6 +12,8 @@ function generate_case(
     systems_data::Dict{Symbol,Any},
 )::Case
 
+    @info("*** Generating case ***")
+
     settings = configure_case(systems_data[:settings], dirname(path))
 
     case = systems_data[:case]
@@ -25,7 +27,7 @@ function generate_case(
             )
     end
 
-    @info("Running system generation")
+    @info("Generating systems")
     
     start_time = time()
     systems::Vector{System} = map(1:num_systems) do system_idx
@@ -40,7 +42,7 @@ function generate_case(
 
     prepare_case!(systems, settings)
 
-    @info("Done generating case. It took $(round(time() - start_time, digits=2)) seconds")
+    @info("*** Done generating case. It took $(round(time() - start_time, digits=2)) seconds ***")
     return Case(systems, settings)
 end
 
