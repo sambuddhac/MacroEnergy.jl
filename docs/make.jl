@@ -82,7 +82,9 @@ const pages = [
             "Manual/assets/thermalpower.md",
             "Manual/assets/vre.md"
         ],
-        "Model" => "Manual/Model.md"
+        "Model" => "Manual/Model.md",
+        "Financial Assumptions" => "Manual/Financial_assumptions.md",
+        "Multi-Period Accounting" => "Manual/Multi_period_accounting.md"
     ],
     "How to contribute" => "how_to_contribute.md",
     "References" => [
