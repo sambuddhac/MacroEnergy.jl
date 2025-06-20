@@ -27,7 +27,7 @@
                         "has_capacity": true,
                         "can_retire": false,
                         "can_expand": true,
-                        "capacity_size": 100,
+                        "capacity_size": 1,
                         "investment_cost": 3600000,
                         "wacc": 0.039,
                         "lifetime": 20,
