@@ -234,7 +234,7 @@ Transmission lines can be represented as `TransmissionLink{Electricity}` Assets.
 
 Assets can be defined using the standard or advanced JSON input formats, or a blend of the two. The standard format is simpler and more concise, while the advanced format allows for more flexibility and additional fields.
 
-Macro also supports CSV inputs. These will usually use the standard input format. Please refer to the [CSV Input documentation](@ref "CSV Input") for more details on how to use CSV files.
+Macro also supports CSV inputs. These will usually use the standard input format. Please refer to the [CSV Input documentation](@ref "CSV Inputs") for more details on how to use CSV files.
 
 ##### Standard JSON Input Format
 
@@ -466,57 +466,11 @@ The `make()` function then returns a new `TransmissionLink` Asset, which contain
 
 Modellers can define Asset-specific default values for the `TransmissionLink` Asset using the `full_default_data()` and `simple_default_data()` functions. These allow Users to provide much shorter and simpler input files than are otherwise required. The two functions are described in the [Assets documentation](@ref "Assets").
 
-
-<!-- It would be interesting to think of good tips to add back in here
-## Tips & Best Practices
-
-### Commodity Type Safety
-Always ensure commodity types match between connected vertices:
-```julia
-# This will validate automatically during construction
-edge = Edge(id, data, time_data, Electricity, elec_node1, elec_node2)
-```
-
-### Time-Varying Parameters
-When using time-varying parameters, ensure vector lengths match the time horizon:
-```julia
-# Availability profile must match number of time periods
-availability_profile = fill(0.8, length(time_data.time_periods))
-```
-
-### Performance Considerations
-- Use `edges_with_capacity_variables()` to filter relevant edges for capacity constraints
-- Set `has_capacity => false` for edges without capacity limits to improve performance
-- Use `integer_decisions => true` sparingly as it increases computational complexity
-
-### Unit Commitment Modeling
-For assets with startup/shutdown dynamics:
-- Use `EdgeWithUC` instead of `Edge`
-- Set realistic `min_up_time` and `min_down_time` values
-- Include `startup_cost` and `startup_fuel_consumption` for accurate modeling
-
-### Investment Modeling
-For capacity expansion studies:
-- Set `can_expand => true` and specify `investment_cost`
-- Use `max_new_capacity` to limit expansion
-- Consider `lifetime` and `wacc` for proper economic evaluation
-
-### Flow Direction
-- Set `unidirectional => true` for one-way flows (default)
-- Set `unidirectional => false` for bidirectional flows (like transmission lines)
-- Use separate edges for different flow directions when needed
-
-### Efficiency and Losses
-- Use `efficiency` for conversion factors (e.g., 0.95 for 95% efficiency)
-- Use `loss_fraction` for transmission losses that may vary over time
-- Losses are applied as: `flow_out = flow_in * (1 - loss_fraction) * efficiency` -->
-
 ## See Also
 
 - [Vertices](@ref) - Network nodes that edges connect
 - [Commodities](@ref) - Types of resources flowing through edges  
 - [Time Data](@ref) - Temporal modeling framework
 - [Constraints](@ref) - Additional constraints for edges
-- [Network Building](@ref) - Constructing complete networks
 - [Storage](@ref) - Energy storage modeling
 - [Assets](@ref) - Higher-level asset modeling using edges
