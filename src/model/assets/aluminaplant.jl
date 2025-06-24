@@ -1,14 +1,14 @@
 struct AluminaPlant{T} <: AbstractAsset
     id::AssetId
     aluminaplant_transform::Transformation
-    elec_edge::Union{Edge{Electricity},EdgeWithUC{Electricity}}
-    alumina_edge::Edge{Alumina} # alumina input
-    bauxite_edge::Edge{Bauxite} # bauxite input
+    elec_edge::Union{Edge{<:Electricity},EdgeWithUC{<:Electricity}}
+    alumina_edge::Edge{<:Alumina} # alumina input
+    bauxite_edge::Edge{<:Bauxite} # bauxite input
     fuel_edge::Edge{T}
-    co2_edge::Edge{CO2} # co2 output
+    co2_edge::Edge{<:CO2} # co2 output
 end
 
-AluminaPlant(id::AssetId, aluminaplant_transform::Transformation, elec_edge::Edge{Electricity}, alumina_edge::Edge{Alumina}, bauxite_edge::Edge{Bauxite}, fuel_edge::Edge{T}, co2_edge::Edge{CO2}) where T<:Commodity =
+AluminaPlant(id::AssetId, aluminaplant_transform::Transformation, elec_edge::Union{Edge{<:Electricity},EdgeWithUC{<:Electricity}}, alumina_edge::Edge{<:Alumina}, bauxite_edge::Edge{<:Bauxite}, fuel_edge::Edge{T}, co2_edge::Edge{<:CO2}) where T<:Commodity =
     AluminaPlant{T}(id, aluminaplant_transform, elec_edge, alumina_edge, bauxite_edge, fuel_edge, co2_edge)
 
 function default_data(t::Type{AluminaPlant}, id=missing, style="full")
@@ -112,8 +112,7 @@ function make(asset_type::Type{AluminaPlant}, data::AbstractDict{Symbol,Any}, sy
         [
             (data[:edges][elec_edge_key], key),
             (data[:edges][elec_edge_key], Symbol("elec_", key)),
-            (data, Symbol("elec_", key)),
-            (data, key),
+            (data, Symbol("elec_", key))
         ]
     )
 
@@ -142,8 +141,7 @@ function make(asset_type::Type{AluminaPlant}, data::AbstractDict{Symbol,Any}, sy
         [
             (data[:edges][bauxite_edge_key], key),
             (data[:edges][bauxite_edge_key], Symbol("bauxite_", key)),
-            (data, Symbol("bauxite_", key)),
-            (data, key),
+            (data, Symbol("bauxite_", key))
         ]
     )
 
@@ -171,7 +169,7 @@ function make(asset_type::Type{AluminaPlant}, data::AbstractDict{Symbol,Any}, sy
         [
             (data[:edges][fuel_edge_key], key),
             (data[:edges][fuel_edge_key], Symbol("fuel_", key)),
-            (data, Symbol("fuel_", key)),
+            (data, Symbol("fuel_", key))
         ]
     )
     commodity_symbol = Symbol(fuel_edge_data[:commodity])
@@ -228,8 +226,7 @@ function make(asset_type::Type{AluminaPlant}, data::AbstractDict{Symbol,Any}, sy
         [
             (data[:edges][co2_edge_key], key),
             (data[:edges][co2_edge_key], Symbol("co2_", key)),
-            (data, Symbol("co2_", key)),
-            (data, key),
+            (data, Symbol("co2_", key))
         ]
     )
     co2_start_node = aluminaplant_transform

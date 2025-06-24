@@ -1,11 +1,11 @@
 struct AluminumSmelting <: AbstractAsset
     id::AssetId
     aluminumsmelting_transform::Transformation
-    elec_edge::Edge{Electricity}
-    alumina_edge::Edge{Alumina} # alumina input
-    graphite_edge::Edge{Graphite} # graphite input
-    aluminum_edge::Union{Edge{Aluminum},EdgeWithUC{Aluminum}} # aluminum output
-    co2_edge::Edge{CO2} # co2 output
+    elec_edge::Edge{<:Electricity}
+    alumina_edge::Edge{<:Alumina} # alumina input
+    graphite_edge::Edge{<:Graphite} # graphite input
+    aluminum_edge::Union{Edge{<:Aluminum},EdgeWithUC{<:Aluminum}} # aluminum output
+    co2_edge::Edge{<:CO2} # co2 output
 end
 
 function default_data(t::Type{AluminumSmelting}, id=missing, style="full")
@@ -114,8 +114,7 @@ function make(asset_type::Type{AluminumSmelting}, data::AbstractDict{Symbol,Any}
         [
             (data[:edges][elec_edge_key], key),
             (data[:edges][elec_edge_key], Symbol("elec_", key)),
-            (data, Symbol("elec_", key)),
-            (data, key),
+            (data, Symbol("elec_", key))
         ]
     )
 
@@ -144,8 +143,7 @@ function make(asset_type::Type{AluminumSmelting}, data::AbstractDict{Symbol,Any}
         [
             (data[:edges][alumina_edge_key], key),
             (data[:edges][alumina_edge_key], Symbol("alumina_", key)),
-            (data, Symbol("alumina_", key)),
-            (data, key),
+            (data, Symbol("alumina_", key))
         ]
     )
 
@@ -174,8 +172,7 @@ function make(asset_type::Type{AluminumSmelting}, data::AbstractDict{Symbol,Any}
         [
             (data[:edges][graphite_edge_key], key),
             (data[:edges][graphite_edge_key], Symbol("graphite_", key)),
-            (data, Symbol("graphite_", key)),
-            (data, key),
+            (data, Symbol("graphite_", key))
         ]
     )
 
@@ -255,8 +252,7 @@ function make(asset_type::Type{AluminumSmelting}, data::AbstractDict{Symbol,Any}
         [
             (data[:edges][co2_edge_key], key),
             (data[:edges][co2_edge_key], Symbol("co2_", key)),
-            (data, Symbol("co2_", key)),
-            (data, key),
+            (data, Symbol("co2_", key))
         ]
     )
     co2_start_node = aluminumsmelting_transform

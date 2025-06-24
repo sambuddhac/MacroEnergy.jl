@@ -3,9 +3,9 @@
 struct AluminumRefining <: AbstractAsset
     id::AssetId                                    # Unique identifier for the asset
     aluminum_transform::Transformation             # Transformation process that converts inputs to outputs
-    elec_edge::Edge{Electricity}                  # Edge representing electricity input
-    aluminumscrap_edge::Edge{AluminumScrap}       # Edge representing aluminum scrap input
-    aluminum_edge::Edge{Aluminum}                 # Edge representing aluminum output
+    elec_edge::Edge{<:Electricity}                  # Edge representing electricity input
+    aluminumscrap_edge::Edge{<:AluminumScrap}       # Edge representing aluminum scrap input
+    aluminum_edge::Edge{<:Aluminum}                 # Edge representing aluminum output
 end
 
 # Factory function to create default data for AluminumRefining
@@ -107,8 +107,7 @@ function make(asset_type::Type{AluminumRefining}, data::AbstractDict{Symbol,Any}
         [
             (data[:edges][elec_edge_key], key),
             (data[:edges][elec_edge_key], Symbol("elec_", key)),
-            (data, Symbol("elec_", key)),
-            (data, key),
+            (data, Symbol("elec_", key))
         ]
     )
 
@@ -139,8 +138,7 @@ function make(asset_type::Type{AluminumRefining}, data::AbstractDict{Symbol,Any}
         [
             (data[:edges][aluminumscrap_edge_key], key),
             (data[:edges][aluminumscrap_edge_key], Symbol("aluminumscrap_", key)),
-            (data, Symbol("aluminumscrap_", key)),
-            (data, key),
+            (data, Symbol("aluminumscrap_", key))
         ]
     )
 
