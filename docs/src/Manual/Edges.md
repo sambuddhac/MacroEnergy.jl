@@ -10,7 +10,7 @@
 
 Each `Edge` can only carry one Commodity so they are usually described with reference to that Commodity, e.g. as `Edge{Electricity}`, `Edge{Hydrogen}`, or `Edge{CO2}`. The general description is an `Edge{T}`, where `T` can be any Commodity or sub-Commodity.
 
-### Asset Edges in Assets
+### Edges in Assets
 
 Most `Edges{T}` are incorporated into Assets, representing the ability of those Assets to transfer Commodities. This is intuitive in some instances but it must be remembered that `Edges` and other primary components within an Asset do not represent physical components. Instead, they represent the capabilities of the Asset as a whole.
 
@@ -24,7 +24,7 @@ An `Edge{Electricity}` could also represent the ability of a natural gas power p
 
 It might be intuitive to think of the `Transformation` as the power plant and the three `Edges` as the fuel lines, power lines, and flue-gas stack respectively. However, this is not correct with Macro. The combination of the three `Edges` and `Transform` represent the entire natural gas power plant. This is discussed in more detail in the [Assets documentation](@ref "Assets").
 
-### Asset Edges outside of Assets
+### Edges outside of Assets
 
 It is not currently possible to define `Edges` outside of Assets using the standard input files. We believe most users will be better served using a simple Asset to represent a connection. However, it is possible to define `Edges` directly in the Julia script you use to build and solve your model. Please feel free to reach out to the developemnt team via a GitHub issue if you have a use case for this.
 
@@ -125,6 +125,14 @@ It is not currently possible to define `Edges` outside of Assets using the stand
 
 ## Types
 
+### Type Hierarchy
+
+```julia
+AbstractEdge{T}
+├── Edge{T}
+└── EdgeWithUC{T}
+```
+
 ### AbstractEdge{T}
 
 Abstract base type for all edges,parameterized by commodity type `T`.
@@ -141,32 +149,72 @@ Edge with unit commitment constraints for modeling assets with startup/shutdown 
 
 ### Keyword Constructors
 
-Edges can be constructed by providing some or all of the fields described above as keyword arguments. The following constructors are available, where `T` is the type of commodity flowing through the edge, e.g. `Electricity`, `NaturalGas`, etc.
-
 ```julia
-Edge{T::Commodity}(; id::Symbol, start_vertex::AbstractVertex, end_vertex::AbstractVertex, time_data::Timedata, [other kwargs]...)
+Edge{T}(; id::Symbol, start_vertex::AbstractVertex, end_vertex::AbstractVertex, 
+        time_data::TimeData, commodity::Type{T}, [additional_fields...])
 
-EdgeWithUC{T::Commodity}(; id::Symbol, start_vertex::AbstractVertex, end_vertex::AbstractVertex, time_data::Timedata, [other kwargs]...)
+EdgeWithUC{T}(; id::Symbol, start_vertex::AbstractVertex, end_vertex::AbstractVertex, 
+              time_data::TimeData, commodity::Type{T}, [additional_fields...])
 ```
 
-### Outer Constructors
+Direct constructors using keyword arguments for all fields, where `T` is the type of commodity flowing through the edge, e.g. `Electricity`, `NaturalGas`, etc.
 
-Edges can also be constructed using a dictionary containing most of their configuration data. This is useful when creating Assets or when reading from input files. The following constructors are available:
+| Parameter   | Type                         | Description                           | Required |
+|-------------|------------------------------|---------------------------------------|----------|
+| `id`        | Symbol                       | Unique identifier                     | Yes      |
+| `start_vertex` | AbstractVertex            | Origin vertex                         | Yes      |
+| `end_vertex` | AbstractVertex              | Destination vertex                    | Yes      |
+| `time_data` | TimeData                     | Time-related data structure           | Yes      |
+| `commodity` | Type{T}                      | Commodity type flowing through edge   | Yes      |
+| `unidirectional` | Bool                    | Flow direction constraint             | No       |
+| `has_capacity` | Bool                      | Whether edge has capacity limits      | No       |
+| `existing_capacity` | Float64               | Initial installed capacity            | No       |
+| `max_capacity` | Float64                   | Maximum total capacity                | No       |
+| `investment_cost` | Float64                 | CAPEX per unit capacity               | No       |
+| `variable_om_cost` | Float64                | Variable O&M costs                    | No       |
+| `...`       | Various                      | Additional edge-specific fields       | No       |
+
+### Primary Constructors
 
 ```julia
-Edge(id, data, time_data, commodity, start_vertex, end_vertex)
+Edge(id::Symbol, data::AbstractDict{Symbol,Any}, time_data::TimeData, 
+     commodity::Type, start_vertex::AbstractVertex, end_vertex::AbstractVertex)
 
-EdgeWithUC(id, data, time_data, commodity, start_vertex, end_vertex)
+EdgeWithUC(id::Symbol, data::AbstractDict{Symbol,Any}, time_data::TimeData, 
+           commodity::Type, start_vertex::AbstractVertex, end_vertex::AbstractVertex)
 ```
+
+Creates Edge components from input data dictionary, time data, commodity type, and vertices.
 
 | Parameter    | Type                       | Description                           |
 |--------------|----------------------------|---------------------------------------|
-| `id`.        | Symbol                     | Unique identifier of the `Edge` |
-| `data`       | AbstractDict{Symbol,Any}   | Configuration data |
-| `commodity`  | DataType                   | Commodity type flowing through `Edge`           |
-| `time_data`  | TimeData                   | Temporal data on the representative periods being modelled, e.g. number of time steps, time step duration, etc. |
-| `start_vertex` | AbstractVertex           | Origin vertex of the `Edge`. The `start_vertex` and `end_vertex` must be compatible with the `commodity` type of the `Edge`.|
-| `end_vertex`   | AbstractVertex           | Destination vertex of the `Edge`. The choice of the `start_vertex` vs. `end_vertex` matters for unidirectional edges. |
+| `id`         | Symbol                     | Unique identifier of the Edge         |
+| `data`       | AbstractDict{Symbol,Any}   | Configuration data                    |
+| `time_data`  | TimeData                   | Temporal data on the representative periods being modelled |
+| `commodity`  | Type                       | Commodity type flowing through Edge   |
+| `start_vertex` | AbstractVertex           | Origin vertex of the Edge             |
+| `end_vertex` | AbstractVertex             | Destination vertex of the Edge        |
+
+### Factory Constructors
+
+```julia
+make_edge(id::Symbol, data::AbstractDict{Symbol,Any}, time_data::TimeData, 
+          commodity::Type, start_vertex::AbstractVertex, end_vertex::AbstractVertex)
+
+make_edge_with_uc(id::Symbol, data::AbstractDict{Symbol,Any}, time_data::TimeData, 
+                  commodity::Type, start_vertex::AbstractVertex, end_vertex::AbstractVertex)
+```
+
+Internal factory methods for creating Edge components with data processing and validation.
+
+| Parameter     | Type                        | Description                              |
+|---------------|-----------------------------|------------------------------------------|
+| `id`          | Symbol                      | Unique identifier for the edge           |
+| `data`        | AbstractDict{Symbol,Any}    | Configuration data for the edge          |
+| `time_data`   | TimeData                    | Time-related data structure              |
+| `commodity`   | Type                        | Commodity type for the edge              |
+| `start_vertex` | AbstractVertex             | Origin vertex of the edge                |
+| `end_vertex`  | AbstractVertex              | Destination vertex of the edge           |
 
 ## Methods
 

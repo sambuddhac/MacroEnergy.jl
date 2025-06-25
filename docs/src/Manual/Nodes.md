@@ -111,6 +111,19 @@ For example, a city Location might contain `Node{Electricity}`, `Node{NaturalGas
 
 ## Types
 
+### Type Hierarchy
+
+`Node` types follow a hierarchical structure rooted in the abstract `AbstractVertex` type:
+
+```julia
+AbstractVertex
+├── Node{T}
+├── AbstractStorage{T}
+│   ├── Storage{T}
+│   └── LongDurationStorage{T}
+└── Transformation{T}
+```
+
 ### Node{T}
 
 Concrete implementation of a network node parameterized by commodity type `T`.
@@ -119,25 +132,54 @@ Concrete implementation of a network node parameterized by commodity type `T`.
 
 ### Keyword Constructors
 
-Nodes can be constructed by providing some or all of the fields described above as keyword arguments. The following constructors are available, where `T` is the type of commodity flowing through the Node, e.g. `Electricity`, `NaturalGas`, etc.
-
 ```julia
-Node{T::Commodity}(; id::Symbol, timedata::TimeData, [additional_fields...])
+Node{T}(; id::Symbol, timedata::TimeData, [additional_fields...])
 ```
 
-### Outer Constructors
+Direct constructor using keyword arguments for all fields, where `T` is the type of commodity flowing through the Node, e.g. `Electricity`, `NaturalGas`, etc.
 
-Nodes can also be constructed using a dictionary containing most of their configuration data. These call the underlying `make_node()` function. This approach is useful when creating Assets or when reading from input files. The following constructors are available:
+| Parameter   | Type                         | Description                           | Required |
+|-------------|------------------------------|---------------------------------------|----------|
+| `id`        | Symbol                       | Unique identifier                     | Yes      |
+| `timedata`  | TimeData                     | Time-related data structure           | Yes      |
+| `location`  | Union{Missing, Symbol}       | Location identifier                   | No       |
+| `demand`    | Vector{Float64}              | Time-varying demand                   | No       |
+| `max_supply`| Vector{Float64}              | Maximum supply by segment             | No       |
+| `price`     | Vector{Float64}              | Time-varying prices                   | No       |
+| `max_nsd`   | Vector{Float64}              | Maximum non-served demand segments    | No       |
+| `price_nsd` | Vector{Float64}              | Penalty prices for non-served demand  | No       |
+| `...`       | Various                      | Additional node-specific fields       | No       |
+
+### Primary Constructors
 
 ```julia
 Node(data::AbstractDict{Symbol,Any}, time_data::TimeData, commodity::DataType)
 ```
+
+Creates a Node from input data dictionary, time data, and commodity type.
 
 | Parameter    | Type                       | Description                           |
 |--------------|----------------------------|---------------------------------------|
 | `data`       | AbstractDict{Symbol,Any}   | Dictionary of node configuration data |
 | `time_data`  | TimeData                   | Time-related data structure           |
 | `commodity`  | DataType                   | Commodity type for the node           |
+
+### Factory Constructors
+
+```julia
+make_node(data::AbstractDict{Symbol,Any}, time_data::TimeData, commodity::DataType)
+
+make(commodity::Type{<:Commodity}, input_data::AbstractDict{Symbol,Any}, system)
+```
+
+Factory methods for creating Nodes. The `make_node()` function is the internal constructor, while `make()` is the high-level factory method used when creating nodes from commodity types.
+
+| Parameter     | Type                        | Description                           |
+|---------------|-----------------------------|---------------------------------------|
+| `data`/`input_data` | AbstractDict{Symbol,Any} | Configuration data for the node     |
+| `time_data`   | TimeData                    | Time-related data structure           |
+| `commodity`   | Type{<:Commodity}           | Commodity type to create node for     |
+| `system`      | System                      | Parent system object (for `make()`)  |
 
 ## Methods
 
@@ -418,19 +460,19 @@ In this case, we will explicitly track the station power using an `Edge{Electric
 
 ```mermaid
 flowchart TD
-    A[Natural Gas Supply]
+    A((Natural Gas Supply))
     subgraph Power Plant
         direction TB
-        T[Transformation]
-        N[Electricity Node]
+        T{{Transformation}}
+        N((Electricity Node))
     end
     A -->|Fuel Intake| T
-    T -->|Generated Electricity| N[Electricity Node]
+    T -->|Generated Electricity| N
     N -->|Station Power| T
     N -->|Exported Electricity| C
     T -->|CO2 Emissions| F
-    C[Electricity Demand]
-    F[CO2 Emissions]
+    C((Electricity Demand))
+    F((CO2 Emissions))
 ```
 
 ```julia
@@ -501,6 +543,8 @@ function make(asset_type::Type{StationPowerExample}, data::AbstractDict{Symbol,A
 end
 ```
 
+##### Natual Gas Power Plant with Station Power, Standard JSON Input Format
+
 Using the default JSON input format and carefully chosen defaults, our new Asset will only require one additional field specifying the station power required per unit of fuel or MWh of electricity generated. The creation and connection of the Node will be handled by the `make()` function. Here, we've used the latter by creating a `station_power_per_MWh` field. This must be accessed and added to the stochiometric balance in the `make()` function.
 
 ```json
@@ -540,6 +584,8 @@ Using the default JSON input format and carefully chosen defaults, our new Asset
     }
 }
 ```
+
+##### Natual Gas Power Plant with Station Power, Advanced JSON Input Format
 
 The advanced JSON inputs will require additional fields to specify the Node and additional Edges. The `make()` function will handle the internal connections. These inputs could be significantly simplified by improving the default values for the fields using the `full_default_data()` function.
 
