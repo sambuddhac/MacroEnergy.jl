@@ -2,9 +2,9 @@
 
 ## Contents
 
-[Overview](#overview) | [Fields](#node-fields) | [Types](#types) | [Constructors](#constructors) | [Methods](#methods) | [Examples](#examples)
+[Overview](@ref "manual-nodes-overview") | [Fields](@ref "Node Fields") | [Types](@ref "manual-nodes-types") | [Constructors](@ref "manual-nodes-constructors") | [Methods](@ref "manual-nodes-methods") | [Examples](@ref "manual-nodes-examples")
 
-## Overview
+## [Overview](@id manual-nodes-overview)
 
 `Nodes` are balance points for flows of a single Commodity. They are one of the four primary components in Macro, alongside `Edges`, `Storage`, and `Transformations`. They are sub-types of the `Vertex` type.
 
@@ -109,7 +109,7 @@ For example, a city Location might contain `Node{Electricity}`, `Node{NaturalGas
 | `policy_budgeting_vars`  | Dict                      | Policy constraint budgeting variables | varies   | Dict() |
 | `policy_slack_vars`      | Dict                      | Policy constraint slack variables     | varies   | Dict() |
 
-## Types
+## [Types](@id manual-nodes-types)
 
 ### Type Hierarchy
 
@@ -128,7 +128,7 @@ AbstractVertex
 
 Concrete implementation of a network node parameterized by commodity type `T`.
 
-## Constructors
+## [Constructors](@id manual-nodes-constructors)
 
 ### Keyword Constructors
 
@@ -181,7 +181,7 @@ Factory methods for creating Nodes. The `make_node()` function is the internal c
 | `commodity`   | Type{<:Commodity}           | Commodity type to create node for     |
 | `system`      | System                      | Parent system object (for `make()`)  |
 
-## Methods
+## [Methods](@id manual-nodes-methods)
 
 ### Accessor Methods
 
@@ -270,7 +270,7 @@ Additional utility methods for working with Nodes.
 | `get_nodes_sametype(nodes::Vector{Node}, commodity::DataType)` | Filter nodes by commodity type | `Vector{Node}` |
 | `make(commodity::Type{<:Commodity}, input_data, system)` | Factory method for creating nodes | `Node{T}` |
 
-## Examples
+## [Examples](@id manual-nodes-examples)
 
 ### Nodes in Node list
 

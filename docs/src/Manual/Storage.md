@@ -2,9 +2,9 @@
 
 ## Contents
 
-[Overview](#overview) | [Fields](#storage-fields) | [Types](#types) | [Constructors](#constructors) | [Methods](#methods) | [Examples](#examples)
+[Overview](@ref "manual-storage-overview") | [Fields](@ref "Storage Fields") | [Types](@ref "manual-storage-types") | [Constructors](@ref "manual-storage-constructors") | [Methods](@ref "manual-storage-methods") | [Examples](@ref "manual-storage-examples")
 
-## Overview
+## [Overview](@id manual-storage-overview)
 
 `Storage` components store commodities over time, allowing for intertemporal energy management and system flexibility. They are one of the four primary components in Macro, alongside `Nodes`, `Edges`, and `Transformations`. They are sub-types of the `Vertex` type.
 
@@ -138,7 +138,7 @@ While single period cycles are fine for storage which usually discharge within t
 | `storage_initial`        | Union{JuMPVariable,Dict{Int64,Float64}} | Initial storage level by period | MWh | Vector{VariableRef}() |
 | `storage_change`         | Union{JuMPVariable,Dict{Int64,Float64}} | Storage change by period        | MWh | Vector{VariableRef}() |
 
-## Types
+## [Types](@id manual-storage-types)
 
 ### Type Hierarchy
 
@@ -174,7 +174,7 @@ Standard storage implementation for short-term storage that operates within repr
 
 Extended storage implementation for long-term storage that operates across multiple representative periods.
 
-## Constructors
+## [Constructors](@id manual-storage-constructors)
 
 ### Keyword Constructors
 
@@ -231,7 +231,7 @@ Internal factory methods for creating Storage components with data processing.
 | `time_data`   | TimeData                    | Time-related data structure              |
 | `commodity`   | DataType                    | Commodity type for the storage           |
 
-## Methods
+## [Methods](@id manual-storage-methods)
 
 ### Accessor Methods
 
@@ -346,7 +346,7 @@ Methods for creating storage components.
 | `make_storage(id, data, time_data, commodity)` | Create standard storage component | `Storage{T}` |
 | `make_long_duration_storage(id, data, time_data, commodity)` | Create long duration storage component | `LongDurationStorage{T}` |
 
-## Examples
+## [Examples](@id manual-storage-examples)
 
 ### Battery Storage
 

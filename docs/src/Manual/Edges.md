@@ -2,9 +2,9 @@
 
 ## Contents
 
-[Overview](#overview) | [Fields](#edge-fields) | [Types](#types) | [Constructors](#constructors) | [Methods](#methods) | [Examples](#examples)
+[Overview](@ref "manual-edges-overview") | [Fields](@ref "Edge Fields") | [Types](@ref "manual-edges-types") | [Constructors](@ref "manual-edges-constructors") | [Methods](@ref "manual-edges-methods") | [Examples](@ref "manual-edges-examples")
 
-## Overview
+## [Overview](@id manual-edges-overview)
 
 `Edges` are connections between components, allowing for one or two-way flows of Commodities. They are one of the four primary components in Macro, alongside `Nodes`, `Storage`, and `Transformations`.
 
@@ -123,7 +123,7 @@ It is not currently possible to define `Edges` outside of Assets using the stand
 | `ushut`                  | JuMPVariable              | Shutdown decision variables           | -        | -       |
 | `startup_fuel_balance_id`                  | Symbol              | ID of the balance used to track start-up fuel consumption | -        | -       |
 
-## Types
+## [Types](@id manual-edges-types)
 
 ### Type Hierarchy
 
@@ -145,7 +145,7 @@ Standard edge implementation, without unit commitment constraints. It is paramet
 
 Edge with unit commitment constraints for modeling assets with startup/shutdown dynamics. It is parameterized by commodity type `T`
 
-## Constructors
+## [Constructors](@id manual-edges-constructors)
 
 ### Keyword Constructors
 
@@ -216,7 +216,7 @@ Internal factory methods for creating Edge components with data processing and v
 | `start_vertex` | AbstractVertex             | Origin vertex of the edge                |
 | `end_vertex`  | AbstractVertex              | Destination vertex of the edge           |
 
-## Methods
+## [Methods](@id manual-edges-methods)
 
 ### Accessor Functions
 
@@ -291,7 +291,7 @@ Internal factory methods for creating Edge components with data processing and v
 | `target_is_valid(edge, target)` | Validate edge-vertex compatibility | Bool |
 | `edge_default_data()` | Get default edge data values | Dict{Symbol,Any} |
 
-## Examples
+## [Examples](@id manual-edges-examples)
 
 ### Transmission Line
 
