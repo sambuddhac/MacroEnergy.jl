@@ -39,6 +39,11 @@ abstract type Biomass <: Commodity end ## tonnes
 abstract type Uranium <: Commodity end ## MWh
 abstract type LiquidFuels <: Commodity end ## MWh
 abstract type Cement <: Commodity end ## tonnes
+abstract type Aluminum <: Commodity end ## tonnes
+abstract type AluminumScrap <: Commodity end ## tonnes
+abstract type Alumina <: Commodity end ## tonnes
+abstract type Graphite <: Commodity end ## tonnes
+abstract type Bauxite <: Commodity end ## tonnes
 
 ## Time data types
 abstract type AbstractTimeData{T<:Commodity} end
@@ -160,6 +165,9 @@ include("model/assets/syntheticnaturalgas.jl")
 include("model/assets/syntheticliquidfuels.jl")
 include("model/assets/co2injection.jl")
 include("model/assets/cementplant.jl")
+include("model/assets/aluminumrefining.jl")
+include("model/assets/aluminumsmelting.jl")
+include("model/assets/aluminaplant.jl")
 
 include("config/configure_settings.jl")
 include("config/case_settings.jl")
@@ -170,6 +178,13 @@ include_all_in_folder("write_outputs/")
 export AbstractAsset,
     AbstractTypeConstraint,
     AgeBasedRetirementConstraint,
+    Alumina,
+    Aluminum,
+    AluminumScrap,
+    AluminumRefining,
+    AluminumSmelting,
+    AluminaPlant,
+    Bauxite,
     BalanceConstraint,
     Battery,
     Biomass,
@@ -197,6 +212,7 @@ export AbstractAsset,
     FuelCell,
     FuelsEndUse,
     GasStorage,
+    Graphite,
     get_optimal_capacity, 
     get_optimal_discounted_costs,
     get_optimal_flow,
