@@ -1,6 +1,6 @@
 # Edges
 
-[Overview](#overview) | [Fields](#edge-data-fields) | [Types](#types) | [Constructors](#constructors) | [Methods](#methods) | [Examples](#examples)
+[Overview](#overview) | [Fields](#edge-fields) | [Types](#types) | [Constructors](#constructors) | [Methods](#methods) | [Examples](#examples)
 
 ## Overview
 
@@ -34,7 +34,7 @@ It is not currently possible to define `Edges` outside of Assets using the stand
 - **Investment**: Edges can have investment costs associated with investments and operation
 - **Time Dependence**: Support time-varying parameters and constraints
 
-## Edge Data Fields
+## Edge Fields
 
 `Edges` have the following fields. When running a model, the fields are set by the input files. When creating an Asset, the defaults below can can be altered using the `@edge_data` macro. The internal fields are used by Macro and are not intended to be set by users in most circumstances.
 
@@ -134,20 +134,34 @@ Edge with unit commitment constraints for modeling assets with startup/shutdown 
 
 ## Constructors
 
+### Keyword Constructors
+
+Edges can be constructed by providing some or all of the fields described above as keyword arguments. The following constructors are available, where `T` is the type of commodity flowing through the edge, e.g. `Electricity`, `NaturalGas`, etc.
+
+```julia
+Edge{T::Commodity}(; id::Symbol, start_vertex::AbstractVertex, end_vertex::AbstractVertex, time_data::Timedata, [other kwargs]...)
+
+EdgeWithUC{T::Commodity}(; id::Symbol, start_vertex::AbstractVertex, end_vertex::AbstractVertex, time_data::Timedata, [other kwargs]...)
+```
+
+### Outer Constructors
+
+Edges can also be constructed using a dictionary containing most of their configuration data. This is useful when creating Assets or when reading from input files. The following constructors are available:
+
 ```julia
 Edge(id, data, time_data, commodity, start_vertex, end_vertex)
 
 EdgeWithUC(id, data, time_data, commodity, start_vertex, end_vertex)
 ```
 
-**Parameters:**
-
-- `id::Symbol`: Unique identifier of the `Edge`
-- `data::Dict`: Configuration data (see [Default Values](#default-values))
-- `time_data::TimeData`: Temporal data on the representative periods being modelled, e.g. number of time steps, time step duration, etc.
-- `commodity::Type`: Commodity type flowing through `Edge`
-- `start_vertex::AbstractVertex`: Origin vertex of the `Edge`. The `start_vertex` and `end_vertex` must be compatible with the `commodity` type of the `Edge`.
-- `end_vertex::AbstractVertex`: Destination vertex of the `Edge`. The choice of the `start_vertex` vs. `end_vertex` matters for unidirectional edges.
+| Parameter    | Type                       | Description                           |
+|--------------|----------------------------|---------------------------------------|
+| `id`.        | Symbol                     | Unique identifier of the `Edge` |
+| `data`       | AbstractDict{Symbol,Any}   | Configuration data |
+| `commodity`  | DataType                   | Commodity type flowing through `Edge`           |
+| `time_data`  | TimeData                   | Temporal data on the representative periods being modelled, e.g. number of time steps, time step duration, etc. |
+| `start_vertex` | AbstractVertex           | Origin vertex of the `Edge`. The `start_vertex` and `end_vertex` must be compatible with the `commodity` type of the `Edge`.|
+| `end_vertex`   | AbstractVertex           | Destination vertex of the `Edge`. The choice of the `start_vertex` vs. `end_vertex` matters for unidirectional edges. |
 
 ## Methods
 
@@ -432,7 +446,7 @@ commodity = commodity_types()[commodity_symbol]
 )
 ```
 
-The next step is to find the start and end vertices of the `Edge{Electricity}`. In our example these are the `Node{Electricity}`. However, they can be other `Vertices`. 
+The next step is to find the start and end vertices of the `Edge{Electricity}`. In our example these are the `Node{Electricity}`. However, they can be other `Vertices`.
 
 The `@start_vertex` and `@end_vertex` macros are similar to the `@process_data` macro in that they allow for flexibility in how the input data is structured. They will search for the `ids` given in the `start_vertex` and `end_vertex` fields of the input data. They will first look in the most specific location before moving to the more general locations.
 
@@ -466,11 +480,180 @@ The `make()` function then returns a new `TransmissionLink` Asset, which contain
 
 Modellers can define Asset-specific default values for the `TransmissionLink` Asset using the `full_default_data()` and `simple_default_data()` functions. These allow Users to provide much shorter and simpler input files than are otherwise required. The two functions are described in the [Assets documentation](@ref "Assets").
 
+### Solar PV Power Plant
+
+#### Solar PV, Standard JSON Input Format
+
+```json
+{
+    "type": "VRE",
+    "global_data": {},
+    "instance_data": {
+        "id": "example_solar_pv",
+        "location": "boston",
+        "fixed_om_cost": 13510.19684,
+        "investment_cost": 41245.37889,
+        "max_capacity": 989513,
+        "availability": {
+            "timeseries": {
+                "path": "system/availability.csv",
+                "header": "boston_solar_pv",
+            }
+        },
+        "elec_can_expand": true,
+        "elec_can_retire": false,
+        "elec_constraints": {
+            "MaxCapacityConstraint": true
+        }
+    }
+}
+```
+
+#### Solar PV, Advanced JSON Input Format
+
+```json
+{
+    "type": "VRE",
+    "global_data": {},
+    "instance_data": {
+        "id": "example_solar_pv",
+        "transforms": {
+            "timedata": "Electricity"
+        },
+        "edges": {
+            "edge": {
+                "commodity": "Electricity",
+                "unidirectional": true,
+                "can_expand": true,
+                "can_retire": false,
+                "has_capacity": true,
+                "constraints": {
+                    "CapacityConstraint": true,
+                    "MaxCapacityConstraint": true
+                },
+                "fixed_om_cost": 13510.19684,
+                "investment_cost": 41245.37889,
+                "max_capacity": 989513,
+                "end_vertex": "boston_elec",
+                "availability": {
+                    "timeseries": {
+                        "path": "system/availability.csv",
+                        "header": "boston_solar_pv",
+                    }
+                },
+            }
+        }
+    }
+}
+```
+
+### Natural Gas Power Plant
+
+#### Nat Gas, Standard JSON Input Format
+
+```json
+{
+    "type": "ThermalPower",
+    "global_data": {},
+    "instance_data": {
+        "id": "example_natural_gas_power_plant",
+        "location": "boston",
+        "timedata": "NaturalGas",
+        "fuel_commodity": "NaturalGas",
+        "co2_sink": "co2_sink",
+        "uc": true,
+        "elec_constraints": {
+            "CapacityConstraint": true,
+            "RampingLimitConstraint": true,
+            "MinFlowConstraint": true,
+            "MinUpTimeConstraint": true,
+            "MinDownTimeConstraint": true,
+        },
+        "emission_rate": 0.181048235160161,
+        "fuel_consumption": 2.249613533,
+        "can_expand": false,
+        "existing_capacity": 4026.4,
+        "investment_cost": 0.0,
+        "fixed_om_cost": 16001,
+        "variable_om_cost": 4.415,
+        "capacity_size": 125.825,
+        "startup_cost": 89.34,
+        "startup_fuel_consumption": 0.58614214,
+        "min_up_time": 6,
+        "min_down_time": 6,
+        "ramp_up_fraction": 0.64,
+        "ramp_down_fraction": 0.64,
+        "min_flow_fraction": 0.444
+    }
+}
+```
+
+#### Nat Gas, Advanced JSON Input Format
+
+```json
+{
+    "type": "ThermalPower",
+    "global_data": {},
+    "instance_data": {
+        "id": "example_natural_gas_power_plant",
+        "transforms": {
+            "emission_rate": 0.181048235160161,
+            "fuel_consumption": 2.249613533
+        },
+        "edges": {
+            "elec_edge": {
+                "commodity": "Electricity",
+                "unidirectional": true,
+                "has_capacity": true,
+                "uc": true,
+                "integer_decisions": false,
+                "constraints": {
+                    "CapacityConstraint": true,
+                    "RampingLimitConstraint": true,
+                    "MinFlowConstraint": true,
+                    "MinUpTimeConstraint": true,
+                    "MinDownTimeConstraint": true
+                },
+               "end_vertex": "boston_elec",
+                "can_retire": true,
+                "can_expand": false,
+                "existing_capacity": 4026.4,
+                "investment_cost": 0.0,
+                "fixed_om_cost": 16001,
+                "variable_om_cost": 4.415,
+                "capacity_size": 125.825,
+                "startup_cost": 89.34,
+                "startup_fuel_consumption": 0.58614214,
+                "min_up_time": 6,
+                "min_down_time": 6,
+                "ramp_up_fraction": 0.64,
+                "ramp_down_fraction": 0.64,
+                "min_flow_fraction": 0.444
+            },
+            "fuel_edge": {
+                "commodity": "NaturalGas",
+                "unidirectional": true,
+                "has_capacity": false,
+                "start_vertex": "boston_natgas"
+            },
+            "co2_edge": {
+                "commodity": "CO2",
+                "unidirectional": true,
+                "has_capacity": false,
+                "end_vertex": "co2_sink"
+            }
+        }
+    }
+}
+```
+
 ## See Also
 
+- [Nodes](@ref) - Network nodes that edges connect to
+- [Transformations](@ref) - Processes that transform flows between edges
+- [Storage](@ref) - Energy storage components that can be connected to edges
 - [Vertices](@ref) - Network nodes that edges connect
+- [Assets](@ref "Assets") - Higher-level components made from edges, nodes,
 - [Commodities](@ref) - Types of resources flowing through edges  
 - [Time Data](@ref) - Temporal modeling framework
 - [Constraints](@ref) - Additional constraints for edges
-- [Storage](@ref) - Energy storage modeling
-- [Assets](@ref) - Higher-level asset modeling using edges
