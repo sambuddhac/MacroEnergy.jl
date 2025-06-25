@@ -1,5 +1,7 @@
 # Storage
 
+## Contents
+
 [Overview](#overview) | [Fields](#storage-fields) | [Types](#types) | [Constructors](#constructors) | [Methods](#methods) | [Examples](#examples)
 
 ## Overview
@@ -52,7 +54,7 @@ While single period cycles are fine for storage which usually discharge within t
 `Storage` components have the following fields. When running a model, the fields are set by the input files. When creating an Asset, the defaults below can be altered using the `@storage_data` macro. The internal fields are used by Macro and are not intended to be set by users in most circumstances.
 
 !!! note "Units in Macro"
-    We have assumed that your System is using units of MWh for energy, tonnes for mass, and hour-long time steps. You can use any set of units as long as they are consistent across your operations and investment inputs.
+    In the tables below, we have assumed that the Storage component compoent in question is storing energy, such as electricity or heat. Therefore the unit of storage is MWh. Please swap these for tonnes or other units as appropriate for your use case. We have also assumed that your System is using hour-long time steps. You can use any set of units as long as they are consistent across your operations and investment inputs.
 
 ### Network Structure
 
@@ -519,7 +521,7 @@ flowchart TD
     T2 --H2 Discharge--> H
 ```
 
-Constructing this Asset requires internal and external `Edges`. Under our formulation, we have set the external charge and discharge `Edges` to have capacity. The internal `Edges` do not have capacities but their flows are limited by that of the external `Edges` and the stoichiomatric balances of the `Transformations`. We have also merged the two `Transformations` in the figure above and instead added a second balance constraint.
+Constructing this Asset requires internal and external `Edges`. Under our formulation, we have set the internal charge and discharge `Edges` to have capacity. The external `Edges` do not have capacities but their flows are limited by that of the internal `Edges` and the stoichiometric balances of the `Transformations`. We have also merged the two `Transformations` in the figure above and instead added a second balance constraint.
 
 ```julia
 struct GasStorage{T} <: AbstractAsset
@@ -755,12 +757,7 @@ end
         "discharge_constraints": {
             "RampingLimitConstraint": true
         }
-    },
-    "instance_data": [
-        {
-            
-        },
-
+    }
 }
 ```
 
@@ -768,34 +765,83 @@ end
 
 ```json
 {
-    "type": "HydrogenStorage",
+    "type": "GasStorage",
     "global_data": {},
     "instance_data": [
         {
-            "id": "hydrogen_storage_boston",
-            "location": "boston",
-            "storage_can_retire": false,
-            "storage_investment_cost": 20000.0,
-            "storage_fixed_om_cost": 5000.0,
-            "storage_max_duration": 30,
-            "storage_min_duration": 1,
-            "discharge_can_retire": false,
-            "discharge_investment_cost": 30000.0,
-            "discharge_fixed_om_cost": 8000.0,
-            "discharge_variable_om_cost": 2.0,
-            "discharge_efficiency": 0.9,
-            "charge_variable_om_cost": 2.0,
-            "charge_efficiency": 0.9,
-            "storage_constraints": {
-                "StorageCapacityConstraint": true,
-                "StorageSymmetricCapacityConstraint": true,
-                "StorageMinDurationConstraint": true,
-                "StorageMaxDurationConstraint": true,
-                "BalanceConstraint": true
+            "id": "SE_Above_ground_storage",
+            "transforms": {
+                "timedata": "Hydrogen",
+                "charge_electricity_consumption": 0.01,
+                "discharge_electricity_consumption": 0.02
             },
-            "discharge_constraints": {
-                "CapacityConstraint": true,
-                "StorageDischargeLimitConstraint": true
+            "storage": {
+                "commodity": "Hydrogen",
+                "can_expand": true,
+                "can_retire": false,
+                "long_duration": true,
+                "investment_cost": 873.01,
+                "fixed_om_cost": 28.76,
+                "loss_fraction": 0.0,
+                "min_storage_level": 0.3,
+                "constraints": {
+                    "StorageCapacityConstraint": true,
+                    "BalanceConstraint": true,
+                    "MinStorageLevelConstraint": true,
+                    "LongDurationStorageImplicitMinMaxConstraint": true
+                }
+            },
+            "edges": {
+                "discharge_edge": {
+                    "type": "Hydrogen",
+                    "unidirectional": true,
+                    "can_expand": true,
+                    "can_retire": false,
+                    "has_capacity": true,
+                    "efficiency": 1.0,
+                    "ramp_up_fraction": 1,
+                    "ramp_down_fraction": 1,
+                    "constraints": {
+                        "CapacityConstraint": true,
+                        "RampingLimitConstraint": true
+                    }
+                },
+                "charge_edge": {
+                    "type": "Hydrogen",
+                    "unidirectional": true,
+                    "has_capacity": true,
+                    "can_expand": true,
+                    "can_retire": false,
+                    "investment_cost": 3219.24,
+                    "efficiency": 1.0,
+                    "constraints": {
+                        "CapacityConstraint": true
+                    }
+                },
+                "external_discharge_edge": {
+                    "end_vertex": "boston_h2",
+                    "type": "Hydrogen",
+                    "unidirectional": true,
+                    "has_capacity": false
+                },
+                "external_charge_edge":{
+                    "start_vertex": "boston_h2",
+                    "type": "Hydrogen",
+                    "unidirectional": true,
+                    "has_capacity": false
+                },
+                "discharge_elec_edge": {
+                    "start_vertex": "boston_elec",
+                    "type": "Electricity",
+                    "unidirectional": true,
+                    "has_capacity": false
+                },
+                "charge_elec_edge": {
+                    "start_vertex": "boston_elec",
+                    "type": "Electricity",
+                    "unidirectional": true,
+                    "has_capacity": false
+                }
             }
         }
     ]
