@@ -74,7 +74,7 @@ In the following equations, $\phi$ is the flow of the commodity and $\epsilon$ i
     \end{aligned}
     ```
 
-### Edges
+### Asset Edges
 !!! note "Unit commitment and default constraints"
     The `Hydrogen` edge **can have unit commitment operations**. To enable it, the user needs to set the `uc` attribute to `true`. The default constraints for unit commitment case are the following:
     - [Capacity constraint](@ref capacity_constraint_ref)

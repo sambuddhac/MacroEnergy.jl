@@ -56,7 +56,7 @@ In the following equations, $\phi$ is the flow of the commodity and $\epsilon$ i
     \end{aligned}
     ```
 
-### Edges
+### Asset Edges
 Both the electricity and hydrogen edges are represented by the same set of attributes. The definition of the `Edge` object can be found here [MacroEnergy.Edge](@ref).
 
 | **Attribute** | **Type** | **Values** | **Default** | **Description** |

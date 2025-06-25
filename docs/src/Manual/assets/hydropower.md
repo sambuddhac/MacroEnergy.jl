@@ -78,7 +78,7 @@ The definition of the `Storage` object can be found here [MacroEnergy.Storage](@
     If the storage is a long-duration storage, the following additional constraints are applied:
     - [Long-duration storage constraints](@ref long_duration_storage_constraints_ref)
 
-### Edges (discharge\_edge, inflow\_edge, spillage\_edge)
+### Asset Edges (discharge\_edge, inflow\_edge, spillage\_edge)
 !!! warning "Asset expansion"
     As a modeling decision, the following conditions are implemented:
     - Only charge and discharge edges are allowed to expand (i.e., they have the `has_capacity` attribute set to `true`). In contrast, this attribute is pre-set to `false` for the `spillage_edge`.

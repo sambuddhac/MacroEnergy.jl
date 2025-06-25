@@ -25,7 +25,7 @@ The structure of the input file for a transmission link asset follows the graph 
 }
 ```
 
-### Edges
+### Asset Edges
 The definition of the `Edge` object can be found here [MacroEnergy.Edge](@ref).
 
 | **Attribute** | **Type** | **Values** | **Default** | **Description** |
