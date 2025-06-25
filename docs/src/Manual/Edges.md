@@ -10,7 +10,7 @@
 
 Each `Edge` can only carry one Commodity so they are usually described with reference to that Commodity, e.g. as `Edge{Electricity}`, `Edge{Hydrogen}`, or `Edge{CO2}`. The general description is an `Edge{T}`, where `T` can be any Commodity or sub-Commodity.
 
-### Edges in Assets
+### Asset Edges in Assets
 
 Most `Edges{T}` are incorporated into Assets, representing the ability of those Assets to transfer Commodities. This is intuitive in some instances but it must be remembered that `Edges` and other primary components within an Asset do not represent physical components. Instead, they represent the capabilities of the Asset as a whole.
 
@@ -24,7 +24,7 @@ An `Edge{Electricity}` could also represent the ability of a natural gas power p
 
 It might be intuitive to think of the `Transformation` as the power plant and the three `Edges` as the fuel lines, power lines, and flue-gas stack respectively. However, this is not correct with Macro. The combination of the three `Edges` and `Transform` represent the entire natural gas power plant. This is discussed in more detail in the [Assets documentation](@ref "Assets").
 
-### Edges outside of Assets
+### Asset Edges outside of Assets
 
 It is not currently possible to define `Edges` outside of Assets using the standard input files. We believe most users will be better served using a simple Asset to represent a connection. However, it is possible to define `Edges` directly in the Julia script you use to build and solve your model. Please feel free to reach out to the developemnt team via a GitHub issue if you have a use case for this.
 
@@ -39,6 +39,9 @@ It is not currently possible to define `Edges` outside of Assets using the stand
 ## Edge Fields
 
 `Edges` have the following fields. When running a model, the fields are set by the input files. When creating an Asset, the defaults below can can be altered using the `@edge_data` macro. The internal fields are used by Macro and are not intended to be set by users in most circumstances.
+
+!!! note "Units in Macro"
+    We have assumed that your System is using units of MWh for energy, tonnes for mass, and hour-long time steps. You can use any set of units as long as they are consistent across your operations and investment inputs.
 
 ### Network Structure
 
@@ -57,11 +60,11 @@ It is not currently possible to define `Edges` outside of Assets using the stand
 | `has_capacity`           | Bool                      | Whether edge has capacity limits      | -        | false   |
 | `can_expand`             | Bool                      | Whether capacity can be expanded      | -        | false   |
 | `can_retire`             | Bool                      | Whether capacity can be retired       | -        | false   |
-| `existing_capacity`      | Float64                   | Initial installed capacity            | MWh / step | 0.0     |
-| `max_capacity`           | Float64                   | Maximum total capacity              | MWh / step | Inf     |
-| `min_capacity`           | Float64                   | Minimum total capacity              | MWh / step | 0.0     |
-| `max_new_capacity`       | Float64                   | Maximum new capacity additions        | MWh / step | Inf     |
-| `capacity_size`          | Float64                   | Unit size for capacity decisions      | MWh / step | 1.0     |
+| `existing_capacity`      | Float64                   | Initial installed capacity            | MWh/hr | 0.0     |
+| `max_capacity`           | Float64                   | Maximum total capacity              | MWh/hr | Inf     |
+| `min_capacity`           | Float64                   | Minimum total capacity              | MWh/hr | 0.0     |
+| `max_new_capacity`       | Float64                   | Maximum new capacity additions        | MWh/hr | Inf     |
+| `capacity_size`          | Float64                   | Unit size for capacity decisions      | MWh/hr | 1.0     |
 | `integer_decisions`      | Bool                      | Whether to use integer capacity vars  | -        | false   |
 
 ### Economic Parameters
@@ -101,12 +104,12 @@ It is not currently possible to define `Edges` outside of Assets using the stand
 
 | Field                    | Type                      | Description                           | Units    | Default |
 |--------------------------|---------------------------|---------------------------------------|----------|---------|
-| `flow`                   | Union{JuMPVariable,Vector{Float64}} | Commodity flow through edge | MWh / step | -        |
-| `capacity`               | Union{AffExpr,Float64}    | Total available capacity              | MWh / step | -       |
-| `new_capacity`           | JuMPVariable              | New capacity investments              | MWh / step | -       |
-| `new_capacity_track`     | Dict{Int,Float64}         | Capacity additions by period          | MWh / step | -       |
-| `retired_capacity`       | JuMPVariable              | Capacity retirements                  | MWh / step | -       |
-| `retired_capacity_track` | Dict{Int,Float64}         | Retirements by period                 | MWh / step | -       |
+| `flow`                   | Union{JuMPVariable,Vector{Float64}} | Commodity flow through edge | MWh/hr | -        |
+| `capacity`               | Union{AffExpr,Float64}    | Total available capacity              | MWh/hr | -       |
+| `new_capacity`           | JuMPVariable              | New capacity investments              | MWh/hr | -       |
+| `new_capacity_track`     | Dict{Int,Float64}         | Capacity additions by period          | MWh/hr | -       |
+| `retired_capacity`       | JuMPVariable              | Capacity retirements                  | MWh/hr | -       |
+| `retired_capacity_track` | Dict{Int,Float64}         | Retirements by period                 | MWh/hr | -       |
 | `new_units`              | JuMPVariable              | New unit installations                | units    | -       |
 | `retired_units`          | JuMPVariable              | Unit retirements                      | units    | -       |
 | `constraints`    | Vector{AbstractTypeConstraint} | Additional constraints              | -        | []      |

@@ -58,6 +58,9 @@ For example, a city Location might contain `Node{Electricity}`, `Node{NaturalGas
 
 `Nodes` have the following fields. When running a model, the fields are set by the input files. When creating an Asset, the defaults below can be altered using the `@node_data` macro. The internal fields are used by Macro and are not intended to be set by users in most circumstances.
 
+!!! note "Units in Macro"
+    We have assumed that your System is using units of MWh for energy, tonnes for mass, and hour-long time steps. You can use any set of units as long as they are consistent across your operations and investment inputs.
+
 ### Network Structure
 
 | Field            | Type           | Description                 | Default |
@@ -69,16 +72,16 @@ For example, a city Location might contain `Node{Electricity}`, `Node{NaturalGas
 
 | Field                    | Type                      | Description                           | Units    | Default |
 |--------------------------|---------------------------|---------------------------------------|----------|---------|
-| `demand`                 | Vector{Float64}           | Time-varying demand requirements      | MWh / step | Float64[] |
-| `max_nsd`                | Vector{Float64}           | Maximum non-served demand by segment  | MWh / step | [0.0]   |
-| `min_nsd`                | Vector{Float64}           | Minimum non-served demand by segment  | MWh / step | [0.0]   |
+| `demand`                 | Vector{Float64}           | Time-varying demand requirements      |  MWh/hr | Float64[] |
+| `max_nsd`                | Vector{Float64}           | Maximum non-served demand by segment  |  MWh/hr | [0.0]   |
+| `min_nsd`                | Vector{Float64}           | Minimum non-served demand by segment  |  MWh/hr | [0.0]   |
 | `price_nsd`              | Vector{Float64}           | Penalty cost for non-served demand    | $/MWh    | [0.0]   |
 
 ### Supply Parameters
 
 | Field                    | Type                      | Description                           | Units    | Default |
 |--------------------------|---------------------------|---------------------------------------|----------|---------|
-| `max_supply`             | Vector{Float64}           | Maximum supply by segment             | MWh / step | [0.0]   |
+| `max_supply`             | Vector{Float64}           | Maximum supply by segment             |  MWh/hr | [0.0]   |
 | `price_supply`           | Vector{Float64}           | Cost of supply by segment             | $/MWh    | [0.0]   |
 | `price`                  | Vector{Float64}           | Time-varying commodity prices         | $/MWh    | Float64[] |
 
@@ -101,8 +104,8 @@ For example, a city Location might contain `Node{Electricity}`, `Node{NaturalGas
 
 | Field                    | Type                      | Description                           | Units    | Default |
 |--------------------------|---------------------------|---------------------------------------|----------|---------|
-| `non_served_demand`      | JuMPVariable              | Non-served demand variables           | MWh / step | Matrix{VariableRef}(undef, 0, 0) |
-| `supply_flow`            | JuMPVariable              | Supply flow variables                 | MWh / step | Matrix{VariableRef}(undef, 0, 0) |
+| `non_served_demand`      | JuMPVariable              | Non-served demand variables           |  MWh/hr | Matrix{VariableRef}(undef, 0, 0) |
+| `supply_flow`            | JuMPVariable              | Supply flow variables                 |  MWh/hr | Matrix{VariableRef}(undef, 0, 0) |
 | `policy_budgeting_vars`  | Dict                      | Policy constraint budgeting variables | varies   | Dict() |
 | `policy_slack_vars`      | Dict                      | Policy constraint slack variables     | varies   | Dict() |
 
