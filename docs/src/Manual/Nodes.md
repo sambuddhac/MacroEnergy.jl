@@ -354,44 +354,6 @@ Sequestration could be modelled using a `Storage{CO2}` component but `Storage` c
 
 ```json
 {
-    "type": "CO2",
-    "global_data": {
-        "time_interval": "CO2"
-    },
-    "instance_data": [
-        {
-            "id": "co2_sink",
-            "constraints": {
-                "CO2CapConstraint": true
-            },
-            "rhs_policy": {
-                "CO2CapConstraint": 0
-            }
-        }
-    ]
-}
-
-```json
-{
-    "type": "CO2",
-    "global_data": {
-        "time_interval": "CO2"
-    },
-    "instance_data": [
-        {
-            "id": "co2_sink",
-            "constraints": {
-                "CO2CapConstraint": true
-            },
-            "rhs_policy": {
-                "CO2CapConstraint": 0
-            }
-        }
-    ]
-}
-
-```json
-{
     "nodes": [
         {
             "type": "CO2",
