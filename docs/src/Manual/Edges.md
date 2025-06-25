@@ -1,5 +1,7 @@
 # Edges
 
+## Contents
+
 [Overview](#overview) | [Fields](#edge-fields) | [Types](#types) | [Constructors](#constructors) | [Methods](#methods) | [Examples](#examples)
 
 ## Overview
