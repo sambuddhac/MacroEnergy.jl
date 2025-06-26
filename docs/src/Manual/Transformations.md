@@ -85,13 +85,6 @@ AbstractVertex
 
 The Transformation type represents conversion processes between different commodities. Unlike other vertex types that are parameterized by commodity type, Transformations handle multiple commodities simultaneously through stoichiometric balance equations.
 
-Key characteristics:
-
-- **Multi-Commodity Processing**: Handles conversion between multiple commodity types
-- **Stoichiometric Balances**: Uses `balance_data` to define conversion relationships
-- **Asset Integration**: Typically used within Assets for complex conversion processes
-- **Flexible Configuration**: Supports various input/output commodity combinations
-
 ## [Constructors](@id manual-transformations-constructors)
 
 ### Keyword Constructors
