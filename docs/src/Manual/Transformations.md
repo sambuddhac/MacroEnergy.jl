@@ -417,7 +417,6 @@ end
 
 `GasStorage` Assets are an interesting example of how `Transformations` can be used to model `Electricity` flows used to energize another flow, instead of converting between Commodities. The [Edges manual page](@ref "Hydrogen Storage") includes an explanation of the `make()` function and inputs of this Asset.
 
-
 ## See Also
 
 - [Edges](@ref) - Components that connect Vertices and carry flows
