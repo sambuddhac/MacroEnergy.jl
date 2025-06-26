@@ -85,7 +85,7 @@ It is not currently possible to define `Edges` outside of Assets using the stand
 | Field                    | Type                      | Description                           | Units    | Default  |
 |--------------------------|---------------------------|---------------------------------------|----------|----------|
 | `startup_cost`           | Float64                   | Cost per startup                      | $        | 0.0     |
-| `startup_fuel_consumption` | Float64                 | Fuel consumed during startup          | MMBtu    | 0.0     |
+| `startup_fuel_consumption` | Float64                 | Fuel consumed during startup          | MWh    | 0.0     |
 | `min_up_time`            | Float64                   | Minimum up time                       | hours    | 0.0     |
 | `min_down_time`          | Float64                   | Minimum down time                     | hours    | 0.0     |
 
