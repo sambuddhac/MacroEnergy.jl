@@ -75,15 +75,15 @@ For example, a city Location might contain `Node{Electricity}`, `Node{NaturalGas
 | `demand`                 | Vector{Float64}           | Time-varying demand requirements      |  MWh/hr | Float64[] |
 | `max_nsd`                | Vector{Float64}           | Maximum non-served demand by segment  |  MWh/hr | [0.0]   |
 | `min_nsd`                | Vector{Float64}           | Minimum non-served demand by segment  |  MWh/hr | [0.0]   |
-| `price_nsd`              | Vector{Float64}           | Penalty cost for non-served demand    | $/MWh    | [0.0]   |
+| `price_nsd`              | Vector{Float64}           | Penalty cost for non-served demand    | \$/MWh    | [0.0]   |
 
 ### Supply Parameters
 
 | Field                    | Type                      | Description                           | Units    | Default |
 |--------------------------|---------------------------|---------------------------------------|----------|---------|
 | `max_supply`             | Vector{Float64}           | Maximum supply by segment             |  MWh/hr | [0.0]   |
-| `price_supply`           | Vector{Float64}           | Cost of supply by segment             | $/MWh    | [0.0]   |
-| `price`                  | Vector{Float64}           | Time-varying commodity prices         | $/MWh    | Float64[] |
+| `price_supply`           | Vector{Float64}           | Cost of supply by segment             | \$/MWh    | [0.0]   |
+| `price`                  | Vector{Float64}           | Time-varying commodity prices         | \$/MWh    | Float64[] |
 
 ### Policy Parameters
 
@@ -281,7 +281,7 @@ The most common way to use Nodes is to add them to the list of Nodes in your Mac
 In this example, we'll define two Electricity Nodes with non-served demand (NSD) limits. NSD limits are defined by:
 
 1. Providing a vector of demand segments in the `max_nsd` field. Each segment is the fraction of this Nodes's demand that can be met by NSD each time step. A value of `[1.0]` indicated that the entire demand can be non-served.  
-2. Providing a vector of prices in the `price_nsd` field, of the same length as the `max_nsd` field. Each segment is the price per MWh of non-served demand for the corresponding segment. Here, we have defined a NSD price of $5000/MWh.
+2. Providing a vector of prices in the `price_nsd` field, of the same length as the `max_nsd` field. Each segment is the price per MWh of non-served demand for the corresponding segment. Here, we have defined a NSD price of \$5000/MWh.
 3. We have to add a `MaxNonServedDemandConstraint` constraint to the `constraints` field to enfore the NSD limit. If we wish to use multiple segments, we also need to add a `MaxNonServedDemandPerSegmentConstraint` constraint.
 
 We want both Nodes to have the same NSD limits, so we can define these in the `global_data` field. To define different limits or prices, we could move the `max_nsd` and / or `price_nsd` fields to the `instance_data` field of each Node.

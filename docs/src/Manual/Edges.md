@@ -71,10 +71,10 @@ It is not currently possible to define `Edges` outside of Assets using the stand
 
 | Field                    | Type                      | Description                           | Units    | Default    |
 |--------------------------|---------------------------|---------------------------------------|----------|------------|
-| `investment_cost`        | Float64                   | CAPEX per unit capacity               | $ / MW     | 0.0        |
-| `annualized_investment_cost` | Float64               | Annualized CAPEX                      | $ / MW / yr  | calculated |
-| `fixed_om_cost`          | Float64                   | Fixed O&M costs                       | $ / MW / yr  | 0.0        |
-| `variable_om_cost`       | Float64                   | Variable O&M costs                    | $ / MWh    | 0.0        |
+| `investment_cost`        | Float64                   | CAPEX per unit capacity               | \$/MW     | 0.0        |
+| `annualized_investment_cost` | Float64               | Annualized CAPEX                      | \$/MW/yr  | calculated |
+| `fixed_om_cost`          | Float64                   | Fixed O&M costs                       | \$/MW/yr  | 0.0        |
+| `variable_om_cost`       | Float64                   | Variable O&M costs                    | \$/MWh    | 0.0        |
 | `wacc`                   | Float64                   | Weighted average cost of capital      | fraction | 0.0        |
 | `lifetime`               | Int                       | Asset lifetime in years               | years    | 1          |
 | `capital_recovery_period` | Int                      | Investment recovery period            | years    | 1          |
@@ -84,7 +84,7 @@ It is not currently possible to define `Edges` outside of Assets using the stand
 
 | Field                    | Type                      | Description                           | Units    | Default  |
 |--------------------------|---------------------------|---------------------------------------|----------|----------|
-| `startup_cost`           | Float64                   | Cost per startup                      | $        | 0.0     |
+| `startup_cost`           | Float64                   | Cost per startup                      | \$        | 0.0     |
 | `startup_fuel_consumption` | Float64                 | Fuel consumed during startup          | MWh    | 0.0     |
 | `min_up_time`            | Float64                   | Minimum up time                       | hours    | 0.0     |
 | `min_down_time`          | Float64                   | Minimum down time                     | hours    | 0.0     |
@@ -96,8 +96,8 @@ It is not currently possible to define `Edges` outside of Assets using the stand
 | `availability`           | Vector{Float64}           | Time-varying availability factors     | fraction        | 1.0        |
 | `loss_fraction`          | Vector{Float64}           | Flow losses                   | fraction | Float64[] |
 | `min_flow_fraction`      | Float64                   | Minimum operating level               | fraction | 0.0      |
-| `ramp_up_fraction`       | Float64                   | Maximum ramp-up rate                  | fraction / step | 1.0      |
-| `ramp_down_fraction`     | Float64                   | Maximum ramp-down rate                | fraction / step | 1.0      |
+| `ramp_up_fraction`       | Float64                   | Maximum ramp-up rate                  | fraction/step | 1.0      |
+| `ramp_down_fraction`     | Float64                   | Maximum ramp-down rate                | fraction/step | 1.0      |
 | `distance`               | Float64                   | Connection distance                   | km       | 0.0      |
 
 ### Investment and Operations Tracking (Internal)

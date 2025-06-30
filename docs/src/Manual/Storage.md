@@ -90,10 +90,10 @@ While single period cycles are fine for storage which usually discharge within t
 
 | Field                    | Type                      | Description                           | Units    | Default    |
 |--------------------------|---------------------------|---------------------------------------|----------|------------|
-| `investment_cost`        | Float64                   | CAPEX per unit capacity               | $/MWh    | 0.0        |
-| `annualized_investment_cost` | Union{Nothing,Float64} | Annualized CAPEX                     | $/MWh/yr | calculated |
-| `fixed_om_cost`          | Float64                   | Fixed O&M costs                       | $/MWh/yr | 0.0        |
-| `variable_om_cost`       | Float64                   | Variable O&M costs                    | $/MWh    | 0.0        |
+| `investment_cost`        | Float64                   | CAPEX per unit capacity               | \$/MWh    | 0.0        |
+| `annualized_investment_cost` | Union{Nothing,Float64} | Annualized CAPEX                     | \$/MWh/yr | calculated |
+| `fixed_om_cost`          | Float64                   | Fixed O&M costs                       | \$/MWh/yr | 0.0        |
+| `variable_om_cost`       | Float64                   | Variable O&M costs                    | \$/MWh    | 0.0        |
 | `wacc`                   | Float64                   | Weighted average cost of capital      | fraction | 0.0        |
 | `lifetime`               | Int                       | Asset lifetime in years               | years    | 1          |
 | `capital_recovery_period` | Int                      | Investment recovery period            | years    | 1          |
