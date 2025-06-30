@@ -27,7 +27,7 @@ function load_system_data(
 end
 
 """
-    load_system_data(system::System, file_path::AbstractString)::Dict{Symbol,Any}
+    load_system_data(file_path::AbstractString, (system::System))::Dict{Symbol,Any}
 
 Load the system data (currently only from a JSON file) given a file path and existing System.
 All other file names defined in the system data file are assumed to be relative to the data_dirpath field of the System.

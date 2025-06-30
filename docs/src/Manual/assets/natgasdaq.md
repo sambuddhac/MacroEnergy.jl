@@ -74,7 +74,7 @@ In the following equations, $\phi$ is the flow of the commodity and $\epsilon$ i
     \end{aligned}
     ```
 
-### Edges
+### Asset Edges
 !!! warning "Asset expansion"
     As a modeling decision, only the incoming `CO2` edge is allowed to expand. Therefore, the `has_capacity` attribute can only be set for this edge. For all the other edges, this attribute is pre-set to `false` to ensure the correct modeling of the asset. 
 

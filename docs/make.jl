@@ -58,12 +58,15 @@ const pages = [
         "Inputs" => "Manual/Inputs.md",
         "Outputs" => "Manual/Outputs.md",
         "System" => "Manual/System.md",
+        "Model" => "Manual/Model.md",
         "Sectors" => "Manual/Sectors.md",
         "Edges" => "Manual/Edges.md",
         "Nodes" => "Manual/Nodes.md",
         "Storage" => "Manual/Storage.md",
-        "Transforms" => "Manual/Transforms.md",
+        "Transformations" => "Manual/Transformations.md",
         "Locations" => "Manual/Locations.md",
+        "Constraints" => "Manual/Constraints.md",
+        "Commodities" => "Manual/Commodities.md",
         "Assets" => "Manual/assets/1_introduction.md",
         "Asset Library" => [
             "Manual/assets/battery.md",
@@ -82,7 +85,6 @@ const pages = [
             "Manual/assets/thermalpower.md",
             "Manual/assets/vre.md"
         ],
-        "Model" => "Manual/Model.md",
         "Financial Assumptions" => "Manual/Financial_assumptions.md",
         "Multi-Period Accounting" => "Manual/Multi_period_accounting.md"
     ],

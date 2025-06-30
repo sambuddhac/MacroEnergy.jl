@@ -1,6 +1,6 @@
 # Investment costs
 
-The cost of investment used by the model is the annualized investment cost of a technology, expressed in $/MW-yr. The annualized investment cost represents an annual payment (also referred to as an annuity) made by a developer to debt and equity investors.
+The cost of investment used by the model is the annualized investment cost of a technology, expressed in \$/MW-yr. The annualized investment cost represents an annual payment (also referred to as an annuity) made by a developer to debt and equity investors.
 
 The annualized investment cost is calculated inside Macro. Users input the CAPEX of a technology (as the investment_cost attribute of an edge) and, if desired, a Weighted Average Cost of Capital (WACC) for a given technology $y$.
 
