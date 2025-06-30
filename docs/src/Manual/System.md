@@ -160,7 +160,7 @@ Loads a complete System from input files in the specified directory or file path
 
 | Parameter   | Type           | Description                                          |
 |-------------|----------------|------------------------------------------------------|
-| `path`      | AbstractString | Path to system directory or system_data.json file   |
+| `path`      | AbstractString | Path to system directory or `system_data.json` file   |
 | `lazy_load` | Bool           | Whether to load data lazily (default: true)         |
 
 ## [Methods](@id manual-system-methods)
@@ -237,7 +237,7 @@ system = load_system(file_path)  # Load system directly from file
 
 ### System Data File Structure
 
-`Systems` and `Cases` are typically defined in the system_data.json file, which contains all the necessary data to define the energy system. Full details on the structure of this file can be found in the [Inputs](@ref) section. Here, we review the structure of the system_data.json file:
+`Systems` and `Cases` are typically defined in the `system_data.json` file, which contains all the necessary data to define the energy system. Full details on the structure of this file can be found in the [Inputs](@ref) section. Here, we review the structure of the `system_data.json` file:
 
 The following is a `Case` made up of one operating period / stochastic scenario / sensitivity case. The `case` field containts an array of `System` definitions. These definitions could directly include all of the `System` data but in this case we've used Macro's `path` feature to refer to other JSON files. These addresses are relative to the `data_dirpath` of the `System` or the directory containing the `system_data.json` file.
 
