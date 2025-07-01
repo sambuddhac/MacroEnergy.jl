@@ -8,6 +8,17 @@ An abstract type for optimization containers that can hold different types of op
 mutable struct ObjectiveFunction
     objective_expression::Union{Nothing, AbstractArray}  # The objective expression, can be empty
     sense::Symbol  # The sense of the objective ('Min', 'Max')
+
+    function ObjectiveFunction()
+	return new(nothing, :Min)  # Default to an empty objective with 'Min' sense
+    end
+end
+
+get_sense(v::ObjectiveFunction) = v.sense
+set_sense!(v::ObjectiveFunction, sense::Symbol) = v.sense = sense
+
+function ObjectiveFunction(nothing)
+    return ObjectiveFunction()
 end
 
 """
