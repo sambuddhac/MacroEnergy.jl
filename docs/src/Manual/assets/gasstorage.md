@@ -136,7 +136,7 @@ In the following equations, $\phi$ is the flow of the commodity and $\epsilon$ i
     ```
     Look also at the "Efficiency" tip below for more information on the efficiency of charging/discharging process.
 
-### Edges
+### Asset Edges
 All the edges are represented by the same set of attributes. The definition of the `Edge` object can be found here [MacroEnergy.Edge](@ref).
 
 | **Attribute** | **Type** | **Values** | **Default** | **Description** |

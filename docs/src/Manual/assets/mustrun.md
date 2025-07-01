@@ -37,7 +37,7 @@ The definition of the transformation object can be found here [MacroEnergy.Trans
 | **timedata** | All | `String` | `String` | Required | Time resolution for the time series data linked to the transformation. E.g. "Electricity". |
 | **constraints** | All | `Dict{String,Bool}` | Any Macro constraint type for vertices | Empty | List of constraints applied to the transformation. E.g. `{"BalanceConstraint": true}`. |
 
-### Edges
+### Asset Edges
 The definition of the `Edge` object can be found here [MacroEnergy.Edge](@ref).
 
 | **Attribute** | **Type** | **Values** | **Default** | **Description** |

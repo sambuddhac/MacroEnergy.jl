@@ -4,7 +4,7 @@
 CurrentModule = MacroEnergy
 ```
 
-### Commodities
+### Commodity Types
 ```@example type_hierarchy
 using MacroEnergy # hide
 using AbstractTrees # hide
@@ -13,12 +13,12 @@ AbstractTrees.children(d::DataType) = subtypes(d) # hide
 print_tree(Commodity)
 ```
 
-### Assets
+### Asset Types
 ```@example type_hierarchy
 print_tree(AbstractAsset)
 ```
 
-### Constraints
+### Constraint Types
 ```@example type_hierarchy
 print_tree(MacroEnergy.AbstractTypeConstraint)
 ```

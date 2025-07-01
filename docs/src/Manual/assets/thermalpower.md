@@ -68,7 +68,7 @@ In the following equations, $\phi$ is the flow of the commodity and $\epsilon$ i
     \end{aligned}
     ```
 
-### Edges
+### Asset Edges
 !!! warning "Asset expansion"
     As a modeling decision, only the `Electricity` and `Fuel` edges are allowed to expand. Therefore, both the `has_capacity` and `constraints` attributes can only be set for those edges. For all the other edges, these attributes are pre-set to `false` and to an empty list respectively to ensure the correct modeling of the asset. 
 
